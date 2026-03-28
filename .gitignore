@@ -69,6 +69,7 @@ temp/
 
 # Agent
 .agent/
+plan/
 
 # ===================================
 # VibeCoding Agent Notes
