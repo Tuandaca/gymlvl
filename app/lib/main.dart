@@ -18,19 +18,18 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
     return MaterialApp.router(
       title: 'GymLevel',
       theme: AppTheme.darkTheme,
-      routerConfig: appRouter,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-      // i18n setup pending configuration
-      // localizationsDelegates: AppLocalizations.localizationsDelegates,
-      // supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
