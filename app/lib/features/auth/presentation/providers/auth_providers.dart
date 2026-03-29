@@ -15,6 +15,22 @@ final authStateStreamProvider = StreamProvider<AuthState>((ref) {
   return authRepository.authStateChange;
 });
 
+final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final session = ref.watch(authStateStreamProvider).valueOrNull?.session;
+  if (session == null) return null;
+  
+  try {
+    final res = await SupabaseConfig.client
+        .from('users')
+        .select()
+        .eq('id', session.user.id)
+        .maybeSingle();
+    return res;
+  } catch (e) {
+    return null;
+  }
+});
+
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(() {
   return AuthController();
 });
