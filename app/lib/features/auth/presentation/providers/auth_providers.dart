@@ -16,7 +16,7 @@ final authStateStreamProvider = StreamProvider<AuthState>((ref) {
 });
 
 final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
-  final session = ref.watch(authStateStreamProvider).valueOrNull?.session;
+  final session = ref.watch(authStateStreamProvider).value?.session;
   if (session == null) return null;
   
   try {

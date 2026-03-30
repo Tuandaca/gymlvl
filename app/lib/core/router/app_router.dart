@@ -8,6 +8,12 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/workout/presentation/screens/workout_screen.dart';
+import '../../features/quests/presentation/screens/quests_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
+import 'main_shell_screen.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authStateAsync = ref.watch(authStateStreamProvider);
   final currentUserAsync = ref.watch(currentUserProvider);
@@ -15,8 +21,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login', // Fallback, redirect logic handles the actual start
     redirect: (context, state) {
-      final authState = authStateAsync.valueOrNull;
-      final currentUser = currentUserAsync.valueOrNull;
+      final authState = authStateAsync.value;
+      final currentUser = currentUserAsync.value;
       
       // Vẫn đang tải Auth hoặc chưa kéo xong Profile
       if (authStateAsync.isLoading || currentUserAsync.isLoading) return null;
@@ -29,17 +35,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isGoingToRegister = loc == '/register';
       final isGoingToOnboarding = loc == '/onboarding';
       
-      // 1. Chưa đăng nhập -> đá về Login
+      // Khởi động không có auth -> login
       if (!isAuth && !isGoingToLogin && !isGoingToRegister) {
         return '/login';
       }
 
-      // 2. Đã đăng nhập NHƯNG chưa Onboard => đá về Onboarding
+      // Đăng nhập rồi nhưng chưa onboard -> onboarding
       if (isAuth && !isOnboarded && !isGoingToOnboarding) {
         return '/onboarding';
       }
 
-      // 3. Đã đăng nhập VÀ Đã Onboard => Không được quay lại Login/Register/Onboarding
+      // Đăng nhập rồi, đã onboard -> chặn quay lại màn hình nhập môn/đăng nhập
       if (isAuth && isOnboarded && (isGoingToLogin || isGoingToRegister || isGoingToOnboarding)) {
         return '/dashboard'; 
       }
@@ -56,28 +62,49 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: '/dashboard',
-        builder: (context, state) => const DashboardScreen(),
-      ),
-      GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          // Trả về bộ khung (Bottom Navigation) chứa 4 tab.
+          return MainShellScreen(navigationShell: navigationShell);
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/workout',
+                builder: (context, state) => const WorkoutScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/quests',
+                builder: (context, state) => const QuestsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+        ],
       ),
     ],
   );
 });
-
-// Temporary placeholder for dashboard, we will move this to features later
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('GymLevel Dashboard')),
-      body: const Center(
-        child: Text('Welcome! You are authenticated.'),
-      ),
-    );
-  }
-}

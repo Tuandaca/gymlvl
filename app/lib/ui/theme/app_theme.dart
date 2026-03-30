@@ -42,7 +42,7 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         titleTextStyle: GoogleFonts.orbitron(
-          color: textMain,
+          color: textMain, // Using textMain since cyanNeon was undefined in this scope if defined inside the class methods.
           fontSize: 20,
           fontWeight: FontWeight.bold,
           letterSpacing: 2.0,

@@ -3,14 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/config/supabase_config.dart';
-import '../domain/user_profile_draft.dart';
+import '../../domain/user_profile_draft.dart';
 
-// State chứa data nháp đang điền ở Form Onboarding
-final onboardingDraftProvider = StateProvider<UserProfileDraft>((ref) {
-  return const UserProfileDraft();
+// ==============================
+// Draft Notifier (thay thế StateProvider đã bị xoá ở Riverpod 3.x)
+// ==============================
+final onboardingDraftProvider = NotifierProvider<OnboardingDraftNotifier, UserProfileDraft>(() {
+  return OnboardingDraftNotifier();
 });
 
+class OnboardingDraftNotifier extends Notifier<UserProfileDraft> {
+  @override
+  UserProfileDraft build() => const UserProfileDraft();
+
+  void set(UserProfileDraft newDraft) {
+    state = newDraft;
+  }
+
+  void update(UserProfileDraft Function(UserProfileDraft current) updater) {
+    state = updater(state);
+  }
+}
+
+// ==============================
 // Controller xử lý submit form
+// ==============================
 final onboardingControllerProvider = AsyncNotifierProvider<OnboardingController, void>(() {
   return OnboardingController();
 });
@@ -20,12 +37,6 @@ class OnboardingController extends AsyncNotifier<void> {
   @override
   FutureOr<void> build() {
     // Intentionally left empty
-  }
-
-  // Cập nhật từng mảng thông tin
-  void updateDraft(UserProfileDraft Function(UserProfileDraft current) updater) {
-    final current = ref.read(onboardingDraftProvider);
-    ref.read(onboardingDraftProvider.notifier).state = updater(current);
   }
 
   // Gọi Edge Function để hoàn tất Onboarding
@@ -53,7 +64,7 @@ class OnboardingController extends AsyncNotifier<void> {
         'id': userId,
         'environment': draft.environment,
         'goals': draft.goals,
-        'class_name': draft.className ?? 'Iron Warrior', // Fallback, thực tế nên tính từ hàm update
+        'class_name': draft.className ?? 'Iron Warrior',
         'experience_level': draft.experienceLevel,
         'age': draft.age,
         'gender': draft.gender,
@@ -61,16 +72,11 @@ class OnboardingController extends AsyncNotifier<void> {
         'weight_kg': draft.weightKg,
       });
 
-      // 3. Gọi Supabase Edge Function `initialize-user` để cấu hình Level và Quest ban đầu
+      // 3. Gọi Supabase Edge Function `initialize-user`
       await SupabaseConfig.client.functions.invoke(
         'initialize-user',
-        // Gửi body kèm data nếu Edge Function cần (ví dụ để biết exp level)
         body: {'experience_level': draft.experienceLevel}, 
       );
-
-      // Thêm log/event báo router check lại AuthGuard, do supabase edge-function sẽ đổi `onboarding_completed` 
-      // lên database. Frontend có thể cần tự cập nhật session / stream auth state 
-      // để router quét lại. GoRouter theo dõi `authStateStream`, nên khi xong có thể cần trigger nó.
     });
   }
 }

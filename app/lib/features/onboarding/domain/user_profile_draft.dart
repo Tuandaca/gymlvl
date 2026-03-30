@@ -4,7 +4,7 @@ part 'user_profile_draft.freezed.dart';
 part 'user_profile_draft.g.dart';
 
 @freezed
-class UserProfileDraft with _$UserProfileDraft {
+abstract class UserProfileDraft with _$UserProfileDraft {
   const factory UserProfileDraft({
     // 1. Environment
     String? environment,

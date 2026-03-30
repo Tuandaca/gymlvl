@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+// @ts-nocheck
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3"
 
 const corsHeaders = {
@@ -6,16 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
+    // Check if the request has an authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing Authorization header');
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
+      { global: { headers: { Authorization: authHeader } } }
     )
 
     // Lấy user gọi request hiện tại
@@ -27,7 +33,8 @@ serve(async (req) => {
     if (userError || !user) throw new Error('Unauthorized')
 
     // Parse Body
-    const { experience_level } = await req.json()
+    const bodyText = await req.text();
+    const { experience_level } = bodyText ? JSON.parse(bodyText) : { experience_level: 'beginner' };
 
     // Xác định level khởi đầu
     let initialLevel = 1;
@@ -41,25 +48,27 @@ serve(async (req) => {
       initialTitle = 'Tay Tạ Sắt';
     }
 
-    // Bơm auth làm admin để phá RLS update bảng public.users 
+    // Bơm auth làm admin để phá RLS update/insert bảng public.users 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Cập nhật bảng `users`
-    const { error: updateError } = await supabaseAdmin
+    // Upsert bảng `users` (Đảm bảo có record kể cả khi trigger tạo user bị disable)
+    const { error: upsertError } = await supabaseAdmin
       .from('users')
-      .update({
+      .upsert({
+        id: user.id,
+        email: user.email,
+        display_name: user.user_metadata?.full_name ?? (user.email ? user.email.split('@')[0] : 'User'),
         onboarding_completed: true,
         level: initialLevel,
         current_title: initialTitle,
         is_capped: false,
         overflow_xp: 0
       })
-      .eq('id', user.id)
 
-    if (updateError) throw updateError
+    if (upsertError) throw upsertError
 
     return new Response(
       JSON.stringify({ 
