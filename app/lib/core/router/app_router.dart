@@ -10,6 +10,7 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
+import '../../features/workout/presentation/screens/exercise_picker_screen.dart';
 import '../../features/quests/presentation/screens/quests_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import 'main_shell_screen.dart';
@@ -102,6 +103,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const ProfileScreen(),
               ),
             ],
+          ),
+          GoRoute(
+            path: '/exercise-picker',
+            builder: (context, state) => const ExercisePickerScreen(),
           ),
         ],
       ),
