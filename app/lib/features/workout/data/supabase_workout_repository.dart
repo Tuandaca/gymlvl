@@ -166,6 +166,21 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
   }
 
   @override
+  Future<WorkoutSet?> getLastSetForExercise(String exerciseId) async {
+    final response = await _supabase
+        .from('workout_sets')
+        .select('*, workout_exercises!inner(exercise_id, workout_id, workouts!inner(user_id))')
+        .eq('workout_exercises.exercise_id', exerciseId)
+        .eq('workout_exercises.workouts.user_id', _userId) // Only match the current user's history
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (response == null) return null;
+    return WorkoutSet.fromJson(response);
+  }
+
+  @override
   Future<Workout?> getWorkoutDetail(String workoutId) async {
     final response = await _supabase
         .from('workouts')

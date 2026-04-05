@@ -37,6 +37,9 @@ abstract class WorkoutRepository {
   /// Xóa set
   Future<void> deleteSet(String setId);
 
+  /// Lấy mức tạ của set tập gần nhất cho bài tập này (Historical tracking)
+  Future<WorkoutSet?> getLastSetForExercise(String exerciseId);
+
   /// Lấy chi tiết workout (bao gồm exercises + sets)
   Future<Workout?> getWorkoutDetail(String workoutId);
 

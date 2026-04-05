@@ -8,6 +8,7 @@ import '../../domain/workout_exercise.dart';
 import '../../domain/workout_set.dart';
 import '../../domain/workout_repository.dart';
 import '../providers/exercise_providers.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 part 'active_workout_controller.freezed.dart';
 
@@ -120,7 +121,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     }
   }
 
-  /// Thêm bài tập vào workout
+  /// Thêm bài tập vào workout kèm 4 set (Dynamic Progressive Overload)
   Future<void> addExercise(Exercise exercise) async {
     if (state.workout == null) return;
     try {
@@ -129,8 +130,76 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         exercise.id,
         state.exercises.length,
       );
+
+      // Thêm import thư viện trong não: ref.read(auth_providers)
+      // Tìm xem user có tạ trong quá khứ không
+      final lastSet = await _repository.getLastSetForExercise(exercise.id);
+      double baseWeight = 0.0;
+
+      if (lastSet != null && lastSet.weightKg > 0) {
+        // Dùng tạ lịch sử của user (tính cho bài tập nặng nhất / set chính)
+        baseWeight = lastSet.weightKg;
+      } else {
+        // Nếu không có lịch sử, tính Heuristic Baseline từ Profile
+        // Lấy profile từ Riverpod FutureProvider, nhưng do đang trong process đồng bộ,
+        // nếu provider chưa có sẽ mặc định trị số chuẩn.
+        try {
+          final profileLoader = ref.read(currentUserProfileProvider.future);
+          final userLoader = ref.read(currentUserProvider.future);
+          final profile = await profileLoader;
+          final user = await userLoader;
+          
+          final weight = (profile?['weight_kg'] as num?)?.toDouble() ?? 60.0;
+          final exp = profile?['experience_level'] as String? ?? 'beginner';
+          final lvl = (user?['level'] as int?) ?? 1;
+
+          double multiplier = 0.1;
+          if (exp == 'intermediate') {
+            multiplier = 0.2;
+          } else if (exp == 'advanced') {
+            multiplier = 0.35;
+          }
+
+          // Cân nặng * Hệ số kinh nghiệm + (Level * 0.5kg)
+          baseWeight = weight * multiplier + (lvl * 0.5);
+
+          // Làm tròn đến 2.5kg gần nhất (ví dụ bánh tạ chuẩn phòng gym)
+          baseWeight = (baseWeight / 2.5).round() * 2.5;
+          if (baseWeight < 5.0) baseWeight = 5.0; // Tối thiểu 5kg
+        } catch (_) {
+          baseWeight = 20.0; // Fallback an toàn nếu lỗi kết nối
+        }
+      }
+
+      // Tự động tạo 4 set chuẩn gym với progressive payload 
+      // Dựa trên mức baseWeight (tạ nặng nhất mà user hướng tới ở set 3)
+      final w1 = ((baseWeight * 0.5) / 2.5).round() * 2.5; // Set 1: 50%
+      final w2 = ((baseWeight * 0.7) / 2.5).round() * 2.5; // Set 2: 70%
+      final w3 = baseWeight;                               // Set 3: 100%
+      final w4 = baseWeight + 2.5;                         // Set 4: 100% + push
+
+      final defaultSetsParams = [
+        {'set': 1, 'reps': 12, 'weight': w1 < 5.0 ? 5.0 : w1},
+        {'set': 2, 'reps': 12, 'weight': w2 < 5.0 ? 5.0 : w2},
+        {'set': 3, 'reps': 10, 'weight': w3},
+        {'set': 4, 'reps': 8, 'weight': w4},
+      ];
+
+      final createdSets = <WorkoutSet>[];
+      for (final param in defaultSetsParams) {
+        final newSet = await _repository.addSet(
+          workoutExercise.id,
+          param['set'] as int,
+          param['reps'] as int,
+          param['weight'] as double,
+        );
+        createdSets.add(newSet);
+      }
+
+      final populatedWorkoutExercise = workoutExercise.copyWith(sets: createdSets);
+
       state = state.copyWith(
-        exercises: [...state.exercises, workoutExercise],
+        exercises: [...state.exercises, populatedWorkoutExercise],
       );
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
