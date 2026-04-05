@@ -493,7 +493,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     decoration: BoxDecoration(
                       color: AppTheme.panelBackground.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.textDim.withOpacity(0.2), style: BorderStyle.dash),
+                      border: Border.all(color: AppTheme.textDim.withOpacity(0.2), style: BorderStyle.solid),
                     ),
                     child: const Text(
                       'Hãy chọn nhóm cơ ở trên hoặc tự thêm bài tập.',
