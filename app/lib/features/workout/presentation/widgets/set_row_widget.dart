@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../ui/theme/app_theme.dart';
 
-class SetRowWidget extends StatelessWidget {
+class SetRowWidget extends StatefulWidget {
   final int setNumber;
   final int reps;
   final double weightKg;
@@ -26,111 +26,188 @@ class SetRowWidget extends StatelessWidget {
   });
 
   @override
+  State<SetRowWidget> createState() => _SetRowWidgetState();
+}
+
+class _SetRowWidgetState extends State<SetRowWidget> {
+  bool _isHovered = false;
+  bool _isDeleteHovered = false;
+  late FocusNode _weightFocus;
+  late FocusNode _repsFocus;
+
+  @override
+  void initState() {
+    super.initState();
+    _weightFocus = FocusNode()..addListener(() => setState(() {}));
+    _repsFocus = FocusNode()..addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _weightFocus.dispose();
+    _repsFocus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isCompleted = widget.isCompleted;
     final rowColor = isCompleted
         ? AppTheme.successGreen.withOpacity(0.08)
-        : Colors.transparent;
+        : (_isHovered ? AppTheme.cyanNeon.withOpacity(0.03) : Colors.transparent);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: rowColor,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isCompleted
-              ? AppTheme.successGreen.withOpacity(0.3)
-              : AppTheme.cyanNeon.withOpacity(0.05),
-          width: 1,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: rowColor,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isCompleted
+                ? AppTheme.successGreen.withOpacity(0.4)
+                : (_isHovered ? AppTheme.cyanNeon.withOpacity(0.2) : AppTheme.cyanNeon.withOpacity(0.05)),
+            width: 1.5,
+          ),
+          boxShadow: isCompleted ? [
+            BoxShadow(
+              color: AppTheme.successGreen.withOpacity(0.1),
+              blurRadius: 10,
+              spreadRadius: 1,
+            )
+          ] : [],
         ),
-      ),
-      child: Row(
-        children: [
-          // Set#
-          SizedBox(
-            width: 32,
-            child: Text(
-              '$setNumber',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Weight input
-          Expanded(
-            child: _buildNumberInput(
-              value: weightKg,
-              suffix: 'kg',
-              onChanged: isEditable
-                  ? (val) => onWeightChanged?.call(double.tryParse(val) ?? 0)
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Reps input
-          Expanded(
-            child: _buildNumberInput(
-              value: reps.toDouble(),
-              suffix: 'reps',
-              isInteger: true,
-              onChanged: isEditable
-                  ? (val) => onRepsChanged?.call(int.tryParse(val) ?? 0)
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 8),
-
-          // Completion checkbox
-          if (isEditable)
-            GestureDetector(
-              onTap: () => onCompletedChanged?.call(!isCompleted),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: isCompleted
-                      ? AppTheme.successGreen.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isCompleted
-                        ? AppTheme.successGreen
-                        : AppTheme.cyanNeon.withOpacity(0.3),
-                    width: 1.5,
+        child: Row(
+          children: [
+            // Set# Badge
+            SizedBox(
+              width: 32,
+              child: Center(
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: isCompleted ? AppTheme.successGreen.withOpacity(0.2) : AppTheme.panelBackground,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isCompleted ? AppTheme.successGreen : AppTheme.textDim.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${widget.setNumber}',
+                      style: TextStyle(
+                        fontFamily: 'Orbitron',
+                        color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
                   ),
                 ),
-                child: isCompleted
-                    ? const Icon(Icons.check, color: AppTheme.successGreen, size: 20)
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Weight input
+            Expanded(
+              child: _buildNumberInput(
+                value: widget.weightKg,
+                suffix: 'kg',
+                focusNode: _weightFocus,
+                onChanged: widget.isEditable
+                    ? (val) => widget.onWeightChanged?.call(double.tryParse(val) ?? 0)
                     : null,
               ),
             ),
-          if (!isEditable)
-            Icon(
-              isCompleted ? Icons.check_circle : Icons.circle_outlined,
-              color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
-              size: 20,
-            ),
+            const SizedBox(width: 8),
 
-          // Delete button
-          if (isEditable && onDelete != null) ...[
-            const SizedBox(width: 4),
-            GestureDetector(
-              onTap: onDelete,
-              child: const SizedBox(
-                width: 28,
-                height: 28,
-                child: Icon(Icons.close, color: AppTheme.dangerOrange, size: 16),
+            // Reps input
+            Expanded(
+              child: _buildNumberInput(
+                value: widget.reps.toDouble(),
+                suffix: 'reps',
+                isInteger: true,
+                focusNode: _repsFocus,
+                onChanged: widget.isEditable
+                    ? (val) => widget.onRepsChanged?.call(int.tryParse(val) ?? 0)
+                    : null,
               ),
             ),
+            const SizedBox(width: 8),
+
+            // Completion checkbox
+            if (widget.isEditable)
+              GestureDetector(
+                onTap: () => widget.onCompletedChanged?.call(!isCompleted),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isCompleted
+                        ? AppTheme.successGreen.withOpacity(0.2)
+                        : AppTheme.background.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isCompleted
+                          ? AppTheme.successGreen
+                          : AppTheme.cyanNeon.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                    boxShadow: isCompleted ? [
+                      BoxShadow(
+                        color: AppTheme.successGreen.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ] : [],
+                  ),
+                  child: isCompleted
+                      ? const Icon(Icons.check, color: AppTheme.successGreen, size: 20)
+                      : null,
+                ),
+              ),
+            if (!widget.isEditable)
+              Icon(
+                isCompleted ? Icons.check_circle : Icons.circle_outlined,
+                color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
+                size: 20,
+              ),
+
+            // Delete button
+            if (widget.isEditable && widget.onDelete != null) ...[
+              const SizedBox(width: 4),
+              MouseRegion(
+                onEnter: (_) => setState(() => _isDeleteHovered = true),
+                onExit: (_) => setState(() => _isDeleteHovered = false),
+                child: GestureDetector(
+                  onTap: widget.onDelete,
+                  child: AnimatedOpacity(
+                    opacity: _isHovered || _isDeleteHovered ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: AnimatedScale(
+                      scale: _isDeleteHovered ? 1.2 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _isDeleteHovered ? AppTheme.dangerOrange.withOpacity(0.1) : Colors.transparent,
+                        ),
+                        child: const Icon(Icons.close, color: AppTheme.dangerOrange, size: 16),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -138,20 +215,34 @@ class SetRowWidget extends StatelessWidget {
   Widget _buildNumberInput({
     required double value,
     required String suffix,
+    required FocusNode focusNode,
     bool isInteger = false,
     ValueChanged<String>? onChanged,
   }) {
-    final displayValue = isInteger ? value.toInt().toString() : value.toString();
+    final displayValue = isInteger ? value.toInt().toString() : (value == value.toInt() ? value.toInt().toString() : value.toString());
+    final isFocused = focusNode.hasFocus;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       height: 36,
       decoration: BoxDecoration(
-        color: AppTheme.background.withOpacity(0.5),
+        color: isFocused ? AppTheme.background : AppTheme.background.withOpacity(0.5),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.1)),
+        border: Border.all(
+          color: isFocused ? AppTheme.purpleNeon : AppTheme.cyanNeon.withOpacity(0.1),
+          width: isFocused ? 1.5 : 1.0,
+        ),
+        boxShadow: isFocused ? [
+          BoxShadow(
+            color: AppTheme.purpleNeon.withOpacity(0.2),
+            blurRadius: 4,
+            spreadRadius: 1,
+          )
+        ] : [],
       ),
       child: onChanged != null
           ? TextFormField(
+              focusNode: focusNode,
               initialValue: value == 0 ? '' : displayValue,
               keyboardType: isInteger
                   ? TextInputType.number
@@ -177,7 +268,7 @@ class SetRowWidget extends StatelessWidget {
               child: Text(
                 '$displayValue $suffix',
                 style: TextStyle(
-                  color: isCompleted ? AppTheme.successGreen : AppTheme.textMain,
+                  color: widget.isCompleted ? AppTheme.successGreen : AppTheme.textMain,
                   fontSize: 13,
                 ),
               ),

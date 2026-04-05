@@ -19,6 +19,7 @@ abstract class ActiveWorkoutState with _$ActiveWorkoutState {
     Workout? workout,
     @Default([]) List<WorkoutExercise> exercises,
     @Default(0) int elapsedSeconds,
+    @Default(true) bool isSetupPhase,
     @Default(false) bool isResting,
     @Default(0) int restSecondsRemaining,
     @Default(0) int restSecondsTotal,
@@ -89,6 +90,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           workout: activeWorkout,
           exercises: activeWorkout.exercises,
           elapsedSeconds: elapsed,
+          isSetupPhase: false, // Auto-resume always jumps to training phase
           isLoading: false,
         );
         _startWorkoutTimer();
@@ -109,9 +111,10 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         workout: workout,
         exercises: [],
         elapsedSeconds: 0,
+        isSetupPhase: true, // Start in setup phase
         isLoading: false,
       );
-      _startWorkoutTimer();
+      // Timer is not started here anymore
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
@@ -138,6 +141,73 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   Future<void> addExercises(List<Exercise> exercises) async {
     for (final exercise in exercises) {
       await addExercise(exercise);
+    }
+  }
+
+  /// Chuyển từ Setup Phase sang Training Phase
+  Future<void> beginTraining() async {
+    if (state.workout == null || state.exercises.isEmpty) return;
+
+    state = state.copyWith(
+      isSetupPhase: false,
+      elapsedSeconds: 0,
+    );
+    _startWorkoutTimer();
+  }
+
+  /// Tải các bài tập mặc định cho các nhóm cơ đã chọn
+  Future<void> loadPresetExercises(List<String> categories) async {
+    if (state.workout == null) return;
+    
+    state = state.copyWith(isLoading: true);
+    
+    try {
+      // Lazy load templates array
+      // Dynamic import to not break cyclic dependencies in this particular file
+      final workoutTemplatesFile = await ref.read(exerciseRepositoryProvider).getExercises(); // Get all exercises to match names
+      
+      final presets = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core']; // Tạm thời map category -> names như trong templates
+      final Map<String, List<String>> presetDict = {
+        'Chest': ['Bench Press (Barbell)', 'Incline Bench Press (Dumbbell)', 'Chest Fly (Machine)', 'Push-up'],
+        'Back': ['Deadlift (Barbell)', 'Pull-up', 'Lat Pulldown (Cable)', 'Seated Cable Row'],
+        'Legs': ['Squat (Barbell)', 'Leg Press', 'Leg Extension', 'Lying Leg Curl'],
+        'Shoulders': ['Overhead Press (Barbell)', 'Lateral Raise (Dumbbell)', 'Face Pull (Cable)'],
+        'Arms': ['Bicep Curl (Barbell)', 'Hammer Curl (Dumbbell)', 'Tricep Pushdown (Cable)', 'Skull Crusher (Barbell)'],
+        'Core': ['Plank', 'Crunch', 'Leg Raise'],
+      };
+
+      final List<String> exercisesToAdd = [];
+      for (final cat in categories) {
+        if (presetDict.containsKey(cat)) {
+          for (final exName in presetDict[cat]!) {
+            if (!exercisesToAdd.contains(exName)) {
+              exercisesToAdd.add(exName);
+            }
+          }
+        }
+      }
+
+      final allExercisesInDB = await ref.read(exerciseRepositoryProvider).getExercises();
+      
+      // Xóa tất cả các exercise cũ trước khi thêm mới (optional, nhưng trong setup phase thì có lẽ user muốn thay thế?)
+      // Nếu không, chỉ cần thêm tiếp
+      
+      for (final templateName in exercisesToAdd) {
+        final exercise = allExercisesInDB.firstWhere(
+          (e) => e.name == templateName,
+          orElse: () => allExercisesInDB.first, // fallback if not found, highly unlikely since DB is seeded
+        );
+        
+        // Kiểm tra xem bài tập này đã có trong workout hay chưa để tránh duplicate
+        final exists = state.exercises.any((we) => we.exercise?.id == exercise.id);
+        if (!exists) {
+          await addExercise(exercise);
+        }
+      }
+      
+      state = state.copyWith(isLoading: false);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 

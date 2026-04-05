@@ -51,14 +51,15 @@ class WorkoutExerciseTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppTheme.panelBackground.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.12)),
+        color: AppTheme.panelBackground.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: AppTheme.cyanNeon.withOpacity(0.05),
+            blurRadius: 15,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -66,24 +67,43 @@ class WorkoutExerciseTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 8, 8),
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppTheme.cyanNeon.withOpacity(0.1),
+                  Colors.transparent,
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              border: Border(bottom: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.1))),
+            ),
             child: Row(
               children: [
                 Container(
-                  width: 36,
-                  height: 36,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: AppTheme.background,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: AppTheme.cyanNeon.withOpacity(0.2),
+                      color: AppTheme.cyanNeon.withOpacity(0.4),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.cyanNeon.withOpacity(0.3),
+                        blurRadius: 8,
+                        spreadRadius: 1,
+                      )
+                    ],
                   ),
                   child: Icon(
                     _getCategoryIcon(exercise?.category),
                     color: AppTheme.cyanNeon,
-                    size: 18,
+                    size: 20,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -196,50 +216,79 @@ class WorkoutExerciseTile extends StatelessWidget {
           // Bottom actions
           if (isEditable)
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 4, 10, 10),
+              padding: const EdgeInsets.fromLTRB(14, 8, 14, 14),
               child: Row(
                 children: [
                   Expanded(
-                    child: TextButton.icon(
+                    child: _buildActionButton(
+                      label: 'Thêm set',
+                      icon: Icons.add,
+                      color: AppTheme.cyanNeon,
                       onPressed: onAddSet,
-                      icon: const Icon(Icons.add, size: 16),
-                      label: const Text('Thêm set',
-                          style: TextStyle(fontSize: 12)),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.cyanNeon,
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: AppTheme.cyanNeon.withOpacity(0.2),
-                          ),
-                        ),
-                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: TextButton.icon(
+                    child: _buildActionButton(
+                      label: 'Nghỉ',
+                      icon: Icons.timer_outlined,
+                      color: AppTheme.purpleNeon,
                       onPressed: onStartRest,
-                      icon: const Icon(Icons.timer_outlined, size: 16),
-                      label:
-                          const Text('Nghỉ', style: TextStyle(fontSize: 12)),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.purpleNeon,
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: BorderSide(
-                            color: AppTheme.purpleNeon.withOpacity(0.2),
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ],
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback? onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.1),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(8),
+          splashColor: color.withOpacity(0.2),
+          highlightColor: color.withOpacity(0.1),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: color),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
