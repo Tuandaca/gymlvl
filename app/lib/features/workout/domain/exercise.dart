@@ -4,7 +4,7 @@ part 'exercise.freezed.dart';
 part 'exercise.g.dart';
 
 @freezed
-class Exercise with _$Exercise {
+abstract class Exercise with _$Exercise {
   const factory Exercise({
     required String id,
     required String name,

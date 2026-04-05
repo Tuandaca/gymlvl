@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/config/supabase_config.dart';
 import '../../domain/user_profile_draft.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // ==============================
 // Draft Notifier (thay thế StateProvider đã bị xoá ở Riverpod 3.x)
@@ -59,8 +60,8 @@ class OnboardingController extends AsyncNotifier<void> {
       final userId = SupabaseConfig.client.auth.currentUser?.id;
       if (userId == null) throw Exception('Ứng dụng mất kết nối phiên đăng nhập.');
 
-      // 2. Chèn dữ liệu vào bảng profiles
-      await SupabaseConfig.client.from('profiles').insert({
+      // 2. Chèn/Cập nhật dữ liệu vào bảng profiles
+      await SupabaseConfig.client.from('profiles').upsert({
         'id': userId,
         'environment': draft.environment,
         'goals': draft.goals,
@@ -72,11 +73,29 @@ class OnboardingController extends AsyncNotifier<void> {
         'weight_kg': draft.weightKg,
       });
 
-      // 3. Gọi Supabase Edge Function `initialize-user`
-      await SupabaseConfig.client.functions.invoke(
-        'initialize-user',
-        body: {'experience_level': draft.experienceLevel}, 
-      );
+      // 3. Khởi tạo trực tiếp (Bypass Edge Function vì người dùng chưa cài Supabase CLI)
+      int initialLevel = 1;
+      String initialTitle = 'Tân Sinh Phấn Tạ';
+
+      if (draft.experienceLevel == 'intermediate') {
+        initialLevel = 11;
+        initialTitle = 'Kẻ Săn Cơ';
+      } else if (draft.experienceLevel == 'advanced') {
+        initialLevel = 21;
+        initialTitle = 'Tay Tạ Sắt';
+      }
+
+      await SupabaseConfig.client.from('users').upsert({
+        'id': userId,
+        'email': SupabaseConfig.client.auth.currentUser?.email,
+        'display_name': SupabaseConfig.client.auth.currentUser?.userMetadata?['full_name'] ?? 'User',
+        'level': initialLevel,
+        'current_title': initialTitle,
+        'onboarding_completed': true,
+      });
+
+      // 4. Force refresh the user session so the router detects onboarding_completed = true
+      ref.invalidate(currentUserProvider);
     });
   }
 }

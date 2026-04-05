@@ -11,6 +11,9 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
 import '../../features/workout/presentation/screens/exercise_picker_screen.dart';
+import '../../features/workout/presentation/screens/active_workout_screen.dart';
+import '../../features/workout/presentation/screens/workout_history_screen.dart';
+import '../../features/workout/presentation/screens/workout_detail_screen.dart';
 import '../../features/quests/presentation/screens/quests_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import 'main_shell_screen.dart';
@@ -20,11 +23,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final currentUserAsync = ref.watch(currentUserProvider);
 
   return GoRouter(
-    initialLocation: '/login', // Fallback, redirect logic handles the actual start
+    initialLocation: '/login',
     redirect: (context, state) {
       final authState = authStateAsync.value;
       final currentUser = currentUserAsync.value;
-      
+
       // Vẫn đang tải Auth hoặc chưa kéo xong Profile
       if (authStateAsync.isLoading || currentUserAsync.isLoading) return null;
 
@@ -35,7 +38,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isGoingToLogin = loc == '/login';
       final isGoingToRegister = loc == '/register';
       final isGoingToOnboarding = loc == '/onboarding';
-      
+
       // Khởi động không có auth -> login
       if (!isAuth && !isGoingToLogin && !isGoingToRegister) {
         return '/login';
@@ -47,8 +50,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // Đăng nhập rồi, đã onboard -> chặn quay lại màn hình nhập môn/đăng nhập
-      if (isAuth && isOnboarded && (isGoingToLogin || isGoingToRegister || isGoingToOnboarding)) {
-        return '/dashboard'; 
+      if (isAuth &&
+          isOnboarded &&
+          (isGoingToLogin || isGoingToRegister || isGoingToOnboarding)) {
+        return '/dashboard';
       }
 
       return null;
@@ -66,9 +71,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
+
+      // ─── Main App Shell (Bottom Navigation) ───
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          // Trả về bộ khung (Bottom Navigation) chứa 4 tab.
           return MainShellScreen(navigationShell: navigationShell);
         },
         branches: [
@@ -104,11 +110,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          GoRoute(
-            path: '/exercise-picker',
-            builder: (context, state) => const ExercisePickerScreen(),
-          ),
         ],
+      ),
+
+      // ─── Workout Flow Routes (ngoài Shell vì cần fullscreen) ───
+      GoRoute(
+        path: '/workout/active',
+        builder: (context, state) => const ActiveWorkoutScreen(),
+      ),
+      GoRoute(
+        path: '/workout/history',
+        builder: (context, state) => const WorkoutHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/workout/detail/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id']!;
+          return WorkoutDetailScreen(workoutId: id);
+        },
+      ),
+      GoRoute(
+        path: '/exercise-picker',
+        builder: (context, state) {
+          final multiSelect =
+              state.uri.queryParameters['multiSelect'] == 'true';
+          return ExercisePickerScreen(multiSelect: multiSelect);
+        },
       ),
     ],
   );

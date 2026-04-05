@@ -41,6 +41,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(onboardingControllerProvider, (previous, next) {
+      if (next is AsyncError) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi: ${next.error}'),
+              backgroundColor: Colors.redAccent,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    });
+
     final submitState = ref.watch(onboardingControllerProvider);
     final isSubmitting = submitState.isLoading;
 
