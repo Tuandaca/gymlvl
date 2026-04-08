@@ -10,6 +10,7 @@ class AppTheme {
   static const Color purpleNeon = Color(0xFF7C4DFF);
   static const Color successGreen = Color(0xFF00E676);
   static const Color dangerOrange = Color(0xFFFF6D00);
+  static const Color warningYellow = Color(0xFFFFD600);
   static const Color textMain = Color(0xFFE0E0E0);
   static const Color textDim = Color(0xFF8B949E);
 

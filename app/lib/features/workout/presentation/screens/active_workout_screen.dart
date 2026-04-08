@@ -11,6 +11,7 @@ import '../providers/exercise_providers.dart';
 import '../controllers/active_workout_controller.dart';
 import '../widgets/workout_exercise_tile.dart';
 import '../widgets/rest_timer_widget.dart';
+import '../../../progression/presentation/widgets/level_up_overlay.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -20,7 +21,7 @@ class ActiveWorkoutScreen extends ConsumerStatefulWidget {
       _ActiveWorkoutScreenState();
 }
 
-class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
+class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with WidgetsBindingObserver {
   final Set<String> _selectedCategories = {};
 
   final List<Map<String, dynamic>> _muscleGroups = [
@@ -35,12 +36,35 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final notifier = ref.read(activeWorkoutControllerProvider.notifier);
       final state = ref.read(activeWorkoutControllerProvider);
+      
       if (!state.hasActiveWorkout) {
-        ref.read(activeWorkoutControllerProvider.notifier).startWorkout();
+        notifier.startWorkout();
+      } else if (state.isTimerPaused) {
+        // Resume timer if it was paused from a previous exit
+        notifier.resumeTimer();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Tự động dừng timer khi app xuống background và resume khi quay lại
+    final notifier = ref.read(activeWorkoutControllerProvider.notifier);
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      notifier.pauseTimer();
+    } else if (state == AppLifecycleState.resumed) {
+      notifier.resumeTimer();
+    }
   }
 
   void _toggleCategory(String category) async {
@@ -128,34 +152,54 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       return;
     }
 
+    final double durationMinutes = state.elapsedSeconds / 60;
+    final int completedSets = state.completedSets;
+    final double pace = completedSets / (durationMinutes > 0 ? durationMinutes : 1);
+    final bool isTooShort = state.elapsedSeconds < 300; // < 5 minutes
+    final bool isSuspicious = pace > 3 && completedSets > 3;
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.panelBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.2)),
+          side: BorderSide(
+            color: isSuspicious 
+                ? AppTheme.dangerOrange 
+                : (isTooShort ? AppTheme.warningYellow : AppTheme.cyanNeon.withOpacity(0.2)),
+            width: isSuspicious ? 2 : 1,
+          ),
         ),
-        title: const Text(
-          'Kết thúc buổi tập?',
+        title: Text(
+          isSuspicious 
+              ? '⚠️ CẢNH BÁO TỐC ĐỘ' 
+              : (isTooShort ? 'TIẾP TỤC GẮNG SỨC?' : 'Kết thúc buổi tập?'),
           style: TextStyle(
             fontFamily: 'Orbitron',
-            color: AppTheme.cyanNeon,
+            color: isSuspicious ? AppTheme.dangerOrange : (isTooShort ? AppTheme.warningYellow : AppTheme.cyanNeon),
             fontSize: 16,
           ),
         ),
         content: Text(
-          '${state.exercises.length} bài tập · ${state.totalSets} sets · ${state.formattedElapsed}',
+          isSuspicious
+              ? 'Hệ thống nhận thấy bạn hoàn thành Sets quá nhanh (${pace.toStringAsFixed(1)} sets/phút). \n\nNếu bạn cố tình khai gian, XP nhận được sẽ bị giới hạn ở mức tối thiểu (10 XP). Bạn có muốn kiểm tra lại không?'
+              : (isTooShort 
+                  ? 'Bạn mới tập được ${state.formattedElapsed}. Yên tâm, các Sets bạn vừa tập vẫn được ghi nhận và tính XP tương xứng. Nhớ quay lại tập bù nhé!' 
+                  : '${state.exercises.length} bài tập · ${state.totalSets} sets · ${state.formattedElapsed}'),
           style: const TextStyle(color: AppTheme.textMain),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Tiếp tục tập', style: TextStyle(color: AppTheme.textDim)),
+            child: Text(isSuspicious ? 'KIỂM TRA LẠI' : 'Tiếp tục tập', style: const TextStyle(color: AppTheme.textDim)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Hoàn thành', style: TextStyle(color: AppTheme.successGreen)),
+            child: Text(
+              isSuspicious ? 'VẪN HOÀN THÀNH' : 'Hoàn thành', 
+              style: TextStyle(color: isSuspicious || isTooShort ? AppTheme.dangerOrange : AppTheme.successGreen)
+            ),
           ),
         ],
       ),
@@ -165,13 +209,29 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       final result = await ref.read(activeWorkoutControllerProvider.notifier).completeWorkout();
       if (result != null && mounted) {
         HapticFeedback.heavyImpact();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎉 Buổi tập hoàn thành! XP sẽ sớm được tính...'),
-            backgroundColor: AppTheme.successGreen,
-          ),
-        );
-        context.pop();
+
+        if (result['xpResult'] != null) {
+          await LevelUpOverlay.show(context, result['xpResult'] as Map<String, dynamic>);
+        } else if (result['error'] != null) {
+          // Hiện lỗi tính XP nhưng vẫn cho thoát màn hình vì workout đã lưu
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('🎉 Buổi tập đã lưu! (${result['error']})'),
+              backgroundColor: AppTheme.warningYellow.withOpacity(0.8),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Buổi tập hoàn thành!'),
+              backgroundColor: AppTheme.successGreen,
+            ),
+          );
+        }
+
+        if (mounted) {
+          context.pop();
+        }
       }
     }
   }
@@ -221,7 +281,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       await ref.read(activeWorkoutControllerProvider.notifier).cancelWorkout();
       return true;
     }
-    return result == 'leave';
+    if (result == 'leave') {
+      ref.read(activeWorkoutControllerProvider.notifier).pauseTimer();
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -345,13 +409,58 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                   style: const TextStyle(
                     fontFamily: 'Orbitron',
                     color: AppTheme.successGreen,
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 12),
+          // XP Live Preview Bar
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text(
+                      'XP PREVIEW',
+                      style: TextStyle(
+                        fontFamily: 'Orbitron',
+                        color: AppTheme.purpleNeon,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '+${workoutState.previewXP}',
+                      style: const TextStyle(
+                        fontFamily: 'Orbitron',
+                        color: AppTheme.purpleNeon,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ).animate(target: workoutState.previewXP.toDouble()).shimmer(),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: (workoutState.previewXP / 500).clamp(0, 1),
+                    backgroundColor: AppTheme.purpleNeon.withOpacity(0.1),
+                    valueColor: const AlwaysStoppedAnimation(AppTheme.purpleNeon),
+                    minHeight: 4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       actions: [

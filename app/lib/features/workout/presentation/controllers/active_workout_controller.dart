@@ -9,6 +9,7 @@ import '../../domain/workout_set.dart';
 import '../../domain/workout_repository.dart';
 import '../providers/exercise_providers.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../progression/domain/progression_engine.dart';
 
 part 'active_workout_controller.freezed.dart';
 
@@ -26,6 +27,8 @@ abstract class ActiveWorkoutState with _$ActiveWorkoutState {
     @Default(0) int restSecondsTotal,
     @Default(false) bool isLoading,
     @Default(false) bool isCompleting,
+    @Default(false) bool isTimerPaused,
+    @Default(0) int previewXP,
     String? errorMessage,
   }) = _ActiveWorkoutState;
 
@@ -345,6 +348,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           return e;
         }).toList(),
       );
+      _updatePreviewXP();
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
     }
@@ -408,7 +412,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   // ─── Complete / Cancel ───
 
-  Future<Workout?> completeWorkout({String? notes}) async {
+  Future<Map<String, dynamic>?> completeWorkout({String? notes}) async {
     if (state.workout == null) return null;
     state = state.copyWith(isCompleting: true);
     try {
@@ -416,9 +420,44 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         state.workout!.id,
         notes: notes,
       );
+
+      Map<String, dynamic>? xpResult;
+      try {
+        xpResult = await _repository.calculateXP(completedWorkout.id);
+      } catch (e) {
+        // Vẫn dọn dẹp và reset state dù lỗi tính XP xảy ra 
+        // để user không bị kẹt ở màn hình Training
+        _cleanup();
+        state = const ActiveWorkoutState();
+        
+        // Refresh để Dashboard fetch lại dữ liệu mới nhất (dù XP có thể chưa cộng)
+        await Future.delayed(const Duration(milliseconds: 500));
+        ref.refresh(currentUserProvider);
+        ref.refresh(currentUserProfileProvider);
+
+        return {
+          'workout': completedWorkout,
+          'xpResult': null,
+          'error': 'Lỗi tính XP: $e',
+        };
+      }
+
       _cleanup();
       state = const ActiveWorkoutState();
-      return completedWorkout;
+      
+      // Delay nhỏ để đảm bảo DB commit trước khi fetch lại
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Refresh Auth Providers để cập nhật level & total_xp
+      // ignore: unused_result
+      ref.refresh(currentUserProvider);
+      // ignore: unused_result
+      ref.refresh(currentUserProfileProvider);
+
+      return {
+        'workout': completedWorkout,
+        'xpResult': xpResult,
+      };
     } catch (e) {
       state = state.copyWith(
         isCompleting: false,
@@ -444,8 +483,53 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   void _startWorkoutTimer() {
     _workoutTimer?.cancel();
     _workoutTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      state = state.copyWith(elapsedSeconds: state.elapsedSeconds + 1);
+      // Chỉ tăng giây nếu không ở trạng thái pause
+      if (!state.isTimerPaused) {
+        state = state.copyWith(elapsedSeconds: state.elapsedSeconds + 1);
+        // Cập nhật XP preview mỗi phút (vì duration XP tính theo phút)
+        if (state.elapsedSeconds % 60 == 0) {
+          _updatePreviewXP();
+        }
+      }
     });
+  }
+
+  void pauseTimer() {
+    state = state.copyWith(isTimerPaused: true);
+  }
+
+  void resumeTimer() {
+    state = state.copyWith(isTimerPaused: false);
+    // Nếu timer chưa chạy (ví dụ sau khi restore từ background) thì start lại
+    if (_workoutTimer == null || !_workoutTimer!.isActive) {
+      _startWorkoutTimer();
+    }
+  }
+
+  void _updatePreviewXP() {
+    final completedSets = state.completedSets;
+    final categories = state.exercises
+        .map((e) => e.exercise?.category)
+        .where((c) => c != null)
+        .toSet();
+
+    // Link với Phase 2.6 Streak System sau này
+    const userStreak = 0.0;
+
+    final isSuspicious = ProgressionEngine.checkSuspiciousPace(
+      completedSets,
+      state.elapsedSeconds,
+    );
+
+    final xp = ProgressionEngine.calculateXP(
+      durationSeconds: state.elapsedSeconds,
+      completedSets: completedSets,
+      uniqueCategories: categories.length,
+      userStreak: userStreak,
+      isSuspicious: isSuspicious,
+    );
+
+    state = state.copyWith(previewXP: xp);
   }
 
   void _cleanup() {

@@ -48,4 +48,7 @@ abstract class WorkoutRepository {
 
   /// Đếm tổng số workout đã hoàn thành
   Future<int> getCompletedWorkoutCount();
+
+  /// Tính toán XP và Level cho Workout đã hoàn thành qua Edge Function
+  Future<Map<String, dynamic>> calculateXP(String workoutId);
 }

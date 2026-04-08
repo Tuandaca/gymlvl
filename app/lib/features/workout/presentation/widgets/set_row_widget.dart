@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../ui/theme/app_theme.dart';
 
 class SetRowWidget extends StatefulWidget {
@@ -143,32 +144,54 @@ class _SetRowWidgetState extends State<SetRowWidget> {
             if (widget.isEditable)
               GestureDetector(
                 onTap: () => widget.onCompletedChanged?.call(!isCompleted),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? AppTheme.successGreen.withOpacity(0.2)
-                        : AppTheme.background.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isCompleted
-                          ? AppTheme.successGreen
-                          : AppTheme.cyanNeon.withOpacity(0.3),
-                      width: 1.5,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppTheme.successGreen.withOpacity(0.2)
+                            : AppTheme.background.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isCompleted
+                              ? AppTheme.successGreen
+                              : AppTheme.cyanNeon.withOpacity(0.3),
+                          width: 1.5,
+                        ),
+                        boxShadow: isCompleted ? [
+                          BoxShadow(
+                            color: AppTheme.successGreen.withOpacity(0.4),
+                            blurRadius: 8,
+                            spreadRadius: 1,
+                          )
+                        ] : [],
+                      ),
+                      child: isCompleted
+                          ? const Icon(Icons.check, color: AppTheme.successGreen, size: 20)
+                          : null,
                     ),
-                    boxShadow: isCompleted ? [
-                      BoxShadow(
-                        color: AppTheme.successGreen.withOpacity(0.4),
-                        blurRadius: 8,
-                        spreadRadius: 1,
-                      )
-                    ] : [],
-                  ),
-                  child: isCompleted
-                      ? const Icon(Icons.check, color: AppTheme.successGreen, size: 20)
-                      : null,
+                    if (isCompleted)
+                      Positioned(
+                        top: -20,
+                        right: -10,
+                        child: const Text(
+                          '+3 XP',
+                          style: TextStyle(
+                            fontFamily: 'Orbitron',
+                            color: AppTheme.successGreen,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(duration: 200.ms)
+                        .slideY(begin: 1, end: -1, duration: 600.ms, curve: Curves.easeOut)
+                        .fadeOut(delay: 400.ms, duration: 200.ms),
+                      ),
+                  ],
                 ),
               ),
             if (!widget.isEditable)

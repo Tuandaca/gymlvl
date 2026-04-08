@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ActiveWorkoutState {
 
- Workout? get workout; List<WorkoutExercise> get exercises; int get elapsedSeconds; bool get isSetupPhase; bool get isResting; int get restSecondsRemaining; int get restSecondsTotal; bool get isLoading; bool get isCompleting; String? get errorMessage;
+ Workout? get workout; List<WorkoutExercise> get exercises; int get elapsedSeconds; bool get isSetupPhase; bool get isResting; int get restSecondsRemaining; int get restSecondsTotal; bool get isLoading; bool get isCompleting; int get previewXP; String? get errorMessage;
 /// Create a copy of ActiveWorkoutState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ActiveWorkoutStateCopyWith<ActiveWorkoutState> get copyWith => _$ActiveWorkoutS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveWorkoutState&&(identical(other.workout, workout) || other.workout == workout)&&const DeepCollectionEquality().equals(other.exercises, exercises)&&(identical(other.elapsedSeconds, elapsedSeconds) || other.elapsedSeconds == elapsedSeconds)&&(identical(other.isSetupPhase, isSetupPhase) || other.isSetupPhase == isSetupPhase)&&(identical(other.isResting, isResting) || other.isResting == isResting)&&(identical(other.restSecondsRemaining, restSecondsRemaining) || other.restSecondsRemaining == restSecondsRemaining)&&(identical(other.restSecondsTotal, restSecondsTotal) || other.restSecondsTotal == restSecondsTotal)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isCompleting, isCompleting) || other.isCompleting == isCompleting)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveWorkoutState&&(identical(other.workout, workout) || other.workout == workout)&&const DeepCollectionEquality().equals(other.exercises, exercises)&&(identical(other.elapsedSeconds, elapsedSeconds) || other.elapsedSeconds == elapsedSeconds)&&(identical(other.isSetupPhase, isSetupPhase) || other.isSetupPhase == isSetupPhase)&&(identical(other.isResting, isResting) || other.isResting == isResting)&&(identical(other.restSecondsRemaining, restSecondsRemaining) || other.restSecondsRemaining == restSecondsRemaining)&&(identical(other.restSecondsTotal, restSecondsTotal) || other.restSecondsTotal == restSecondsTotal)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isCompleting, isCompleting) || other.isCompleting == isCompleting)&&(identical(other.previewXP, previewXP) || other.previewXP == previewXP)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,workout,const DeepCollectionEquality().hash(exercises),elapsedSeconds,isSetupPhase,isResting,restSecondsRemaining,restSecondsTotal,isLoading,isCompleting,errorMessage);
+int get hashCode => Object.hash(runtimeType,workout,const DeepCollectionEquality().hash(exercises),elapsedSeconds,isSetupPhase,isResting,restSecondsRemaining,restSecondsTotal,isLoading,isCompleting,previewXP,errorMessage);
 
 @override
 String toString() {
-  return 'ActiveWorkoutState(workout: $workout, exercises: $exercises, elapsedSeconds: $elapsedSeconds, isSetupPhase: $isSetupPhase, isResting: $isResting, restSecondsRemaining: $restSecondsRemaining, restSecondsTotal: $restSecondsTotal, isLoading: $isLoading, isCompleting: $isCompleting, errorMessage: $errorMessage)';
+  return 'ActiveWorkoutState(workout: $workout, exercises: $exercises, elapsedSeconds: $elapsedSeconds, isSetupPhase: $isSetupPhase, isResting: $isResting, restSecondsRemaining: $restSecondsRemaining, restSecondsTotal: $restSecondsTotal, isLoading: $isLoading, isCompleting: $isCompleting, previewXP: $previewXP, errorMessage: $errorMessage)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ActiveWorkoutStateCopyWith<$Res>  {
   factory $ActiveWorkoutStateCopyWith(ActiveWorkoutState value, $Res Function(ActiveWorkoutState) _then) = _$ActiveWorkoutStateCopyWithImpl;
 @useResult
 $Res call({
- Workout? workout, List<WorkoutExercise> exercises, int elapsedSeconds, bool isSetupPhase, bool isResting, int restSecondsRemaining, int restSecondsTotal, bool isLoading, bool isCompleting, String? errorMessage
+ Workout? workout, List<WorkoutExercise> exercises, int elapsedSeconds, bool isSetupPhase, bool isResting, int restSecondsRemaining, int restSecondsTotal, bool isLoading, bool isCompleting, int previewXP, String? errorMessage
 });
 
 
@@ -62,7 +62,7 @@ class _$ActiveWorkoutStateCopyWithImpl<$Res>
 
 /// Create a copy of ActiveWorkoutState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? workout = freezed,Object? exercises = null,Object? elapsedSeconds = null,Object? isSetupPhase = null,Object? isResting = null,Object? restSecondsRemaining = null,Object? restSecondsTotal = null,Object? isLoading = null,Object? isCompleting = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? workout = freezed,Object? exercises = null,Object? elapsedSeconds = null,Object? isSetupPhase = null,Object? isResting = null,Object? restSecondsRemaining = null,Object? restSecondsTotal = null,Object? isLoading = null,Object? isCompleting = null,Object? previewXP = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 workout: freezed == workout ? _self.workout : workout // ignore: cast_nullable_to_non_nullable
 as Workout?,exercises: null == exercises ? _self.exercises : exercises // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as bool,restSecondsRemaining: null == restSecondsRemaining ? _self.restSecondsRe
 as int,restSecondsTotal: null == restSecondsTotal ? _self.restSecondsTotal : restSecondsTotal // ignore: cast_nullable_to_non_nullable
 as int,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isCompleting: null == isCompleting ? _self.isCompleting : isCompleting // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,previewXP: null == previewXP ? _self.previewXP : previewXP // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -171,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  int previewXP,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActiveWorkoutState() when $default != null:
-return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.errorMessage);case _:
+return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.previewXP,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -192,10 +193,10 @@ return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetup
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  int previewXP,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _ActiveWorkoutState():
-return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.errorMessage);case _:
+return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.previewXP,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +213,10 @@ return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetup
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Workout? workout,  List<WorkoutExercise> exercises,  int elapsedSeconds,  bool isSetupPhase,  bool isResting,  int restSecondsRemaining,  int restSecondsTotal,  bool isLoading,  bool isCompleting,  int previewXP,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _ActiveWorkoutState() when $default != null:
-return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.errorMessage);case _:
+return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetupPhase,_that.isResting,_that.restSecondsRemaining,_that.restSecondsTotal,_that.isLoading,_that.isCompleting,_that.previewXP,_that.errorMessage);case _:
   return null;
 
 }
@@ -227,7 +228,7 @@ return $default(_that.workout,_that.exercises,_that.elapsedSeconds,_that.isSetup
 
 
 class _ActiveWorkoutState extends ActiveWorkoutState {
-  const _ActiveWorkoutState({this.workout, final  List<WorkoutExercise> exercises = const [], this.elapsedSeconds = 0, this.isSetupPhase = true, this.isResting = false, this.restSecondsRemaining = 0, this.restSecondsTotal = 0, this.isLoading = false, this.isCompleting = false, this.errorMessage}): _exercises = exercises,super._();
+  const _ActiveWorkoutState({this.workout, final  List<WorkoutExercise> exercises = const [], this.elapsedSeconds = 0, this.isSetupPhase = true, this.isResting = false, this.restSecondsRemaining = 0, this.restSecondsTotal = 0, this.isLoading = false, this.isCompleting = false, this.previewXP = 0, this.errorMessage}): _exercises = exercises,super._();
   
 
 @override final  Workout? workout;
@@ -245,6 +246,7 @@ class _ActiveWorkoutState extends ActiveWorkoutState {
 @override@JsonKey() final  int restSecondsTotal;
 @override@JsonKey() final  bool isLoading;
 @override@JsonKey() final  bool isCompleting;
+@override@JsonKey() final  int previewXP;
 @override final  String? errorMessage;
 
 /// Create a copy of ActiveWorkoutState
@@ -257,16 +259,16 @@ _$ActiveWorkoutStateCopyWith<_ActiveWorkoutState> get copyWith => __$ActiveWorko
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveWorkoutState&&(identical(other.workout, workout) || other.workout == workout)&&const DeepCollectionEquality().equals(other._exercises, _exercises)&&(identical(other.elapsedSeconds, elapsedSeconds) || other.elapsedSeconds == elapsedSeconds)&&(identical(other.isSetupPhase, isSetupPhase) || other.isSetupPhase == isSetupPhase)&&(identical(other.isResting, isResting) || other.isResting == isResting)&&(identical(other.restSecondsRemaining, restSecondsRemaining) || other.restSecondsRemaining == restSecondsRemaining)&&(identical(other.restSecondsTotal, restSecondsTotal) || other.restSecondsTotal == restSecondsTotal)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isCompleting, isCompleting) || other.isCompleting == isCompleting)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveWorkoutState&&(identical(other.workout, workout) || other.workout == workout)&&const DeepCollectionEquality().equals(other._exercises, _exercises)&&(identical(other.elapsedSeconds, elapsedSeconds) || other.elapsedSeconds == elapsedSeconds)&&(identical(other.isSetupPhase, isSetupPhase) || other.isSetupPhase == isSetupPhase)&&(identical(other.isResting, isResting) || other.isResting == isResting)&&(identical(other.restSecondsRemaining, restSecondsRemaining) || other.restSecondsRemaining == restSecondsRemaining)&&(identical(other.restSecondsTotal, restSecondsTotal) || other.restSecondsTotal == restSecondsTotal)&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isCompleting, isCompleting) || other.isCompleting == isCompleting)&&(identical(other.previewXP, previewXP) || other.previewXP == previewXP)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,workout,const DeepCollectionEquality().hash(_exercises),elapsedSeconds,isSetupPhase,isResting,restSecondsRemaining,restSecondsTotal,isLoading,isCompleting,errorMessage);
+int get hashCode => Object.hash(runtimeType,workout,const DeepCollectionEquality().hash(_exercises),elapsedSeconds,isSetupPhase,isResting,restSecondsRemaining,restSecondsTotal,isLoading,isCompleting,previewXP,errorMessage);
 
 @override
 String toString() {
-  return 'ActiveWorkoutState(workout: $workout, exercises: $exercises, elapsedSeconds: $elapsedSeconds, isSetupPhase: $isSetupPhase, isResting: $isResting, restSecondsRemaining: $restSecondsRemaining, restSecondsTotal: $restSecondsTotal, isLoading: $isLoading, isCompleting: $isCompleting, errorMessage: $errorMessage)';
+  return 'ActiveWorkoutState(workout: $workout, exercises: $exercises, elapsedSeconds: $elapsedSeconds, isSetupPhase: $isSetupPhase, isResting: $isResting, restSecondsRemaining: $restSecondsRemaining, restSecondsTotal: $restSecondsTotal, isLoading: $isLoading, isCompleting: $isCompleting, previewXP: $previewXP, errorMessage: $errorMessage)';
 }
 
 
@@ -277,7 +279,7 @@ abstract mixin class _$ActiveWorkoutStateCopyWith<$Res> implements $ActiveWorkou
   factory _$ActiveWorkoutStateCopyWith(_ActiveWorkoutState value, $Res Function(_ActiveWorkoutState) _then) = __$ActiveWorkoutStateCopyWithImpl;
 @override @useResult
 $Res call({
- Workout? workout, List<WorkoutExercise> exercises, int elapsedSeconds, bool isSetupPhase, bool isResting, int restSecondsRemaining, int restSecondsTotal, bool isLoading, bool isCompleting, String? errorMessage
+ Workout? workout, List<WorkoutExercise> exercises, int elapsedSeconds, bool isSetupPhase, bool isResting, int restSecondsRemaining, int restSecondsTotal, bool isLoading, bool isCompleting, int previewXP, String? errorMessage
 });
 
 
@@ -294,7 +296,7 @@ class __$ActiveWorkoutStateCopyWithImpl<$Res>
 
 /// Create a copy of ActiveWorkoutState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? workout = freezed,Object? exercises = null,Object? elapsedSeconds = null,Object? isSetupPhase = null,Object? isResting = null,Object? restSecondsRemaining = null,Object? restSecondsTotal = null,Object? isLoading = null,Object? isCompleting = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? workout = freezed,Object? exercises = null,Object? elapsedSeconds = null,Object? isSetupPhase = null,Object? isResting = null,Object? restSecondsRemaining = null,Object? restSecondsTotal = null,Object? isLoading = null,Object? isCompleting = null,Object? previewXP = null,Object? errorMessage = freezed,}) {
   return _then(_ActiveWorkoutState(
 workout: freezed == workout ? _self.workout : workout // ignore: cast_nullable_to_non_nullable
 as Workout?,exercises: null == exercises ? _self._exercises : exercises // ignore: cast_nullable_to_non_nullable
@@ -305,7 +307,8 @@ as bool,restSecondsRemaining: null == restSecondsRemaining ? _self.restSecondsRe
 as int,restSecondsTotal: null == restSecondsTotal ? _self.restSecondsTotal : restSecondsTotal // ignore: cast_nullable_to_non_nullable
 as int,isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isCompleting: null == isCompleting ? _self.isCompleting : isCompleting // ignore: cast_nullable_to_non_nullable
-as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as bool,previewXP: null == previewXP ? _self.previewXP : previewXP // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

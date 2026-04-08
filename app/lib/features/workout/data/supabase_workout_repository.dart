@@ -216,4 +216,18 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
 
     return (response as List).length;
   }
+
+  @override
+  Future<Map<String, dynamic>> calculateXP(String workoutId) async {
+    final response = await _supabase.functions.invoke(
+      'calculate-xp',
+      body: {'workout_id': workoutId},
+    );
+    
+    if (response.status == 200) {
+      return response.data as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to calculate XP: \${response.data}');
+    }
+  }
 }
