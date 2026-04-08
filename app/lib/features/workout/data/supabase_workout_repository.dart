@@ -219,9 +219,18 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
 
   @override
   Future<Map<String, dynamic>> calculateXP(String workoutId) async {
+    final session = _supabase.auth.currentSession;
+    final token = session?.accessToken;
+    
+    // ignore: avoid_print
+    print('DEBUG: Calling calculate-xp. session exists: ${session != null}, token length: ${token?.length ?? 0}');
+
     final response = await _supabase.functions.invoke(
       'calculate-xp',
       body: {'workout_id': workoutId},
+      headers: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
     );
     
     if (response.status == 200) {

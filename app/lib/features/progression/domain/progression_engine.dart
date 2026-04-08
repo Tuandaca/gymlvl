@@ -18,8 +18,8 @@ class ProgressionEngine {
     // Volume XP: 3 XP mỗi Set hoàn thành
     final volumeXP = completedSets * 3;
 
-    // Variety XP: 5 XP mỗi loại bài tập khác nhau
-    final varietyXP = uniqueCategories * 5;
+    // Variety XP: 5 XP mỗi loại bài tập khác nhau (tính từ cái thứ 2 trở đi)
+    final varietyXP = math.max(0, uniqueCategories - 1) * 5;
 
     // Streak Multiplier: Tối đa 2.0x
     final streakMultiplier = (1 + userStreak * 0.05).clamp(1.0, 2.0);

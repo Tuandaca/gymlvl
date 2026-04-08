@@ -82,7 +82,10 @@ export function calculateXP(workout: any, userStreak: number = 0, isSuspicious: 
   }
 
   const volumeXP = totalSets * 3;
-  const varietyXP = categories.size * 5;
+  
+  // Variety XP: 5 XP cho mỗi category thêm vào ngoài cái đầu tiên
+  // Chỉ tính category nào đã có ít nhất 1 set hoàn thành
+  const varietyXP = Math.max(0, categories.size - 1) * 5;
   const streakMultiplier = Math.min(1 + userStreak * 0.05, 2.0);
 
   const rawXP = (durationXP + volumeXP + varietyXP) * streakMultiplier;

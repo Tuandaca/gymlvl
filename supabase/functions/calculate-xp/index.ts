@@ -13,16 +13,27 @@ Deno.serve(async (req: Request) => {
 
   try {
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) throw new Error('Missing Authorization header');
+    if (!authHeader) {
+      console.error('Missing Authorization header');
+      throw new Error('Missing Authorization header');
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    console.log('Processing request for token starts with:', token.substring(0, 10));
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
     );
 
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    if (userError || !user) throw new Error('Unauthorized');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Auth error detail:', userError);
+      throw new Error(`Unauthorized: ${userError?.message || 'Empty user'}`);
+    }
+    
+    console.log('User authenticated:', user.id);
 
     const { workout_id } = await req.json();
     if (!workout_id) throw new Error('Missing workout_id parameter');

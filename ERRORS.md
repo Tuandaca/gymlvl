@@ -1,5 +1,19 @@
 # TÀI LIỆU THEO DÕI LỖI (ERRORS TRACKING)
 
+## [2026-04-09 02:50] - FunctionException 400 Unauthorized in calculate-xp
+- **Type**: Integration / Auth Error
+- **Severity**: Critical
+- **File**: `app/lib/features/workout/data/supabase_workout_repository.dart` & `supabase/functions/calculate-xp/index.ts`
+- **Agent**: @backend-specialist
+- **Root Cause**: Edge Function không nhận diện được người dùng do cơ chế xác thực implicit trong môi trường function đôi khi không ổn định. App chưa gửi Token Authorization một cách tường minh dẫn đến lỗi 400.
+- **Fix Applied**: 
+    1. Ép App gửi `Authorization: Bearer <token>` trong header.
+    2. Sửa Backend dùng `auth.getUser(token)` thay vì `auth.getUser()` không tham số.
+- **Prevention**: Luôn sử dụng cơ chế truyền Token tường minh (Explicit Token Passing) cho các Edge Function yêu cầu xác thực người dùng.
+- **Status**: Fixed
+
+---
+
 File này lưu trữ các lỗi gặp phải trong quá trình phát triển để AI (GymLevel Agent) học tập, tránh lặp lại.
 
 ## [2026-04-05 21:40] - Lỗi Syntax BorderStyle.dash
