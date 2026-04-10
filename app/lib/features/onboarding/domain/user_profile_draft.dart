@@ -23,6 +23,11 @@ abstract class UserProfileDraft with _$UserProfileDraft {
     String? gender,
     double? heightCm,
     double? weightKg,
+
+    // 6. Scheduling & Frequency
+    @Default(3) int weeklyGymDays,
+    @Default(0) int weeklyHomeDays,
+    @Default([]) List<String> preferredDays,
   }) = _UserProfileDraft;
 
   factory UserProfileDraft.fromJson(Map<String, dynamic> json) =>

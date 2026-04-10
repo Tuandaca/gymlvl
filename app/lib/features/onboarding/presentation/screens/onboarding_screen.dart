@@ -80,7 +80,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '[ STEP ${_currentPage + 1}/6 - INITIALIZING ]',
+                          '[ STEP ${_currentPage + 1}/7 - INITIALIZING ]',
                           style: const TextStyle(
                             color: AppTheme.cyanNeon,
                             fontSize: 12,
@@ -97,7 +97,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: (_currentPage + 1) / 6,
+                            widthFactor: (_currentPage + 1) / 7,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.cyanNeon,
@@ -132,6 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _StepGoals(),
                   _StepExperience(),
                   _StepBiometrics(),
+                  _StepScheduling(),
                   _StepClassConfirmation(),
                 ],
               ),
@@ -159,10 +160,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       // Biometrics checks
                       canNext = draft.age != null && draft.weightKg != null && draft.heightCm != null && draft.gender != null;
                       break;
+                    case 5:
+                      // Scheduling checks
+                      canNext = draft.preferredDays.isNotEmpty;
+                      break;
                   }
 
                   return SystemButton(
-                    text: _currentPage == 5 ? 'AWAKEN' : 'CONTINUE',
+                    text: _currentPage == 6 ? 'AWAKEN' : 'CONTINUE',
                     isLoading: isSubmitting,
                     onPressed: canNext ? _nextPage : null,
                   );
@@ -435,6 +440,96 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _StepScheduling extends ConsumerWidget {
+  const _StepScheduling();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final draft = ref.watch(onboardingDraftProvider);
+
+    return _buildStepContainer(
+      title: '[ DEPLOYMENT SCHEDULE ]',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(child: Text('When and where will you train?', style: TextStyle(color: AppTheme.textDim))),
+          const SizedBox(height: 32),
+          
+          // Gym Days
+          const Text('GYM DAYS PER WEEK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Slider(
+            value: draft.weeklyGymDays.toDouble(),
+            min: 0,
+            max: 7,
+            divisions: 7,
+            label: draft.weeklyGymDays.toString(),
+            activeColor: AppTheme.cyanNeon,
+            onChanged: (val) {
+              ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(weeklyGymDays: val.toInt()));
+            },
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Home Days
+          const Text('HOME DAYS PER WEEK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.purpleNeon)),
+          Slider(
+            value: draft.weeklyHomeDays.toDouble(),
+            min: 0,
+            max: 7,
+            divisions: 7,
+            label: draft.weeklyHomeDays.toString(),
+            activeColor: AppTheme.purpleNeon,
+            onChanged: (val) {
+              ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(weeklyHomeDays: val.toInt()));
+            },
+          ),
+          
+          const SizedBox(height: 32),
+          
+          const Text('PREFERRED DAYS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _dayChip(ref, draft, 'Thứ 2', 'mon'),
+              _dayChip(ref, draft, 'Thứ 3', 'tue'),
+              _dayChip(ref, draft, 'Thứ 4', 'wed'),
+              _dayChip(ref, draft, 'Thứ 5', 'thu'),
+              _dayChip(ref, draft, 'Thứ 6', 'fri'),
+              _dayChip(ref, draft, 'Thứ 7', 'sat'),
+              _dayChip(ref, draft, 'CN', 'sun'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dayChip(WidgetRef ref, UserProfileDraft draft, String label, String val) {
+    final isSelected = draft.preferredDays.contains(val);
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      selectedColor: AppTheme.cyanNeon.withOpacity(0.2),
+      checkmarkColor: AppTheme.cyanNeon,
+      labelStyle: TextStyle(color: isSelected ? AppTheme.cyanNeon : Colors.white54, fontSize: 12),
+      onSelected: (selected) {
+        if (selected) {
+          ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
+            preferredDays: [...c.preferredDays, val]
+          ));
+        } else {
+          ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
+            preferredDays: c.preferredDays.where((d) => d != val).toList()
+          ));
+        }
+      },
     );
   }
 }

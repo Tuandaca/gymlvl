@@ -1,126 +1,230 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../ui/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../quests/presentation/providers/quest_providers.dart';
+import '../../../quests/presentation/widgets/daily_quest_card.dart';
+import '../providers/stats_providers.dart';
+import '../widgets/stats_charts.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
-  int _xpRequiredForLevel(int level) {
-    return (100 * math.pow(level, 1.5)).floor();
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Tự động đồng bộ Quest ngay khi vào Dashboard
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(activeQuestControllerProvider.notifier); // Trigger build
+    });
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final userState = ref.watch(currentUserProvider);
+    final questState = ref.watch(activeQuestControllerProvider);
+    final statsState = ref.watch(dashboardStatsControllerProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('TỔNG QUAN', style: TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2.0)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: userState.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
-        error: (e, st) => Center(child: Text('Lỗi: $e', style: const TextStyle(color: AppTheme.dangerOrange))),
-        data: (user) {
-          if (user == null) {
-            return const Center(child: Text('Chưa có dữ liệu User.', style: TextStyle(color: AppTheme.textDim)));
-          }
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(activeQuestControllerProvider.notifier).refresh();
+          await ref.read(dashboardStatsControllerProvider.notifier).refresh();
+        },
+        color: AppTheme.cyanNeon,
+        child: CustomScrollView(
+          slivers: [
+            // App Bar
+            const SliverAppBar(
+              floating: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              title: Text(
+                'SYSTEM HUB',
+                style: TextStyle(
+                  fontFamily: 'Orbitron',
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 4.0,
+                  fontSize: 16,
+                ),
+              ),
+            ),
 
-          final level = user['level'] as int? ?? 1;
-          final totalXp = user['total_xp'] as int? ?? 0;
-          final title = user['current_title'] as String? ?? 'Tập Sự';
-
-          final baseXP = level > 1 ? _xpRequiredForLevel(level - 1) : 0;
-          final nextXP = _xpRequiredForLevel(level);
-          final currentLevelXp = totalXp - baseXP;
-          final xpNeeded = nextXP - baseXP;
-          
-          final progress = xpNeeded > 0 ? (currentLevelXp / xpNeeded).clamp(0.0, 1.0) : 0.0;
-
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Thẻ (Card) User Profile "Solo Leveling"
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.panelBackground,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.3)),
-                    boxShadow: [
-                      BoxShadow(color: AppTheme.cyanNeon.withOpacity(0.1), blurRadius: 15, spreadRadius: 2),
-                    ],
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  // 1. Profile / Level Status
+                  _buildProfileSection(userState),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // 2. Daily Quest Section
+                  _buildSectionHeader('TODAY\'S OBJECTIVE'),
+                  const SizedBox(height: 12),
+                  questState.when(
+                    data: (quest) => quest != null 
+                        ? DailyQuestCard(quest: quest)
+                        : _buildEmptyQuest(),
+                    loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
+                    error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
                   ),
+
+                  const SizedBox(height: 40),
+
+                  // 3. Analytics Section
+                  _buildSectionHeader('BIOMETRIC ANALYSIS'),
+                  const SizedBox(height: 12),
+                  statsState.when(
+                    data: (stats) => stats != null 
+                        ? _buildAnalyticsGrid(stats)
+                        : const Center(child: Text('No data recorded yet.', style: TextStyle(color: AppTheme.textDim))),
+                    loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+                    error: (e, _) => const SizedBox.shrink(),
+                  ),
+                  
+                  const SizedBox(height: 40),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Row(
+      children: [
+        Container(width: 4, height: 16, color: AppTheme.cyanNeon),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileSection(AsyncValue<Map<String, dynamic>?> userState) {
+    return userState.when(
+      data: (user) {
+        if (user == null) return const SizedBox.shrink();
+        final level = user['level'] ?? 1;
+        final xp = user['current_level_xp'] ?? 0;
+        final title = user['current_title'] ?? 'Seeker';
+        
+        return Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppTheme.cyanNeon.withOpacity(0.1),
+                  child: const Icon(Icons.person, color: AppTheme.cyanNeon, size: 30),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'LEVEL $level',
-                        style: const TextStyle(
-                          fontFamily: 'Orbitron',
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.cyanNeon,
-                          letterSpacing: 2,
-                        ),
+                        user['display_name'] ?? 'User',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
-                      const SizedBox(height: 4),
                       Text(
-                        title.toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.amber,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 3,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      
-                      // Thanh XP (Progress Bar)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('XP', style: TextStyle(color: AppTheme.textDim, fontWeight: FontWeight.bold)),
-                          Text(
-                            '$totalXp / $nextXP',
-                            style: const TextStyle(color: AppTheme.textMain, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: progress,
-                          minHeight: 12,
-                          backgroundColor: Colors.white10,
-                          color: AppTheme.cyanNeon,
-                        ),
+                        title.toString().toUpperCase(),
+                        style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 40),
-                const Center(
-                  child: Text(
-                    'Các tính năng Dashboard khác\nđang được phát triển...',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppTheme.textDim),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text('LEVEL', style: TextStyle(color: AppTheme.textDim, fontSize: 10)),
+                    Text(
+                      '$level',
+                      style: const TextStyle(fontFamily: 'Orbitron', fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.cyanNeon),
+                    ),
+                  ],
                 ),
               ],
             ),
-          );
-        },
+            const SizedBox(height: 16),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: 0.6, // Placeholder
+                minHeight: 4,
+                backgroundColor: Colors.white10,
+                color: AppTheme.cyanNeon,
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox(height: 100),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildEmptyQuest() {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white10),
       ),
+      child: const Column(
+        children: [
+          Icon(Icons.bedtime_outlined, color: AppTheme.textDim, size: 40),
+          SizedBox(height: 16),
+          Text(
+            'SYSTEM STANDBY\nRest day detected.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppTheme.textDim, height: 1.5, letterSpacing: 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsGrid(dynamic stats) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.panelBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: VolumeTrendChart(trend: stats.volumeTrend),
+        ),
+        const SizedBox(height: 20),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.panelBackground,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: MuscleRadarChart(split: stats.muscleSplit),
+        ),
+      ],
     );
   }
 }

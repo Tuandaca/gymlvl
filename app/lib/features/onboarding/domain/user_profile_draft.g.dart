@@ -18,6 +18,13 @@ _UserProfileDraft _$UserProfileDraftFromJson(Map<String, dynamic> json) =>
       gender: json['gender'] as String?,
       heightCm: (json['heightCm'] as num?)?.toDouble(),
       weightKg: (json['weightKg'] as num?)?.toDouble(),
+      weeklyGymDays: (json['weeklyGymDays'] as num?)?.toInt() ?? 3,
+      weeklyHomeDays: (json['weeklyHomeDays'] as num?)?.toInt() ?? 0,
+      preferredDays:
+          (json['preferredDays'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$UserProfileDraftToJson(_UserProfileDraft instance) =>
@@ -30,4 +37,7 @@ Map<String, dynamic> _$UserProfileDraftToJson(_UserProfileDraft instance) =>
       'gender': instance.gender,
       'heightCm': instance.heightCm,
       'weightKg': instance.weightKg,
+      'weeklyGymDays': instance.weeklyGymDays,
+      'weeklyHomeDays': instance.weeklyHomeDays,
+      'preferredDays': instance.preferredDays,
     };

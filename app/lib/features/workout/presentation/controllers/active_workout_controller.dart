@@ -227,18 +227,16 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _startWorkoutTimer();
   }
 
-  /// Tải các bài tập mặc định cho các nhóm cơ đã chọn
+  /// Tải các bài tập mặc định cho các nhóm cơ đã chọn (Có thêm và xóa tự động)
   Future<void> loadPresetExercises(List<String> categories) async {
     if (state.workout == null) return;
     
     state = state.copyWith(isLoading: true);
     
     try {
-      // Lazy load templates array
-      // Dynamic import to not break cyclic dependencies in this particular file
-      final workoutTemplatesFile = await ref.read(exerciseRepositoryProvider).getExercises(); // Get all exercises to match names
+      final allExercisesInDB = await ref.read(exerciseRepositoryProvider).getExercises();
       
-      final presets = ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core']; // Tạm thời map category -> names như trong templates
+      // 1. Xác định danh sách bài tập cần phải có dựa trên categories
       final Map<String, List<String>> presetDict = {
         'Chest': ['Bench Press (Barbell)', 'Incline Bench Press (Dumbbell)', 'Chest Fly (Machine)', 'Push-up'],
         'Back': ['Deadlift (Barbell)', 'Pull-up', 'Lat Pulldown (Cable)', 'Seated Cable Row'],
@@ -248,36 +246,84 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         'Core': ['Plank', 'Crunch', 'Leg Raise'],
       };
 
-      final List<String> exercisesToAdd = [];
+      final List<String> targetExerciseNames = [];
       for (final cat in categories) {
         if (presetDict.containsKey(cat)) {
-          for (final exName in presetDict[cat]!) {
-            if (!exercisesToAdd.contains(exName)) {
-              exercisesToAdd.add(exName);
-            }
-          }
+          targetExerciseNames.addAll(presetDict[cat]!);
         }
       }
 
-      final allExercisesInDB = await ref.read(exerciseRepositoryProvider).getExercises();
+      // 2. Xóa các bài tập có category KHÔNG nằm trong danh sách categories được chọn
+      // Chỉ tự động xóa nếu bài tập đó thuộc 1 trong các category chính (để tránh xóa nhầm bài custom lẻ)
+      final List<WorkoutExercise> remainingExercises = [];
+      final List<String> idsToRemove = [];
+
+      for (final we in state.exercises) {
+        final category = we.exercise?.category;
+        // Nếu category bài tập hiện tại không còn trong danh sách chọn, và nó thuộc 6 nhóm cơ chính
+        if (category != null && 
+            presetDict.containsKey(category) && 
+            !categories.contains(category)) {
+          idsToRemove.add(we.id);
+        } else {
+          remainingExercises.add(we);
+        }
+      }
+
+      // Thực thi xóa trên DB
+      for (final id in idsToRemove) {
+        await _repository.removeExerciseFromWorkout(id);
+      }
+
+      // 3. Thêm các bài tập thiếu
+      final List<WorkoutExercise> updatedExercises = [...remainingExercises];
       
-      // Xóa tất cả các exercise cũ trước khi thêm mới (optional, nhưng trong setup phase thì có lẽ user muốn thay thế?)
-      // Nếu không, chỉ cần thêm tiếp
-      
-      for (final templateName in exercisesToAdd) {
+      for (final templateName in targetExerciseNames) {
         final exercise = allExercisesInDB.firstWhere(
           (e) => e.name == templateName,
-          orElse: () => allExercisesInDB.first, // fallback if not found, highly unlikely since DB is seeded
+          orElse: () => allExercisesInDB.first,
         );
         
-        // Kiểm tra xem bài tập này đã có trong workout hay chưa để tránh duplicate
-        final exists = state.exercises.any((we) => we.exercise?.id == exercise.id);
+        final exists = updatedExercises.any((we) => we.exercise?.id == exercise.id);
         if (!exists) {
-          await addExercise(exercise);
+          // Add to DB and Get populated exercise
+          final workoutExercise = await _repository.addExerciseToWorkout(
+            state.workout!.id,
+            exercise.id,
+            updatedExercises.length,
+          );
+
+          // Tự động tạo sets (Helper logic copy từ addExercise)
+          final lastSet = await _repository.getLastSetForExercise(exercise.id);
+          double baseWeight = 20.0; 
+          if (lastSet != null && lastSet.weightKg > 0) baseWeight = lastSet.weightKg;
+
+          final w1 = ((baseWeight * 0.5) / 2.5).round() * 2.5; 
+          final w2 = ((baseWeight * 0.7) / 2.5).round() * 2.5;
+          
+          final defaultParams = [
+            {'set': 1, 'reps': 12, 'weight': w1 < 5.0 ? 5.0 : w1},
+            {'set': 2, 'reps': 12, 'weight': w2 < 5.0 ? 5.0 : w2},
+            {'set': 3, 'reps': 10, 'weight': baseWeight},
+            {'set': 4, 'reps': 8, 'weight': baseWeight + 2.5},
+          ];
+
+          final createdSets = <WorkoutSet>[];
+          for (final param in defaultParams) {
+            final newSet = await _repository.addSet(
+              workoutExercise.id,
+              param['set'] as int,
+              param['reps'] as int,
+              param['weight'] as double,
+            );
+            createdSets.add(newSet);
+          }
+          
+          updatedExercises.add(workoutExercise.copyWith(sets: createdSets));
         }
       }
       
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(exercises: updatedExercises, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }

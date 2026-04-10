@@ -49,6 +49,7 @@ dependencies:
   # UI & Utils
   google_fonts: any
   flutter_animate: any
+  fl_chart: any
   rive: any
   shimmer: any
   shared_preferences: any

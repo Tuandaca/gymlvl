@@ -82,44 +82,88 @@ Deno.serve(async (req: Request) => {
 
     if (profileError || !userProfile) throw new Error('User profile not found');
 
+    // ... (authenticating user and fetching profile)
+    
+    // 3. Kiểm tra Quest active cho hôm nay
+    const today = new Date();
+    today.setHours(today.getHours() + 7);
+    const dateStr = today.toISOString().split('T')[0];
+
+    const { data: activeQuest } = await supabaseAdmin
+      .from('quest_instances')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .gte('created_at', `${dateStr}T00:00:00Z`)
+      .lte('created_at', `${dateStr}T23:59:59Z`)
+      .maybeSingle();
+
+    const isQuest = activeQuest ? verifyQuestCompletion(workout, activeQuest.prescribed_config) : false;
+    
     // TODO: Gắn logic lấy streak từ bảng streaks (Phase 2.6)
     const userStreak = 0;
 
-    console.log(`Calculating XP for workout ${workout_id}, user ${user.id}`);
-    const earnedXP = calculateXP(workout, userStreak, validation.isSuspicious);
+    console.log(`Calculating XP for workout ${workout_id}, user ${user.id}. isQuest: ${isQuest}`);
+    
+    const earnedXP = calculateXP(workout, {
+      userStreak,
+      isSuspicious: validation.isSuspicious,
+      isQuest
+    });
+
     console.log(`Earned XP: ${earnedXP}, isSuspicious: ${validation.isSuspicious}`);
     
     const newTotalXP = (userProfile.total_xp || 0) + earnedXP;
 
     // 4. Kiểm tra Level up
     const { newLevel, leveledUp, nextLevelXp } = checkLevel(userProfile.level || 1, newTotalXP);
-    console.log(`Leveled Up: ${leveledUp}, New Level: ${newLevel}`);
-
-    const baseXPForNewLevel = newLevel > 1 ? Math.floor(100 * Math.pow(newLevel - 1, 1.5)) : 0;
-    const currentLevelXp = newTotalXP - baseXPForNewLevel;
-
+    
     // 5. Cập nhật DB (Sử dụng Promise.all để song song hóa)
     const updates = [];
-
     const title = leveledUp ? getTitleForLevel(newLevel) : undefined;
     
+    // Cập nhật User Profile
     updates.push(supabaseAdmin.from('users').update({
       total_xp: newTotalXP,
       level: newLevel,
-      current_level_xp: currentLevelXp,
+      current_level_xp: newTotalXP - (newLevel > 1 ? Math.floor(100 * Math.pow(newLevel - 1, 1.5)) : 0),
       ...(title ? { current_title: title } : {})
     }).eq('id', user.id));
 
-    updates.push(supabaseAdmin.from('workouts').update({
-      is_xp_calculated: true,
-    }).eq('id', workout_id));
+    // Đánh dấu workout đã tính điểm
+    updates.push(supabaseAdmin.from('workouts').update({ is_xp_calculated: true }).eq('id', workout_id));
 
+    // Log XP
     updates.push(supabaseAdmin.from('xp_logs').insert({
       user_id: user.id,
       amount: earnedXP,
-      source: 'workout',
+      source: isQuest ? 'quest' : 'workout',
       source_id: workout_id,
     }));
+
+    // Cập nhật Quest status nếu hoàn thành
+    if (isQuest && activeQuest) {
+      updates.push(supabaseAdmin.from('quest_instances').update({
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        earned_xp: earnedXP
+      }).eq('id', activeQuest.id));
+    }
+
+    // 6. CẬP NHẬT KỶ LỤC CÁ NHÂN (PRs)
+    if (workout.workout_exercises) {
+      for (const we of workout.workout_exercises) {
+        if (!we.workout_sets) continue;
+        const maxWeight = Math.max(...we.workout_sets.filter(s => s.is_completed).map(s => Number(s.weight_kg || 0)));
+        if (maxWeight > 0) {
+          updates.push(supabaseAdmin.rpc('upsert_exercise_pr', {
+            p_user_id: user.id,
+            p_exercise_id: we.exercise_id,
+            p_weight: maxWeight
+          }));
+        }
+      }
+    }
 
     await Promise.all(updates);
     console.log('Database updates successful');
@@ -131,6 +175,7 @@ Deno.serve(async (req: Request) => {
         totalXP: newTotalXP,
         newLevel,
         leveledUp,
+        isQuest,
         newTitle: title || null,
         nextLevelXp,
         isSuspicious: validation.isSuspicious,

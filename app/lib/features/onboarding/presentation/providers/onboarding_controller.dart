@@ -71,6 +71,9 @@ class OnboardingController extends AsyncNotifier<void> {
         'gender': draft.gender,
         'height_cm': draft.heightCm,
         'weight_kg': draft.weightKg,
+        'weekly_gym_days': draft.weeklyGymDays,
+        'weekly_home_days': draft.weeklyHomeDays,
+        'preferred_days': draft.preferredDays,
       });
 
       // 3. Khởi tạo trực tiếp (Bypass Edge Function vì người dùng chưa cài Supabase CLI)
