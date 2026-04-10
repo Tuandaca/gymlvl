@@ -8,7 +8,6 @@ Tài liệu đặc tả hệ thống tính điểm kinh nghiệm (XP) và thăng
 - 🎯 **Quest-Centric**: Hoàn thành nhiệm vụ hàng ngày là nguồn XP lớn nhất để tạo thói quen.
 
 ---
-
 ## 2. Công thức tính XP chuẩn (Standard Workout)
 
 Điểm XP nhận được sau một buổi tập tự do:
