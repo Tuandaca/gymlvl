@@ -1,103 +1,75 @@
-export interface ValidationResult {
-  valid: boolean;
-  isSuspicious: boolean;
-  errors: string[];
-}
+// ... (existing interfaces)
 
-export function validateWorkout(workout: any): ValidationResult {
-  const errors: string[] = [];
-  let isSuspicious = false;
+export function getSuggestedWeight(profile: any, exercise: any): number {
+  const bw = profile.weight_kg || 70;
+  const isMale = profile.gender === 'male';
+  let factor = 0.2; // Default baseline
+
+  // Biometric Factor based on environment and goals
+  // Focus on basic compounds for beginners
+  const category = (exercise.category || '').toLowerCase();
   
-  const durationSeconds = workout.duration_seconds || 0;
-  const durationMinutes = durationSeconds / 60;
-
-  // 1. Check max duration (4 hours)
-  if (durationSeconds > 14400) {
-    errors.push("Workout too long (maximum 4 hours)");
+  if (category.includes('chest') || category.includes('push')) {
+    factor = isMale ? 0.4 : 0.25;
+  } else if (category.includes('leg') || category.includes('squat')) {
+    factor = isMale ? 0.6 : 0.4;
+  } else if (category.includes('back') || category.includes('deadlift')) {
+    factor = isMale ? 0.7 : 0.5;
+  } else if (category.includes('arm') || category.includes('shoulder')) {
+    factor = isMale ? 0.15 : 0.08;
   }
 
-  // 2. Check exercises array existence
-  if (!workout.workout_exercises || workout.workout_exercises.length === 0) {
-    errors.push("No exercises in workout");
-    return { valid: false, isSuspicious: false, errors };
-  }
+  // Adjust for experience
+  if (profile.experience_level === 'intermediate') factor *= 1.3;
+  if (profile.experience_level === 'advanced') factor *= 1.6;
 
-  let totalSets = 0;
-  for (const ex of workout.workout_exercises) {
-    if (ex.workout_sets) {
-      const completedSets = ex.workout_sets.filter((s: any) => s.is_completed === true).length;
-      totalSets += completedSets;
-
-      // 3. Max 30 sets per exercise
-      if (ex.workout_sets.length > 30) {
-        errors.push(`Too many sets for exercise ID: ${ex.exercise_id}`);
-      }
-      
-      // 4. Check for unrealistic weight (max 500kg)
-      for (const set of ex.workout_sets) {
-        if (set.weight_kg > 500) {
-          errors.push(`Unrealistic weight: ${set.weight_kg}kg`);
-        }
-      }
-    }
-  }
-
-  // 5. Check Pace (Suspicious if sets > 3 and pace > 3 sets/min)
-  // Example: 15 sets in 2 minutes = 7.5 pace -> Suspicious
-  if (totalSets > 3 && durationMinutes > 0) {
-    const pace = totalSets / durationMinutes;
-    if (pace > 3) {
-      isSuspicious = true;
-    }
-  }
-
-  return { 
-    valid: errors.length === 0, 
-    isSuspicious,
-    errors 
-  };
+  return Math.round(bw * factor * 2) / 2; // Round to nearest 0.5kg
 }
 
-export function calculateXP(workout: any, userStreak: number = 0, isSuspicious: boolean = false): number {
-  if (isSuspicious) {
-    return 10; // Cap at 10 XP if suspicious
+export function calculateXP(workout: any, options: { 
+  userStreak: number, 
+  isSuspicious: boolean, 
+  isQuest?: boolean,
+  matchesQuestTargets?: boolean 
+}): number {
+  const { userStreak = 0, isSuspicious = false, isQuest = false, matchesQuestTargets = false } = options;
+
+  if (isSuspicious) return 10;
+
+  // 1. Base Quest XP (The primary source)
+  if (isQuest) {
+    let questXP = 300; // Base reward for completing the assigned route
+    if (matchesQuestTargets) {
+      questXP += 100; // Bonus for hitting exactly the prescribed weights/reps
+    }
+    const streakMultiplier = Math.min(1 + userStreak * 0.05, 2.0);
+    return Math.floor(questXP * streakMultiplier);
   }
 
+  // 2. Standard Training XP (The secondary source)
   const durationMinutes = Math.floor((workout.duration_seconds || 0) / 60);
-  const durationXP = Math.min(durationMinutes * 2, 120); 
+  const durationXP = Math.min(durationMinutes * 1, 60); // Lower reward for free training
 
   let totalSets = 0;
-  const categories = new Set<string>();
-
   if (workout.workout_exercises) {
     for (const ex of workout.workout_exercises) {
       if (ex.workout_sets) {
-        const completedSets = ex.workout_sets.filter((s: any) => s.is_completed === true).length;
-        totalSets += completedSets;
-      }
-      if (ex.exercises && ex.exercises.category) {
-        categories.add(ex.exercises.category);
+        totalSets += ex.workout_sets.filter((s: any) => s.is_completed).length;
       }
     }
   }
 
-  const volumeXP = totalSets * 3;
-  
-  // Variety XP: 5 XP cho mỗi category thêm vào ngoài cái đầu tiên
-  // Chỉ tính category nào đã có ít nhất 1 set hoàn thành
-  const varietyXP = Math.max(0, categories.size - 1) * 5;
-  const streakMultiplier = Math.min(1 + userStreak * 0.05, 2.0);
+  const volumeXP = totalSets * 2;
+  const streakMultiplier = Math.min(1 + userStreak * 0.05, 1.5); // Cap lower for free training
 
-  const rawXP = (durationXP + volumeXP + varietyXP) * streakMultiplier;
-  return Math.floor(Math.min(rawXP, 500)); // Daily / Workout cap
+  return Math.floor((durationXP + volumeXP) * streakMultiplier);
 }
 
-// XP tích lũy để đạt level N
+// XP Required Curve
 export function xpRequiredForLevel(level: number): number {
   return Math.floor(100 * Math.pow(level, 1.5));
 }
 
-// Kiểm tra level-up dựa trên số totalXP
 export function checkLevel(currentLevel: number, totalXP: number): { newLevel: number, leveledUp: boolean, nextLevelXp: number } {
   let tempLevel = currentLevel;
   while (totalXP >= xpRequiredForLevel(tempLevel)) {
@@ -108,4 +80,27 @@ export function checkLevel(currentLevel: number, totalXP: number): { newLevel: n
     leveledUp: tempLevel > currentLevel,
     nextLevelXp: xpRequiredForLevel(tempLevel),
   };
+}
+
+/**
+ * Checks if a workout satisfies the requirements of a specific quest.
+ */
+export function verifyQuestCompletion(workout: any, questConfig: any): boolean {
+  if (!questConfig || !questConfig.exercises) return false;
+  
+  // Logic: User must complete at least 80% of the prescribed exercises
+  const completedExercises = workout.workout_exercises || [];
+  let matchingCount = 0;
+
+  for (const target of questConfig.exercises) {
+    const found = completedExercises.find((ce: any) => ce.exercise_id === target.exercise_id);
+    if (found) {
+      const completedSets = (found.workout_sets || []).filter((s: any) => s.is_completed).length;
+      if (completedSets >= target.sets) {
+        matchingCount++;
+      }
+    }
+  }
+
+  return (matchingCount / questConfig.exercises.length) >= 0.8;
 }
