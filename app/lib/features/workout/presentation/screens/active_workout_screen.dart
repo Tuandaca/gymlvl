@@ -58,13 +58,8 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Tự động dừng timer khi app xuống background và resume khi quay lại
-    final notifier = ref.read(activeWorkoutControllerProvider.notifier);
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      notifier.pauseTimer();
-    } else if (state == AppLifecycleState.resumed) {
-      notifier.resumeTimer();
-    }
+    // Không tự động dừng timer nữa để người dùng có thể switch app nghe nhạc/nhắn tin
+    // Timer sẽ chạy liên tục cho đến khi người dùng chủ động Pause hoặc Hoàn thành.
   }
 
   void _toggleCategory(String category) async {
@@ -239,6 +234,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with 
   Future<bool> _onWillPop() async {
     final state = ref.read(activeWorkoutControllerProvider);
     if (!state.hasActiveWorkout) return true;
+    
+    // Nếu vẫn đang trong bước thiết lập, cho phép thoát ngay không cần hỏi
+    if (state.isSetupPhase) {
+      await ref.read(activeWorkoutControllerProvider.notifier).cancelWorkout();
+      return true;
+    }
 
     final result = await showDialog<String>(
       context: context,

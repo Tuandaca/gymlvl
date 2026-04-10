@@ -528,11 +528,20 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   void _startWorkoutTimer() {
     _workoutTimer?.cancel();
+    
+    // Lưu lại thời điểm bắt đầu/resume để tính toán chính xác dù bị OS throttle
+    final lastStartedAt = DateTime.now();
+    final initialElapsed = state.elapsedSeconds;
+
     _workoutTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      // Chỉ tăng giây nếu không ở trạng thái pause
+      // Chỉ tính toán nếu không ở trạng thái pause
       if (!state.isTimerPaused) {
-        state = state.copyWith(elapsedSeconds: state.elapsedSeconds + 1);
-        // Cập nhật XP preview mỗi phút (vì duration XP tính theo phút)
+        final now = DateTime.now();
+        final actualElapsed = initialElapsed + now.difference(lastStartedAt).inSeconds;
+        
+        state = state.copyWith(elapsedSeconds: actualElapsed);
+        
+        // Cập nhật XP preview mỗi phút
         if (state.elapsedSeconds % 60 == 0) {
           _updatePreviewXP();
         }

@@ -36,33 +36,41 @@ export function calculateXP(workout: any, options: {
 
   if (isSuspicious) return 10;
 
-  // 1. Base Quest XP (The primary source)
+  // 1. Base Quest XP (Special high reward route)
   if (isQuest) {
-    let questXP = 300; // Base reward for completing the assigned route
-    if (matchesQuestTargets) {
-      questXP += 100; // Bonus for hitting exactly the prescribed weights/reps
-    }
+    let questXP = 300; 
+    if (matchesQuestTargets) questXP += 100;
     const streakMultiplier = Math.min(1 + userStreak * 0.05, 2.0);
     return Math.floor(questXP * streakMultiplier);
   }
 
-  // 2. Standard Training XP (The secondary source)
+  // 2. Standard Training XP (Aligned with Frontend)
   const durationMinutes = Math.floor((workout.duration_seconds || 0) / 60);
-  const durationXP = Math.min(durationMinutes * 1, 60); // Lower reward for free training
+  const durationXP = Math.min(durationMinutes * 2, 120); // 2 XP/min, max 120
 
   let totalSets = 0;
+  const categories = new Set();
+
   if (workout.workout_exercises) {
     for (const ex of workout.workout_exercises) {
-      if (ex.workout_sets) {
-        totalSets += ex.workout_sets.filter((s: any) => s.is_completed).length;
+      const completedSetsInExercise = (ex.workout_sets || []).filter((s: any) => s.is_completed).length;
+      if (completedSetsInExercise > 0) {
+        totalSets += completedSetsInExercise;
+        if (ex.exercises?.category) {
+          categories.add(ex.exercises.category);
+        }
       }
     }
   }
 
-  const volumeXP = totalSets * 2;
-  const streakMultiplier = Math.min(1 + userStreak * 0.05, 1.5); // Cap lower for free training
+  const volumeXP = totalSets * 3; // 3 XP per set
+  const varietyXP = Math.max(0, categories.size - 1) * 5; // 5 XP per additional category
 
-  return Math.floor((durationXP + volumeXP) * streakMultiplier);
+  const streakMultiplier = Math.min(1 + userStreak * 0.05, 1.5);
+
+  const totalXP = Math.floor((durationXP + volumeXP + varietyXP) * streakMultiplier);
+  
+  return Math.min(totalXP, 500); // Global cap
 }
 
 // XP Required Curve
@@ -103,4 +111,48 @@ export function verifyQuestCompletion(workout: any, questConfig: any): boolean {
   }
 
   return (matchingCount / questConfig.exercises.length) >= 0.8;
+}
+
+/**
+ * Validates a workout for anti-cheat and basic integrity.
+ */
+export function validateWorkout(workout: any): { valid: boolean; isSuspicious: boolean; errors?: string[] } {
+  const errors: string[] = [];
+  let isSuspicious = false;
+
+  const durationSeconds = workout.duration_seconds || 0;
+  
+  let totalSets = 0;
+  if (workout.workout_exercises) {
+    for (const ex of workout.workout_exercises) {
+      if (ex.workout_sets) {
+        totalSets += ex.workout_sets.filter((s: any) => s.is_completed).length;
+      }
+    }
+  }
+
+  // 1. Basic checks
+  if (totalSets === 0) errors.push("No completed sets found");
+  if (durationSeconds <= 0) errors.push("Invalid duration");
+
+  // 2. Suspicious Pace Check (e.g., more than 3 sets per minute is highly unlikely)
+  const minutes = durationSeconds / 60;
+  const pace = totalSets / (minutes > 0 ? minutes : 1);
+  
+  if (pace > 4 && totalSets > 3) {
+    isSuspicious = true;
+  }
+
+  // 3. Time logic parity (Workout shouldn't be completed in the future)
+  const now = new Date();
+  const completedAt = workout.completed_at ? new Date(workout.completed_at) : now;
+  if (completedAt > new Date(now.getTime() + 60000)) { // 1 min buffer for clock drift
+    errors.push("Workout completion time is in the future");
+  }
+
+  return {
+    valid: errors.length === 0,
+    isSuspicious,
+    errors: errors.length > 0 ? errors : undefined
+  };
 }

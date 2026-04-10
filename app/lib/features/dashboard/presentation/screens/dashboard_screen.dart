@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -123,9 +124,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return userState.when(
       data: (user) {
         if (user == null) return const SizedBox.shrink();
-        final level = user['level'] ?? 1;
-        final xp = user['current_level_xp'] ?? 0;
-        final title = user['current_title'] ?? 'Seeker';
+        
+        final level = (user['level'] as num?)?.toInt() ?? 1;
+        final currentLevelXp = (user['current_level_xp'] as num?)?.toInt() ?? 0;
+        final title = (user['current_title'] as String?) ?? 'Seeker';
+        
+        final nextLevelRequirement = (100 * math.pow(level, 1.5)).floor();
+        final progress = (currentLevelXp / nextLevelRequirement).clamp(0.0, 1.0);
         
         return Column(
           children: [
@@ -146,7 +151,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1),
                       ),
                       Text(
-                        title.toString().toUpperCase(),
+                        title.toUpperCase(),
                         style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2),
                       ),
                     ],
@@ -165,11 +170,25 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${_formatNumber(currentLevelXp)} / ${_formatNumber(nextLevelRequirement)} XP',
+                  style: const TextStyle(color: AppTheme.textDim, fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${(progress * 100).toInt()}%',
+                  style: const TextStyle(color: AppTheme.cyanNeon, fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
-                value: 0.6, // Placeholder
-                minHeight: 4,
+                value: progress,
+                minHeight: 6,
                 backgroundColor: Colors.white10,
                 color: AppTheme.cyanNeon,
               ),
@@ -180,6 +199,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       loading: () => const SizedBox(height: 100),
       error: (_, __) => const SizedBox.shrink(),
     );
+  }
+
+  String _formatNumber(num number) {
+    if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(1)}k';
+    }
+    return number.toString();
   }
 
   Widget _buildEmptyQuest() {

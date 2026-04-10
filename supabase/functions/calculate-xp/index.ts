@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { validateWorkout, calculateXP, checkLevel } from "../_shared/progression_engine.ts";
+import { validateWorkout, calculateXP, checkLevel, verifyQuestCompletion } from "../_shared/progression_engine.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
