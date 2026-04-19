@@ -195,6 +195,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           param['set'] as int,
           param['reps'] as int,
           param['weight'] as double,
+          baselineWeightKg: param['weight'] as double,
         );
         createdSets.add(newSet);
       }
@@ -418,6 +419,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           return e;
         }).toList(),
       );
+      _updatePreviewXP();
     } catch (e) {
       state = state.copyWith(errorMessage: e.toString());
     }
@@ -540,11 +542,8 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         final actualElapsed = initialElapsed + now.difference(lastStartedAt).inSeconds;
         
         state = state.copyWith(elapsedSeconds: actualElapsed);
-        
-        // Cập nhật XP preview mỗi phút
-        if (state.elapsedSeconds % 60 == 0) {
-          _updatePreviewXP();
-        }
+        // XP preview không phụ thuộc vào thời gian nữa
+        // Chỉ cập nhật khi user hoàn thành/sửa/xóa set (trong updateSet, deleteSet)
       }
     });
   }
@@ -562,7 +561,11 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   }
 
   void _updatePreviewXP() {
-    final completedSets = state.completedSets;
+    final allCompletedSets = state.exercises
+        .expand((e) => e.sets)
+        .where((s) => s.isCompleted)
+        .toList();
+
     final categories = state.exercises
         .map((e) => e.exercise?.category)
         .where((c) => c != null)
@@ -572,13 +575,13 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     const userStreak = 0.0;
 
     final isSuspicious = ProgressionEngine.checkSuspiciousPace(
-      completedSets,
+      allCompletedSets.length,
       state.elapsedSeconds,
     );
 
     final xp = ProgressionEngine.calculateXP(
       durationSeconds: state.elapsedSeconds,
-      completedSets: completedSets,
+      completedSets: allCompletedSets,
       uniqueCategories: categories.length,
       userStreak: userStreak,
       isSuspicious: isSuspicious,

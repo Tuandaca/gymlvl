@@ -6,7 +6,9 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../quests/presentation/providers/quest_providers.dart';
 import '../../../quests/presentation/widgets/daily_quest_card.dart';
+import '../../../onboarding/domain/class_definitions.dart';
 import '../providers/stats_providers.dart';
+import '../providers/class_providers.dart';
 import '../widgets/stats_charts.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -31,11 +33,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final userState = ref.watch(currentUserProvider);
     final questState = ref.watch(activeQuestControllerProvider);
     final statsState = ref.watch(dashboardStatsControllerProvider);
+    final classesState = ref.watch(userClassesProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: RefreshIndicator(
         onRefresh: () async {
+          ref.invalidate(userClassesProvider);
           await ref.read(activeQuestControllerProvider.notifier).refresh();
           await ref.read(dashboardStatsControllerProvider.notifier).refresh();
         },
@@ -66,9 +70,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   // 1. Profile / Level Status
                   _buildProfileSection(userState),
                   
+                  const SizedBox(height: 24),
+                  
+                  // 2. Active Classes (Multi-Class XP Bars)
+                  _buildSectionHeader('ACTIVE CLASSES'),
+                  const SizedBox(height: 12),
+                  _buildClassesSection(classesState),
+
                   const SizedBox(height: 32),
                   
-                  // 2. Daily Quest Section
+                  // 3. Daily Quest Section
                   _buildSectionHeader('TODAY\'S OBJECTIVE'),
                   const SizedBox(height: 12),
                   questState.when(
@@ -81,7 +92,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                   const SizedBox(height: 40),
 
-                  // 3. Analytics Section
+                  // 4. Analytics Section
                   _buildSectionHeader('BIOMETRIC ANALYSIS'),
                   const SizedBox(height: 12),
                   statsState.when(
@@ -119,6 +130,133 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ],
     );
   }
+
+  Widget _buildClassesSection(AsyncValue<List<Map<String, dynamic>>> classesState) {
+    return classesState.when(
+      data: (classes) {
+        if (classes.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: const Center(
+              child: Text('No class selected yet.', style: TextStyle(color: AppTheme.textDim)),
+            ),
+          );
+        }
+        return Column(
+          children: classes.map((uc) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildClassCard(uc),
+          )).toList(),
+        );
+      },
+      loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon))),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildClassCard(Map<String, dynamic> uc) {
+    final classId = uc['class_id'] as String? ?? 'A';
+    final classDef = kClassDefinitions[classId];
+    final level = (uc['level'] as num?)?.toInt() ?? 1;
+    final currentXP = (uc['current_xp'] as num?)?.toInt() ?? 0;
+    final slot = (uc['slot'] as String?) ?? 'primary';
+    final isGraduated = (uc['is_graduated'] as bool?) ?? false;
+    
+    // Calculate XP progress for this class
+    final classColor = classDef != null ? Color(classDef.colorHex) : AppTheme.cyanNeon;
+    final nextLevelXP = classDef?.totalXpForLevel(level + 1) ?? 100;
+    final currentLevelBaseXP = classDef?.totalXpForLevel(level) ?? 0;
+    final progressInLevel = currentXP - currentLevelBaseXP;
+    final xpNeeded = nextLevelXP - currentLevelBaseXP;
+    final progress = xpNeeded > 0 ? (progressInLevel / xpNeeded).clamp(0.0, 1.0) : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.panelBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: classColor.withOpacity(0.3), width: 1),
+      ),
+      child: Row(
+        children: [
+          // Icon + Level
+          Column(
+            children: [
+              Text(classDef?.iconEmoji ?? '⚔️', style: const TextStyle(fontSize: 28)),
+              const SizedBox(height: 4),
+              Text(
+                'Lv $level',
+                style: TextStyle(fontFamily: 'Orbitron', fontSize: 13, fontWeight: FontWeight.bold, color: classColor),
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          // Class Info + XP Bar
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      classDef?.className ?? classId,
+                      style: TextStyle(color: classColor, fontWeight: FontWeight.bold, fontSize: 14),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: classColor.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        slot.toUpperCase(),
+                        style: TextStyle(color: classColor.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+                      ),
+                    ),
+                    if (isGraduated) ...[
+                      const SizedBox(width: 6),
+                      const Text('🎓', style: TextStyle(fontSize: 14)),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${_formatNumber(progressInLevel)} / ${_formatNumber(xpNeeded)} XP',
+                      style: const TextStyle(color: AppTheme.textDim, fontSize: 10),
+                    ),
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: TextStyle(color: classColor, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 5,
+                    backgroundColor: Colors.white10,
+                    color: classColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildProfileSection(AsyncValue<Map<String, dynamic>?> userState) {
     return userState.when(

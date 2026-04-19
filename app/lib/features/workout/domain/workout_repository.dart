@@ -28,7 +28,7 @@ abstract class WorkoutRepository {
 
   /// Thêm set vào exercise
   Future<WorkoutSet> addSet(
-      String workoutExerciseId, int setNumber, int reps, double weightKg);
+      String workoutExerciseId, int setNumber, int reps, double weightKg, {double baselineWeightKg = 0});
 
   /// Cập nhật set
   Future<WorkoutSet> updateSet(String setId,

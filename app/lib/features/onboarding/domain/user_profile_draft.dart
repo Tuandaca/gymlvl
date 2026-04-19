@@ -12,7 +12,12 @@ abstract class UserProfileDraft with _$UserProfileDraft {
     // 2. Goals (max 3)
     @Default([]) List<String> goals,
     
-    // 3. Class (generated after environment and goals)
+    // 3. Multi-Class Selection (Primary + Secondary)
+    // class_id: 'A'-'H' matching class_definitions table
+    String? primaryClassId,
+    String? secondaryClassId,
+
+    // Legacy: kept for backward-compat during migration
     String? className,
 
     // 4. Experience Level

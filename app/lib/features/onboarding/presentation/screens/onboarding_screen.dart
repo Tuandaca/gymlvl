@@ -6,6 +6,7 @@ import '../../../../ui/widgets/system_panel.dart';
 import '../../../../ui/widgets/system_text_field.dart';
 import '../providers/onboarding_controller.dart';
 import '../../domain/user_profile_draft.dart';
+import '../../domain/class_definitions.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -19,7 +20,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentPage = 0;
 
   void _nextPage() {
-    if (_currentPage < 5) {
+    if (_currentPage < 7) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -80,7 +81,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '[ STEP ${_currentPage + 1}/7 - INITIALIZING ]',
+                          '[ STEP ${_currentPage + 1}/8 - INITIALIZING ]',
                           style: const TextStyle(
                             color: AppTheme.cyanNeon,
                             fontSize: 12,
@@ -97,7 +98,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: (_currentPage + 1) / 7,
+                            widthFactor: (_currentPage + 1) / 8,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.cyanNeon,
@@ -130,6 +131,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _StepLanguage(),
                   _StepEnvironment(),
                   _StepGoals(),
+                  _StepClassSelection(),
                   _StepExperience(),
                   _StepBiometrics(),
                   _StepScheduling(),
@@ -154,20 +156,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       canNext = draft.goals.isNotEmpty;
                       break;
                     case 3:
-                      canNext = draft.experienceLevel != null;
+                      // Class Selection — must have primary class
+                      canNext = draft.primaryClassId != null;
                       break;
                     case 4:
+                      canNext = draft.experienceLevel != null;
+                      break;
+                    case 5:
                       // Biometrics checks
                       canNext = draft.age != null && draft.weightKg != null && draft.heightCm != null && draft.gender != null;
                       break;
-                    case 5:
+                    case 6:
                       // Scheduling checks
                       canNext = draft.preferredDays.isNotEmpty;
                       break;
                   }
 
                   return SystemButton(
-                    text: _currentPage == 6 ? 'AWAKEN' : 'CONTINUE',
+                    text: _currentPage == 7 ? 'AWAKEN' : 'CONTINUE',
                     isLoading: isSubmitting,
                     onPressed: canNext ? _nextPage : null,
                   );
@@ -277,6 +283,206 @@ class _StepGoals extends ConsumerWidget {
           ));
         }
       },
+    );
+  }
+}
+
+class _StepClassSelection extends ConsumerWidget {
+  const _StepClassSelection();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final draft = ref.watch(onboardingDraftProvider);
+    final recommended = draft.primaryClassId != null 
+        ? getRecommendedSecondary(draft.primaryClassId!)
+        : <String>[];
+    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null)
+        ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
+        : null;
+
+    return _buildStepContainer(
+      title: '[ CLASS SELECTION ]',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(child: Text('Choose your path. Select up to 2 Classes.', style: TextStyle(color: AppTheme.textDim))),
+          const SizedBox(height: 8),
+          
+          // Synergy Badge
+          if (synergy != null)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [AppTheme.purpleNeon.withOpacity(0.3), AppTheme.cyanNeon.withOpacity(0.3)]),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppTheme.purpleNeon, width: 1),
+                ),
+                child: Text(
+                  '⚡ ${synergy.synergyName} — Perfect Synergy! +${synergy.bonusPercent}% XP',
+                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+
+          const Text('PRIMARY CLASS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.cyanNeon, letterSpacing: 2)),
+          const SizedBox(height: 8),
+          ...kClassDefinitions.values.map((classDef) {
+            final isSelected = draft.primaryClassId == classDef.classId;
+            final isSecondary = draft.secondaryClassId == classDef.classId;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _ClassTile(
+                classDef: classDef,
+                isSelected: isSelected,
+                isSecondary: isSecondary,
+                isRecommended: recommended.contains(classDef.classId) && !isSelected,
+                onTap: () {
+                  if (isSelected) {
+                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: null));
+                  } else {
+                    // If tapping on the current secondary, swap
+                    if (isSecondary) {
+                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
+                        primaryClassId: classDef.classId,
+                        secondaryClassId: null,
+                      ));
+                    } else {
+                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: classDef.classId));
+                    }
+                  }
+                },
+                onSecondaryTap: draft.primaryClassId != null && !isSelected ? () {
+                  if (isSecondary) {
+                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: null));
+                  } else {
+                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: classDef.classId));
+                  }
+                } : null,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+/// Single class selection tile with RPG styling
+class _ClassTile extends StatelessWidget {
+  final ClassDefinition classDef;
+  final bool isSelected;
+  final bool isSecondary;
+  final bool isRecommended;
+  final VoidCallback onTap;
+  final VoidCallback? onSecondaryTap;
+
+  const _ClassTile({
+    required this.classDef,
+    required this.isSelected,
+    required this.isSecondary,
+    required this.isRecommended,
+    required this.onTap,
+    this.onSecondaryTap,
+  });
+
+  Color get _classColor => Color(classDef.colorHex);
+
+  String get _difficultyLabel {
+    switch (classDef.difficulty) {
+      case 'easy': return '⬛ Dễ';
+      case 'medium': return '🟨 Trung Bình';
+      case 'hard': return '🟧 Khó';
+      case 'hardcore': return '🟥 Cực Khó';
+      default: return '';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : (isRecommended ? Colors.amber.withOpacity(0.5) : Colors.white12));
+    final bgColor = isSelected 
+        ? _classColor.withOpacity(0.15) 
+        : (isSecondary ? AppTheme.purpleNeon.withOpacity(0.1) : Colors.black26);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: bgColor,
+          border: Border.all(color: borderColor, width: (isSelected || isSecondary) ? 2 : 1),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: (isSelected || isSecondary) ? [
+            BoxShadow(color: borderColor.withOpacity(0.2), blurRadius: 12)
+          ] : [],
+        ),
+        child: Row(
+          children: [
+            Text(classDef.iconEmoji, style: const TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        classDef.className,
+                        style: TextStyle(
+                          color: isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : Colors.white),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(_difficultyLabel, style: const TextStyle(fontSize: 10)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(classDef.focus, style: const TextStyle(color: AppTheme.textDim, fontSize: 11)),
+                ],
+              ),
+            ),
+            // Slot Badges
+            if (isSelected)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _classColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _classColor, width: 1),
+                ),
+                child: Text('PRIMARY', style: TextStyle(color: _classColor, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              )
+            else if (isSecondary)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppTheme.purpleNeon.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.purpleNeon, width: 1),
+                ),
+                child: const Text('SECONDARY', style: TextStyle(color: AppTheme.purpleNeon, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              )
+            else if (isRecommended)
+              const Text('✨', style: TextStyle(fontSize: 16))
+            else if (onSecondaryTap != null)
+              GestureDetector(
+                onTap: onSecondaryTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text('+2nd', style: TextStyle(color: AppTheme.textDim, fontSize: 9)),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -539,6 +745,12 @@ class _StepClassConfirmation extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
+    final primaryClass = kClassDefinitions[draft.primaryClassId];
+    final secondaryClass = draft.secondaryClassId != null ? kClassDefinitions[draft.secondaryClassId] : null;
+    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null)
+        ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
+        : null;
+
     return _buildStepContainer(
       title: '[ PLAYER AWAKENING ]',
       child: Column(
@@ -547,22 +759,62 @@ class _StepClassConfirmation extends ConsumerWidget {
           const SizedBox(height: 24),
           const Text('EVALUATION COMPLETE', style: TextStyle(color: AppTheme.textDim, letterSpacing: 2)),
           const SizedBox(height: 32),
-          const Text('YOUR CLASS IS:', style: TextStyle(fontSize: 16)),
-          const SizedBox(height: 16),
+          
+          // Primary Class
+          const Text('YOUR PRIMARY CLASS:', style: TextStyle(fontSize: 12, letterSpacing: 1)),
+          const SizedBox(height: 8),
           Text(
-            (draft.className ?? 'IRON WARRIOR').toUpperCase(), 
-            style: const TextStyle(
+            '${primaryClass?.iconEmoji ?? '⚔️'} ${(primaryClass?.className ?? 'WARRIOR').toUpperCase()}', 
+            style: TextStyle(
               fontFamily: 'Orbitron',
-              fontSize: 32, 
-              color: AppTheme.purpleNeon, 
+              fontSize: 26, 
+              color: primaryClass != null ? Color(primaryClass.colorHex) : AppTheme.purpleNeon, 
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
               shadows: [
-                Shadow(color: AppTheme.purpleNeon, blurRadius: 20)
+                Shadow(color: primaryClass != null ? Color(primaryClass.colorHex) : AppTheme.purpleNeon, blurRadius: 20)
               ]
             )
           ),
-          const SizedBox(height: 64),
+          
+          // Secondary Class (if selected)
+          if (secondaryClass != null) ...[
+            const SizedBox(height: 24),
+            const Text('SECONDARY CLASS:', style: TextStyle(fontSize: 12, letterSpacing: 1, color: AppTheme.textDim)),
+            const SizedBox(height: 8),
+            Text(
+              '${secondaryClass.iconEmoji} ${secondaryClass.className.toUpperCase()}', 
+              style: TextStyle(
+                fontFamily: 'Orbitron',
+                fontSize: 20, 
+                color: Color(secondaryClass.colorHex), 
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+                shadows: [
+                  Shadow(color: Color(secondaryClass.colorHex), blurRadius: 16)
+                ]
+              )
+            ),
+          ],
+
+          // Synergy Badge
+          if (synergy != null) ...[
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [AppTheme.purpleNeon.withOpacity(0.2), AppTheme.cyanNeon.withOpacity(0.2)]),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.amber, width: 1),
+              ),
+              child: Text(
+                '⚡ ${synergy.synergyName}',
+                style: const TextStyle(color: Colors.amber, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 48),
           const Text(
             'The system is ready.\nYour journey begins now.', 
             textAlign: TextAlign.center,

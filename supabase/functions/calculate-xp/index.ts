@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { validateWorkout, calculateXP, checkLevel, verifyQuestCompletion } from "../_shared/progression_engine.ts";
+import { validateWorkout, calculateXP, checkLevel, checkClassLevel, allocateClassXP, verifyQuestCompletion } from "../_shared/progression_engine.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 2. Lấy profile
+    // 2. Lấy user profile (global level/xp)
     const { data: userProfile, error: profileError } = await supabaseAdmin
       .from('users')
       .select('level, total_xp, current_level_xp')
@@ -82,9 +82,14 @@ Deno.serve(async (req: Request) => {
 
     if (profileError || !userProfile) throw new Error('User profile not found');
 
-    // ... (authenticating user and fetching profile)
-    
-    // 3. Kiểm tra Quest active cho hôm nay
+    // 3. Lấy danh sách Active Classes của user
+    const { data: userClasses } = await supabaseAdmin
+      .from('user_classes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_graduated', false);
+
+    // 4. Kiểm tra Quest active cho hôm nay
     const today = new Date();
     today.setHours(today.getHours() + 7);
     const dateStr = today.toISOString().split('T')[0];
@@ -105,6 +110,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Calculating XP for workout ${workout_id}, user ${user.id}. isQuest: ${isQuest}`);
     
+    // 5. Tính Global XP
     const earnedXP = calculateXP(workout, {
       userStreak,
       isSuspicious: validation.isSuspicious,
@@ -115,14 +121,18 @@ Deno.serve(async (req: Request) => {
     
     const newTotalXP = (userProfile.total_xp || 0) + earnedXP;
 
-    // 4. Kiểm tra Level up
+    // 6. Kiểm tra Global Level up
     const { newLevel, leveledUp, nextLevelXp } = checkLevel(userProfile.level || 1, newTotalXP);
     
-    // 5. Cập nhật DB (Sử dụng Promise.all để song song hóa)
+    // 7. Phân bổ XP cho từng Class (Multi-Class Logic)
+    const classXPResults = allocateClassXP(earnedXP, workout, userClasses || []);
+    const classLevelResults: any[] = [];
+
+    // 8. DB Updates (Promise.all)
     const updates = [];
     const title = leveledUp ? getTitleForLevel(newLevel) : undefined;
     
-    // Cập nhật User Profile
+    // Update Global User Profile
     updates.push(supabaseAdmin.from('users').update({
       total_xp: newTotalXP,
       level: newLevel,
@@ -133,13 +143,64 @@ Deno.serve(async (req: Request) => {
     // Đánh dấu workout đã tính điểm
     updates.push(supabaseAdmin.from('workouts').update({ is_xp_calculated: true }).eq('id', workout_id));
 
-    // Log XP
+    // Log Global XP
     updates.push(supabaseAdmin.from('xp_logs').insert({
       user_id: user.id,
       amount: earnedXP,
       source: isQuest ? 'quest' : 'workout',
       source_id: workout_id,
     }));
+
+    // Update mỗi Class XP + Level
+    for (const classResult of classXPResults) {
+      const classRecord = (userClasses || []).find((uc: any) => uc.class_id === classResult.classId);
+      if (!classRecord) continue;
+
+      const classLevel = checkClassLevel(
+        classRecord.level || 1,
+        classResult.newTotalXP,
+        classRecord.difficulty
+      );
+
+      classLevelResults.push({
+        classId: classResult.classId,
+        className: classRecord.class_name,
+        slot: classResult.slot,
+        xpEarned: classResult.xpEarned,
+        newTotalXP: classResult.newTotalXP,
+        newLevel: classLevel.newLevel,
+        leveledUp: classLevel.leveledUp,
+        isGraduation: classLevel.isGraduation,
+      });
+
+      // Update user_classes table
+      const classUpdate: any = {
+        current_xp: classResult.newTotalXP,
+        level: classLevel.newLevel,
+      };
+
+      // Đánh dấu tốt nghiệp nếu đạt Lv 20
+      if (classLevel.isGraduation) {
+        classUpdate.is_graduated = true;
+        classUpdate.graduated_at = new Date().toISOString();
+      }
+
+      updates.push(
+        supabaseAdmin.from('user_classes')
+          .update(classUpdate)
+          .eq('id', classRecord.id)
+      );
+
+      // Log Class-specific XP
+      updates.push(supabaseAdmin.from('xp_logs').insert({
+        user_id: user.id,
+        amount: classResult.xpEarned,
+        source: 'class_xp',
+        source_id: workout_id,
+        class_id: classResult.classId,
+        class_xp_earned: classResult.xpEarned,
+      }));
+    }
 
     // Cập nhật Quest status nếu hoàn thành
     if (isQuest && activeQuest) {
@@ -150,11 +211,11 @@ Deno.serve(async (req: Request) => {
       }).eq('id', activeQuest.id));
     }
 
-    // 6. CẬP NHẬT KỶ LỤC CÁ NHÂN (PRs)
+    // CẬP NHẬT KỶ LỤC CÁ NHÂN (PRs)
     if (workout.workout_exercises) {
       for (const we of workout.workout_exercises) {
         if (!we.workout_sets) continue;
-        const maxWeight = Math.max(...we.workout_sets.filter(s => s.is_completed).map(s => Number(s.weight_kg || 0)));
+        const maxWeight = Math.max(...we.workout_sets.filter((s: any) => s.is_completed).map((s: any) => Number(s.weight_kg || 0)));
         if (maxWeight > 0) {
           updates.push(supabaseAdmin.rpc('upsert_exercise_pr', {
             p_user_id: user.id,
@@ -179,6 +240,8 @@ Deno.serve(async (req: Request) => {
         newTitle: title || null,
         nextLevelXp,
         isSuspicious: validation.isSuspicious,
+        // New: Multi-Class results
+        classResults: classLevelResults,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
@@ -201,3 +264,5 @@ function getTitleForLevel(level: number): string | null {
   if (level >= 5) return "Tập Sự";
   return null;
 }
+
+

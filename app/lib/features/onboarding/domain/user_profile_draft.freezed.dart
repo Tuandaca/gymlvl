@@ -17,7 +17,9 @@ mixin _$UserProfileDraft {
 
 // 1. Environment
  String? get environment;// 2. Goals (max 3)
- List<String> get goals;// 3. Class (generated after environment and goals)
+ List<String> get goals;// 3. Multi-Class Selection (Primary + Secondary)
+// class_id: 'A'-'H' matching class_definitions table
+ String? get primaryClassId; String? get secondaryClassId;// Legacy: kept for backward-compat during migration
  String? get className;// 4. Experience Level
  String? get experienceLevel;// 5. Biometrics
  int? get age; String? get gender; double? get heightCm; double? get weightKg;// 6. Scheduling & Frequency
@@ -34,16 +36,16 @@ $UserProfileDraftCopyWith<UserProfileDraft> get copyWith => _$UserProfileDraftCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileDraft&&(identical(other.environment, environment) || other.environment == environment)&&const DeepCollectionEquality().equals(other.goals, goals)&&(identical(other.className, className) || other.className == className)&&(identical(other.experienceLevel, experienceLevel) || other.experienceLevel == experienceLevel)&&(identical(other.age, age) || other.age == age)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.weightKg, weightKg) || other.weightKg == weightKg)&&(identical(other.weeklyGymDays, weeklyGymDays) || other.weeklyGymDays == weeklyGymDays)&&(identical(other.weeklyHomeDays, weeklyHomeDays) || other.weeklyHomeDays == weeklyHomeDays)&&const DeepCollectionEquality().equals(other.preferredDays, preferredDays));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileDraft&&(identical(other.environment, environment) || other.environment == environment)&&const DeepCollectionEquality().equals(other.goals, goals)&&(identical(other.primaryClassId, primaryClassId) || other.primaryClassId == primaryClassId)&&(identical(other.secondaryClassId, secondaryClassId) || other.secondaryClassId == secondaryClassId)&&(identical(other.className, className) || other.className == className)&&(identical(other.experienceLevel, experienceLevel) || other.experienceLevel == experienceLevel)&&(identical(other.age, age) || other.age == age)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.weightKg, weightKg) || other.weightKg == weightKg)&&(identical(other.weeklyGymDays, weeklyGymDays) || other.weeklyGymDays == weeklyGymDays)&&(identical(other.weeklyHomeDays, weeklyHomeDays) || other.weeklyHomeDays == weeklyHomeDays)&&const DeepCollectionEquality().equals(other.preferredDays, preferredDays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,environment,const DeepCollectionEquality().hash(goals),className,experienceLevel,age,gender,heightCm,weightKg,weeklyGymDays,weeklyHomeDays,const DeepCollectionEquality().hash(preferredDays));
+int get hashCode => Object.hash(runtimeType,environment,const DeepCollectionEquality().hash(goals),primaryClassId,secondaryClassId,className,experienceLevel,age,gender,heightCm,weightKg,weeklyGymDays,weeklyHomeDays,const DeepCollectionEquality().hash(preferredDays));
 
 @override
 String toString() {
-  return 'UserProfileDraft(environment: $environment, goals: $goals, className: $className, experienceLevel: $experienceLevel, age: $age, gender: $gender, heightCm: $heightCm, weightKg: $weightKg, weeklyGymDays: $weeklyGymDays, weeklyHomeDays: $weeklyHomeDays, preferredDays: $preferredDays)';
+  return 'UserProfileDraft(environment: $environment, goals: $goals, primaryClassId: $primaryClassId, secondaryClassId: $secondaryClassId, className: $className, experienceLevel: $experienceLevel, age: $age, gender: $gender, heightCm: $heightCm, weightKg: $weightKg, weeklyGymDays: $weeklyGymDays, weeklyHomeDays: $weeklyHomeDays, preferredDays: $preferredDays)';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $UserProfileDraftCopyWith<$Res>  {
   factory $UserProfileDraftCopyWith(UserProfileDraft value, $Res Function(UserProfileDraft) _then) = _$UserProfileDraftCopyWithImpl;
 @useResult
 $Res call({
- String? environment, List<String> goals, String? className, String? experienceLevel, int? age, String? gender, double? heightCm, double? weightKg, int weeklyGymDays, int weeklyHomeDays, List<String> preferredDays
+ String? environment, List<String> goals, String? primaryClassId, String? secondaryClassId, String? className, String? experienceLevel, int? age, String? gender, double? heightCm, double? weightKg, int weeklyGymDays, int weeklyHomeDays, List<String> preferredDays
 });
 
 
@@ -71,11 +73,13 @@ class _$UserProfileDraftCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileDraft
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? environment = freezed,Object? goals = null,Object? className = freezed,Object? experienceLevel = freezed,Object? age = freezed,Object? gender = freezed,Object? heightCm = freezed,Object? weightKg = freezed,Object? weeklyGymDays = null,Object? weeklyHomeDays = null,Object? preferredDays = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? environment = freezed,Object? goals = null,Object? primaryClassId = freezed,Object? secondaryClassId = freezed,Object? className = freezed,Object? experienceLevel = freezed,Object? age = freezed,Object? gender = freezed,Object? heightCm = freezed,Object? weightKg = freezed,Object? weeklyGymDays = null,Object? weeklyHomeDays = null,Object? preferredDays = null,}) {
   return _then(_self.copyWith(
 environment: freezed == environment ? _self.environment : environment // ignore: cast_nullable_to_non_nullable
 as String?,goals: null == goals ? _self.goals : goals // ignore: cast_nullable_to_non_nullable
-as List<String>,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
+as List<String>,primaryClassId: freezed == primaryClassId ? _self.primaryClassId : primaryClassId // ignore: cast_nullable_to_non_nullable
+as String?,secondaryClassId: freezed == secondaryClassId ? _self.secondaryClassId : secondaryClassId // ignore: cast_nullable_to_non_nullable
+as String?,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
 as String?,experienceLevel: freezed == experienceLevel ? _self.experienceLevel : experienceLevel // ignore: cast_nullable_to_non_nullable
 as String?,age: freezed == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
 as int?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
@@ -169,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? environment,  List<String> goals,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? environment,  List<String> goals,  String? primaryClassId,  String? secondaryClassId,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileDraft() when $default != null:
-return $default(_that.environment,_that.goals,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
+return $default(_that.environment,_that.goals,_that.primaryClassId,_that.secondaryClassId,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
   return orElse();
 
 }
@@ -190,10 +194,10 @@ return $default(_that.environment,_that.goals,_that.className,_that.experienceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? environment,  List<String> goals,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? environment,  List<String> goals,  String? primaryClassId,  String? secondaryClassId,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileDraft():
-return $default(_that.environment,_that.goals,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
+return $default(_that.environment,_that.goals,_that.primaryClassId,_that.secondaryClassId,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +214,10 @@ return $default(_that.environment,_that.goals,_that.className,_that.experienceLe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? environment,  List<String> goals,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? environment,  List<String> goals,  String? primaryClassId,  String? secondaryClassId,  String? className,  String? experienceLevel,  int? age,  String? gender,  double? heightCm,  double? weightKg,  int weeklyGymDays,  int weeklyHomeDays,  List<String> preferredDays)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileDraft() when $default != null:
-return $default(_that.environment,_that.goals,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
+return $default(_that.environment,_that.goals,_that.primaryClassId,_that.secondaryClassId,_that.className,_that.experienceLevel,_that.age,_that.gender,_that.heightCm,_that.weightKg,_that.weeklyGymDays,_that.weeklyHomeDays,_that.preferredDays);case _:
   return null;
 
 }
@@ -225,7 +229,7 @@ return $default(_that.environment,_that.goals,_that.className,_that.experienceLe
 @JsonSerializable()
 
 class _UserProfileDraft implements UserProfileDraft {
-  const _UserProfileDraft({this.environment, final  List<String> goals = const [], this.className, this.experienceLevel, this.age, this.gender, this.heightCm, this.weightKg, this.weeklyGymDays = 3, this.weeklyHomeDays = 0, final  List<String> preferredDays = const []}): _goals = goals,_preferredDays = preferredDays;
+  const _UserProfileDraft({this.environment, final  List<String> goals = const [], this.primaryClassId, this.secondaryClassId, this.className, this.experienceLevel, this.age, this.gender, this.heightCm, this.weightKg, this.weeklyGymDays = 3, this.weeklyHomeDays = 0, final  List<String> preferredDays = const []}): _goals = goals,_preferredDays = preferredDays;
   factory _UserProfileDraft.fromJson(Map<String, dynamic> json) => _$UserProfileDraftFromJson(json);
 
 // 1. Environment
@@ -239,7 +243,11 @@ class _UserProfileDraft implements UserProfileDraft {
   return EqualUnmodifiableListView(_goals);
 }
 
-// 3. Class (generated after environment and goals)
+// 3. Multi-Class Selection (Primary + Secondary)
+// class_id: 'A'-'H' matching class_definitions table
+@override final  String? primaryClassId;
+@override final  String? secondaryClassId;
+// Legacy: kept for backward-compat during migration
 @override final  String? className;
 // 4. Experience Level
 @override final  String? experienceLevel;
@@ -272,16 +280,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileDraft&&(identical(other.environment, environment) || other.environment == environment)&&const DeepCollectionEquality().equals(other._goals, _goals)&&(identical(other.className, className) || other.className == className)&&(identical(other.experienceLevel, experienceLevel) || other.experienceLevel == experienceLevel)&&(identical(other.age, age) || other.age == age)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.weightKg, weightKg) || other.weightKg == weightKg)&&(identical(other.weeklyGymDays, weeklyGymDays) || other.weeklyGymDays == weeklyGymDays)&&(identical(other.weeklyHomeDays, weeklyHomeDays) || other.weeklyHomeDays == weeklyHomeDays)&&const DeepCollectionEquality().equals(other._preferredDays, _preferredDays));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileDraft&&(identical(other.environment, environment) || other.environment == environment)&&const DeepCollectionEquality().equals(other._goals, _goals)&&(identical(other.primaryClassId, primaryClassId) || other.primaryClassId == primaryClassId)&&(identical(other.secondaryClassId, secondaryClassId) || other.secondaryClassId == secondaryClassId)&&(identical(other.className, className) || other.className == className)&&(identical(other.experienceLevel, experienceLevel) || other.experienceLevel == experienceLevel)&&(identical(other.age, age) || other.age == age)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.weightKg, weightKg) || other.weightKg == weightKg)&&(identical(other.weeklyGymDays, weeklyGymDays) || other.weeklyGymDays == weeklyGymDays)&&(identical(other.weeklyHomeDays, weeklyHomeDays) || other.weeklyHomeDays == weeklyHomeDays)&&const DeepCollectionEquality().equals(other._preferredDays, _preferredDays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,environment,const DeepCollectionEquality().hash(_goals),className,experienceLevel,age,gender,heightCm,weightKg,weeklyGymDays,weeklyHomeDays,const DeepCollectionEquality().hash(_preferredDays));
+int get hashCode => Object.hash(runtimeType,environment,const DeepCollectionEquality().hash(_goals),primaryClassId,secondaryClassId,className,experienceLevel,age,gender,heightCm,weightKg,weeklyGymDays,weeklyHomeDays,const DeepCollectionEquality().hash(_preferredDays));
 
 @override
 String toString() {
-  return 'UserProfileDraft(environment: $environment, goals: $goals, className: $className, experienceLevel: $experienceLevel, age: $age, gender: $gender, heightCm: $heightCm, weightKg: $weightKg, weeklyGymDays: $weeklyGymDays, weeklyHomeDays: $weeklyHomeDays, preferredDays: $preferredDays)';
+  return 'UserProfileDraft(environment: $environment, goals: $goals, primaryClassId: $primaryClassId, secondaryClassId: $secondaryClassId, className: $className, experienceLevel: $experienceLevel, age: $age, gender: $gender, heightCm: $heightCm, weightKg: $weightKg, weeklyGymDays: $weeklyGymDays, weeklyHomeDays: $weeklyHomeDays, preferredDays: $preferredDays)';
 }
 
 
@@ -292,7 +300,7 @@ abstract mixin class _$UserProfileDraftCopyWith<$Res> implements $UserProfileDra
   factory _$UserProfileDraftCopyWith(_UserProfileDraft value, $Res Function(_UserProfileDraft) _then) = __$UserProfileDraftCopyWithImpl;
 @override @useResult
 $Res call({
- String? environment, List<String> goals, String? className, String? experienceLevel, int? age, String? gender, double? heightCm, double? weightKg, int weeklyGymDays, int weeklyHomeDays, List<String> preferredDays
+ String? environment, List<String> goals, String? primaryClassId, String? secondaryClassId, String? className, String? experienceLevel, int? age, String? gender, double? heightCm, double? weightKg, int weeklyGymDays, int weeklyHomeDays, List<String> preferredDays
 });
 
 
@@ -309,11 +317,13 @@ class __$UserProfileDraftCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileDraft
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? environment = freezed,Object? goals = null,Object? className = freezed,Object? experienceLevel = freezed,Object? age = freezed,Object? gender = freezed,Object? heightCm = freezed,Object? weightKg = freezed,Object? weeklyGymDays = null,Object? weeklyHomeDays = null,Object? preferredDays = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? environment = freezed,Object? goals = null,Object? primaryClassId = freezed,Object? secondaryClassId = freezed,Object? className = freezed,Object? experienceLevel = freezed,Object? age = freezed,Object? gender = freezed,Object? heightCm = freezed,Object? weightKg = freezed,Object? weeklyGymDays = null,Object? weeklyHomeDays = null,Object? preferredDays = null,}) {
   return _then(_UserProfileDraft(
 environment: freezed == environment ? _self.environment : environment // ignore: cast_nullable_to_non_nullable
 as String?,goals: null == goals ? _self._goals : goals // ignore: cast_nullable_to_non_nullable
-as List<String>,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
+as List<String>,primaryClassId: freezed == primaryClassId ? _self.primaryClassId : primaryClassId // ignore: cast_nullable_to_non_nullable
+as String?,secondaryClassId: freezed == secondaryClassId ? _self.secondaryClassId : secondaryClassId // ignore: cast_nullable_to_non_nullable
+as String?,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
 as String?,experienceLevel: freezed == experienceLevel ? _self.experienceLevel : experienceLevel // ignore: cast_nullable_to_non_nullable
 as String?,age: freezed == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
 as int?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable

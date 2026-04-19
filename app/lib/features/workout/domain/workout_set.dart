@@ -11,6 +11,7 @@ abstract class WorkoutSet with _$WorkoutSet {
     @JsonKey(name: 'set_number') @Default(1) int setNumber,
     @Default(0) int reps,
     @JsonKey(name: 'weight_kg') @Default(0) double weightKg,
+    @JsonKey(name: 'baseline_weight_kg') @Default(0) double baselineWeightKg,
     @JsonKey(name: 'is_completed') @Default(false) bool isCompleted,
     @JsonKey(name: 'rest_seconds') @Default(0) int restSeconds,
     @JsonKey(name: 'created_at') DateTime? createdAt,

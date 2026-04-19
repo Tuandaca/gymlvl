@@ -12,6 +12,8 @@ _UserProfileDraft _$UserProfileDraftFromJson(Map<String, dynamic> json) =>
       goals:
           (json['goals'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const [],
+      primaryClassId: json['primaryClassId'] as String?,
+      secondaryClassId: json['secondaryClassId'] as String?,
       className: json['className'] as String?,
       experienceLevel: json['experienceLevel'] as String?,
       age: (json['age'] as num?)?.toInt(),
@@ -31,6 +33,8 @@ Map<String, dynamic> _$UserProfileDraftToJson(_UserProfileDraft instance) =>
     <String, dynamic>{
       'environment': instance.environment,
       'goals': instance.goals,
+      'primaryClassId': instance.primaryClassId,
+      'secondaryClassId': instance.secondaryClassId,
       'className': instance.className,
       'experienceLevel': instance.experienceLevel,
       'age': instance.age,

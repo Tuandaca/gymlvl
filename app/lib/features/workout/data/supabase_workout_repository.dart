@@ -126,7 +126,7 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
 
   @override
   Future<WorkoutSet> addSet(
-      String workoutExerciseId, int setNumber, int reps, double weightKg) async {
+      String workoutExerciseId, int setNumber, int reps, double weightKg, {double baselineWeightKg = 0}) async {
     final response = await _supabase
         .from('workout_sets')
         .insert({
@@ -134,6 +134,7 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
           'set_number': setNumber,
           'reps': reps,
           'weight_kg': weightKg,
+          'baseline_weight_kg': baselineWeightKg,
         })
         .select()
         .single();

@@ -34,7 +34,7 @@ final class ActiveQuestControllerProvider
 }
 
 String _$activeQuestControllerHash() =>
-    r'2290aed85dd17930251f5509053a599301974bb1';
+    r'3edab31b98dd2995f9089e80f463132c41db5635';
 
 abstract class _$ActiveQuestController extends $AsyncNotifier<QuestInstance?> {
   FutureOr<QuestInstance?> build();
