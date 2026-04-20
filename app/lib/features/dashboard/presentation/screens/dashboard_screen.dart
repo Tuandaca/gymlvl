@@ -10,6 +10,7 @@ import '../../../onboarding/domain/class_definitions.dart';
 import '../providers/stats_providers.dart';
 import '../providers/class_providers.dart';
 import '../widgets/stats_charts.dart';
+import '../../../../core/localization/localization_engine.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -47,18 +48,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: CustomScrollView(
           slivers: [
             // App Bar
-            const SliverAppBar(
+            SliverAppBar(
               floating: true,
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
               title: Text(
-                'SYSTEM HUB',
-                style: TextStyle(
+                'system_hub'.tr(ref),
+                style: const TextStyle(
                   fontFamily: 'Orbitron',
                   fontWeight: FontWeight.bold,
                   letterSpacing: 4.0,
                   fontSize: 16,
+                  color: AppTheme.cyanNeon,
+                  shadows: [Shadow(color: AppTheme.cyanNeon, blurRadius: 10)],
                 ),
               ),
             ),
@@ -73,14 +76,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 24),
                   
                   // 2. Active Classes (Multi-Class XP Bars)
-                  _buildSectionHeader('ACTIVE CLASSES'),
+                  _buildSectionHeader('active_classes'.tr(ref)),
                   const SizedBox(height: 12),
                   _buildClassesSection(classesState),
 
                   const SizedBox(height: 32),
                   
                   // 3. Daily Quest Section
-                  _buildSectionHeader('TODAY\'S OBJECTIVE'),
+                  _buildSectionHeader('todays_objective'.tr(ref)),
                   const SizedBox(height: 12),
                   questState.when(
                     data: (quest) => quest != null 
@@ -93,13 +96,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: 40),
 
                   // 4. Analytics Section
-                  _buildSectionHeader('BIOMETRIC ANALYSIS'),
+                  _buildSectionHeader('biometric_analysis'.tr(ref)),
                   const SizedBox(height: 12),
                   statsState.when(
                     data: (stats) => stats != null 
                         ? _buildAnalyticsGrid(stats)
-                        : const Center(child: Text('No data recorded yet.', style: TextStyle(color: AppTheme.textDim))),
-                    loading: () => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
+                        : Center(child: Text('no_data_recorded'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
+                    loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator(color: AppTheme.purpleNeon))),
                     error: (e, _) => const SizedBox.shrink(),
                   ),
                   
@@ -142,8 +145,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white10),
             ),
-            child: const Center(
-              child: Text('No class selected yet.', style: TextStyle(color: AppTheme.textDim)),
+            child: Center(
+              child: Text('no_class_selected'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontFamily: 'Orbitron')),
             ),
           );
         }
@@ -180,7 +183,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       decoration: BoxDecoration(
         color: AppTheme.panelBackground,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: classColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: classColor.withOpacity(0.5), width: 1.5),
+        boxShadow: [BoxShadow(color: classColor.withOpacity(0.1), blurRadius: 15, spreadRadius: -5)],
       ),
       child: Row(
         children: [
@@ -204,7 +208,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Row(
                   children: [
                     Text(
-                      classDef?.className ?? classId,
+                      classDef != null 
+                          ? resolveClassName(classDef, ref.watch(localizationModeProvider)) 
+                          : classId,
                       style: TextStyle(color: classColor, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                     const SizedBox(width: 8),

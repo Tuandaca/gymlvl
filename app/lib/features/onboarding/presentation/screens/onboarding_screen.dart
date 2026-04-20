@@ -7,6 +7,7 @@ import '../../../../ui/widgets/system_text_field.dart';
 import '../providers/onboarding_controller.dart';
 import '../../domain/user_profile_draft.dart';
 import '../../domain/class_definitions.dart';
+import '../../../../core/localization/localization_engine.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -81,7 +82,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '[ STEP ${_currentPage + 1}/8 - INITIALIZING ]',
+                          '[ STEP ${_currentPage + 1}/9 - INITIALIZING ]',
                           style: const TextStyle(
                             color: AppTheme.cyanNeon,
                             fontSize: 12,
@@ -98,7 +99,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: (_currentPage + 1) / 8,
+                            widthFactor: (_currentPage + 1) / 9,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.cyanNeon,
@@ -131,7 +132,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _StepLanguage(),
                   _StepEnvironment(),
                   _StepGoals(),
-                  _StepClassSelection(),
+                  _StepPrimaryClass(),
+                  _StepSecondaryClass(),
                   _StepExperience(),
                   _StepBiometrics(),
                   _StepScheduling(),
@@ -149,6 +151,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   bool canNext = true;
 
                   switch (_currentPage) {
+                    case 0:
+                      canNext = true;
+                      break;
                     case 1:
                       canNext = draft.environment != null;
                       break;
@@ -156,24 +161,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       canNext = draft.goals.isNotEmpty;
                       break;
                     case 3:
-                      // Class Selection — must have primary class
+                      // Primary Class - Required
                       canNext = draft.primaryClassId != null;
                       break;
                     case 4:
-                      canNext = draft.experienceLevel != null;
+                      // Secondary Class - Optional
+                      canNext = true;
                       break;
                     case 5:
-                      // Biometrics checks
-                      canNext = draft.age != null && draft.weightKg != null && draft.heightCm != null && draft.gender != null;
+                      canNext = draft.experienceLevel != null;
                       break;
                     case 6:
-                      // Scheduling checks
+                      canNext = draft.age != null && draft.weightKg != null && draft.heightCm != null && draft.gender != null;
+                      break;
+                    case 7:
                       canNext = draft.preferredDays.isNotEmpty;
                       break;
                   }
 
                   return SystemButton(
-                    text: _currentPage == 7 ? 'AWAKEN' : 'CONTINUE',
+                    text: _currentPage == 8 ? 'AWAKEN' : 'CONTINUE',
                     isLoading: isSubmitting,
                     onPressed: canNext ? _nextPage : null,
                   );
@@ -195,15 +202,24 @@ class _StepLanguage extends ConsumerWidget {
   const _StepLanguage();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(localizationModeProvider);
     return _buildStepContainer(
       title: '[ SYSTEM LANGUAGE ]',
       child: Column(
         children: [
           const Text('Select Regional Settings for the System.', style: TextStyle(color: AppTheme.textDim)),
           const SizedBox(height: 32),
-          _NeonChoiceTile(label: 'Tiếng Việt', isSelected: true, onTap: () {}),
+          _NeonChoiceTile(
+            label: 'Tiếng Việt', 
+            isSelected: mode == AppLangMode.vi, 
+            onTap: () => ref.read(localizationModeProvider.notifier).setMode(AppLangMode.vi),
+          ),
           const SizedBox(height: 16),
-          _NeonChoiceTile(label: 'English', isSelected: false, onTap: () {}),
+          _NeonChoiceTile(
+            label: 'English', 
+            isSelected: mode == AppLangMode.en, 
+            onTap: () => ref.read(localizationModeProvider.notifier).setMode(AppLangMode.en),
+          ),
         ],
       ),
     );
@@ -287,27 +303,75 @@ class _StepGoals extends ConsumerWidget {
   }
 }
 
-class _StepClassSelection extends ConsumerWidget {
-  const _StepClassSelection();
+class _StepPrimaryClass extends ConsumerWidget {
+  const _StepPrimaryClass();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
-    final recommended = draft.primaryClassId != null 
-        ? getRecommendedSecondary(draft.primaryClassId!)
-        : <String>[];
-    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null)
-        ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
-        : null;
+    final recommended = _getRecommendedClasses(draft.goals);
 
     return _buildStepContainer(
-      title: '[ CLASS SELECTION ]',
+      title: '[ PRIMARY CLASS ]',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: Text('Choose your path. Select up to 2 Classes.', style: TextStyle(color: AppTheme.textDim))),
-          const SizedBox(height: 8),
+          const Center(child: Text('Choose your main training path.', style: TextStyle(color: AppTheme.textDim))),
+          const SizedBox(height: 16),
           
-          // Synergy Badge
+          ...kClassDefinitions.values.map((classDef) {
+            final isSelected = draft.primaryClassId == classDef.classId;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _ClassTile(
+                classDef: classDef,
+                isSelected: isSelected,
+                isSecondary: false,
+                isRecommended: recommended.contains(classDef.classId) && !isSelected,
+                onTap: () {
+                  if (isSelected) {
+                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: null));
+                  } else {
+                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
+                      primaryClassId: classDef.classId,
+                      secondaryClassId: null, // Reset secondary when primary changes
+                    ));
+                  }
+                },
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _StepSecondaryClass extends ConsumerWidget {
+  const _StepSecondaryClass();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final draft = ref.watch(onboardingDraftProvider);
+    
+    // Check if synergy exists
+    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null) 
+        ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
+        : null;
+
+    final primaryClassId = draft.primaryClassId;
+    if (primaryClassId == null) {
+      return const Center(child: Text('Select Primary Class first.', style: TextStyle(color: AppTheme.dangerOrange)));
+    }
+
+    final allowedSecondary = kClassDefinitions[primaryClassId]?.allowedSecondary ?? [];
+
+    return _buildStepContainer(
+      title: '[ SECONDARY CLASS ]',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(child: Text('Enhance your build. (Optional, tap to skip if wanted)', style: TextStyle(color: AppTheme.textDim))),
+          const SizedBox(height: 16),
+          
           if (synergy != null)
             Center(
               child: Container(
@@ -325,40 +389,31 @@ class _StepClassSelection extends ConsumerWidget {
               ),
             ),
 
-          const Text('PRIMARY CLASS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.cyanNeon, letterSpacing: 2)),
-          const SizedBox(height: 8),
           ...kClassDefinitions.values.map((classDef) {
-            final isSelected = draft.primaryClassId == classDef.classId;
+            final isPrimary = draft.primaryClassId == classDef.classId;
             final isSecondary = draft.secondaryClassId == classDef.classId;
+            bool isLocked = !allowedSecondary.contains(classDef.classId);
+
+            if (isPrimary) return const SizedBox.shrink();
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: _ClassTile(
-                classDef: classDef,
-                isSelected: isSelected,
-                isSecondary: isSecondary,
-                isRecommended: recommended.contains(classDef.classId) && !isSelected,
-                onTap: () {
-                  if (isSelected) {
-                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: null));
-                  } else {
-                    // If tapping on the current secondary, swap
+              child: Opacity(
+                opacity: isLocked ? 0.4 : 1.0,
+                child: _ClassTile(
+                  classDef: classDef,
+                  isSelected: false,
+                  isSecondary: isSecondary,
+                  isRecommended: false,
+                  onTap: () {
+                    if (isLocked) return;
                     if (isSecondary) {
-                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
-                        primaryClassId: classDef.classId,
-                        secondaryClassId: null,
-                      ));
+                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: null));
                     } else {
-                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: classDef.classId));
+                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: classDef.classId));
                     }
-                  }
-                },
-                onSecondaryTap: draft.primaryClassId != null && !isSelected ? () {
-                  if (isSecondary) {
-                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: null));
-                  } else {
-                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: classDef.classId));
-                  }
-                } : null,
+                  },
+                ),
               ),
             );
           }),
@@ -369,13 +424,12 @@ class _StepClassSelection extends ConsumerWidget {
 }
 
 /// Single class selection tile with RPG styling
-class _ClassTile extends StatelessWidget {
+class _ClassTile extends ConsumerWidget {
   final ClassDefinition classDef;
   final bool isSelected;
   final bool isSecondary;
   final bool isRecommended;
   final VoidCallback onTap;
-  final VoidCallback? onSecondaryTap;
 
   const _ClassTile({
     required this.classDef,
@@ -383,7 +437,6 @@ class _ClassTile extends StatelessWidget {
     required this.isSecondary,
     required this.isRecommended,
     required this.onTap,
-    this.onSecondaryTap,
   });
 
   Color get _classColor => Color(classDef.colorHex);
@@ -399,7 +452,7 @@ class _ClassTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final borderColor = isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : (isRecommended ? Colors.amber.withOpacity(0.5) : Colors.white12));
     final bgColor = isSelected 
         ? _classColor.withOpacity(0.15) 
@@ -429,7 +482,7 @@ class _ClassTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        classDef.className,
+                        resolveClassName(classDef, ref.watch(localizationModeProvider)),
                         style: TextStyle(
                           color: isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : Colors.white),
                           fontWeight: FontWeight.bold,
@@ -441,7 +494,7 @@ class _ClassTile extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(classDef.focus, style: const TextStyle(color: AppTheme.textDim, fontSize: 11)),
+                  Text(resolveClassFocus(classDef, ref.watch(localizationModeProvider)), style: const TextStyle(color: AppTheme.textDim, fontSize: 11)),
                 ],
               ),
             ),
@@ -468,18 +521,6 @@ class _ClassTile extends StatelessWidget {
               )
             else if (isRecommended)
               const Text('✨', style: TextStyle(fontSize: 16))
-            else if (onSecondaryTap != null)
-              GestureDetector(
-                onTap: onSecondaryTap,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Text('+2nd', style: TextStyle(color: AppTheme.textDim, fontSize: 9)),
-                ),
-              ),
           ],
         ),
       ),

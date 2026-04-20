@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../ui/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/localization/localization_engine.dart';
 import '../../../../ui/widgets/system_button.dart';
 import '../providers/exercise_providers.dart';
 import '../controllers/active_workout_controller.dart';
@@ -21,11 +22,8 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   @override
   void initState() {
     super.initState();
-    // Check cho active workout khi mở tab (auto-resume)
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(activeWorkoutControllerProvider.notifier)
-          .checkForActiveWorkout();
+      ref.read(activeWorkoutControllerProvider.notifier).checkForActiveWorkout();
     });
   }
 
@@ -37,7 +35,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('LUYỆN TẬP'),
+        title: Text('training_title'.tr(ref)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -61,9 +59,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'GẦN ĐÂY',
-                  style: TextStyle(
+                Text(
+                  'recent'.tr(ref),
+                  style: const TextStyle(
                     fontFamily: 'Orbitron',
                     color: AppTheme.cyanNeon,
                     fontSize: 13,
@@ -73,9 +71,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
                 TextButton(
                   onPressed: () => context.push('/workout/history'),
-                  child: const Text(
-                    'Xem tất cả →',
-                    style: TextStyle(
+                  child: Text(
+                    'view_all'.tr(ref),
+                    style: const TextStyle(
                       color: AppTheme.textDim,
                       fontSize: 12,
                     ),
@@ -103,10 +101,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                             size: 40,
                             color: AppTheme.textDim.withOpacity(0.3)),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Chưa có buổi tập nào',
-                          style:
-                              TextStyle(color: AppTheme.textDim, fontSize: 13),
+                        Text(
+                          'no_workouts_yet'.tr(ref),
+                          style: const TextStyle(color: AppTheme.textDim, fontSize: 13),
                         ),
                       ],
                     ),
@@ -130,7 +127,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
               ),
               error: (err, _) => Center(
-                child: Text('Lỗi: $err',
+                child: Text('Error: $err',
                     style: const TextStyle(color: AppTheme.dangerOrange)),
               ),
             ),
@@ -145,9 +142,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: AppTheme.panelBackground.withOpacity(0.5),
+        gradient: LinearGradient(
+          colors: [
+            AppTheme.cyanNeon.withOpacity(0.06),
+            AppTheme.purpleNeon.withOpacity(0.04),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.15)),
+        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
             color: AppTheme.cyanNeon.withOpacity(0.05),
@@ -160,9 +164,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           const Icon(Icons.fitness_center_rounded,
               size: 60, color: AppTheme.cyanNeon),
           const SizedBox(height: 16),
-          const Text(
-            'Sẵn sàng để thăng cấp?',
-            style: TextStyle(
+          Text(
+            'ready_to_level_up'.tr(ref),
+            style: const TextStyle(
               color: AppTheme.textMain,
               fontSize: 20,
               fontFamily: 'Orbitron',
@@ -171,16 +175,16 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Bắt đầu buổi tập để kiếm XP và thăng cấp!',
+            'start_workout_desc'.tr(ref),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppTheme.textDim,
               fontSize: 14,
             ),
           ),
           const SizedBox(height: 24),
           SystemButton(
-            text: 'BẮT ĐẦU BUỔI TẬP',
+            text: 'start_session'.tr(ref),
             onPressed: () => context.push('/workout/active'),
           ),
         ],
@@ -235,9 +239,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'BUỔI TẬP ĐANG DỞ',
-                style: TextStyle(
+              Text(
+                'active_workout'.tr(ref),
+                style: const TextStyle(
                   fontFamily: 'Orbitron',
                   color: AppTheme.successGreen,
                   fontSize: 13,
@@ -249,14 +253,14 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            '${workoutState.exercises.length} bài tập · ${workoutState.totalSets} sets · ${workoutState.formattedElapsed}',
+            '${workoutState.exercises.length} ${'exercises'.tr(ref).toLowerCase()} · ${workoutState.totalSets} sets · ${workoutState.formattedElapsed}',
             style: const TextStyle(color: AppTheme.textMain, fontSize: 14),
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: SystemButton(
-              text: 'TIẾP TỤC TẬP',
+              text: 'continue_workout'.tr(ref),
               onPressed: () => context.push('/workout/active'),
             ),
           ),

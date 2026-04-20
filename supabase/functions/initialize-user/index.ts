@@ -38,14 +38,18 @@ Deno.serve(async (req: Request) => {
 
     // Xác định level khởi đầu
     let initialLevel = 1;
+    let initialXP = 0;
     let initialTitle = 'Tân Sinh Phấn Tạ';
 
+    // Công thức tính XP theo level: 100 * (level ^ 1.5)
     if (experience_level === 'intermediate') {
       initialLevel = 11;
       initialTitle = 'Kẻ Săn Cơ';
+      initialXP = Math.floor(100 * Math.pow(10, 1.5)); // 3162 XP (Đủ để đạt đầu cấp 11)
     } else if (experience_level === 'advanced') {
       initialLevel = 21;
       initialTitle = 'Tay Tạ Sắt';
+      initialXP = Math.floor(100 * Math.pow(20, 1.5)); // 8944 XP (Đủ để đạt đầu cấp 21)
     }
 
     // Bơm auth làm admin để phá RLS update/insert bảng public.users 
@@ -63,6 +67,7 @@ Deno.serve(async (req: Request) => {
         display_name: user.user_metadata?.full_name ?? (user.email ? user.email.split('@')[0] : 'User'),
         onboarding_completed: true,
         level: initialLevel,
+        total_xp: initialXP,
         current_title: initialTitle,
         is_capped: false,
         overflow_xp: 0

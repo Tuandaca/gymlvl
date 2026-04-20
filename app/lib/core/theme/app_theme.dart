@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Core colors
-  static const Color background = Color(0xFF0A0A12);
-  static const Color panelBackground = Color(0xD90D1423); // 85% opacity
+  // Core colors (Solo Leveling & Cyberpunk Aesthetic)
+  static const Color background = Color(0xFF030308); // Deepest void black
+  static const Color panelBackground = Color(0xD90A0D1A);
   static const Color cyanNeon = Color(0xFF00E5FF);
-  static const Color darkCyan = Color.fromARGB(255, 0, 80, 90);
-  static const Color purpleNeon = Color(0xFF7C4DFF);
+  static const Color darkCyan = Color.fromARGB(255, 0, 40, 60);
+  static const Color purpleNeon = Color(0xFFD500F9); // More vibrant magenta-purple
   static const Color successGreen = Color(0xFF00E676);
-  static const Color dangerOrange = Color(0xFFFF6D00);
-  static const Color textMain = Color(0xFFE0E0E0);
-  static const Color textDim = Color(0xFF8B949E);
+  static const Color dangerOrange = Color(0xFFFF3D00); // More blood red/orange
+  static const Color textMain = Color(0xFFE2E8F0);
+  static const Color textDim = Color(0xFF64748B);
 
   static ThemeData get darkTheme {
     return ThemeData(

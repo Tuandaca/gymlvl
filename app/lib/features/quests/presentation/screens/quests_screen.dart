@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/localization/localization_engine.dart';
 import '../providers/quest_providers.dart';
 import '../widgets/daily_quest_card.dart';
 
@@ -14,9 +15,9 @@ class QuestsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text(
-          'NHIỆM VỤ',
-          style: TextStyle(
+        title: Text(
+          'quests_title'.tr(ref),
+          style: const TextStyle(
             fontFamily: 'Orbitron',
             fontWeight: FontWeight.bold,
             letterSpacing: 2.0,
@@ -37,9 +38,9 @@ class QuestsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'MAINFRAME OBJECTIVES',
-                style: TextStyle(
+              Text(
+                'mainframe_objectives'.tr(ref),
+                style: const TextStyle(
                   color: AppTheme.textDim,
                   fontSize: 10,
                   letterSpacing: 2,
@@ -50,7 +51,7 @@ class QuestsScreen extends ConsumerWidget {
               questState.when(
                 data: (quest) => quest != null
                     ? DailyQuestCard(quest: quest)
-                    : _buildEmptyQuests(),
+                    : _buildEmptyQuests(ref),
                 loading: () => const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40.0),
@@ -62,9 +63,9 @@ class QuestsScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 32),
-              _buildComingSoonSection('QUEST CHÍNH TUYẾN'),
+              _buildComingSoonSection('main_quest'.tr(ref), ref),
               const SizedBox(height: 16),
-              _buildComingSoonSection('NHIỆM VỤ ẨN'),
+              _buildComingSoonSection('hidden_quest'.tr(ref), ref),
             ],
           ),
         ),
@@ -72,7 +73,7 @@ class QuestsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildEmptyQuests() {
+  Widget _buildEmptyQuests(WidgetRef ref) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -81,13 +82,13 @@ class QuestsScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),
-      child: const Column(
+      child: Column(
         children: [
-          Icon(Icons.query_builder_rounded, color: AppTheme.textDim, size: 48),
+          const Icon(Icons.query_builder_rounded, color: AppTheme.textDim, size: 48),
           const SizedBox(height: 16),
           Text(
-            'NO MISSIONS ASSIGNED',
-            style: TextStyle(
+            'no_missions'.tr(ref),
+            style: const TextStyle(
               color: AppTheme.textMain,
               fontFamily: 'Orbitron',
               fontWeight: FontWeight.bold,
@@ -95,16 +96,16 @@ class QuestsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Check back later for new objectives or force sync manually.',
+            'no_missions_desc'.tr(ref),
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textDim, fontSize: 12),
+            style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildComingSoonSection(String title) {
+  Widget _buildComingSoonSection(String title, WidgetRef ref) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -120,9 +121,9 @@ class QuestsScreen extends ConsumerWidget {
             title,
             style: const TextStyle(color: AppTheme.textDim, fontWeight: FontWeight.bold),
           ),
-          const Text(
-            'LOCKED',
-            style: TextStyle(
+          Text(
+            'locked'.tr(ref),
+            style: const TextStyle(
               color: AppTheme.dangerOrange,
               fontSize: 10,
               fontFamily: 'Orbitron',

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/config/supabase_config.dart';
+import '../../../../core/localization/localization_engine.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../dashboard/presentation/providers/class_providers.dart';
 import '../../../onboarding/domain/class_definitions.dart';
@@ -110,7 +111,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   // ============== CLASS SWITCH MODAL ==============
-  void _showClassPickerSheet(String slot, String currentClassId) {
+  void _showClassPickerSheet(String slot, String currentClassId, String? primaryClassId) {
+    List<String> allowedSecondary = [];
+    if (slot == 'secondary' && primaryClassId != null) {
+      allowedSecondary = getRecommendedSecondary(primaryClassId);
+      // Include perfect synergies directly just in case it's missed
+      for (final syn in kPerfectSynergies) {
+        if (syn.primaryClassId == primaryClassId) allowedSecondary.add(syn.secondaryClassId);
+        if (syn.secondaryClassId == primaryClassId) allowedSecondary.add(syn.primaryClassId);
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.panelBackground,
@@ -124,6 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             border: Border(top: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.5), width: 2)),
+            color: AppTheme.panelBackground,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +144,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'CHỌN ${slot.toUpperCase()} CLASS',
+                    "${'choose_class'.tr(ref)} ${slot.toUpperCase()}",
                     style: const TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.cyanNeon),
                   ),
                   IconButton(
@@ -142,10 +154,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              const Text(
-                'RETROSPECTIVE LEVELING: Hệ thống sẽ đánh giá lại lịch sử tập luyện của bạn để tính toán Level phù hợp cho Class mới thay vì quay về Level 1.',
-                style: TextStyle(color: AppTheme.textDim, fontSize: 12, height: 1.5),
+              Text(
+                'retro_leveling_desc'.tr(ref),
+                style: const TextStyle(color: AppTheme.textDim, fontSize: 12, height: 1.5),
               ),
+              if (slot == 'secondary') ...[
+                const SizedBox(height: 10),
+                Text(
+                  'class_locked_synergy'.tr(ref),
+                  style: const TextStyle(color: AppTheme.dangerOrange, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Orbitron'),
+                ),
+              ],
               const SizedBox(height: 20),
               Expanded(
                 child: ListView.builder(
@@ -154,41 +173,64 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     final classId = kClassDefinitions.keys.elementAt(index);
                     final classDef = kClassDefinitions[classId]!;
                     final isSelected = currentClassId == classId;
-                    final color = Color(classDef.colorHex);
+                    
+                    bool isLocked = false;
+                    if (slot == 'secondary' && primaryClassId != null) {
+                      isLocked = !allowedSecondary.contains(classId) && classId != primaryClassId;
+                    }
+                    if (slot == 'primary' && currentClassId == classId) {
+                      // Already primary
+                    }
+
+                    final color = isLocked ? Colors.grey : Color(classDef.colorHex);
 
                     return GestureDetector(
-                      onTap: () {
+                      onTap: isLocked ? null : () {
                         Navigator.pop(context);
                         _switchClass(classId, slot);
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: isSelected ? color.withOpacity(0.15) : Colors.black26,
-                          border: Border.all(color: isSelected ? color : Colors.white12, width: isSelected ? 2 : 1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(classDef.iconEmoji, style: const TextStyle(fontSize: 28)),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    classDef.className,
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color, fontFamily: 'Orbitron'),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(classDef.focus, style: const TextStyle(color: AppTheme.textDim, fontSize: 12)),
-                                ],
+                      child: Opacity(
+                        opacity: isLocked ? 0.3 : 1.0,
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isSelected ? color.withOpacity(0.15) : Colors.black26,
+                            border: Border.all(color: isSelected ? color : Colors.white12, width: isSelected ? 2 : 1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Text(classDef.iconEmoji, style: const TextStyle(fontSize: 28)),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      resolveClassName(classDef, ref.watch(localizationModeProvider)),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color, fontFamily: 'Orbitron'),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      resolveClassFocus(classDef, ref.watch(localizationModeProvider)),
+                                      style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      resolveClassDesc(classDef, ref.watch(localizationModeProvider)),
+                                      style: TextStyle(color: AppTheme.textDim.withOpacity(0.7), fontSize: 10),
+                                      maxLines: 2, overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            if (isSelected)
-                              Icon(Icons.check_circle, color: color)
-                          ],
+                              if (isLocked)
+                                const Icon(Icons.lock, color: Colors.grey)
+                              else if (isSelected)
+                                Icon(Icons.check_circle, color: color)
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -209,11 +251,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.panelBackground,
         shape: RoundedRectangleBorder(side: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.5)), borderRadius: BorderRadius.circular(16)),
-        title: const Text('Xác nhận Đổi Class?', style: TextStyle(fontFamily: 'Orbitron', color: AppTheme.cyanNeon, fontSize: 16)),
-        content: const Text('Hệ thống sẽ đồng bộ lịch sử tập luyện của bạn chuyên về nhóm cơ này vào Class mới.', style: TextStyle(color: AppTheme.textMain)),
+        title: Text('confirm_switch'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', color: AppTheme.cyanNeon, fontSize: 16)),
+        content: Text('confirm_switch_desc'.tr(ref), style: const TextStyle(color: AppTheme.textMain)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy', style: TextStyle(color: AppTheme.textDim))),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Đồng ý', style: TextStyle(color: AppTheme.cyanNeon))),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('cancel'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('confirm'.tr(ref), style: const TextStyle(color: AppTheme.cyanNeon))),
         ],
       ),
     );
@@ -239,11 +281,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.panelBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppTheme.dangerOrange.withOpacity(0.5))),
-        title: const Text('Đăng xuất?', style: TextStyle(fontFamily: 'Orbitron', color: AppTheme.dangerOrange, fontSize: 16)),
-        content: const Text('Bạn có chắc muốn thoát tài khoản hiện tại?', style: TextStyle(color: AppTheme.textMain)),
+        title: Text('confirm_logout'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', color: AppTheme.dangerOrange, fontSize: 16)),
+        content: Text('confirm_logout_desc'.tr(ref), style: const TextStyle(color: AppTheme.textMain)),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Hủy', style: TextStyle(color: AppTheme.textDim))),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Đăng xuất', style: TextStyle(color: AppTheme.dangerOrange))),
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('cancel'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('logout'.tr(ref), style: const TextStyle(color: AppTheme.dangerOrange))),
         ],
       ),
     );
@@ -263,11 +305,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('HỆ THỐNG NHÂN VẬT', style: TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2.0, fontSize: 16)),
+        title: Text('system_character'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2.0, fontSize: 16)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         actions: [
+          _buildLanguageSelector(ref),
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.edit_rounded, color: AppTheme.cyanNeon),
@@ -295,12 +338,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _buildHeaderSection(user),
                     const SizedBox(height: 28),
 
-                    _buildSectionHeader('BIOMETRICS BOARD'),
+                    _buildSectionHeader('biometrics_board'.tr(ref)),
                     const SizedBox(height: 12),
                     _isEditing ? _buildBiometricsEdit() : _buildBiometricsReadonly(profile),
                     const SizedBox(height: 28),
 
-                    _buildSectionHeader('BATTLE SCHEDULE'),
+                    _buildSectionHeader('battle_schedule'.tr(ref)),
                     const SizedBox(height: 12),
                     _isEditing ? _buildScheduleEdit() : _buildScheduleReadonly(profile),
                     const SizedBox(height: 28),
@@ -308,7 +351,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildSectionHeader('ACTIVE CLASSES'),
+                        _buildSectionHeader('active_classes'.tr(ref)),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -342,6 +385,94 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         const SizedBox(width: 10),
         Text(title, style: const TextStyle(color: Colors.white, fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 13)),
       ],
+    );
+  }
+
+  Widget _buildLanguageSelector(WidgetRef ref) {
+    final mode = ref.watch(localizationModeProvider);
+    final isEn = mode == AppLangMode.en;
+
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          ref.read(localizationModeProvider.notifier).setMode(
+            isEn ? AppLangMode.vi : AppLangMode.en,
+          );
+        },
+        child: Container(
+          width: 72,
+          height: 32,
+          margin: const EdgeInsets.only(right: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.background,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.cyanNeon.withOpacity(0.1),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              AnimatedAlign(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOutBack,
+                alignment: isEn ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  width: 38,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: AppTheme.cyanNeon,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.cyanNeon.withOpacity(0.5),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: TextStyle(
+                          fontFamily: 'Orbitron',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: !isEn ? AppTheme.background : AppTheme.textDim,
+                        ),
+                        child: const Text('VI'),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: AnimatedDefaultTextStyle(
+                        duration: const Duration(milliseconds: 200),
+                        style: TextStyle(
+                          fontFamily: 'Orbitron',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isEn ? AppTheme.background : AppTheme.textDim,
+                        ),
+                        child: const Text('EN'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -401,11 +532,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     return Row(
       children: [
-        _buildHudBox('TUỔI', age != null ? '$age' : '-'),
+        _buildHudBox('age'.tr(ref), age != null ? '$age' : '-'),
         const SizedBox(width: 10),
-        _buildHudBox('CAO', height != null ? '${height}cm' : '-'),
+        _buildHudBox('height'.tr(ref), height != null ? '${height}cm' : '-'),
         const SizedBox(width: 10),
-        _buildHudBox('NẶNG', weight != null ? '${weight}kg' : '-'),
+        _buildHudBox('weight'.tr(ref), weight != null ? '${weight}kg' : '-'),
       ],
     );
   }
@@ -413,17 +544,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildHudBox(String label, String value) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.black26,
-          //border: Border.all(color: Colors.white10),
-          borderRadius: BorderRadius.circular(8),
+          color: AppTheme.panelBackground.withOpacity(0.5),
+          border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.2)),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.cyanNeon.withOpacity(0.05),
+              blurRadius: 10,
+            )
+          ],
         ),
         child: Column(
           children: [
             Text(value, style: const TextStyle(color: AppTheme.cyanNeon, fontFamily: 'Orbitron', fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: AppTheme.textDim, fontSize: 10, letterSpacing: 1)),
+            Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.textDim, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -485,12 +622,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('GYM/HOME RATIO', style: TextStyle(color: AppTheme.textDim, fontSize: 12)),
-              Text('$gymDays/$homeDays DAYS', style: const TextStyle(color: Colors.white, fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold)),
+              Text('gym_home_ratio'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontSize: 12)),
+              Text("$gymDays/$homeDays ${'days'.tr(ref)}", style: const TextStyle(color: Colors.white, fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 12),
-          const Text('PREFERRED PROTOCOLS', style: TextStyle(color: AppTheme.textDim, fontSize: 12)),
+          Text('preferred_protocols'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontSize: 12)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -560,11 +697,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         final primary = classes.firstWhere((c) => c['slot'] == 'primary', orElse: () => {});
         final secondary = classes.firstWhere((c) => c['slot'] == 'secondary', orElse: () => {});
 
+        final primaryId = primary['class_id'] as String?;
+
         return Column(
           children: [
-            _buildClassHoloCard(primary, 'primary'),
+            _buildClassHoloCard(primary, 'primary', null),
             const SizedBox(height: 12),
-            _buildClassHoloCard(secondary, 'secondary'),
+            _buildClassHoloCard(secondary, 'secondary', primaryId),
           ],
         );
       },
@@ -573,15 +712,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildClassHoloCard(Map<String, dynamic> uc, String slot) {
+  Widget _buildClassHoloCard(Map<String, dynamic> uc, String slot, String? primaryId) {
     final classId = uc['class_id'] as String?;
     if (classId == null) {
       return GestureDetector(
-        onTap: () => _showClassPickerSheet(slot, ''),
+        onTap: () => _showClassPickerSheet(slot, '', primaryId),
         child: Container(
           width: double.infinity, padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(border: Border.all(color: Colors.white24, style: BorderStyle.solid), borderRadius: BorderRadius.circular(12)),
-          child: Center(child: Text('+ CHỌN $slot CLASS', style: const TextStyle(color: AppTheme.textDim, fontFamily: 'Orbitron', letterSpacing: 1))),
+          child: Center(child: Text("+ ${'choose_class'.tr(ref)} ${slot.toUpperCase()}", style: const TextStyle(color: AppTheme.textDim, fontFamily: 'Orbitron', letterSpacing: 1))),
         ),
       );
     }
@@ -601,7 +740,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => _showClassPickerSheet(slot, classId),
+          onTap: () => _showClassPickerSheet(slot, classId, primaryId),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -614,7 +753,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(classDef?.className.toUpperCase() ?? '', style: TextStyle(color: color, fontFamily: 'Orbitron', fontWeight: FontWeight.bold, fontSize: 14)),
+                          Text(
+                            classDef != null 
+                                ? resolveClassName(classDef, ref.watch(localizationModeProvider)).toUpperCase() 
+                                : '', 
+                            style: TextStyle(color: color, fontFamily: 'Orbitron', fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
                           const SizedBox(width: 8),
                           if (isGraduated) const Text('🎓', style: TextStyle(fontSize: 12)),
                         ],
@@ -643,7 +787,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               foregroundColor: AppTheme.textDim, side: const BorderSide(color: AppTheme.textDim),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text('HỦY', style: TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
+            child: Text('cancel'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
           ),
         ),
         const SizedBox(width: 12),
@@ -656,7 +800,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             child: _isSaving 
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                : const Text('LƯU', style: TextStyle(fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                : Text('save'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ),
         ),
       ],
@@ -669,7 +813,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: OutlinedButton.icon(
         onPressed: _confirmLogout,
         icon: const Icon(Icons.logout_rounded, size: 18),
-        label: const Text('ĐĂNG XUẤT', style: TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
+        label: Text('logout'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.dangerOrange,
           side: BorderSide(color: AppTheme.dangerOrange.withOpacity(0.5)),

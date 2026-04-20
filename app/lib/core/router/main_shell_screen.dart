@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/localization/localization_engine.dart';
 
-class MainShellScreen extends StatelessWidget {
+class MainShellScreen extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   const MainShellScreen({super.key, required this.navigationShell});
@@ -10,16 +12,12 @@ class MainShellScreen extends StatelessWidget {
   void _onTap(int index) {
     navigationShell.goBranch(
       index,
-      // A common pattern when using bottom navigation bars is to support
-      // navigating to the initial location when tapping the item that is
-      // already active. This example demonstrates how to support this behavior,
-      // using the initialLocation parameter of goBranch.
       initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: navigationShell,
@@ -65,19 +63,19 @@ class MainShellScreen extends StatelessWidget {
               fontSize: 9,
               letterSpacing: 1,
             ),
-            items: _buildNavItems(),
+            items: _buildNavItems(ref),
           ),
         ),
       ),
     );
   }
 
-  List<BottomNavigationBarItem> _buildNavItems() {
+  List<BottomNavigationBarItem> _buildNavItems(WidgetRef ref) {
     return [
-      _buildItem(Icons.dashboard_rounded, 'DASHBOARD', 0),
-      _buildItem(Icons.fitness_center_rounded, 'TRAINING', 1),
-      _buildItem(Icons.my_location_rounded, 'QUESTS', 2),
-      _buildItem(Icons.shield_rounded, 'STATUS', 3),
+      _buildItem(Icons.dashboard_rounded, 'dashboard_tab'.tr(ref), 0),
+      _buildItem(Icons.fitness_center_rounded, 'training_tab'.tr(ref), 1),
+      _buildItem(Icons.my_location_rounded, 'quests_tab'.tr(ref), 2),
+      _buildItem(Icons.shield_rounded, 'profile_tab'.tr(ref), 3),
     ];
   }
 
@@ -94,7 +92,7 @@ class MainShellScreen extends StatelessWidget {
               : null,
         ),
       ),
-      label: '[$label]',
+      label: '[${label.toUpperCase()}]',
     );
   }
 }

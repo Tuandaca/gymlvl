@@ -19,23 +19,21 @@ const CLASS_XP_CURVES: Record<string, ClassXPConfig> = {
 
 // --- Class Focus Mapping ---
 // Maps class_id to the exercise categories that count as "Focus Match"
-const CLASS_FOCUS_CATEGORIES: Record<string, string[]> = {
-  'A': ['cardio', 'hiit', 'full_body'],                    // Fat Slayer
-  'B': ['chest', 'back', 'legs', 'shoulders', 'full_body'], // Recomp Ghost
-  'C': ['chest', 'back', 'legs', 'shoulders', 'arms'],      // Mass Architect
-  'D': ['legs', 'back', 'chest'],                           // Titan Strength (compound lifts)
-  'E': ['full_body', 'plyometrics', 'cardio'],              // Nitro Athlete
-  'F': ['cardio', 'full_body', 'endurance'],                // Enduro Guard
-  'G': ['calisthenics', 'core', 'full_body'],               // Gravity Defier
-  'H': ['chest', 'back', 'legs', 'shoulders', 'arms'],      // Apex Competitor
+export const CLASS_FOCUS_CATEGORIES: Record<string, string[]> = {
+  'shredder': ['cardio', 'hiit', 'full_body'],
+  'hyper_growth': ['chest', 'back', 'legs', 'shoulders', 'arms'],
+  'powerlifting': ['legs', 'back', 'chest'],
+  'endurance': ['cardio', 'full_body', 'endurance'],
+  'calisthenics': ['calisthenics', 'core', 'full_body', 'arms'],
+  'bodybuilding': ['chest', 'back', 'legs', 'shoulders', 'arms'],
 };
 
 // --- Perfect Synergy Pairs ---
-const PERFECT_SYNERGIES: [string, string][] = [
-  ['A', 'B'], // The Shredder
-  ['C', 'D'], // Juggernaut
-  ['G', 'D'], // Cyber Monk
-  ['E', 'F'], // First Responder
+export const PERFECT_SYNERGIES: [string, string][] = [
+  ['shredder', 'hyper_growth'],
+  ['powerlifting', 'endurance'],
+  ['calisthenics', 'powerlifting'],
+  ['endurance', 'bodybuilding'],
 ];
 
 // ==============================================================================

@@ -18,13 +18,28 @@ import '../../features/quests/presentation/screens/quests_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import 'main_shell_screen.dart';
 
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    _ref.listen(authStateStreamProvider, (_, __) => notifyListeners());
+    _ref.listen(currentUserProvider, (_, __) => notifyListeners());
+  }
+}
+
+// Sử dụng Refractoring để tránh tạo lại GoRouter khi Provider thay đổi.
+// GoRouter chỉ được khởi tạo MỘT LẦN duy nhất.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authStateAsync = ref.watch(authStateStreamProvider);
-  final currentUserAsync = ref.watch(currentUserProvider);
+  final notifier = RouterNotifier(ref);
 
   return GoRouter(
     initialLocation: '/login',
+    refreshListenable: notifier,
     redirect: (context, state) {
+      // Đọc biến thay vì watch để tránh việc GoRouter bị khởi tạo lại mỗi khi state đổi.
+      final authStateAsync = ref.read(authStateStreamProvider);
+      final currentUserAsync = ref.read(currentUserProvider);
+
       final authState = authStateAsync.value;
       final currentUser = currentUserAsync.value;
 

@@ -1,13 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { CLASS_FOCUS_CATEGORIES, classXPRequired } from "../_shared/progression_engine.ts";
+import { CLASS_FOCUS_CATEGORIES, xpRequiredForClassLevel } from "../_shared/progression_engine.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// We need to re-declare or redefine xpRequiredForClassLevel locally or export it. Wait, progression_engine exports xpRequiredForClassLevel.
-import { xpRequiredForClassLevel } from "../_shared/progression_engine.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
