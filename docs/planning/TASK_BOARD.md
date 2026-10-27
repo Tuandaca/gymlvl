@@ -1,8 +1,8 @@
 # GymLvl — Task Board
 
 **Last updated:** 2026-10-28
-**Baseline:** branch `codex/supabase-product-audit`, commit `56c1122`. The baseline tree was clean;
-the bootstrap files are currently uncommitted.
+**Baseline:** branch `main`, consolidation checkpoint `17ca562` (2026-10-28). `main` is the only
+development branch; the tree is clean and matches `origin/main`.
 **Current milestone:** M1 — NOT STARTED
 **Next proposed task:** **M1-01 — Baseline stabilization and evidence lock**
 **Rule:** Only the task marked `NEXT` may be started, and only after explicit user go-ahead. Do not
@@ -56,8 +56,7 @@ bundle tasks.
 ### Scope
 
 1. Verify the external backup bundle/archive and record its hashes.
-2. Confirm HEAD, branch, and remote refs, and that the only uncommitted files are the expected
-   bootstrap planning files.
+2. Confirm HEAD, branch, and remote refs, and that the working tree is clean on `main`.
 3. Create/refresh `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` pinning:
    - GymLvl baseline SHA,
    - `emilfunk/opengym` SHA + AGPL,
@@ -77,15 +76,16 @@ bundle tasks.
 ### Acceptance criteria
 
 - [ ] Backup SHA-256 values match the recorded manifest.
-- [ ] A fresh clone from the bundle has HEAD `56c1122`.
-- [ ] Archive file count equals `git ls-tree -r --name-only HEAD` count.
+- [ ] A fresh clone from the backup bundle has HEAD equal to the HEAD recorded for that backup
+      (the 2026-10-28 pre-consolidation bundle records `56c1122`).
+- [ ] Archive file count equals the Git tree count at the backup's recorded HEAD.
 - [ ] All nine memory files are mutually consistent.
 - [ ] `flutter analyze` → 0 issues.
 - [ ] `flutter test` → 126/126.
 - [ ] `cd tools/db-tests; npm test` → 10/10.
 - [ ] `cd tools/db-tests; npm run test:edge` → 15/15.
 - [ ] `dart format --output=none --set-exit-if-changed lib test` → 0 changed.
-- [ ] `git status` shows only the expected planning files.
+- [ ] `git status --porcelain=v1` is empty on `main`.
 - [ ] Conflict register covers every known documentation contradiction.
 - [ ] Tag decision is recorded (approved or deferred).
 - [ ] `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md` updated.
@@ -165,7 +165,7 @@ pass. If `flutter build apk` cannot run, report `BLOCKED` with the exact toolcha
 | Catalog import | `NOT AUTHORIZED` | M2; requires M1 and license ledger |
 | Media work | `NOT AUTHORIZED` | Explicitly postponed |
 | AGPL reuse | `NOT AUTHORIZED` | Requires legal decision |
-| Commit/push/tag | `NOT AUTHORIZED` | Requires explicit approval |
+| Commit/push/tag without approval | `NOT AUTHORIZED` | Default policy; the 2026-10-28 consolidation was explicitly authorized |
 | Production deployment | `NOT AUTHORIZED` | No approval |
 
 ## Work log
@@ -174,3 +174,4 @@ pass. If `flutter build apk` cannot run, report `BLOCKED` with the exact toolcha
 |---|---|---|---|
 | 2026-10-27/28 | M0 audit | `DONE` (reported) | Chat transcript; reconstructed in `M0_AUDIT.md` |
 | 2026-10-28 | Persistent context bootstrap | `DONE` | Nine memory files created; baseline suites re-run at `56c1122` |
+| 2026-10-28 | Main consolidation + main-only workflow | `DONE` | Fast-forward `e003803..17ca562`; memory files committed; suites 126/10/15 `PASS`; docs updated |

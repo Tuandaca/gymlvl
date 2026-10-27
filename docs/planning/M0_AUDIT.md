@@ -5,8 +5,8 @@
 **Audit date:** 2026-10-27/28
 **Audit baseline at the time:** branch `codex/supabase-product-audit`, HEAD `e003803`, 166 dirty
 status entries
-**Current baseline (2026-10-28):** `56c1122`, pushed; the nine memory files created after the
-baseline are uncommitted
+**Current baseline (2026-10-28):** `main` @ `17ca562`; consolidated under D-014. `56c1122` is the
+historical audit-branch checkpoint
 **Durable record created:** 2026-10-28
 
 ## 0. Provenance of this document
@@ -457,6 +457,7 @@ memory system instead, and M1-01 now owns the manifest and license ledger.
 | 2026-10-28 | External backup bundle + archive created and verified | Preservation evidence recorded in `SESSION_HANDOFF.md` |
 | 2026-10-28 | Nine memory/process files created | Durable context for future agents |
 | 2026-10-28 | Baseline suites re-run at `56c1122` | analyze 0, Flutter 126, SQL 10, Edge 15, format clean |
+| 2026-10-28 | Work consolidated into `main` at `17ca562`; memory files committed | `main` is the sole development branch (D-014); suites re-run and tree clean |
 
 **Not verified:** who created `56c1122`, whether CI ran on it, whether the Android release build
 works, whether a live Supabase project matches the migrations, and whether the 150 curated exercise

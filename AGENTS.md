@@ -3,7 +3,8 @@
 **Status:** Active
 **Established:** 2026-10-28
 **Applies to:** Every AI agent and human contributor working in this repository.
-**Baseline:** branch `codex/supabase-product-audit`, commit `56c112213e43c8c11c620b9cd1258475fb2e9935` (`56c1122`).
+**Baseline:** branch `main` — the only development branch — consolidation checkpoint
+`17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`, 2026-10-28).
 
 This file is an operating contract, not product documentation. Product context lives in
 `docs/planning/PROJECT_CONTEXT.md`; current work state lives in
@@ -131,6 +132,9 @@ Do not write a narrative that hides an incomplete result.
 
 ## 8. Git and checkpoint rules
 
+- **`main` is the only development branch.** Commit all new work on `main`. Do not create,
+  switch to, or merge from other branches unless the user explicitly authorizes it. Existing branches
+  (`codex/supabase-product-audit`) are retained read-only for provenance; do not delete them.
 - No `git reset --hard`, `git clean -fd`, `git checkout`, `git switch`, `git stash`, `git rebase`, or
   force-push without explicit approval.
 - Do not create commits or tags automatically. If a checkpoint is needed, propose the exact tag name

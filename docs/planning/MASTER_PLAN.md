@@ -2,7 +2,7 @@
 
 **Document status:** Active control document
 **Established:** 2026-10-28
-**Baseline:** `56c1122` (`codex/supabase-product-audit`)
+**Baseline:** `main` @ `17ca562` (sole development branch; consolidated 2026-10-28)
 **Original product plan:** [`GymLvl_OpenGym_Migration_Master_Plan.md`](GymLvl_OpenGym_Migration_Master_Plan.md)
 (version 1.0, 27/10/2026, 31,935 bytes) — **preserved verbatim, do not overwrite.**
 
@@ -124,7 +124,7 @@ blocker, not an M1-01 blocker.
 | OpenGym B catalogue is 5,632 exercises | 6,554 exercises at `e6a95c28`; 17 translations, 13,109 media files | Use 6,554 in planning; media remains prohibited |
 | M0 is "baseline, protect Antigravity work, legal inventory" | M0 was executed as an audit/planning milestone; no application changes | Recorded in `M0_AUDIT.md` |
 | M1 is design-system foundation | Already implemented and verified | M1 re-baselined to stabilization |
-| Workspace may be dirty and unpushed | Committed and pushed as `56c1122`; tree clean | Use `56c1122` as baseline |
+| Workspace may be dirty and unpushed | Committed as `56c1122`; consolidated into `main` at `17ca562`; tree clean | Use `main` as the sole branch; baseline `17ca562` |
 | `GYMLVL_OPENGYM_MIGRATION_MASTER_PLAN.md` | Actual file is `GymLvl_OpenGym_Migration_Master_Plan.md` | Path corrected here |
 
 ## 7. Out of scope until separately authorized

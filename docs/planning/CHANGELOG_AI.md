@@ -7,6 +7,74 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 ---
 
+## 2026-10-28 — Main consolidation and main-only workflow
+
+**Task:** Consolidate `codex/supabase-product-audit` into `main`, commit the nine memory files, and
+establish `main` as the only development branch.
+**Status:** `PASS`
+**Baseline:** `main`; consolidation checkpoint `17ca562`; the workflow-doc commit containing this
+entry is the current `main` HEAD.
+**Scope:** Git consolidation and documentation only. No application code, SQL migration, Edge
+Function, CI config, dependency, UI, or media change.
+
+### Changed
+
+- Committed the nine memory files: `AGENTS.md` and `docs/planning/{MASTER_PLAN,M0_AUDIT,
+  PROJECT_CONTEXT,ARCHITECTURE,DECISIONS,TASK_BOARD,SESSION_HANDOFF,CHANGELOG_AI}.md` — `17ca562`,
+  9 files, +2,015 lines.
+- Fast-forwarded `main` from `e003803` to `17ca562`; no merge commit, no conflicts.
+- Pushed `main`: `e003803..17ca562  main -> main` (no force).
+- Workflow docs: `AGENTS.md` (baseline + `main`-only rule), `DECISIONS.md` (D-014),
+  `SESSION_HANDOFF.md`, `TASK_BOARD.md`, `PROJECT_CONTEXT.md`, `MASTER_PLAN.md`, this entry.
+- Retained `codex/supabase-product-audit` at `17ca562`; nothing deleted.
+
+### Backup (pre-consolidation)
+
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-backups\20261028-main-consolidation\`
+
+| Artifact | SHA-256 |
+|---|---|
+| `gymlvl-pre-consolidation-all-refs.bundle` | `CB9AA6E1C1A91C8178114D53E2375B0ED0788D808DFA0CBA4F8D80FDF4251F00` |
+| `gymlvl-pre-consolidation-HEAD.zip` | `CD458094BA1F20176C6080F3DC59F9D5432E6862C6E2B748B2203805FD9444C9` |
+| `gymlvl-uncommitted-memory-files.tgz` | `4DFB158D1255F26E029E854C4A91608E0B6058F2DE324A140EBB9BAE5C714D62` |
+
+Verified: bundle clone HEAD = `56c1122`; archive 502 files = Git tree 502; untracked archive 9 files,
+all hashes matched.
+
+### Verification (this session, `17ca562`)
+
+| Command | Result |
+|---|---|
+| `git merge-base --is-ancestor main codex/supabase-product-audit` | `PASS` — fast-forward safe |
+| `git merge --ff-only codex/supabase-product-audit` | `PASS` — `e003803..17ca562` |
+| `flutter analyze` | `PASS` — 0 issues |
+| `flutter test` | `PASS` — 126/126 |
+| `dart format --output=none --set-exit-if-changed lib test` | `PASS` — 125 files, 0 changed |
+| `npm test` (db-tests) | `PASS` — 10/10, PostgreSQL 17.5/PGlite |
+| `npm run test:edge` | `PASS` — 15/15 |
+| `git push origin main` | `PASS` — `e003803..17ca562` |
+| `git ls-remote origin refs/heads/main` | `PASS` — equal to local `main` |
+| Android release build/device smoke | `NOT RUN` |
+| iOS build | `NOT RUN` |
+| Live Supabase / AI provider | `NOT RUN` |
+
+### Decisions
+
+D-014 (`main` is the sole development branch) accepted by explicit user instruction. D-011's
+`56c1122` baseline is historical; `main` @ `17ca562` is current. D-009 (no automatic Git writes)
+remains in force; this consolidation was explicitly authorized.
+
+### Blockers
+
+None for the consolidation. M1-01 prerequisites and platform blockers are unchanged.
+
+### Next
+
+**M1-01 — Baseline stabilization and evidence lock.** Documentation/verification only. Requires
+explicit user go-ahead.
+
+---
+
 ## 2026-10-28 — Persistent context bootstrap
 
 **Task:** Create a durable, model-independent project memory and handoff system.

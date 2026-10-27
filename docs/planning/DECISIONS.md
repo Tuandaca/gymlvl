@@ -2,7 +2,7 @@
 
 **Status:** Active
 **Established:** 2026-10-28
-**Baseline:** `56c1122`
+**Baseline:** `main` @ `17ca562` (consolidated 2026-10-28)
 **Rule:** Every material change to architecture, schema strategy, licensing, dependency policy, or
 milestone scope needs an entry here. Do not silently change a decision.
 
@@ -32,6 +32,7 @@ Status values:
 | D-011 | Baseline is clean `56c1122`; M0's dirty snapshot is historical | RECORDED | 2026-10-28 |
 | D-012 | Documentation-only bootstrap; no feature work | ACCEPTED | 2026-10-28 |
 | D-013 | External backup required before memory edits | ACCEPTED | 2026-10-28 |
+| D-014 | `main` is the sole development branch | ACCEPTED | 2026-10-28 |
 
 ---
 
@@ -144,7 +145,7 @@ changelog.
 **Consequences:** Every task updates the board, handoff, and changelog. The original master plan is
 preserved untouched and referenced, never overwritten.
 
-## D-011 — Current baseline is `56c1122`
+## D-011 — Bootstrap baseline was `56c1122`
 
 **Status:** RECORDED
 **Context:** M0 observed HEAD `e003803` with 166 dirty entries. Between sessions the work was
@@ -154,6 +155,8 @@ committed as `56c1122` (381 files, +33,198/−8,080) and pushed to
 current.
 **Consequences:** G-02 in the defect register is resolved. The actor/timing of the commit is
 unverified. Future audits must record the commit they ran against.
+**Superseded by:** D-014 — the current baseline is `main` @ `17ca562`. `56c1122` remains a valid
+historical checkpoint.
 
 ## D-012 — Documentation-only bootstrap
 
@@ -173,6 +176,23 @@ then verify: bundle clone HEAD == repository HEAD; archive file count == Git tre
 SHA-256 hashes.
 **Consequences:** Backup evidence is recorded in `SESSION_HANDOFF.md`. The backup is not a substitute
 for an approved commit; it is a recovery artifact.
+
+## D-014 — `main` is the sole development branch
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28)
+**Context:** Work was split between `main` (`e003803`) and `codex/supabase-product-audit` (`56c1122`),
+while the nine memory files were uncommitted on the audit branch. Two active lines risk divergent
+baselines and ambiguous handoffs.
+**Decision:** Consolidate every commit into `main` and use `main` exclusively for all future
+development. The audit branch fast-forwarded into `main` (no merge commit, no rewrite); the nine
+memory files were committed as `17ca562` and are now on `main`. `codex/supabase-product-audit` is
+retained unchanged for provenance and is not a development target.
+**Consequences:** All commits, pushes, and future tasks target `main`; any new branch requires
+explicit user authorization. No force push, reset, rebase, or branch deletion was used. `origin/main`
+is the canonical remote ref, and local and remote `main` must match after every authorized push.
+**Evidence:** `git merge --ff-only` → `e003803..17ca562`; regression suites re-run at `17ca562`
+(Flutter 126/126, SQL 10/10, Edge 15/15, analyze clean, format clean); `origin/main` verified at the
+pushed commit. Full record in `SESSION_HANDOFF.md`.
 
 ---
 

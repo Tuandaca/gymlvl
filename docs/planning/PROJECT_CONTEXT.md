@@ -2,8 +2,8 @@
 
 **Status:** Durable project memory
 **Last verified:** 2026-10-28
-**Baseline:** branch `codex/supabase-product-audit`, commit `56c1122` (full SHA
-`56c112213e43c8c11c620b9cd1258475fb2e9935`)
+**Baseline:** branch `main` (sole development branch), consolidation checkpoint `17ca562`
+(full SHA `17ca562f7d382cdd16e17a414460b8266edcf16b`)
 **Owner:** GymLvl project
 
 This file answers: what is GymLvl, what is true now, what must not change, and which source wins
@@ -30,19 +30,21 @@ trainer — **without** losing the RPG identity or the existing user history.
 | Item | Value |
 |---|---|
 | Repository | `https://github.com/Tuandaca/gymlvl` |
-| Current branch | `codex/supabase-product-audit` |
-| Current HEAD | `56c112213e43c8c11c620b9cd1258475fb2e9935` (`56c1122`) |
-| `main` | `e0038038300d5bfaf3c4747094cf36a132eb8711` (`e003803`) |
-| Remote branch | `origin/codex/supabase-product-audit` = `56c1122` (verified via `git ls-remote`) |
-| Working tree at baseline | Clean, 0 entries before the memory bootstrap (verified 2026-10-28) |
+| Development branch | `main` (only) |
+| Consolidation checkpoint | `17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`) |
+| Previous `main` | `e0038038300d5bfaf3c4747094cf36a132eb8711` (`e003803`) |
+| Remote branch | `origin/main` — pushed and verified at the checkpoint (via `git ls-remote`) |
+| Retained branch | `codex/supabase-product-audit` = `17ca562` (read-only provenance) |
+| Working tree at baseline | Clean (verified 2026-10-28) |
 | Tags | None |
-| Tracked files at HEAD | 502 |
+| Tracked files at HEAD | 511 |
 
 **Important:** the M0 audit observed 166 dirty entries on top of `e003803`. Between sessions that
 work was committed as `56c1122` ("feat: add core workout features, Supabase backend functions, and
 end-to-end testing infrastructure": 381 files, +33,198/−8,080) and pushed to
 `origin/codex/supabase-product-audit`. The actor and exact timing of that commit are not verified.
-All current work starts from the clean `56c1122` baseline.
+On 2026-10-28 all work was consolidated into `main` at `17ca562` (fast-forward; D-014). All current
+work starts from `main`.
 
 ## 3. Technology stack
 
@@ -61,9 +63,10 @@ All current work starts from the clean `56c1122` baseline.
 There is **no local SQL database**, no sync outbox, and no offline mutation queue today. Offline
 behavior is limited to a local active-workout snapshot; set mutations still require the network.
 
-## 4. Verified baseline evidence (2026-10-28, commit `56c1122`)
+## 4. Verified baseline evidence (2026-10-28, `main` @ `17ca562`)
 
-These checks were executed in the bootstrap session:
+These checks were re-executed during the consolidation session; the same suites passed at `56c1122`
+in the bootstrap session:
 
 | Check | Command | Result |
 |---|---|---|
@@ -133,7 +136,7 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 
 | Conflict | Current truth |
 |---|---|
-| M0 report says 166 dirty entries / HEAD `e003803` | Work is committed and pushed as `56c1122`; tree is clean. |
+| M0 report says 166 dirty entries / HEAD `e003803` | Work was committed as `56c1122`, consolidated into `main` at `17ca562`; tree is clean. |
 | `PROJECT.md` says Orbitron was eliminated | `app/pubspec.yaml` still declares the `Orbitron` family and asset. |
 | `TEST_READY.md` says 83 Flutter tests | Actual suite is 126 tests at `56c1122`. |
 | `PROJECT.md` milestone table says M2/M5 `IN_PROGRESS` | `docs/IMPLEMENTATION_STATUS.md` says they are complete; the milestone numbering in `PROJECT.md` is a different, older plan. |
@@ -164,7 +167,7 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 | M1-01 | Next proposed task (requires explicit go-ahead): baseline stabilization and evidence lock. |
 | Candy | The Bold Candy Neubrutalism design system. |
 | Authoritative progression | Server-side `complete_workout` transaction that owns all awards. |
-| `56c1122` | Current clean baseline commit. |
+| `main` @ `17ca562` | Current consolidated baseline. `56c1122` is the historical audit-branch checkpoint. |
 | AGPL | Copyleft license on both OpenGym repositories; reference-only. |
 | MIT text | Exercise metadata/instructions from the dataset; importable with notice. |
 | Media | Images/GIFs/videos; all postponed and unlicensed for GymLvl. |
