@@ -8,10 +8,10 @@ abstract class UserProfileDraft with _$UserProfileDraft {
   const factory UserProfileDraft({
     // 1. Environment
     String? environment,
-    
+
     // 2. Goals (max 3)
     @Default([]) List<String> goals,
-    
+
     // 3. Multi-Class Selection (Primary + Secondary)
     // class_id: 'A'-'H' matching class_definitions table
     String? primaryClassId,

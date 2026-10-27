@@ -1,732 +1,556 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../../ui/theme/app_theme.dart';
-import '../../../../ui/widgets/system_button.dart';
 import '../../domain/exercise.dart';
+import '../../workout_copy.dart';
 import '../providers/exercise_providers.dart';
-import '../controllers/active_workout_controller.dart';
 import '../widgets/workout_exercise_tile.dart';
 import '../widgets/rest_timer_widget.dart';
 import '../../../progression/presentation/widgets/level_up_overlay.dart';
+import 'workout_summary_screen.dart';
 
 class ActiveWorkoutScreen extends ConsumerStatefulWidget {
   const ActiveWorkoutScreen({super.key});
-
   @override
   ConsumerState<ActiveWorkoutScreen> createState() =>
       _ActiveWorkoutScreenState();
 }
 
-class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> with WidgetsBindingObserver {
-  final Set<String> _selectedCategories = {};
-
-  final List<Map<String, dynamic>> _muscleGroups = [
-    {'name': 'Chest', 'icon': Icons.fitness_center},
-    {'name': 'Back', 'icon': Icons.reorder},
-    {'name': 'Legs', 'icon': Icons.directions_run},
-    {'name': 'Shoulders', 'icon': Icons.accessibility_new},
-    {'name': 'Arms', 'icon': Icons.high_quality},
-    {'name': 'Core', 'icon': Icons.vibration},
-  ];
+class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
+  bool _allowPop = false;
+  final Set<String> _groups = {};
+  String t(String key) => workoutText(ref, key);
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final notifier = ref.read(activeWorkoutControllerProvider.notifier);
-      final state = ref.read(activeWorkoutControllerProvider);
-      
-      if (!state.hasActiveWorkout) {
-        notifier.startWorkout();
-      } else if (state.isTimerPaused) {
-        // Resume timer if it was paused from a previous exit
-        notifier.resumeTimer();
+      if (mounted) {
+        ref.read(activeWorkoutControllerProvider.notifier).startWorkout();
       }
     });
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
+  Future<void> _addExercise() async {
+    final result = await context.push<List<Exercise>>(
+      '/exercise-picker?multiSelect=true',
+    );
+    if (result != null && mounted) {
+      await ref
+          .read(activeWorkoutControllerProvider.notifier)
+          .addExercises(result);
+    }
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Không tự động dừng timer nữa để người dùng có thể switch app nghe nhạc/nhắn tin
-    // Timer sẽ chạy liên tục cho đến khi người dùng chủ động Pause hoặc Hoàn thành.
-  }
+  Future<bool> _confirm(String title, String message, String action) async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(t('cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(action),
+            ),
+          ],
+        ),
+      ) ??
+      false;
 
-  void _toggleCategory(String category) async {
-    setState(() {
-      if (_selectedCategories.contains(category)) {
-        _selectedCategories.remove(category);
-      } else {
-        _selectedCategories.add(category);
-      }
-    });
-
-    // Auto-load preset exercises when category changes
+  Future<void> _finish() async {
+    FocusScope.of(context).unfocus();
     final controller = ref.read(activeWorkoutControllerProvider.notifier);
-    await controller.loadPresetExercises(_selectedCategories.toList());
-  }
-
-  Future<void> _addCustomExercise() async {
-    final result = await context.push<List<Exercise>>('/exercise-picker?multiSelect=true');
-    if (result != null && result.isNotEmpty) {
-      final controller = ref.read(activeWorkoutControllerProvider.notifier);
-      await controller.addExercises(result);
-    }
-  }
-
-  void _showRestTimerQuickSelect() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => RestTimerQuickSelect(
-        onSelect: (seconds) {
-          ref.read(activeWorkoutControllerProvider.notifier).startRest(seconds);
-        },
-      ),
-    );
-  }
-
-  Future<void> _confirmRemoveExercise(String workoutExerciseId, String name) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.panelBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.2)),
-        ),
-        title: const Text(
-          'Xóa bài tập?',
-          style: TextStyle(
-            fontFamily: 'Orbitron',
-            color: AppTheme.dangerOrange,
-            fontSize: 16,
-          ),
-        ),
-        content: Text(
-          'Bạn có chắc muốn xóa "$name" khỏi buổi tập?\nTất cả sets đã log sẽ bị xóa.',
-          style: const TextStyle(color: AppTheme.textMain),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hủy', style: TextStyle(color: AppTheme.textDim)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Xóa', style: TextStyle(color: AppTheme.dangerOrange)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      ref.read(activeWorkoutControllerProvider.notifier).removeExercise(workoutExerciseId);
-    }
-  }
-
-  Future<void> _completeWorkout() async {
-    final state = ref.read(activeWorkoutControllerProvider);
-    if (state.totalSets == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Hãy log ít nhất 1 set trước khi kết thúc!'),
-          backgroundColor: AppTheme.dangerOrange,
-        ),
-      );
+    if (!await _confirm(t('finish_title'), t('finish_hint'), t('finish')) ||
+        !mounted) {
       return;
     }
+    final currentState = ref.read(activeWorkoutControllerProvider);
+    final currentWorkout = currentState.workout;
+    final totalVolume = currentState.totalVolumeKg;
+    final durationSeconds = currentState.elapsedSeconds;
+    final completedSets = currentState.completedSets;
+    final totalSets = currentState.totalSets;
+    final exercises = currentState.exercises;
 
-    final double durationMinutes = state.elapsedSeconds / 60;
-    final int completedSets = state.completedSets;
-    final double pace = completedSets / (durationMinutes > 0 ? durationMinutes : 1);
-    final bool isTooShort = state.elapsedSeconds < 300; // < 5 minutes
-    final bool isSuspicious = pace > 3 && completedSets > 3;
+    final result = await controller.completeWorkout();
+    if (result == null || !mounted) return;
+    HapticFeedback.mediumImpact();
 
-    final confirmed = await showDialog<bool>(
+    final xpResult = result['xpResult'] as Map<String, dynamic>? ?? {};
+    if (xpResult['leveledUp'] == true) {
+      await LevelUpOverlay.show(context, xpResult);
+    }
+
+    if (currentWorkout != null && mounted) {
+      await WorkoutSummaryScreen.show(
+        context,
+        workout: currentWorkout,
+        xpResult: xpResult,
+        totalVolumeKg: totalVolume,
+        durationSeconds: durationSeconds,
+        completedSetsCount: completedSets,
+        totalSetsCount: totalSets,
+        exercises: exercises,
+      );
+    }
+    if (mounted) _exit();
+  }
+
+  void _exit() {
+    setState(() => _allowPop = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/workout');
+      }
+    });
+  }
+
+  Future<void> _leave() async {
+    final state = ref.read(activeWorkoutControllerProvider);
+    if (state.isCompleting || state.isLoading) return;
+    if (!state.hasActiveWorkout || state.isSetupPhase) {
+      _exit();
+      return;
+    }
+    final choice = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.panelBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: isSuspicious 
-                ? AppTheme.dangerOrange 
-                : (isTooShort ? AppTheme.warningYellow : AppTheme.cyanNeon.withOpacity(0.2)),
-            width: isSuspicious ? 2 : 1,
-          ),
-        ),
-        title: Text(
-          isSuspicious 
-              ? '⚠️ CẢNH BÁO TỐC ĐỘ' 
-              : (isTooShort ? 'TIẾP TỤC GẮNG SỨC?' : 'Kết thúc buổi tập?'),
-          style: TextStyle(
-            fontFamily: 'Orbitron',
-            color: isSuspicious ? AppTheme.dangerOrange : (isTooShort ? AppTheme.warningYellow : AppTheme.cyanNeon),
-            fontSize: 16,
-          ),
-        ),
-        content: Text(
-          isSuspicious
-              ? 'Hệ thống nhận thấy bạn hoàn thành Sets quá nhanh (${pace.toStringAsFixed(1)} sets/phút). \n\nNếu bạn cố tình khai gian, XP nhận được sẽ bị giới hạn ở mức tối thiểu (10 XP). Bạn có muốn kiểm tra lại không?'
-              : (isTooShort 
-                  ? 'Bạn mới tập được ${state.formattedElapsed}. Yên tâm, các Sets bạn vừa tập vẫn được ghi nhận và tính XP tương xứng. Nhớ quay lại tập bù nhé!' 
-                  : '${state.exercises.length} bài tập · ${state.totalSets} sets · ${state.formattedElapsed}'),
-          style: const TextStyle(color: AppTheme.textMain),
-        ),
+        title: Text(t('leave_title')),
+        content: Text(t('leave_hint')),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(isSuspicious ? 'KIỂM TRA LẠI' : 'Tiếp tục tập', style: const TextStyle(color: AppTheme.textDim)),
+            onPressed: () => Navigator.pop(context, 'stay'),
+            child: Text(t('stay')),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              isSuspicious ? 'VẪN HOÀN THÀNH' : 'Hoàn thành', 
-              style: TextStyle(color: isSuspicious || isTooShort ? AppTheme.dangerOrange : AppTheme.successGreen)
-            ),
+            onPressed: () => Navigator.pop(context, 'cancel'),
+            child: Text(t('cancel_session')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'pause'),
+            child: Text(t('leave')),
           ),
         ],
       ),
     );
-
-    if (confirmed == true) {
-      final result = await ref.read(activeWorkoutControllerProvider.notifier).completeWorkout();
-      if (result != null && mounted) {
-        HapticFeedback.heavyImpact();
-
-        if (result['xpResult'] != null) {
-          await LevelUpOverlay.show(context, result['xpResult'] as Map<String, dynamic>);
-        } else if (result['error'] != null) {
-          // Hiện lỗi tính XP nhưng vẫn cho thoát màn hình vì workout đã lưu
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('🎉 Buổi tập đã lưu! (${result['error']})'),
-              backgroundColor: AppTheme.warningYellow.withOpacity(0.8),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('🎉 Buổi tập hoàn thành!'),
-              backgroundColor: AppTheme.successGreen,
-            ),
-          );
-        }
-
-        if (mounted) {
-          context.pop();
-        }
-      }
+    if (!mounted || choice == null || choice == 'stay') return;
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
+    if (choice == 'cancel') {
+      await controller.cancelWorkout();
+    } else {
+      await controller.pauseTimer();
+    }
+    if (mounted &&
+        ref.read(activeWorkoutControllerProvider).errorMessage == null) {
+      _exit();
     }
   }
 
-  Future<bool> _onWillPop() async {
-    final state = ref.read(activeWorkoutControllerProvider);
-    if (!state.hasActiveWorkout) return true;
-    
-    // Nếu vẫn đang trong bước thiết lập, cho phép thoát ngay không cần hỏi
-    if (state.isSetupPhase) {
-      await ref.read(activeWorkoutControllerProvider.notifier).cancelWorkout();
-      return true;
-    }
-
-    final result = await showDialog<String>(
+  void _rest() {
+    showModalBottomSheet<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.panelBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.2)),
-        ),
-        title: const Text(
-          'Đang tập dở!',
-          style: TextStyle(
-            fontFamily: 'Orbitron',
-            color: AppTheme.dangerOrange,
-            fontSize: 16,
-          ),
-        ),
-        content: const Text(
-          'Buổi tập đang được lưu tự động.\nBạn có thể tiếp tục bất cứ lúc nào.',
-          style: TextStyle(color: AppTheme.textMain),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop('stay'),
-            child: const Text('Ở lại', style: TextStyle(color: AppTheme.cyanNeon)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop('leave'),
-            child: const Text('Tạm rời', style: TextStyle(color: AppTheme.textDim)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop('cancel'),
-            child: const Text('Hủy', style: TextStyle(color: AppTheme.dangerOrange)),
-          ),
-        ],
+      builder: (context) => RestTimerQuickSelect(
+        onSelect: (seconds) => ref
+            .read(activeWorkoutControllerProvider.notifier)
+            .startRest(seconds),
       ),
     );
-
-    if (result == 'cancel') {
-      await ref.read(activeWorkoutControllerProvider.notifier).cancelWorkout();
-      return true;
-    }
-    if (result == 'leave') {
-      ref.read(activeWorkoutControllerProvider.notifier).pauseTimer();
-      return true;
-    }
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final workoutState = ref.watch(activeWorkoutControllerProvider);
+    final isSetupPhase = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isSetupPhase),
+    );
+    final hasActiveWorkout = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.hasActiveWorkout),
+    );
+    final busy = ref.watch(
+      activeWorkoutControllerProvider.select(
+        (s) => s.isLoading || s.isCompleting,
+      ),
+    );
+    final errorMessage = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.errorMessage),
+    );
+
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
 
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        final shouldPop = await _onWillPop();
-        if (shouldPop && mounted) {
-          context.pop();
-        }
+      canPop: _allowPop,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _leave();
       },
       child: Scaffold(
         backgroundColor: AppTheme.background,
-        appBar: workoutState.isSetupPhase ? _buildSetupAppBar() : _buildTrainingAppBar(workoutState),
-        body: Stack(
-          children: [
-            if (workoutState.isSetupPhase)
-              _buildSetupPhase(workoutState)
-            else if (workoutState.isLoading && workoutState.exercises.isEmpty)
-              const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon))
-            else if (workoutState.exercises.isEmpty)
-              _buildEmptyState()
-            else
-              _buildTrainingPhase(workoutState),
-
-            // Rest timer overlay
-            if (!workoutState.isSetupPhase && workoutState.isResting)
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () {}, // Prevent tap-through
-                  child: Container(
-                    color: Colors.black54,
-                    child: Center(
-                      child: RestTimerWidget(
-                        secondsRemaining: workoutState.restSecondsRemaining,
-                        secondsTotal: workoutState.restSecondsTotal,
-                        onSkip: () {
-                          ref.read(activeWorkoutControllerProvider.notifier).skipRest();
-                        },
-                      ),
-                    ),
-                  ),
-                ),
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: busy ? null : _leave,
+            icon: const Icon(Icons.arrow_back),
+          ),
+          title: _WorkoutTimerTitle(isSetupPhase: isSetupPhase),
+          actions: [
+            if (!isSetupPhase) _WorkoutTimerPauseAction(busy: busy),
+            if (!isSetupPhase)
+              TextButton(
+                onPressed: busy ? null : _finish,
+                child: Text(t('finish')),
               ),
           ],
         ),
-
-        // FAB — Add exercise (only in training phase)
-        floatingActionButton: (!workoutState.isSetupPhase && workoutState.hasActiveWorkout && !workoutState.isResting)
-            ? FloatingActionButton.extended(
-                onPressed: _addCustomExercise,
-                backgroundColor: AppTheme.cyanNeon,
-                foregroundColor: AppTheme.background,
-                icon: const Icon(Icons.add_rounded),
-                label: const Text(
-                  'THÊM BÀI TẬP',
-                  style: TextStyle(
-                    fontFamily: 'Orbitron',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    letterSpacing: 1,
+        body: SafeArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 900),
+              child: Column(
+                children: [
+                  if (busy) const LinearProgressIndicator(minHeight: 2),
+                  if (errorMessage != null)
+                    MaterialBanner(
+                      content: Text(t(errorMessage)),
+                      actions: [
+                        if (!hasActiveWorkout)
+                          TextButton(
+                            onPressed: controller.startWorkout,
+                            child: Text(t('retry')),
+                          ),
+                        if (hasActiveWorkout &&
+                            (errorMessage == 'save_failed' ||
+                                errorMessage == 'reload_required'))
+                          TextButton(
+                            onPressed: busy
+                                ? null
+                                : controller.checkForActiveWorkout,
+                            child: Text(t('reload_saved')),
+                          ),
+                        TextButton(
+                          onPressed: controller.clearError,
+                          child: Text(t('dismiss')),
+                        ),
+                      ],
+                    ),
+                  if (!isSetupPhase) const _WorkoutStatsHeader(),
+                  if (!isSetupPhase) const _ActiveRestTimerSection(),
+                  Expanded(
+                    child: isSetupPhase
+                        ? _setup()
+                        : _TrainingView(onConfirm: _confirm, onRest: _rest),
                   ),
-                ),
-              ).animate().slideY(begin: 1, end: 0, duration: 300.ms)
+                  if (isSetupPhase)
+                    _SetupBottomAction(
+                      busy: busy,
+                      onBegin: controller.beginTraining,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        floatingActionButton: !isSetupPhase && hasActiveWorkout
+            ? FloatingActionButton.extended(
+                onPressed: busy ? null : _addExercise,
+                label: Text(t('add_exercise')),
+                icon: const Icon(Icons.add),
+              )
             : null,
       ),
     );
   }
 
-  AppBar _buildSetupAppBar() {
-    return AppBar(
-      title: const Text(
-        'THIẾT LẬP BUỔI TẬP',
-        style: TextStyle(
-          fontFamily: 'Orbitron',
-          color: AppTheme.cyanNeon,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1,
-        ),
-      ),
+  Widget _setup() {
+    final exercises = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.exercises),
     );
-  }
-
-  AppBar _buildTrainingAppBar(ActiveWorkoutState workoutState) {
-    return AppBar(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.successGreen.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: AppTheme.successGreen,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.successGreen.withOpacity(0.6),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  workoutState.formattedElapsed,
-                  style: const TextStyle(
-                    fontFamily: 'Orbitron',
-                    color: AppTheme.successGreen,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          // XP Live Preview Bar
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text(
-                      'XP PREVIEW',
-                      style: TextStyle(
-                        fontFamily: 'Orbitron',
-                        color: AppTheme.purpleNeon,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '+${workoutState.previewXP}',
-                      style: const TextStyle(
-                        fontFamily: 'Orbitron',
-                        color: AppTheme.purpleNeon,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ).animate(target: workoutState.previewXP.toDouble()).shimmer(),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: LinearProgressIndicator(
-                    value: (workoutState.previewXP / 500).clamp(0, 1),
-                    backgroundColor: AppTheme.purpleNeon.withOpacity(0.1),
-                    valueColor: const AlwaysStoppedAnimation(AppTheme.purpleNeon),
-                    minHeight: 4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: workoutState.isCompleting ? null : _completeWorkout,
-          child: Text(
-            'XONG',
-            style: TextStyle(
-              fontFamily: 'Orbitron',
-              color: workoutState.isCompleting ? AppTheme.textDim : AppTheme.successGreen,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1,
-            ),
-          ),
-        ),
-      ],
+    final isLoading = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isLoading),
     );
-  }
-
-  Widget _buildSetupPhase(ActiveWorkoutState workoutState) {
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Selection Grid
-                const Text(
-                  '1. CHỌN NHÓM CƠ',
-                  style: TextStyle(
-                    fontFamily: 'Orbitron',
-                    color: AppTheme.textMain,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: _muscleGroups.map((group) {
-                    final name = group['name'] as String;
-                    final isSelected = _selectedCategories.contains(name);
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.selectionClick();
-                        _toggleCategory(name);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        width: (MediaQuery.of(context).size.width - 44) / 3, // 3 columns
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: isSelected ? AppTheme.cyanNeon.withOpacity(0.15) : AppTheme.panelBackground,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected ? AppTheme.cyanNeon : AppTheme.cyanNeon.withOpacity(0.1),
-                            width: isSelected ? 2 : 1,
-                          ),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: AppTheme.cyanNeon.withOpacity(0.3),
-                              blurRadius: 10,
-                              spreadRadius: 1,
-                            )
-                          ] : [],
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              group['icon'] as IconData,
-                              color: isSelected ? AppTheme.cyanNeon : AppTheme.textDim,
-                              size: 28,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              name,
-                              style: TextStyle(
-                                color: isSelected ? AppTheme.textMain : AppTheme.textDim,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-                
-                const SizedBox(height: 24),
-                Center(
-                  child: OutlinedButton.icon(
-                    onPressed: _addCustomExercise,
-                    icon: const Icon(Icons.tune, size: 18),
-                    label: const Text('CUSTOM (Tự chọn bài)'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.purpleNeon,
-                      side: BorderSide(color: AppTheme.purpleNeon.withOpacity(0.5)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-                
-                // Selected Exercises
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '2. BÀI TẬP ĐÃ CHỌN (${workoutState.exercises.length})',
-                      style: const TextStyle(
-                        fontFamily: 'Orbitron',
-                        color: AppTheme.textMain,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (workoutState.isLoading)
-                      const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(color: AppTheme.cyanNeon, strokeWidth: 2),
-                      )
-                  ],
-                ),
-                const SizedBox(height: 16),
-                
-                if (workoutState.exercises.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: AppTheme.panelBackground.withOpacity(0.4),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppTheme.textDim.withOpacity(0.2), style: BorderStyle.solid),
-                    ),
-                    child: const Text(
-                      'Hãy chọn nhóm cơ ở trên hoặc tự thêm bài tập.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.textDim),
-                    ),
-                  ),
-
-                ...workoutState.exercises.map((we) => Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.panelBackground,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.1)),
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    title: Text(we.exercise?.name ?? 'Unknown', style: const TextStyle(color: AppTheme.textMain, fontWeight: FontWeight.bold)),
-                    subtitle: Text(we.exercise?.category ?? '', style: TextStyle(color: AppTheme.cyanNeon.withOpacity(0.7), fontSize: 12)),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, color: AppTheme.dangerOrange),
-                      onPressed: () => ref.read(activeWorkoutControllerProvider.notifier).removeExercise(we.id),
-                    ),
-                  ),
-                )).toList(),
-              ],
-            ),
-          ),
-        ),
-
-        // Begin Training Button
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppTheme.background.withOpacity(0.9),
-            border: Border(top: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.2))),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.cyanNeon.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -5),
-              ),
-            ],
-          ),
-          child: SystemButton(
-            text: '⚔️ CHIẾN ĐẤU',
-            onPressed: workoutState.exercises.isNotEmpty ? () {
-              HapticFeedback.heavyImpact();
-              ref.read(activeWorkoutControllerProvider.notifier).beginTraining();
-            } : null,
-          ),
-        ).animate().slideY(begin: 1, end: 0, duration: 400.ms),
-      ],
-    );
-  }
-
-  Widget _buildTrainingPhase(ActiveWorkoutState workoutState) {
     final controller = ref.read(activeWorkoutControllerProvider.notifier);
 
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      itemCount: workoutState.exercises.length,
-      itemBuilder: (context, index) {
-        final we = workoutState.exercises[index];
-        return WorkoutExerciseTile(
-          workoutExercise: we,
-          isEditable: true,
-          onAddSet: () => controller.addSet(we.id),
-          onRemove: () => _confirmRemoveExercise(
-            we.id,
-            we.exercise?.name ?? 'Bài tập',
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Text(t('choose_groups'), style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core']
+              .map(
+                (group) => FilterChip(
+                  label: Text(t(group)),
+                  selected: _groups.contains(group),
+                  onSelected: isLoading
+                      ? null
+                      : (selected) async {
+                          setState(() {
+                            selected
+                                ? _groups.add(group)
+                                : _groups.remove(group);
+                          });
+                          if (selected) {
+                            await controller.loadPresetExercises([group]);
+                          }
+                        },
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: isLoading ? null : _addExercise,
+          icon: const Icon(Icons.add),
+          label: Text(t('add_exercise')),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          '${t('selected')} (${exercises.length})',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        if (exercises.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(t('choose_hint')),
           ),
-          onStartRest: _showRestTimerQuickSelect,
-          onUpdateSet: (setId, {reps, weightKg, isCompleted}) {
-            controller.updateSet(
-              we.id,
-              setId,
-              reps: reps,
-              weightKg: weightKg,
-              isCompleted: isCompleted,
-            );
-          },
-          onDeleteSet: (setId) => controller.deleteSet(we.id, setId),
-        );
-      },
+        ...exercises.map(
+          (exercise) => Card(
+            child: ListTile(
+              title: Text(exercise.exercise?.name ?? t('exercises')),
+              subtitle: Text(
+                '${exercise.sets.length} ${t('sets')} · ${t(exercise.exercise?.category ?? '')}',
+              ),
+              trailing: IconButton(
+                tooltip: t('remove'),
+                icon: const Icon(Icons.close),
+                onPressed: isLoading
+                    ? null
+                    : () => controller.removeExercise(exercise.id),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(t('load_hint'), style: const TextStyle(color: AppTheme.textDim)),
+      ],
     );
   }
+}
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+class _SetupBottomAction extends ConsumerWidget {
+  final bool busy;
+  final VoidCallback onBegin;
+
+  const _SetupBottomAction({required this.busy, required this.onBegin});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final exercisesEmpty = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.exercises.isEmpty),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: busy || exercisesEmpty ? null : onBegin,
+          icon: const Icon(Icons.play_arrow),
+          label: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(workoutText(ref, 'begin')),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WorkoutTimerTitle extends ConsumerWidget {
+  final bool isSetupPhase;
+  const _WorkoutTimerTitle({required this.isSetupPhase});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (isSetupPhase) {
+      return Text(workoutText(ref, 'setup'));
+    }
+    final formatted = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.formattedElapsed),
+    );
+    return Text(formatted);
+  }
+}
+
+class _WorkoutTimerPauseAction extends ConsumerWidget {
+  final bool busy;
+  const _WorkoutTimerPauseAction({required this.busy});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isTimerPaused = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isTimerPaused),
+    );
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
+
+    return IconButton(
+      tooltip: workoutText(ref, isTimerPaused ? 'resume' : 'pause'),
+      onPressed: busy
+          ? null
+          : () => isTimerPaused
+                ? controller.resumeTimer()
+                : controller.pauseTimer(),
+      icon: Icon(isTimerPaused ? Icons.play_arrow : Icons.pause),
+    );
+  }
+}
+
+class _WorkoutStatsHeader extends ConsumerWidget {
+  const _WorkoutStatsHeader();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final completedSets = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.completedSets),
+    );
+    final totalSets = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.totalSets),
+    );
+    final previewXP = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.previewXP),
+    );
+    final isTimerPaused = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isTimerPaused),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 8,
         children: [
-          Icon(Icons.add_circle_outline_rounded,
-                  size: 80, color: AppTheme.cyanNeon.withOpacity(0.5))
-              .animate(
-                onPlay: (c) => c.repeat(reverse: true),
-              )
-              .scale(
-                begin: const Offset(1, 1),
-                end: const Offset(1.1, 1.1),
-                duration: 1500.ms,
-              ),
-          const SizedBox(height: 20),
-          const Text(
-            'Thêm một số bài tập!',
-            style: TextStyle(
-              color: AppTheme.textMain,
-              fontSize: 18,
-              fontFamily: 'Orbitron',
-            ),
+          Text(
+            '$completedSets/$totalSets ${workoutText(ref, 'sets')}',
+            style: const TextStyle(color: AppTheme.cyanNeon),
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Nhấn nút bên dưới để chọn thêm',
-            style: TextStyle(
-              color: AppTheme.textDim,
-              fontSize: 14,
-            ),
+          Text(
+            '${workoutText(ref, 'estimated_xp')}: +$previewXP',
+            style: const TextStyle(color: AppTheme.purpleNeon),
           ),
-          const SizedBox(height: 80),
+          if (isTimerPaused)
+            Text(
+              workoutText(ref, 'paused'),
+              style: const TextStyle(color: AppTheme.warningYellow),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _ActiveRestTimerSection extends ConsumerWidget {
+  const _ActiveRestTimerSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isResting = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isResting),
+    );
+    if (!isResting) return const SizedBox.shrink();
+
+    final remaining = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.restRemaining),
+    );
+    final total = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.restTotal),
+    );
+    final isPaused = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isRestPaused),
+    );
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
+
+    return RestTimerWidget(
+      secondsRemaining: remaining,
+      secondsTotal: total,
+      isPaused: isPaused,
+      onSkip: controller.skipRest,
+      onPauseResume: () {
+        if (isPaused) {
+          controller.resumeRest();
+        } else {
+          controller.pauseRest();
+        }
+      },
+      onReset: controller.resetRest,
+      onAdd30: controller.addRest30,
+      onSubtract15: controller.subtractRest15,
+    );
+  }
+}
+
+class _TrainingView extends ConsumerWidget {
+  final Future<bool> Function(String, String, String) onConfirm;
+  final VoidCallback onRest;
+
+  const _TrainingView({required this.onConfirm, required this.onRest});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final exercises = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.exercises),
+    );
+    final isCompleting = ref.watch(
+      activeWorkoutControllerProvider.select((s) => s.isCompleting),
+    );
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
+
+    return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+      itemCount: exercises.length,
+      onReorder: (oldIndex, newIndex) {
+        controller.reorderExercises(oldIndex, newIndex);
+      },
+      itemBuilder: (context, index) {
+        final exercise = exercises[index];
+        return WorkoutExerciseTile(
+          key: ValueKey(exercise.id),
+          index: index,
+          workoutExercise: exercise,
+          isEditable: !isCompleting,
+          onAddSet: () => controller.addSet(exercise.id),
+          onRemove: () async {
+            if (await onConfirm(
+              workoutText(ref, 'remove_exercise'),
+              workoutText(ref, 'remove_hint'),
+              workoutText(ref, 'remove'),
+            )) {
+              await controller.removeExercise(exercise.id);
+            }
+          },
+          onStartRest: onRest,
+          onUpdateSet: (id, {reps, weightKg, durationSeconds, isCompleted}) =>
+              controller.updateSet(
+                exercise.id,
+                id,
+                reps: reps,
+                weightKg: weightKg,
+                durationSeconds: durationSeconds,
+                isCompleted: isCompleted,
+              ),
+          onDeleteSet: (id) => controller.deleteSet(exercise.id, id),
+        );
+      },
     );
   }
 }

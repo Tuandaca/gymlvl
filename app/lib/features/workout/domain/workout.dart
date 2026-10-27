@@ -1,3 +1,7 @@
+// Freezed forwards factory parameter JsonKey annotations to generated fields.
+// See https://pub.dev/packages/freezed#disabling-invalid_annotation_target-warning-and-warning-in-generates-files
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'workout_exercise.dart';
 
@@ -22,6 +26,9 @@ abstract class Workout with _$Workout {
     @JsonKey(name: 'duration_seconds') @Default(0) int durationSeconds,
     String? notes,
     @JsonKey(name: 'started_at') DateTime? startedAt,
+    @JsonKey(name: 'training_started_at') DateTime? trainingStartedAt,
+    @JsonKey(name: 'paused_at') DateTime? pausedAt,
+    @JsonKey(name: 'paused_seconds') @Default(0) int pausedSeconds,
     @JsonKey(name: 'completed_at') DateTime? completedAt,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,

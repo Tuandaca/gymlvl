@@ -1,19 +1,26 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/exercise.dart';
 import '../../domain/workout.dart';
 import '../../domain/workout_exercise.dart';
 import '../../domain/workout_set.dart';
 import '../../domain/workout_repository.dart';
+import '../../domain/workout_templates.dart';
 import '../providers/exercise_providers.dart';
+import 'workout_history_controller.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../progression/domain/progression_engine.dart';
+import '../../../quests/domain/quest_instance.dart';
+import '../../../quests/presentation/providers/quest_providers.dart';
+import '../../../dashboard/presentation/providers/stats_providers.dart';
+import '../../../dashboard/presentation/providers/class_providers.dart';
 
 part 'active_workout_controller.freezed.dart';
-
-// ─── Active Workout State ───
 
 @freezed
 abstract class ActiveWorkoutState with _$ActiveWorkoutState {
@@ -25,6 +32,8 @@ abstract class ActiveWorkoutState with _$ActiveWorkoutState {
     @Default(false) bool isResting,
     @Default(0) int restSecondsRemaining,
     @Default(0) int restSecondsTotal,
+    @Default(false) bool isRestPaused,
+    DateTime? restTargetEndTime,
     @Default(false) bool isLoading,
     @Default(false) bool isCompleting,
     @Default(false) bool isTimerPaused,
@@ -34,415 +43,526 @@ abstract class ActiveWorkoutState with _$ActiveWorkoutState {
 
   const ActiveWorkoutState._();
 
-  bool get hasActiveWorkout =>
-      workout != null && workout!.status == WorkoutStatus.active;
-
-  String get formattedElapsed {
-    final minutes = (elapsedSeconds ~/ 60).toString().padLeft(2, '0');
-    final seconds = (elapsedSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
-  String get formattedRest {
-    final minutes = (restSecondsRemaining ~/ 60).toString().padLeft(2, '0');
-    final seconds = (restSecondsRemaining % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
-  double get restProgress {
-    if (restSecondsTotal == 0) return 0;
-    return 1.0 - (restSecondsRemaining / restSecondsTotal);
-  }
-
+  bool get hasActiveWorkout => workout?.status == WorkoutStatus.active;
+  String get formattedElapsed => formatDuration(elapsedSeconds);
+  String get formattedRest => formatDuration(restSecondsRemaining);
+  static String formatDuration(int seconds) =>
+      '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
+  double get restProgress => restSecondsTotal <= 0
+      ? 0
+      : (1 - restSecondsRemaining / restSecondsTotal).clamp(0, 1);
+  int get restRemaining => restSecondsRemaining;
+  int get restTotal => restSecondsTotal;
   int get totalSets => exercises.fold(0, (sum, ex) => sum + ex.sets.length);
-  int get completedSets =>
-      exercises.fold(
-          0, (sum, ex) => sum + ex.sets.where((s) => s.isCompleted).length);
+  int get completedSets => exercises.fold(
+    0,
+    (sum, ex) => sum + ex.sets.where((s) => s.isCompleted).length,
+  );
+  double get totalVolumeKg => exercises.fold(
+    0.0,
+    (sum, ex) =>
+        sum +
+        ex.sets
+            .where((s) => s.isCompleted)
+            .fold(0.0, (sSum, s) => sSum + (s.weightKg * s.reps)),
+  );
 }
 
-// ─── Controller (Riverpod 3.x Notifier) ───
-
 class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
+  static const String backupKey = 'gymlvl_active_workout_backup';
+
   Timer? _workoutTimer;
   Timer? _restTimer;
+  Future<void> _pending = Future.value();
+  Future<Map<String, dynamic>?>? _completion;
+  int _generation = 0;
+  bool _mutationFailed = false;
 
   WorkoutRepository get _repository => ref.read(workoutRepositoryProvider);
 
   @override
   ActiveWorkoutState build() {
-    ref.onDispose(() {
-      _workoutTimer?.cancel();
-      _restTimer?.cancel();
-    });
+    ref.watch(
+      authStateStreamProvider.select((value) => value.value?.session?.user.id),
+    );
+    _generation++;
+    _cleanup();
+    _pending = Future.value();
+    _completion = null;
+    _mutationFailed = false;
+    ref.onDispose(_cleanup);
     return const ActiveWorkoutState();
   }
 
-  /// Kiểm tra xem có workout đang dở dang không (auto-resume)
-  Future<void> checkForActiveWorkout() async {
-    state = state.copyWith(isLoading: true);
-    try {
-      final activeWorkout = await _repository.getActiveWorkout();
-      if (activeWorkout != null) {
-        final elapsed = activeWorkout.startedAt != null
-            ? DateTime.now()
-                .toUtc()
-                .difference(activeWorkout.startedAt!)
-                .inSeconds
-            : 0;
-
-        state = state.copyWith(
-          workout: activeWorkout,
-          exercises: activeWorkout.exercises,
-          elapsedSeconds: elapsed,
-          isSetupPhase: false, // Auto-resume always jumps to training phase
-          isLoading: false,
-        );
-        _startWorkoutTimer();
-      } else {
-        state = state.copyWith(isLoading: false);
-      }
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
-    }
+  static int elapsedFor(Workout workout, DateTime now) {
+    final start = workout.trainingStartedAt;
+    if (start == null) return 0;
+    final end = workout.completedAt ?? workout.pausedAt ?? now;
+    return math.max(
+      0,
+      end.toUtc().difference(start.toUtc()).inSeconds - workout.pausedSeconds,
+    );
   }
 
-  /// Bắt đầu buổi tập mới
-  Future<void> startWorkout() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
-    try {
-      final workout = await _repository.startWorkout();
-      state = state.copyWith(
-        workout: workout,
-        exercises: [],
-        elapsedSeconds: 0,
-        isSetupPhase: true, // Start in setup phase
-        isLoading: false,
-      );
-      // Timer is not started here anymore
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
-    }
+  bool _isCurrent(int generation) => ref.mounted && generation == _generation;
+
+  void _adopt(Workout workout, int generation) {
+    if (!_isCurrent(generation)) return;
+    state = state.copyWith(
+      workout: workout,
+      exercises: workout.exercises,
+      isSetupPhase: workout.trainingStartedAt == null,
+      isTimerPaused: workout.pausedAt != null,
+      elapsedSeconds: elapsedFor(workout, DateTime.now().toUtc()),
+      errorMessage: null,
+    );
+    _updatePreviewXP();
+    _startWorkoutTimer();
+    _saveLocalBackup();
   }
 
-  /// Thêm bài tập vào workout kèm 4 set (Dynamic Progressive Overload)
-  Future<void> addExercise(Exercise exercise) async {
-    if (state.workout == null) return;
-    try {
-      final workoutExercise = await _repository.addExerciseToWorkout(
-        state.workout!.id,
-        exercise.id,
-        state.exercises.length,
-      );
-
-      // Thêm import thư viện trong não: ref.read(auth_providers)
-      // Tìm xem user có tạ trong quá khứ không
-      final lastSet = await _repository.getLastSetForExercise(exercise.id);
-      double baseWeight = 0.0;
-
-      if (lastSet != null && lastSet.weightKg > 0) {
-        // Dùng tạ lịch sử của user (tính cho bài tập nặng nhất / set chính)
-        baseWeight = lastSet.weightKg;
-      } else {
-        // Nếu không có lịch sử, tính Heuristic Baseline từ Profile
-        // Lấy profile từ Riverpod FutureProvider, nhưng do đang trong process đồng bộ,
-        // nếu provider chưa có sẽ mặc định trị số chuẩn.
-        try {
-          final profileLoader = ref.read(currentUserProfileProvider.future);
-          final userLoader = ref.read(currentUserProvider.future);
-          final profile = await profileLoader;
-          final user = await userLoader;
-          
-          final weight = (profile?['weight_kg'] as num?)?.toDouble() ?? 60.0;
-          final exp = profile?['experience_level'] as String? ?? 'beginner';
-          final lvl = (user?['level'] as int?) ?? 1;
-
-          double multiplier = 0.1;
-          if (exp == 'intermediate') {
-            multiplier = 0.2;
-          } else if (exp == 'advanced') {
-            multiplier = 0.35;
-          }
-
-          // Cân nặng * Hệ số kinh nghiệm + (Level * 0.5kg)
-          baseWeight = weight * multiplier + (lvl * 0.5);
-
-          // Làm tròn đến 2.5kg gần nhất (ví dụ bánh tạ chuẩn phòng gym)
-          baseWeight = (baseWeight / 2.5).round() * 2.5;
-          if (baseWeight < 5.0) baseWeight = 5.0; // Tối thiểu 5kg
-        } catch (_) {
-          baseWeight = 20.0; // Fallback an toàn nếu lỗi kết nối
+  // All writes retain user order, including a final completion after pending set edits.
+  Future<void> _enqueue(Future<void> Function(int generation) action) {
+    if (state.isCompleting) return Future.value();
+    final generation = _generation;
+    final next = _pending.then((_) async {
+      if (!ref.mounted || generation != _generation) return;
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      try {
+        await action(generation);
+      } catch (_) {
+        if (ref.mounted && generation == _generation) {
+          _mutationFailed = true;
+          state = state.copyWith(errorMessage: 'save_failed');
+        }
+      } finally {
+        if (ref.mounted && generation == _generation) {
+          state = state.copyWith(isLoading: false);
         }
       }
+    });
+    _pending = next;
+    return next;
+  }
 
-      // Tự động tạo 4 set chuẩn gym với progressive payload 
-      // Dựa trên mức baseWeight (tạ nặng nhất mà user hướng tới ở set 3)
-      final w1 = ((baseWeight * 0.5) / 2.5).round() * 2.5; // Set 1: 50%
-      final w2 = ((baseWeight * 0.7) / 2.5).round() * 2.5; // Set 2: 70%
-      final w3 = baseWeight;                               // Set 3: 100%
-      final w4 = baseWeight + 2.5;                         // Set 4: 100% + push
+  // --- LOCAL INTERRUPTION RECOVERY (shared_preferences) ---
 
-      final defaultSetsParams = [
-        {'set': 1, 'reps': 12, 'weight': w1 < 5.0 ? 5.0 : w1},
-        {'set': 2, 'reps': 12, 'weight': w2 < 5.0 ? 5.0 : w2},
-        {'set': 3, 'reps': 10, 'weight': w3},
-        {'set': 4, 'reps': 8, 'weight': w4},
-      ];
+  Future<void> _saveLocalBackup() async {
+    final workout = state.workout;
+    if (workout == null || !state.hasActiveWorkout) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final snapshot = <String, dynamic>{
+        'workout': workout.copyWith(exercises: state.exercises).toJson(),
+        'local_updated_at': DateTime.now().toUtc().toIso8601String(),
+        'elapsed_seconds': state.elapsedSeconds,
+      };
+      await prefs.setString(backupKey, jsonEncode(snapshot));
+    } catch (_) {
+      // Local backup failure should not crash interactive workout
+    }
+  }
 
-      final createdSets = <WorkoutSet>[];
-      for (final param in defaultSetsParams) {
-        final newSet = await _repository.addSet(
-          workoutExercise.id,
-          param['set'] as int,
-          param['reps'] as int,
-          param['weight'] as double,
-          baselineWeightKg: param['weight'] as double,
-        );
-        createdSets.add(newSet);
+  Future<void> _clearLocalBackup() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(backupKey);
+    } catch (_) {}
+  }
+
+  static Future<Map<String, dynamic>?> checkLocalBackup() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(backupKey);
+      if (raw == null || raw.isEmpty) return null;
+      return jsonDecode(raw) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> restoreFromLocalBackup() => _enqueue((generation) async {
+    try {
+      final backup = await checkLocalBackup();
+      if (backup == null) return;
+      final workoutMap = backup['workout'] as Map<String, dynamic>?;
+      if (workoutMap == null) return;
+      final workout = Workout.fromJson(workoutMap);
+      _mutationFailed = false;
+      _adopt(workout, generation);
+
+      // Verify and synchronize with remote active workout if available
+      try {
+        final remote = await _repository.getWorkoutDetail(workout.id);
+        if (remote != null && _isCurrent(generation)) {
+          // If remote is newer, adopt remote; otherwise keep local edits and save
+          _adopt(remote, generation);
+        }
+      } catch (_) {}
+    } catch (_) {
+      state = state.copyWith(errorMessage: 'restore_failed');
+    }
+  });
+
+  Future<void> discardLocalBackup() => _enqueue((generation) async {
+    await _clearLocalBackup();
+    if (state.hasActiveWorkout) {
+      await cancelWorkout();
+    } else {
+      _cleanup();
+      state = const ActiveWorkoutState();
+    }
+  });
+
+  Future<void> checkForActiveWorkout() => _enqueue((generation) async {
+    // 1. Check local backup first for instant offline resume
+    final backup = await checkLocalBackup();
+    if (backup != null && !state.hasActiveWorkout) {
+      final workoutMap = backup['workout'] as Map<String, dynamic>?;
+      if (workoutMap != null) {
+        try {
+          final localWorkout = Workout.fromJson(workoutMap);
+          _mutationFailed = false;
+          _adopt(localWorkout, generation);
+        } catch (_) {}
       }
+    }
 
-      final populatedWorkoutExercise = workoutExercise.copyWith(sets: createdSets);
+    // 2. Fetch server active workout
+    try {
+      final workout = await _repository.getActiveWorkout();
+      if (!_isCurrent(generation)) return;
+      _mutationFailed = false;
+      if (workout != null) {
+        _adopt(workout, generation);
+      } else if (backup == null) {
+        _cleanup();
+        state = const ActiveWorkoutState();
+      }
+    } catch (_) {
+      // If server unreachable but local backup exists, remain on local state
+      if (backup == null && _isCurrent(generation)) {
+        _cleanup();
+        state = const ActiveWorkoutState();
+      }
+    }
+  });
 
+  Future<void> startWorkout() => _enqueue((generation) async {
+    if (state.hasActiveWorkout) return;
+    final workout = await _repository.startWorkout();
+    if (!_isCurrent(generation)) return;
+    _mutationFailed = false;
+    _adopt(workout, generation);
+  });
+
+  Future<void> beginTraining() => _enqueue((generation) async {
+    if (!state.hasActiveWorkout || state.exercises.isEmpty) return;
+    _adopt(await _repository.beginWorkout(state.workout!.id), generation);
+  });
+
+  Future<void> _reload() async {
+    final generation = _generation;
+    final workout = await _repository.getWorkoutDetail(state.workout!.id);
+    if (workout != null) _adopt(workout, generation);
+  }
+
+  Future<void> _addExercise(
+    Exercise exercise, {
+    PrescribedExercise? prescription,
+  }) async {
+    final generation = _generation;
+    if (!state.hasActiveWorkout ||
+        state.exercises.any((e) => e.exerciseId == exercise.id)) {
+      return;
+    }
+    final order =
+        state.exercises.fold<int>(-1, (v, e) => math.max(v, e.orderIndex)) + 1;
+    final item = await _repository.addExerciseToWorkout(
+      state.workout!.id,
+      exercise.id,
+      order,
+    );
+    if (!_isCurrent(generation)) return;
+    try {
+      // Existing logged loads are suggestions only. No load is invented for a new exercise.
+      final previous = await _repository.getLastSetForExercise(exercise.id);
+      if (!_isCurrent(generation)) return;
+      final bodyweight = exercise.equipment.toLowerCase().contains('body');
+      final weight = bodyweight
+          ? 0.0
+          : (prescription?.weightKg ?? previous?.weightKg ?? 0.0).clamp(
+              0.0,
+              1000.0,
+            );
+      final isTimed =
+          exercise.forceType?.toLowerCase() == 'static' ||
+          exercise.movementPattern == 'carry' ||
+          exercise.category.toLowerCase() == 'cardio' ||
+          (exercise.slug?.contains('plank') ?? false);
+      final sets = <WorkoutSet>[];
+      final count = prescription?.sets ?? 3;
+      final defaultReps = isTimed
+          ? 0
+          : (prescription?.reps ?? previous?.reps ?? 10);
+      final defaultDuration = isTimed ? 30 : 0;
+
+      for (var i = 1; i <= count; i++) {
+        sets.add(
+          await _repository.addSet(
+            item.id,
+            i,
+            defaultReps,
+            weight,
+            durationSeconds: defaultDuration,
+          ),
+        );
+        if (!_isCurrent(generation)) return;
+      }
       state = state.copyWith(
-        exercises: [...state.exercises, populatedWorkoutExercise],
+        exercises: [
+          ...state.exercises,
+          item.copyWith(exercise: exercise, sets: sets),
+        ],
       );
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      _updatePreviewXP();
+      _saveLocalBackup();
+    } catch (_) {
+      if (!_isCurrent(generation)) return;
+      // Do not leave a half-created exercise hidden from the screen.
+      try {
+        await _repository.removeExerciseFromWorkout(item.id);
+      } catch (_) {}
+      await _reload();
+      rethrow;
     }
   }
 
-  /// Thêm nhiều bài tập cùng lúc
-  Future<void> addExercises(List<Exercise> exercises) async {
-    for (final exercise in exercises) {
-      await addExercise(exercise);
+  Future<void> addExercise(Exercise exercise) =>
+      _enqueue((_) => _addExercise(exercise));
+
+  Future<void> addExercises(List<Exercise> exercises) =>
+      _enqueue((generation) async {
+        for (final exercise in exercises) {
+          await _addExercise(exercise);
+          if (!_isCurrent(generation)) return;
+        }
+      });
+
+  Future<bool> startQuest(QuestInstance quest) async {
+    final generation = _generation;
+    await startWorkout();
+    if (!_isCurrent(generation)) return false;
+    if (!state.hasActiveWorkout) return false;
+    if (!state.isSetupPhase) {
+      state = state.copyWith(errorMessage: 'active_session_exists');
+      return false;
     }
+    await _enqueue((generation) async {
+      final catalog = await ref.read(exerciseRepositoryProvider).getExercises();
+      if (!_isCurrent(generation)) return;
+      for (final target in quest.config) {
+        final matches = catalog.where(
+          (exercise) => exercise.id == target.exerciseId,
+        );
+        if (matches.isEmpty) throw StateError('exercise_unavailable');
+        await _addExercise(matches.first, prescription: target);
+        if (!_isCurrent(generation)) return;
+      }
+    });
+    return _isCurrent(generation) && state.errorMessage == null;
   }
 
-  /// Chuyển từ Setup Phase sang Training Phase
-  Future<void> beginTraining() async {
-    if (state.workout == null || state.exercises.isEmpty) return;
+  Future<void> loadPresetExercises(List<String> categories) => _enqueue((
+    generation,
+  ) async {
+    if (!state.hasActiveWorkout || !state.isSetupPhase) return;
+    final catalog = await ref.read(exerciseRepositoryProvider).getExercises();
+    if (!_isCurrent(generation)) return;
+    final names = WorkoutTemplates.getExercisesForCategories(categories);
+    // Category selection adds presets. Removing a selection never deletes logged user work.
+    for (final name in names) {
+      final matches = catalog.where((exercise) => exercise.name == name);
+      if (matches.isEmpty) continue;
+      await _addExercise(matches.first);
+      if (!_isCurrent(generation)) return;
+    }
+    if (names.isNotEmpty &&
+        !catalog.any((exercise) => names.contains(exercise.name))) {
+      state = state.copyWith(errorMessage: 'exercise_unavailable');
+    }
+  });
+
+  // --- REORDER EXERCISES ---
+
+  Future<void> reorderExercises(int oldIndex, int newIndex) =>
+      _enqueue((generation) async {
+        if (!state.hasActiveWorkout || state.exercises.isEmpty) return;
+        if (oldIndex < 0 || oldIndex >= state.exercises.length) return;
+        if (newIndex < 0 || newIndex > state.exercises.length) return;
+
+        var targetIndex = newIndex;
+        if (oldIndex < targetIndex) {
+          targetIndex -= 1;
+        }
+        if (oldIndex == targetIndex) return;
+
+        final updated = List<WorkoutExercise>.from(state.exercises);
+        final moved = updated.removeAt(oldIndex);
+        updated.insert(targetIndex, moved);
+
+        final reordered = <WorkoutExercise>[];
+        for (var i = 0; i < updated.length; i++) {
+          reordered.add(updated[i].copyWith(orderIndex: i));
+        }
+
+        state = state.copyWith(exercises: reordered);
+        _saveLocalBackup();
+
+        final ids = reordered.map((e) => e.id).toList();
+        await _repository.reorderExercises(state.workout!.id, ids);
+      });
+
+  Future<void> removeExercise(String id) => _enqueue((generation) async {
+    await _repository.removeExerciseFromWorkout(id);
+    if (!_isCurrent(generation)) return;
+    state = state.copyWith(
+      exercises: state.exercises.where((e) => e.id != id).toList(),
+    );
+    _updatePreviewXP();
+    _saveLocalBackup();
+  });
+
+  Future<void> addSet(
+    String id, {
+    int reps = 10,
+    double weightKg = 0,
+    int durationSeconds = 0,
+  }) => _enqueue((generation) async {
+    final exercise = state.exercises.firstWhere((e) => e.id == id);
+    final number =
+        exercise.sets.fold<int>(0, (v, s) => math.max(v, s.setNumber)) + 1;
+    final set = await _repository.addSet(
+      id,
+      number,
+      reps,
+      weightKg,
+      durationSeconds: durationSeconds,
+    );
+    if (!_isCurrent(generation)) return;
+    state = state.copyWith(
+      exercises: state.exercises
+          .map((e) => e.id == id ? e.copyWith(sets: [...e.sets, set]) : e)
+          .toList(),
+    );
+    _saveLocalBackup();
+  });
+
+  Future<void> updateSet(
+    String exerciseId,
+    String setId, {
+    int? reps,
+    double? weightKg,
+    int? durationSeconds,
+    bool? isCompleted,
+  }) => _enqueue((generation) async {
+    final currentExercise = state.exercises.firstWhere(
+      (e) => e.id == exerciseId,
+    );
+    final current = currentExercise.sets.firstWhere((s) => s.id == setId);
+
+    final newReps = reps ?? current.reps;
+    final newDuration = durationSeconds ?? current.durationSeconds;
+    final newIsCompleted = isCompleted ?? current.isCompleted;
+
+    if (newIsCompleted && newReps <= 0 && newDuration <= 0) {
+      state = state.copyWith(errorMessage: 'reps_required');
+      return;
+    }
+
+    final updated = await _repository.updateSet(
+      setId,
+      reps: reps,
+      weightKg: weightKg,
+      durationSeconds: durationSeconds,
+      isCompleted: isCompleted,
+    );
+    if (!_isCurrent(generation)) return;
 
     state = state.copyWith(
-      isSetupPhase: false,
-      elapsedSeconds: 0,
+      exercises: state.exercises
+          .map(
+            (e) => e.id == exerciseId
+                ? e.copyWith(
+                    sets: e.sets
+                        .map((s) => s.id == setId ? updated : s)
+                        .toList(),
+                  )
+                : e,
+          )
+          .toList(),
     );
-    _startWorkoutTimer();
-  }
+    _updatePreviewXP();
+    _saveLocalBackup();
 
-  /// Tải các bài tập mặc định cho các nhóm cơ đã chọn (Có thêm và xóa tự động)
-  Future<void> loadPresetExercises(List<String> categories) async {
-    if (state.workout == null) return;
-    
-    state = state.copyWith(isLoading: true);
-    
-    try {
-      final allExercisesInDB = await ref.read(exerciseRepositoryProvider).getExercises();
-      
-      // 1. Xác định danh sách bài tập cần phải có dựa trên categories
-      final Map<String, List<String>> presetDict = {
-        'Chest': ['Bench Press (Barbell)', 'Incline Bench Press (Dumbbell)', 'Chest Fly (Machine)', 'Push-up'],
-        'Back': ['Deadlift (Barbell)', 'Pull-up', 'Lat Pulldown (Cable)', 'Seated Cable Row'],
-        'Legs': ['Squat (Barbell)', 'Leg Press', 'Leg Extension', 'Lying Leg Curl'],
-        'Shoulders': ['Overhead Press (Barbell)', 'Lateral Raise (Dumbbell)', 'Face Pull (Cable)'],
-        'Arms': ['Bicep Curl (Barbell)', 'Hammer Curl (Dumbbell)', 'Tricep Pushdown (Cable)', 'Skull Crusher (Barbell)'],
-        'Core': ['Plank', 'Crunch', 'Leg Raise'],
-      };
-
-      final List<String> targetExerciseNames = [];
-      for (final cat in categories) {
-        if (presetDict.containsKey(cat)) {
-          targetExerciseNames.addAll(presetDict[cat]!);
-        }
-      }
-
-      // 2. Xóa các bài tập có category KHÔNG nằm trong danh sách categories được chọn
-      // Chỉ tự động xóa nếu bài tập đó thuộc 1 trong các category chính (để tránh xóa nhầm bài custom lẻ)
-      final List<WorkoutExercise> remainingExercises = [];
-      final List<String> idsToRemove = [];
-
-      for (final we in state.exercises) {
-        final category = we.exercise?.category;
-        // Nếu category bài tập hiện tại không còn trong danh sách chọn, và nó thuộc 6 nhóm cơ chính
-        if (category != null && 
-            presetDict.containsKey(category) && 
-            !categories.contains(category)) {
-          idsToRemove.add(we.id);
-        } else {
-          remainingExercises.add(we);
-        }
-      }
-
-      // Thực thi xóa trên DB
-      for (final id in idsToRemove) {
-        await _repository.removeExerciseFromWorkout(id);
-      }
-
-      // 3. Thêm các bài tập thiếu
-      final List<WorkoutExercise> updatedExercises = [...remainingExercises];
-      
-      for (final templateName in targetExerciseNames) {
-        final exercise = allExercisesInDB.firstWhere(
-          (e) => e.name == templateName,
-          orElse: () => allExercisesInDB.first,
-        );
-        
-        final exists = updatedExercises.any((we) => we.exercise?.id == exercise.id);
-        if (!exists) {
-          // Add to DB and Get populated exercise
-          final workoutExercise = await _repository.addExerciseToWorkout(
-            state.workout!.id,
-            exercise.id,
-            updatedExercises.length,
-          );
-
-          // Tự động tạo sets (Helper logic copy từ addExercise)
-          final lastSet = await _repository.getLastSetForExercise(exercise.id);
-          double baseWeight = 20.0; 
-          if (lastSet != null && lastSet.weightKg > 0) baseWeight = lastSet.weightKg;
-
-          final w1 = ((baseWeight * 0.5) / 2.5).round() * 2.5; 
-          final w2 = ((baseWeight * 0.7) / 2.5).round() * 2.5;
-          
-          final defaultParams = [
-            {'set': 1, 'reps': 12, 'weight': w1 < 5.0 ? 5.0 : w1},
-            {'set': 2, 'reps': 12, 'weight': w2 < 5.0 ? 5.0 : w2},
-            {'set': 3, 'reps': 10, 'weight': baseWeight},
-            {'set': 4, 'reps': 8, 'weight': baseWeight + 2.5},
-          ];
-
-          final createdSets = <WorkoutSet>[];
-          for (final param in defaultParams) {
-            final newSet = await _repository.addSet(
-              workoutExercise.id,
-              param['set'] as int,
-              param['reps'] as int,
-              param['weight'] as double,
-            );
-            createdSets.add(newSet);
-          }
-          
-          updatedExercises.add(workoutExercise.copyWith(sets: createdSets));
-        }
-      }
-      
-      state = state.copyWith(exercises: updatedExercises, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    // Auto-start rest timer on completing a set
+    if (isCompleted == true && !current.isCompleted) {
+      final restSec = current.restSeconds > 0 ? current.restSeconds : 60;
+      startRest(restSec);
     }
-  }
+  });
 
-  /// Xóa bài tập khỏi workout
-  Future<void> removeExercise(String workoutExerciseId) async {
-    try {
-      await _repository.removeExerciseFromWorkout(workoutExerciseId);
-      state = state.copyWith(
-        exercises:
-            state.exercises.where((e) => e.id != workoutExerciseId).toList(),
-      );
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
-  }
+  Future<void> deleteSet(String exerciseId, String setId) => _enqueue((
+    generation,
+  ) async {
+    await _repository.deleteSet(setId);
+    if (!_isCurrent(generation)) return;
+    state = state.copyWith(
+      exercises: state.exercises
+          .map(
+            (e) => e.id == exerciseId
+                ? e.copyWith(sets: e.sets.where((s) => s.id != setId).toList())
+                : e,
+          )
+          .toList(),
+    );
+    _updatePreviewXP();
+    _saveLocalBackup();
+  });
 
-  /// Thêm set vào exercise
-  Future<void> addSet(String workoutExerciseId,
-      {int reps = 0, double weightKg = 0}) async {
-    try {
-      final exercise =
-          state.exercises.firstWhere((e) => e.id == workoutExerciseId);
-      final setNumber = exercise.sets.length + 1;
-
-      final newSet = await _repository.addSet(
-        workoutExerciseId,
-        setNumber,
-        reps,
-        weightKg,
-      );
-
-      state = state.copyWith(
-        exercises: state.exercises.map((e) {
-          if (e.id == workoutExerciseId) {
-            return e.copyWith(sets: [...e.sets, newSet]);
-          }
-          return e;
-        }).toList(),
-      );
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
-  }
-
-  /// Cập nhật set
-  Future<void> updateSet(String workoutExerciseId, String setId,
-      {int? reps, double? weightKg, bool? isCompleted}) async {
-    try {
-      final updatedSet = await _repository.updateSet(
-        setId,
-        reps: reps,
-        weightKg: weightKg,
-        isCompleted: isCompleted,
-      );
-
-      state = state.copyWith(
-        exercises: state.exercises.map((e) {
-          if (e.id == workoutExerciseId) {
-            return e.copyWith(
-              sets: e.sets.map((s) {
-                if (s.id == setId) return updatedSet;
-                return s;
-              }).toList(),
-            );
-          }
-          return e;
-        }).toList(),
-      );
-      _updatePreviewXP();
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
-  }
-
-  /// Xóa set
-  Future<void> deleteSet(String workoutExerciseId, String setId) async {
-    try {
-      await _repository.deleteSet(setId);
-
-      state = state.copyWith(
-        exercises: state.exercises.map((e) {
-          if (e.id == workoutExerciseId) {
-            final updatedSets =
-                e.sets.where((s) => s.id != setId).toList();
-            final renumbered = updatedSets.asMap().entries.map((entry) {
-              return entry.value.copyWith(setNumber: entry.key + 1);
-            }).toList();
-            return e.copyWith(sets: renumbered);
-          }
-          return e;
-        }).toList(),
-      );
-      _updatePreviewXP();
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
-    }
-  }
-
-  // ─── Rest Timer ───
+  // --- RE-ARCHITECTED REST TIMER (1-second interval, pause/resume, +30s/-15s, background accurate) ---
 
   void startRest(int seconds) {
+    if (seconds <= 0 || seconds > 7200) return;
     _restTimer?.cancel();
+    final targetEndTime = DateTime.now().add(Duration(seconds: seconds));
     state = state.copyWith(
       isResting: true,
+      isRestPaused: false,
       restSecondsRemaining: seconds,
       restSecondsTotal: seconds,
+      restTargetEndTime: targetEndTime,
     );
 
     _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      final remaining = state.restSecondsRemaining - 1;
+      if (state.isRestPaused) return;
+
+      final now = DateTime.now();
+      final target = state.restTargetEndTime;
+      final remaining = target != null
+          ? math.max(0, target.difference(now).inSeconds)
+          : math.max(0, state.restSecondsRemaining - 1);
+
       if (remaining <= 0) {
         timer.cancel();
+        _restTimer = null;
         HapticFeedback.heavyImpact();
+        SystemSound.play(SystemSoundType.alert);
         state = state.copyWith(
           isResting: false,
+          isRestPaused: false,
           restSecondsRemaining: 0,
+          restTargetEndTime: null,
         );
       } else {
         state = state.copyWith(restSecondsRemaining: remaining);
@@ -450,144 +570,192 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     });
   }
 
-  void skipRest() {
-    _restTimer?.cancel();
+  void pauseRest() {
+    if (!state.isResting || state.isRestPaused) return;
+    state = state.copyWith(isRestPaused: true);
+  }
+
+  void resumeRest() {
+    if (!state.isResting || !state.isRestPaused) return;
+    final newTarget = DateTime.now().add(
+      Duration(seconds: state.restSecondsRemaining),
+    );
+    state = state.copyWith(isRestPaused: false, restTargetEndTime: newTarget);
+  }
+
+  void resetRest() {
+    if (!state.isResting) return;
+    final total = state.restSecondsTotal > 0 ? state.restSecondsTotal : 60;
+    startRest(total);
+  }
+
+  void adjustRest(int deltaSeconds) {
+    if (!state.isResting) return;
+    final current = state.restSecondsRemaining;
+    final updated = math.max(1, current + deltaSeconds);
+    final newTarget = DateTime.now().add(Duration(seconds: updated));
+    final newTotal = math.max(state.restSecondsTotal, updated);
     state = state.copyWith(
-      isResting: false,
-      restSecondsRemaining: 0,
+      restSecondsRemaining: updated,
+      restSecondsTotal: newTotal,
+      restTargetEndTime: newTarget,
     );
   }
 
-  // ─── Complete / Cancel ───
+  void addRest30() => adjustRest(30);
 
-  Future<Map<String, dynamic>?> completeWorkout({String? notes}) async {
-    if (state.workout == null) return null;
-    state = state.copyWith(isCompleting: true);
+  void subtractRest15() => adjustRest(-15);
+
+  void skipRest() {
+    _restTimer?.cancel();
+    _restTimer = null;
+    state = state.copyWith(
+      isResting: false,
+      isRestPaused: false,
+      restSecondsRemaining: 0,
+      restTargetEndTime: null,
+    );
+  }
+
+  // --- WORKOUT COMPLETION & RECOVERY CLEANUP ---
+
+  Future<Map<String, dynamic>?> completeWorkout({String? notes}) {
+    if (_completion != null) return _completion!;
+    if (_mutationFailed) {
+      state = state.copyWith(errorMessage: 'reload_required');
+      return Future.value(null);
+    }
+    final pending = _pending;
+    state = state.copyWith(isCompleting: true, errorMessage: null);
+    _completion = _finish(pending, notes);
+    return _completion!;
+  }
+
+  Future<Map<String, dynamic>?> _finish(
+    Future<void> pending,
+    String? notes,
+  ) async {
+    final generation = _generation;
     try {
-      final completedWorkout = await _repository.completeWorkout(
+      await pending;
+      if (!ref.mounted ||
+          generation != _generation ||
+          !state.hasActiveWorkout) {
+        return null;
+      }
+      if (_mutationFailed) {
+        state = state.copyWith(errorMessage: 'reload_required');
+        return null;
+      }
+      if (state.errorMessage != null) return null;
+      if (state.completedSets == 0 || state.isSetupPhase) {
+        state = state.copyWith(errorMessage: 'completed_set_required');
+        return null;
+      }
+      final result = await _repository.finishWorkout(
         state.workout!.id,
         notes: notes,
       );
+      if (!ref.mounted || generation != _generation) return null;
 
-      Map<String, dynamic>? xpResult;
-      try {
-        xpResult = await _repository.calculateXP(completedWorkout.id);
-      } catch (e) {
-        // Vẫn dọn dẹp và reset state dù lỗi tính XP xảy ra 
-        // để user không bị kẹt ở màn hình Training
-        _cleanup();
-        state = const ActiveWorkoutState();
-        
-        // Refresh để Dashboard fetch lại dữ liệu mới nhất (dù XP có thể chưa cộng)
-        await Future.delayed(const Duration(milliseconds: 500));
-        ref.refresh(currentUserProvider);
-        ref.refresh(currentUserProfileProvider);
-
-        return {
-          'workout': completedWorkout,
-          'xpResult': null,
-          'error': 'Lỗi tính XP: $e',
-        };
-      }
-
+      // Clean up local interruption backup upon genuine completion
+      await _clearLocalBackup();
       _cleanup();
-      state = const ActiveWorkoutState();
-      
-      // Delay nhỏ để đảm bảo DB commit trước khi fetch lại
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Refresh Auth Providers để cập nhật level & total_xp
-      // ignore: unused_result
-      ref.refresh(currentUserProvider);
-      // ignore: unused_result
-      ref.refresh(currentUserProfileProvider);
-
-      return {
-        'workout': completedWorkout,
-        'xpResult': xpResult,
-      };
-    } catch (e) {
-      state = state.copyWith(
-        isCompleting: false,
-        errorMessage: e.toString(),
+      final finishedWorkout = state.workout!.copyWith(
+        exercises: state.exercises,
+        durationSeconds: state.elapsedSeconds,
+        completedAt: DateTime.now().toUtc(),
+        status: WorkoutStatus.completed,
       );
-      return null;
-    }
-  }
-
-  Future<void> cancelWorkout() async {
-    if (state.workout == null) return;
-    try {
-      await _repository.cancelWorkout(state.workout!.id);
-      _cleanup();
       state = const ActiveWorkoutState();
-    } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      _invalidateProgress();
+      return {
+        'workout': result.workout,
+        'xpResult': result.rewards,
+        'exercises': finishedWorkout.exercises,
+        'durationSeconds': finishedWorkout.durationSeconds,
+      };
+    } catch (_) {
+      if (ref.mounted && generation == _generation) {
+        state = state.copyWith(errorMessage: 'completion_failed');
+      }
+      return null;
+    } finally {
+      if (ref.mounted && generation == _generation) {
+        state = state.copyWith(isCompleting: false);
+        _completion = null;
+      }
     }
   }
 
-  // ─── Internal ───
+  Future<void> cancelWorkout() => _enqueue((generation) async {
+    if (!state.hasActiveWorkout) return;
+    await _repository.cancelWorkout(state.workout!.id);
+    if (!_isCurrent(generation)) return;
+    _mutationFailed = false;
+    await _clearLocalBackup();
+    _cleanup();
+    state = const ActiveWorkoutState();
+    _invalidateProgress();
+  });
+
+  Future<void> pauseTimer() => _setPaused(true);
+  Future<void> resumeTimer() => _setPaused(false);
+  Future<void> _setPaused(bool paused) => _enqueue((generation) async {
+    if (!state.hasActiveWorkout || state.isSetupPhase) return;
+    _adopt(
+      await _repository.setWorkoutPaused(state.workout!.id, paused),
+      generation,
+    );
+  });
 
   void _startWorkoutTimer() {
     _workoutTimer?.cancel();
-    
-    // Lưu lại thời điểm bắt đầu/resume để tính toán chính xác dù bị OS throttle
-    final lastStartedAt = DateTime.now();
-    final initialElapsed = state.elapsedSeconds;
-
+    if (!state.hasActiveWorkout || state.isSetupPhase || state.isTimerPaused) {
+      return;
+    }
     _workoutTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      // Chỉ tính toán nếu không ở trạng thái pause
-      if (!state.isTimerPaused) {
-        final now = DateTime.now();
-        final actualElapsed = initialElapsed + now.difference(lastStartedAt).inSeconds;
-        
-        state = state.copyWith(elapsedSeconds: actualElapsed);
-        // XP preview không phụ thuộc vào thời gian nữa
-        // Chỉ cập nhật khi user hoàn thành/sửa/xóa set (trong updateSet, deleteSet)
-      }
+      state = state.copyWith(
+        elapsedSeconds: elapsedFor(state.workout!, DateTime.now().toUtc()),
+      );
+      _updatePreviewXP();
     });
   }
 
-  void pauseTimer() {
-    state = state.copyWith(isTimerPaused: true);
-  }
-
-  void resumeTimer() {
-    state = state.copyWith(isTimerPaused: false);
-    // Nếu timer chưa chạy (ví dụ sau khi restore từ background) thì start lại
-    if (_workoutTimer == null || !_workoutTimer!.isActive) {
-      _startWorkoutTimer();
-    }
-  }
-
   void _updatePreviewXP() {
-    final allCompletedSets = state.exercises
+    final trained = state.exercises
+        .where((e) => e.sets.any((s) => s.isCompleted))
+        .toList();
+    final sets = trained
         .expand((e) => e.sets)
         .where((s) => s.isCompleted)
         .toList();
-
-    final categories = state.exercises
-        .map((e) => e.exercise?.category)
-        .where((c) => c != null)
-        .toSet();
-
-    // Link với Phase 2.6 Streak System sau này
-    const userStreak = 0.0;
-
-    final isSuspicious = ProgressionEngine.checkSuspiciousPace(
-      allCompletedSets.length,
-      state.elapsedSeconds,
+    state = state.copyWith(
+      previewXP: ProgressionEngine.calculateXP(
+        durationSeconds: state.elapsedSeconds,
+        completedSets: sets,
+        uniqueCategories: trained
+            .map((e) => e.exercise?.category.toLowerCase())
+            .whereType<String>()
+            .toSet()
+            .length,
+        isSuspicious: ProgressionEngine.checkSuspiciousPace(
+          sets.length,
+          state.elapsedSeconds,
+        ),
+      ),
     );
+  }
 
-    final xp = ProgressionEngine.calculateXP(
-      durationSeconds: state.elapsedSeconds,
-      completedSets: allCompletedSets,
-      uniqueCategories: categories.length,
-      userStreak: userStreak,
-      isSuspicious: isSuspicious,
-    );
-
-    state = state.copyWith(previewXP: xp);
+  void _invalidateProgress() {
+    ref.invalidate(currentUserProvider);
+    ref.invalidate(currentUserProfileProvider);
+    ref.invalidate(workoutHistoryProvider);
+    ref.invalidate(recentWorkoutsProvider);
+    ref.invalidate(completedWorkoutCountProvider);
+    ref.invalidate(dashboardStatsControllerProvider);
+    ref.invalidate(activeQuestControllerProvider);
+    ref.invalidate(userClassesProvider);
   }
 
   void _cleanup() {
@@ -597,7 +765,5 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _restTimer = null;
   }
 
-  void clearError() {
-    state = state.copyWith(errorMessage: null);
-  }
+  void clearError() => state = state.copyWith(errorMessage: null);
 }

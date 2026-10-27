@@ -1,0 +1,52 @@
+name: Verify GymLevel
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  database-and-edge:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/db-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/db-tests/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run check:edge
+      - run: npm run test:edge
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test --reporter expanded
+      - name: Build web (isolated test configuration)
+        run: >-
+          flutter build web --release
+          --dart-define=SUPABASE_URL=http://127.0.0.1:54321
+          --dart-define=SUPABASE_PUBLISHABLE_KEY=sb_publishable_local_test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-test-build
+          path: app/build/web
+          retention-days: 7

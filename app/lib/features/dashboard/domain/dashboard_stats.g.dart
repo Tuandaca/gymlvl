@@ -19,6 +19,12 @@ _DashboardStats _$DashboardStatsFromJson(Map<String, dynamic> json) =>
               ?.map((e) => PRRecord.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      achievements:
+          (json['achievements'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          const [],
+      streak: json['streak'] as Map<String, dynamic>?,
     );
 
 Map<String, dynamic> _$DashboardStatsToJson(_DashboardStats instance) =>
@@ -26,6 +32,8 @@ Map<String, dynamic> _$DashboardStatsToJson(_DashboardStats instance) =>
       'volume_trend': instance.volumeTrend,
       'muscle_split': instance.muscleSplit,
       'recent_prs': instance.recentPRs,
+      'achievements': instance.achievements,
+      'streak': instance.streak,
     };
 
 _VolumePoint _$VolumePointFromJson(Map<String, dynamic> json) => _VolumePoint(

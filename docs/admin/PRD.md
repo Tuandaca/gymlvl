@@ -1,5 +1,7 @@
 # Product Requirements Document (PRD) - GymLevel Admin Panel
 
+> Future product proposal, deferred beyond core user acceptance. No admin app or admin API is currently implemented. Refer to [implementation status](../IMPLEMENTATION_STATUS.md) for verified scope.
+
 ## 1. Tổng Quan Kế Hoạch (Executive Summary)
 Admin Panel là trung tâm điều khiển (Command Center) của hệ thống GymLevel. Mục tiêu là cung cấp cho đội ngũ vận hành một giao diện web trực quan, mạnh mẽ và an toàn để quản lý vòng luân hồi game (Core Game Loop), nội dung luyện tập, cũng như theo dõi sức khoẻ của nền tảng mà không cần can thiệp trực tiếp vào Database hay Code.
 

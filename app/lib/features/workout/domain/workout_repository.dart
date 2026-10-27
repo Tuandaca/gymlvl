@@ -9,6 +9,13 @@ abstract class WorkoutRepository {
   /// Lấy workout đang active (nếu có) — dùng cho auto-resume
   Future<Workout?> getActiveWorkout();
 
+  Future<Workout> beginWorkout(String workoutId);
+
+  Future<Workout> setWorkoutPaused(String workoutId, bool paused);
+
+  /// Completion and rewards commit in one database transaction. Safe to retry.
+  Future<WorkoutCompletion> finishWorkout(String workoutId, {String? notes});
+
   /// Hoàn thành workout
   Future<Workout> completeWorkout(String workoutId, {String? notes});
 
@@ -17,22 +24,39 @@ abstract class WorkoutRepository {
 
   /// Thêm bài tập vào workout
   Future<WorkoutExercise> addExerciseToWorkout(
-      String workoutId, String exerciseId, int orderIndex);
+    String workoutId,
+    String exerciseId,
+    int orderIndex,
+  );
 
   /// Xóa bài tập khỏi workout (cascade xóa sets)
   Future<void> removeExerciseFromWorkout(String workoutExerciseId);
 
   /// Sắp xếp lại thứ tự bài tập
   Future<void> reorderExercises(
-      String workoutId, List<String> workoutExerciseIds);
+    String workoutId,
+    List<String> workoutExerciseIds,
+  );
 
   /// Thêm set vào exercise
   Future<WorkoutSet> addSet(
-      String workoutExerciseId, int setNumber, int reps, double weightKg, {double baselineWeightKg = 0});
+    String workoutExerciseId,
+    int setNumber,
+    int reps,
+    double weightKg, {
+    double baselineWeightKg = 0,
+    int durationSeconds = 0,
+  });
 
   /// Cập nhật set
-  Future<WorkoutSet> updateSet(String setId,
-      {int? reps, double? weightKg, bool? isCompleted, int? restSeconds});
+  Future<WorkoutSet> updateSet(
+    String setId, {
+    int? reps,
+    double? weightKg,
+    bool? isCompleted,
+    int? restSeconds,
+    int? durationSeconds,
+  });
 
   /// Xóa set
   Future<void> deleteSet(String setId);
@@ -51,4 +75,11 @@ abstract class WorkoutRepository {
 
   /// Tính toán XP và Level cho Workout đã hoàn thành qua Edge Function
   Future<Map<String, dynamic>> calculateXP(String workoutId);
+}
+
+class WorkoutCompletion {
+  final Workout workout;
+  final Map<String, dynamic> rewards;
+
+  const WorkoutCompletion(this.workout, this.rewards);
 }

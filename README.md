@@ -1,103 +1,51 @@
-# 🏋️ GymLevel
+﻿# GymLevel
 
-> **A progression game disguised as a fitness app**
+GymLevel is a Flutter fitness app with an RPG-style dashboard, workout logging, class progression, daily quests, and Vietnamese/English interfaces. Supabase Auth and PostgreSQL are the source of truth; authenticated Edge Functions and database transactions own progression and rewards.
 
-[![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
-[![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+The project is undergoing a product and security verification pass. See [implementation status and test evidence](docs/IMPLEMENTATION_STATUS.md) for the current release gate. Features in older design documents are not necessarily implemented.
 
----
+## Start here
 
-## 🎯 What is GymLevel?
+- [Run and test the app locally](docs/DEVELOPMENT.md)
+- [Architecture and security boundaries](docs/ARCHITECTURE.md)
+- [Implementation checklist, evidence, and acceptance tests](docs/IMPLEMENTATION_STATUS.md)
+- [Progression rules](docs/PROGRESSION_GUIDE.md)
+- [Historical debugging record](ERRORS.md)
 
-GymLevel transforms your fitness journey into an RPG experience:
+## Run the client
 
-- 🎮 **Level up** by completing workouts
-- ⚡ **Earn XP** from every session
-- ⚔️ **Complete quests** (daily, weekly, main story)
-- 🔥 **Build streaks** for bonus multipliers
-- 🏅 **Unlock badges & titles** as you progress
-- 🤖 **AI Coach** suggests personalized workouts
+Install Flutter with Dart compatible with `app/pubspec.yaml` (`^3.10.4`), then start the backend using the [development guide](docs/DEVELOPMENT.md). From `app/`:
 
----
-
-## 🛠️ Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| Frontend | Flutter (Android, iOS, Web) |
-| State Management | Riverpod 2.x |
-| Backend | Firebase (Auth, Firestore, Storage) |
-| Server Logic | Cloud Functions (TypeScript) |
-| AI/ML | Python FastAPI on Cloud Run |
-| Languages | Vietnamese + English |
-
----
-
-## 📂 Project Structure
-
-```
-gymlvl/
-├── app/              # Flutter application
-├── functions/        # Firebase Cloud Functions
-├── ml_api/           # AI recommendation service (Phase 4)
-├── plan/             # Development plans (phase-by-phase)
-│   ├── phase0/       # Setup & Infrastructure
-│   ├── phase1/       # Auth + Onboarding
-│   ├── phase2/       # Core Game Loop
-│   ├── phase3/       # Dashboard + UI Polish
-│   ├── phase4/       # AI Coach
-│   ├── phase5/       # Testing & Security
-│   └── phase6/       # Deploy & Launch
-└── .agent/           # AI agent configuration
+```powershell
+flutter pub get
+flutter run -d chrome --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
 ```
 
----
+Use a publishable key or supported legacy anon key. Never put a secret/service-role key or AI-provider key in Flutter configuration. Missing configuration opens an actionable setup screen.
 
-## 🚀 Development Phases
+## Repository
 
-| Phase | Description | Duration |
-|-------|-------------|----------|
-| 0 | Project Setup & Infrastructure | 1-2 days |
-| 1 | Authentication + Onboarding | 3-5 days |
-| 2 | Core Game Loop (XP, Level, Quest, Streak) | 7-10 days |
-| 3 | Dashboard + UI Polish + Animations | 5-7 days |
-| 4 | AI Coach | 5-7 days |
-| 5 | Testing & Security | 3-5 days |
-| 6 | Deployment & Launch | 2-3 days |
+```text
+app/                   Flutter client, generated models, localization, tests
+supabase/migrations/   Versioned schema and privileged database operations
+supabase/functions/    Authenticated Deno Edge Functions and tests
+docs/                  Setup, architecture, verification, design references
+docs/admin/            Future proposal; no running admin application
+ERRORS.md              Historical incidents and regression notes
+```
 
----
+There is no separate Python/FastAPI service or alternate backend. AI credentials belong in the server environment; see the development guide for provider configuration and limitations.
 
-## 🎨 Design
+## Development checks
 
-- **Theme**: Dark mode with neon accents
-- **Style**: Futuristic game HUD interface
-- **Colors**: Cyan, Purple, Green neon on deep dark
-- **Fonts**: Orbitron (headings), Inter (body), JetBrains Mono (stats)
-- **Animations**: Level up celebration, XP fly, streak fire, glassmorphism
+```powershell
+Set-Location app
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+flutter build web --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
+```
 
----
+When annotated models or providers change, run `dart run build_runner build --delete-conflicting-outputs`, wait for successful completion, and review generated changes before testing.
 
-## 📋 Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `/create` | Build new features |
-| `/debug` | Fix bugs |
-| `/enhance` | Improve existing features |
-| `/preview` | Preview the app |
-| `/test` | Run tests |
-| `/commit` | Auto-generate git commit |
-| `/deploy` | Deploy to production |
-| `/status` | Check project status |
-| `/progress` | Update project progress |
-
----
-
-## 👤 Author
-
-**Tuandaca** — ngobongsu23@gmail.com
-
----
-
-*Built with ❤️ and 💪*
+Platform scaffolds exist for Android, iOS, web, Windows, macOS, and Linux. Only platforms with executed build and runtime evidence in the status report should be treated as verified.

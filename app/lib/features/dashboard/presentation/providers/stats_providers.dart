@@ -1,36 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/config/supabase_config.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/dashboard_stats.dart';
-
 part 'stats_providers.g.dart';
 
 @riverpod
 class DashboardStatsController extends _$DashboardStatsController {
   @override
   FutureOr<DashboardStats?> build() async {
-    return _fetchStats();
+    final userId = ref.watch(
+      authStateStreamProvider.select((state) => state.value?.session?.user.id),
+    );
+    if (userId == null) return null;
+    return _fetch();
   }
 
-  Future<DashboardStats?> _fetchStats() async {
-    try {
-      final response = await SupabaseConfig.client.functions.invoke(
-        'get-user-stats',
-        method: HttpMethod.post,
-      );
-
-      if (response.status == 200) {
-        return DashboardStats.fromJson(response.data);
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+  Future<DashboardStats> _fetch() async {
+    final data = await SupabaseConfig.client.rpc('get_user_stats');
+    return DashboardStats.fromJson(Map<String, dynamic>.from(data as Map));
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _fetchStats());
+    // Rebuilding lets Riverpod discard results belonging to an old identity.
+    ref.invalidateSelf();
   }
 }

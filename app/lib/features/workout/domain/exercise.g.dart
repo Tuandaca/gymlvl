@@ -19,6 +19,29 @@ _Exercise _$ExerciseFromJson(Map<String, dynamic> json) => _Exercise(
           .toList() ??
       const [],
   imageUrl: json['image_url'] as String?,
+  slug: json['slug'] as String?,
+  nameVi: json['name_vi'] as String? ?? '',
+  nameEn: json['name_en'] as String? ?? '',
+  movementPattern: json['movement_pattern'] as String?,
+  secondaryMuscles:
+      (json['secondary_muscles'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  difficulty: json['difficulty'] as String?,
+  formCues:
+      (json['form_cues'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+  commonMistakes:
+      (json['common_mistakes'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  alternativeExerciseSlugs:
+      (json['alternative_exercise_slugs'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -36,6 +59,15 @@ Map<String, dynamic> _$ExerciseToJson(_Exercise instance) => <String, dynamic>{
   'mechanic': instance.mechanic,
   'instructions': instance.instructions,
   'image_url': instance.imageUrl,
+  'slug': instance.slug,
+  'name_vi': instance.nameVi,
+  'name_en': instance.nameEn,
+  'movement_pattern': instance.movementPattern,
+  'secondary_muscles': instance.secondaryMuscles,
+  'difficulty': instance.difficulty,
+  'form_cues': instance.formCues,
+  'common_mistakes': instance.commonMistakes,
+  'alternative_exercise_slugs': instance.alternativeExerciseSlugs,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
 };

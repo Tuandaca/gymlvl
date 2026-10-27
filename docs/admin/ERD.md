@@ -1,5 +1,7 @@
 # Entity Relationship Diagram (ERD) - GymLevel Admin & Gamification
 
+> Future proposal only. These admin entities are not the deployed schema. Versioned `supabase/migrations/` files are authoritative; see [implementation status](../IMPLEMENTATION_STATUS.md).
+
 Sơ đồ dưới đây tập trung vào Mối Quan Hệ Dữ Liệu (Data Relationship) cốt lõi dành cho Admin Panel và các khối Gamification. Các bảng hệ thống Workout hiện tại (Profile, Workout, Exercise) sẽ được mở rộng bằng cách thêm Relations với Admin.
 
 ```mermaid

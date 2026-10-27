@@ -15,8 +15,10 @@ final recentWorkoutsProvider = FutureProvider<List<Workout>>((ref) async {
 });
 
 /// Chi tiết một workout cụ thể
-final workoutDetailProvider =
-    FutureProvider.family<Workout?, String>((ref, workoutId) async {
+final workoutDetailProvider = FutureProvider.family<Workout?, String>((
+  ref,
+  workoutId,
+) async {
   final repository = ref.watch(workoutRepositoryProvider);
   return repository.getWorkoutDetail(workoutId);
 });

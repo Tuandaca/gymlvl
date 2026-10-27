@@ -62,7 +62,7 @@ schema_paths = []
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = ["./seed.sql", "./seed_exercises.sql"]
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -405,3 +405,18 @@ entrypoint = "./functions/switch-class/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/switch-class/*.html" ]
+
+[functions.calculate-xp]
+verify_jwt = true
+
+[functions.initialize-user]
+verify_jwt = true
+
+[functions.get-user-stats]
+verify_jwt = true
+
+[functions.sync-daily-data]
+verify_jwt = true
+
+[functions.ai-coach]
+verify_jwt = true

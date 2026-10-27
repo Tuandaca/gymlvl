@@ -1,5 +1,7 @@
 # System Architecture - GymLevel Admin Panel
 
+> Future design proposal only. No admin application, schema, custom-role provisioning, or deployment exists. See [IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md).
+
 ## 1. Công Nghệ (Tech Stack Proposal)
 Bởi vì GymLevel là một ứng dụng di động viết bằng Flutter và phụ thuộc vào Supabase, có hai lựa chọn chính để xây dựng Admin Panel. Giải pháp được chọn bên dưới dựa theo Design Patterns chuẩn ở môi trường Enterprise:
 
@@ -20,11 +22,13 @@ Mô hình **Role-Based Access Control** (Quyền truy cập dựa trên vai trò
 
 ### Cách triển khai quyền hạ (Supabase Custom Claims):
 - Auth user qua `supabase.auth.signInWithPassword()`
-- Chạy trigger khi cấp quyền: Bơm `role` vào `app_metadata` trên JSON Web Token.
+- A trusted server provisioning operation may assign `app_role` inside `app_metadata`. Never use user-editable metadata or a browser-distributed service-role credential.
 - Bảng Database bọc RLS check: 
   ```sql
-  (auth.jwt() ->> 'role') = 'SUPER_ADMIN'
+  (auth.jwt() -> 'app_metadata' ->> 'app_role') = 'SUPER_ADMIN'
   ```
+
+This claim lookup is not a complete policy. Define role-specific grants, ownership constraints, `USING`/`WITH CHECK`, current-assignment checks for sensitive actions, and regression tests first. The top-level JWT `role` is the database role, not an application administrator role.
 
 ## 3. Kiến Trúc Modular (Folder Structure)
 

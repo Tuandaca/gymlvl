@@ -34,6 +34,6 @@ Map<String, dynamic> _$WorkoutExerciseToJson(_WorkoutExercise instance) =>
       'order_index': instance.orderIndex,
       'notes': instance.notes,
       'created_at': instance.createdAt?.toIso8601String(),
-      'exercises': instance.exercise,
-      'workout_sets': instance.sets,
+      'exercises': instance.exercise?.toJson(),
+      'workout_sets': instance.sets.map((e) => e.toJson()).toList(),
     };

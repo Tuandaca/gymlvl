@@ -1,17 +1,26 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../core/theme/app_theme.dart';
-import '../../../auth/presentation/providers/auth_providers.dart';
-import '../../../quests/presentation/providers/quest_providers.dart';
-import '../../../quests/presentation/widgets/daily_quest_card.dart';
-import '../../../onboarding/domain/class_definitions.dart';
-import '../providers/stats_providers.dart';
-import '../providers/class_providers.dart';
-import '../widgets/stats_charts.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/localization/localization_engine.dart';
+import '../../../../ui/candy/candy.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../quests/domain/quest_instance.dart';
+import '../../../quests/presentation/providers/quest_providers.dart';
+import '../../../workout/presentation/controllers/workout_history_controller.dart';
+import '../../../workout/presentation/providers/exercise_providers.dart';
+import '../providers/class_providers.dart';
+import '../providers/stats_providers.dart';
+import '../widgets/dashboard_header.dart';
+import '../widgets/hero_xp_card.dart';
+import '../widgets/kpi_tiles_grid.dart';
+import '../widgets/recent_workouts_section.dart';
+import '../widgets/stats_charts.dart';
+import '../widgets/weekly_activity_grid.dart';
 
+/// Overhauled Dashboard Screen implementing the complete Candy Neubrutalism visual system.
+/// Features tactile typography, 0 RenderFlex layout overflows (320px to 1440px),
+/// 4 KPI tiles, hero XP progression, weekly activity grid, daily quests preview,
+/// recent workouts feed, and tactile CTAs.
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
@@ -20,239 +29,381 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Tự động đồng bộ Quest ngay khi vào Dashboard
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(activeQuestControllerProvider.notifier); // Trigger build
-    });
+  bool _startingQuest = false;
+
+  Future<void> _startQuest(QuestInstance quest) async {
+    if (_startingQuest) return;
+    setState(() => _startingQuest = true);
+    try {
+      final started = await ref
+          .read(activeWorkoutControllerProvider.notifier)
+          .startQuest(quest);
+      if (!mounted) return;
+      if (started) {
+        await context.push('/workout/active');
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('quest_start_failed'.tr(ref))));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('quest_start_failed'.tr(ref))));
+      }
+    } finally {
+      if (mounted) setState(() => _startingQuest = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final userState = ref.watch(currentUserProvider);
-    final questState = ref.watch(activeQuestControllerProvider);
-    final statsState = ref.watch(dashboardStatsControllerProvider);
-    final classesState = ref.watch(userClassesProvider);
+    final userAsync = ref.watch(currentUserProvider);
+    final classesAsync = ref.watch(userClassesProvider);
+    final questAsync = ref.watch(activeQuestControllerProvider);
+    final statsAsync = ref.watch(dashboardStatsControllerProvider);
+    final recentWorkoutsAsync = ref.watch(recentWorkoutsProvider);
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
+    return CandyScaffold(
+      gridBackground: true,
+      appBar: AppBar(
+        title: Text(
+          'system_hub'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            color: CandyColors.ink,
+            letterSpacing: 0.2,
+          ),
+        ),
+        backgroundColor: CandyColors.canvas,
+        elevation: 0,
+        centerTitle: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2.0),
+          child: Container(color: CandyColors.ink, height: 2.0),
+        ),
+      ),
       body: RefreshIndicator(
+        color: CandyColors.hotPink,
         onRefresh: () async {
+          ref.invalidate(currentUserProvider);
           ref.invalidate(userClassesProvider);
-          await ref.read(activeQuestControllerProvider.notifier).refresh();
-          await ref.read(dashboardStatsControllerProvider.notifier).refresh();
+          ref.invalidate(recentWorkoutsProvider);
+          await Future.wait([
+            ref.read(activeQuestControllerProvider.notifier).refresh(),
+            ref.read(dashboardStatsControllerProvider.notifier).refresh(),
+          ]);
         },
-        color: AppTheme.cyanNeon,
-        child: CustomScrollView(
-          slivers: [
-            // App Bar
-            SliverAppBar(
-              floating: true,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              centerTitle: true,
-              title: Text(
-                'system_hub'.tr(ref),
-                style: const TextStyle(
-                  fontFamily: 'Orbitron',
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 4.0,
-                  fontSize: 16,
-                  color: AppTheme.cyanNeon,
-                  shadows: [Shadow(color: AppTheme.cyanNeon, blurRadius: 10)],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontalPadding = constraints.maxWidth > 920
+                ? (constraints.maxWidth - 880) / 2
+                : (constraints.maxWidth < 360 ? 12.0 : 16.0);
+
+            final userData = userAsync.asData?.value;
+            final userClasses = classesAsync.asData?.value ?? [];
+            final statsData = statsAsync.asData?.value;
+            final recentWorkouts = recentWorkoutsAsync.asData?.value ?? [];
+
+            // Calculate metrics for KPI tiles
+            double totalVolume = 0;
+            int totalSets = 0;
+            final completedWeekdays = <int>{};
+
+            if (statsData != null) {
+              for (final pt in statsData.volumeTrend) {
+                totalVolume += pt.value;
+                try {
+                  final dt = DateTime.parse(pt.date);
+                  completedWeekdays.add(dt.weekday);
+                } catch (_) {}
+              }
+            }
+
+            for (final w in recentWorkouts) {
+              for (final ex in w.exercises) {
+                totalSets += (ex.sets as List).length;
+              }
+              final completed = w.completedAt ?? w.createdAt;
+              if (completed != null) {
+                completedWeekdays.add(completed.weekday);
+              }
+            }
+
+            final currentStreak =
+                (statsData?.streak?['current_streak'] as num?)?.toInt() ?? 0;
+            final longestStreak =
+                (statsData?.streak?['longest_streak'] as num?)?.toInt() ?? 0;
+            final totalWorkouts = recentWorkouts.length;
+
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 16.0,
+              ),
+              children: [
+                // 1. Header with personalized greeting, avatar, and RPG class badges
+                if (userData != null)
+                  DashboardHeader(user: userData, userClasses: userClasses)
+                else if (userAsync.isLoading)
+                  const CandySkeleton(height: 90, borderRadius: 18)
+                else
+                  _buildErrorCard(
+                    message: 'load_failed'.tr(ref),
+                    onRetry: () => ref.invalidate(currentUserProvider),
+                  ),
+
+                const SizedBox(height: 14),
+
+                // 2. Hero XP Progression Bar
+                if (userData != null) HeroXpCard(user: userData),
+
+                const SizedBox(height: 16),
+
+                // 3. Tactile Primary Action CTAs
+                _buildActionButtons(context, ref),
+
+                const SizedBox(height: 20),
+
+                // 4. 4 Tactile Neubrutalist KPI Tiles
+                KpiTilesGrid(
+                  totalVolume: totalVolume,
+                  totalWorkouts: totalWorkouts,
+                  totalSets: totalSets,
+                  currentStreak: currentStreak,
+                  longestStreak: longestStreak,
                 ),
-              ),
-            ),
 
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // 1. Profile / Level Status
-                  _buildProfileSection(userState),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // 2. Active Classes (Multi-Class XP Bars)
-                  _buildSectionHeader('active_classes'.tr(ref)),
-                  const SizedBox(height: 12),
-                  _buildClassesSection(classesState),
+                const SizedBox(height: 16),
 
-                  const SizedBox(height: 32),
-                  
-                  // 3. Daily Quest Section
-                  _buildSectionHeader('todays_objective'.tr(ref)),
-                  const SizedBox(height: 12),
-                  questState.when(
-                    data: (quest) => quest != null 
-                        ? DailyQuestCard(quest: quest)
-                        : _buildEmptyQuest(),
-                    loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
-                    error: (e, _) => Text('Error: $e', style: const TextStyle(color: Colors.red)),
+                // 5. 7-Day Weekly Activity Grid
+                WeeklyActivityGrid(
+                  completedWeekdays: completedWeekdays,
+                  activeDaysCount: completedWeekdays.length,
+                ),
+
+                const SizedBox(height: 24),
+
+                // 6. Daily Quests Preview
+                _buildSectionHeader(
+                  context,
+                  title: 'todays_objective'.tr(ref),
+                  icon: Icons.flag_rounded,
+                  accentColor: CandyColors.canaryYellow,
+                ),
+                const SizedBox(height: 10),
+                questAsync.when(
+                  data: (quest) => quest == null
+                      ? _buildRestDayCard(context, ref)
+                      : _buildDailyQuestCard(context, ref, quest),
+                  loading: () =>
+                      const CandySkeleton(height: 130, borderRadius: 18),
+                  error: (_, _) => _buildErrorCard(
+                    message: 'load_failed'.tr(ref),
+                    onRetry: () =>
+                        ref.invalidate(activeQuestControllerProvider),
                   ),
+                ),
 
-                  const SizedBox(height: 40),
+                const SizedBox(height: 24),
 
-                  // 4. Analytics Section
-                  _buildSectionHeader('biometric_analysis'.tr(ref)),
-                  const SizedBox(height: 12),
-                  statsState.when(
-                    data: (stats) => stats != null 
-                        ? _buildAnalyticsGrid(stats)
-                        : Center(child: Text('no_data_recorded'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
-                    loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator(color: AppTheme.purpleNeon))),
-                    error: (e, _) => const SizedBox.shrink(),
+                // 7. Recent Workouts Feed
+                RecentWorkoutsSection(recentWorkoutsAsync: recentWorkoutsAsync),
+
+                const SizedBox(height: 24),
+
+                // 8. Achievements & Streak Milestones
+                _buildSectionHeader(
+                  context,
+                  title: 'biometric_analysis'.tr(ref),
+                  icon: Icons.insights_rounded,
+                  accentColor: CandyColors.softLilac,
+                ),
+                const SizedBox(height: 10),
+                statsAsync.when(
+                  data: (stats) => stats == null
+                      ? _buildEmptyStatsCard(ref)
+                      : Column(
+                          children: [
+                            _buildMilestones(
+                              ref,
+                              stats.achievements,
+                              stats.streak,
+                            ),
+                            const SizedBox(height: 14),
+                            if (stats.volumeTrend.isNotEmpty) ...[
+                              VolumeTrendChart(trend: stats.volumeTrend),
+                              const SizedBox(height: 14),
+                            ],
+                            if (stats.muscleSplit.isNotEmpty)
+                              MuscleRadarChart(split: stats.muscleSplit),
+                          ],
+                        ),
+                  loading: () =>
+                      const CandySkeleton(height: 140, borderRadius: 18),
+                  error: (_, _) => _buildErrorCard(
+                    message: 'load_failed'.tr(ref),
+                    onRetry: () =>
+                        ref.invalidate(dashboardStatsControllerProvider),
                   ),
-                  
-                  const SizedBox(height: 40),
-                ]),
-              ),
-            ),
-          ],
+                ),
+
+                const SizedBox(height: 32),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color accentColor,
+  }) {
     return Row(
       children: [
-        Container(width: 4, height: 16, color: AppTheme.cyanNeon),
-        const SizedBox(width: 12),
-        Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-            fontSize: 12,
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: accentColor,
+            shape: BoxShape.circle,
+            border: CandyColors.standardBorder(width: 1.5),
+          ),
+          child: Icon(icon, size: 14, color: CandyColors.ink),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontFamily: CandyFonts.display,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: CandyColors.ink,
+              letterSpacing: 0.3,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildClassesSection(AsyncValue<List<Map<String, dynamic>>> classesState) {
-    return classesState.when(
-      data: (classes) {
-        if (classes.isEmpty) {
-          return Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.black26,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10),
-            ),
-            child: Center(
-              child: Text('no_class_selected'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontFamily: 'Orbitron')),
-            ),
-          );
-        }
-        return Column(
-          children: classes.map((uc) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: _buildClassCard(uc),
-          )).toList(),
-        );
-      },
-      loading: () => const SizedBox(height: 80, child: Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon))),
-      error: (_, __) => const SizedBox.shrink(),
+  Widget _buildActionButtons(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        CandyButton(
+          label: 'start_workout'.tr(ref),
+          variant: CandyButtonVariant.primary,
+          size: CandyButtonSize.large,
+          icon: Icons.play_arrow_rounded,
+          onPressed: () => context.go('/workout'),
+        ),
+        const SizedBox(height: 10),
+        CandyButton(
+          label: 'AI Coach',
+          variant: CandyButtonVariant.secondary,
+          size: CandyButtonSize.medium,
+          icon: Icons.auto_awesome_rounded,
+          onPressed: () => context.push('/coach'),
+        ),
+      ],
     );
   }
 
-  Widget _buildClassCard(Map<String, dynamic> uc) {
-    final classId = uc['class_id'] as String? ?? 'A';
-    final classDef = kClassDefinitions[classId];
-    final level = (uc['level'] as num?)?.toInt() ?? 1;
-    final currentXP = (uc['current_xp'] as num?)?.toInt() ?? 0;
-    final slot = (uc['slot'] as String?) ?? 'primary';
-    final isGraduated = (uc['is_graduated'] as bool?) ?? false;
-    
-    // Calculate XP progress for this class
-    final classColor = classDef != null ? Color(classDef.colorHex) : AppTheme.cyanNeon;
-    final nextLevelXP = classDef?.totalXpForLevel(level + 1) ?? 100;
-    final currentLevelBaseXP = classDef?.totalXpForLevel(level) ?? 0;
-    final progressInLevel = currentXP - currentLevelBaseXP;
-    final xpNeeded = nextLevelXP - currentLevelBaseXP;
-    final progress = xpNeeded > 0 ? (progressInLevel / xpNeeded).clamp(0.0, 1.0) : 0.0;
+  Widget _buildDailyQuestCard(
+    BuildContext context,
+    WidgetRef ref,
+    QuestInstance quest,
+  ) {
+    final complete = quest.status == 'completed';
+    final active =
+        quest.status == 'active' && quest.expiresAt.isAfter(DateTime.now());
+    final earnedXp = quest.earnedXp ?? 100;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.panelBackground,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: classColor.withOpacity(0.5), width: 1.5),
-        boxShadow: [BoxShadow(color: classColor.withOpacity(0.1), blurRadius: 15, spreadRadius: -5)],
-      ),
+    int totalSets = 0;
+    for (final ex in quest.config) {
+      totalSets += ex.sets;
+    }
+
+    CandyQuestStatus status;
+    if (complete) {
+      status = CandyQuestStatus.claimed;
+    } else {
+      status = CandyQuestStatus.inProgress;
+    }
+
+    final questTitle = (complete ? 'quest_complete' : 'quest_active').tr(ref);
+    final questDesc = quest.config.isNotEmpty
+        ? quest.config
+              .map((e) => '${e.exerciseName} (${e.sets}×${e.reps})')
+              .join(' · ')
+        : 'quest_reward_hint'.tr(ref);
+
+    return CandyQuestCard(
+      title: questTitle,
+      description: questDesc,
+      currentProgress: complete ? totalSets : 0,
+      targetProgress: totalSets > 0 ? totalSets : 1,
+      xpReward: earnedXp,
+      status: status,
+      icon: Icons.fitness_center_rounded,
+      iconColor: CandyColors.canaryYellow,
+      onStart: active ? () => _startQuest(quest) : null,
+    );
+  }
+
+  Widget _buildRestDayCard(BuildContext context, WidgetRef ref) {
+    return CandyCard(
+      shadow: CandyCardShadow.small,
+      padding: const EdgeInsets.all(18),
+      backgroundColor: CandyColors.card,
       child: Row(
         children: [
-          // Icon + Level
-          Column(
-            children: [
-              Text(classDef?.iconEmoji ?? '⚔️', style: const TextStyle(fontSize: 28)),
-              const SizedBox(height: 4),
-              Text(
-                'Lv $level',
-                style: TextStyle(fontFamily: 'Orbitron', fontSize: 13, fontWeight: FontWeight.bold, color: classColor),
-              ),
-            ],
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: CandyColors.softLilac,
+              shape: BoxShape.circle,
+              border: CandyColors.standardBorder(),
+            ),
+            child: const Icon(
+              Icons.nights_stay_rounded,
+              color: CandyColors.ink,
+              size: 24,
+            ),
           ),
-          const SizedBox(width: 16),
-          // Class Info + XP Bar
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      classDef != null 
-                          ? resolveClassName(classDef, ref.watch(localizationModeProvider)) 
-                          : classId,
-                      style: TextStyle(color: classColor, fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: classColor.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        slot.toUpperCase(),
-                        style: TextStyle(color: classColor.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
-                      ),
-                    ),
-                    if (isGraduated) ...[
-                      const SizedBox(width: 6),
-                      const Text('🎓', style: TextStyle(fontSize: 14)),
-                    ],
-                  ],
+                Text(
+                  'rest_day'.tr(ref),
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.display,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: CandyColors.ink,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${_formatNumber(progressInLevel)} / ${_formatNumber(xpNeeded)} XP',
-                      style: const TextStyle(color: AppTheme.textDim, fontSize: 10),
-                    ),
-                    Text(
-                      '${(progress * 100).toInt()}%',
-                      style: TextStyle(color: classColor, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 5,
-                    backgroundColor: Colors.white10,
-                    color: classColor,
+                const SizedBox(height: 2),
+                Text(
+                  translateText(
+                    ref,
+                    vi: 'Hôm nay là ngày nghỉ ngơi phục hồi thể lực!',
+                    en: 'Today is an honest rest day for recovery!',
+                  ),
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.body,
+                    fontSize: 12,
+                    color: CandyColors.charcoal,
                   ),
                 ),
               ],
@@ -263,138 +414,162 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
+  Widget _buildMilestones(
+    WidgetRef ref,
+    List<Map<String, dynamic>> achievements,
+    Map<String, dynamic>? streak,
+  ) {
+    final current = (streak?['current_streak'] as num?)?.toInt() ?? 0;
+    final longest = (streak?['longest_streak'] as num?)?.toInt() ?? 0;
 
-  Widget _buildProfileSection(AsyncValue<Map<String, dynamic>?> userState) {
-    return userState.when(
-      data: (user) {
-        if (user == null) return const SizedBox.shrink();
-        
-        final level = (user['level'] as num?)?.toInt() ?? 1;
-        final currentLevelXp = (user['current_level_xp'] as num?)?.toInt() ?? 0;
-        final title = (user['current_title'] as String?) ?? 'Seeker';
-        
-        final nextLevelRequirement = (100 * math.pow(level, 1.5)).floor();
-        final progress = (currentLevelXp / nextLevelRequirement).clamp(0.0, 1.0);
-        
-        return Column(
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppTheme.cyanNeon.withOpacity(0.1),
-                  child: const Icon(Icons.person, color: AppTheme.cyanNeon, size: 30),
+    final names = <String, String>{
+      'first_workout': translateText(
+        ref,
+        vi: 'Buổi tập đầu tiên',
+        en: 'First workout',
+      ),
+      'ten_workouts': translateText(ref, vi: '10 buổi tập', en: '10 workouts'),
+      'streak_7': translateText(ref, vi: 'Chuỗi 7 ngày', en: '7-day streak'),
+      'level_10': translateText(ref, vi: 'Cấp độ 10', en: 'Level 10'),
+    };
+
+    final streakSummary = translateText(
+      ref,
+      vi: 'Chuỗi hiện tại: $current ngày · Kỷ lục: $longest',
+      en: 'Current streak: $current days · Best: $longest',
+    );
+
+    return CandyCard(
+      shadow: CandyCardShadow.small,
+      padding: const EdgeInsets.all(18),
+      backgroundColor: CandyColors.card,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: CandyColors.softLilac,
+                  shape: BoxShape.circle,
+                  border: CandyColors.standardBorder(width: 1.5),
                 ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user['display_name'] ?? 'User',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 1),
-                      ),
-                      Text(
-                        title.toUpperCase(),
-                        style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2),
-                      ),
-                    ],
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  color: CandyColors.ink,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  streakSummary,
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.body,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: CandyColors.ink,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const Text('LEVEL', style: TextStyle(color: AppTheme.textDim, fontSize: 10)),
-                    Text(
-                      '$level',
-                      style: const TextStyle(fontFamily: 'Orbitron', fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.cyanNeon),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'lifetime_quests'.tr(ref),
+            style: const TextStyle(
+              fontFamily: CandyFonts.body,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: CandyColors.charcoal,
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_formatNumber(currentLevelXp)} / ${_formatNumber(nextLevelRequirement)} XP',
-                  style: const TextStyle(color: AppTheme.textDim, fontSize: 11, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${(progress * 100).toInt()}%',
-                  style: const TextStyle(color: AppTheme.cyanNeon, fontSize: 11, fontWeight: FontWeight.bold),
-                ),
-              ],
+          ),
+          const SizedBox(height: 10),
+          if (achievements.isEmpty)
+            Text(
+              translateText(
+                ref,
+                vi: 'Hoàn thành buổi tập đầu tiên để mở huy hiệu.',
+                en: 'Complete your first workout to unlock a badge.',
+              ),
+              style: const TextStyle(
+                fontFamily: CandyFonts.body,
+                color: CandyColors.muted,
+                fontSize: 13,
+              ),
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: achievements.map((achievement) {
+                final id = achievement['achievement_id']?.toString() ?? '';
+                final label = names[id] ?? id;
+                return CandyBadge(
+                  label: label,
+                  icon: Icons.verified_rounded,
+                  variant: CandyBadgeVariant.mint,
+                  fontSize: 12,
+                  hasShadow: true,
+                );
+              }).toList(),
             ),
-            const SizedBox(height: 6),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: Colors.white10,
-                color: AppTheme.cyanNeon,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyStatsCard(WidgetRef ref) {
+    return CandyCard(
+      shadow: CandyCardShadow.small,
+      padding: const EdgeInsets.all(20),
+      backgroundColor: CandyColors.card,
+      child: Center(
+        child: Text(
+          'no_data_recorded'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.body,
+            color: CandyColors.muted,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard({
+    required String message,
+    required VoidCallback onRetry,
+  }) {
+    return CandyCard(
+      shadow: CandyCardShadow.small,
+      backgroundColor: const Color(0xFFFFF1F0),
+      borderColor: CandyColors.coral,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const Icon(Icons.cloud_off_rounded, color: CandyColors.coral),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                fontFamily: CandyFonts.body,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          ],
-        );
-      },
-      loading: () => const SizedBox(height: 100),
-      error: (_, __) => const SizedBox.shrink(),
-    );
-  }
-
-  String _formatNumber(num number) {
-    if (number >= 1000) {
-      return '${(number / 1000).toStringAsFixed(1)}k';
-    }
-    return number.toString();
-  }
-
-  Widget _buildEmptyQuest() {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.black26,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-      ),
-      child: const Column(
-        children: [
-          Icon(Icons.bedtime_outlined, color: AppTheme.textDim, size: 40),
-          SizedBox(height: 16),
-          Text(
-            'SYSTEM STANDBY\nRest day detected.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.textDim, height: 1.5, letterSpacing: 1),
+          ),
+          CandyButton(
+            label: 'Thử lại',
+            variant: CandyButtonVariant.danger,
+            size: CandyButtonSize.small,
+            isFullWidth: false,
+            onPressed: onRetry,
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAnalyticsGrid(dynamic stats) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppTheme.panelBackground,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: VolumeTrendChart(trend: stats.volumeTrend),
-        ),
-        const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppTheme.panelBackground,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: MuscleRadarChart(split: stats.muscleSplit),
-        ),
-      ],
     );
   }
 }

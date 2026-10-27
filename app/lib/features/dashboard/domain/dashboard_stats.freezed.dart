@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DashboardStats {
 
-@JsonKey(name: 'volume_trend') List<VolumePoint> get volumeTrend;@JsonKey(name: 'muscle_split') List<MuscleSplit> get muscleSplit;@JsonKey(name: 'recent_prs') List<PRRecord> get recentPRs;
+@JsonKey(name: 'volume_trend') List<VolumePoint> get volumeTrend;@JsonKey(name: 'muscle_split') List<MuscleSplit> get muscleSplit;@JsonKey(name: 'recent_prs') List<PRRecord> get recentPRs; List<Map<String, dynamic>> get achievements; Map<String, dynamic>? get streak;
 /// Create a copy of DashboardStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $DashboardStatsCopyWith<DashboardStats> get copyWith => _$DashboardStatsCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardStats&&const DeepCollectionEquality().equals(other.volumeTrend, volumeTrend)&&const DeepCollectionEquality().equals(other.muscleSplit, muscleSplit)&&const DeepCollectionEquality().equals(other.recentPRs, recentPRs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardStats&&const DeepCollectionEquality().equals(other.volumeTrend, volumeTrend)&&const DeepCollectionEquality().equals(other.muscleSplit, muscleSplit)&&const DeepCollectionEquality().equals(other.recentPRs, recentPRs)&&const DeepCollectionEquality().equals(other.achievements, achievements)&&const DeepCollectionEquality().equals(other.streak, streak));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(volumeTrend),const DeepCollectionEquality().hash(muscleSplit),const DeepCollectionEquality().hash(recentPRs));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(volumeTrend),const DeepCollectionEquality().hash(muscleSplit),const DeepCollectionEquality().hash(recentPRs),const DeepCollectionEquality().hash(achievements),const DeepCollectionEquality().hash(streak));
 
 @override
 String toString() {
-  return 'DashboardStats(volumeTrend: $volumeTrend, muscleSplit: $muscleSplit, recentPRs: $recentPRs)';
+  return 'DashboardStats(volumeTrend: $volumeTrend, muscleSplit: $muscleSplit, recentPRs: $recentPRs, achievements: $achievements, streak: $streak)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $DashboardStatsCopyWith<$Res>  {
   factory $DashboardStatsCopyWith(DashboardStats value, $Res Function(DashboardStats) _then) = _$DashboardStatsCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'volume_trend') List<VolumePoint> volumeTrend,@JsonKey(name: 'muscle_split') List<MuscleSplit> muscleSplit,@JsonKey(name: 'recent_prs') List<PRRecord> recentPRs
+@JsonKey(name: 'volume_trend') List<VolumePoint> volumeTrend,@JsonKey(name: 'muscle_split') List<MuscleSplit> muscleSplit,@JsonKey(name: 'recent_prs') List<PRRecord> recentPRs, List<Map<String, dynamic>> achievements, Map<String, dynamic>? streak
 });
 
 
@@ -65,12 +65,14 @@ class _$DashboardStatsCopyWithImpl<$Res>
 
 /// Create a copy of DashboardStats
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? volumeTrend = null,Object? muscleSplit = null,Object? recentPRs = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? volumeTrend = null,Object? muscleSplit = null,Object? recentPRs = null,Object? achievements = null,Object? streak = freezed,}) {
   return _then(_self.copyWith(
 volumeTrend: null == volumeTrend ? _self.volumeTrend : volumeTrend // ignore: cast_nullable_to_non_nullable
 as List<VolumePoint>,muscleSplit: null == muscleSplit ? _self.muscleSplit : muscleSplit // ignore: cast_nullable_to_non_nullable
 as List<MuscleSplit>,recentPRs: null == recentPRs ? _self.recentPRs : recentPRs // ignore: cast_nullable_to_non_nullable
-as List<PRRecord>,
+as List<PRRecord>,achievements: null == achievements ? _self.achievements : achievements // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,streak: freezed == streak ? _self.streak : streak // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs,  List<Map<String, dynamic>> achievements,  Map<String, dynamic>? streak)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DashboardStats() when $default != null:
-return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
+return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs,_that.achievements,_that.streak);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs,  List<Map<String, dynamic>> achievements,  Map<String, dynamic>? streak)  $default,) {final _that = this;
 switch (_that) {
 case _DashboardStats():
-return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
+return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs,_that.achievements,_that.streak);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'volume_trend')  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split')  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs')  List<PRRecord> recentPRs,  List<Map<String, dynamic>> achievements,  Map<String, dynamic>? streak)?  $default,) {final _that = this;
 switch (_that) {
 case _DashboardStats() when $default != null:
-return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
+return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs,_that.achievements,_that.streak);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.volumeTrend,_that.muscleSplit,_that.recentPRs);case _:
 @JsonSerializable()
 
 class _DashboardStats implements DashboardStats {
-  const _DashboardStats({@JsonKey(name: 'volume_trend') required final  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split') required final  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs') final  List<PRRecord> recentPRs = const []}): _volumeTrend = volumeTrend,_muscleSplit = muscleSplit,_recentPRs = recentPRs;
+  const _DashboardStats({@JsonKey(name: 'volume_trend') required final  List<VolumePoint> volumeTrend, @JsonKey(name: 'muscle_split') required final  List<MuscleSplit> muscleSplit, @JsonKey(name: 'recent_prs') final  List<PRRecord> recentPRs = const [], final  List<Map<String, dynamic>> achievements = const [], final  Map<String, dynamic>? streak}): _volumeTrend = volumeTrend,_muscleSplit = muscleSplit,_recentPRs = recentPRs,_achievements = achievements,_streak = streak;
   factory _DashboardStats.fromJson(Map<String, dynamic> json) => _$DashboardStatsFromJson(json);
 
  final  List<VolumePoint> _volumeTrend;
@@ -235,6 +237,22 @@ class _DashboardStats implements DashboardStats {
   return EqualUnmodifiableListView(_recentPRs);
 }
 
+ final  List<Map<String, dynamic>> _achievements;
+@override@JsonKey() List<Map<String, dynamic>> get achievements {
+  if (_achievements is EqualUnmodifiableListView) return _achievements;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_achievements);
+}
+
+ final  Map<String, dynamic>? _streak;
+@override Map<String, dynamic>? get streak {
+  final value = _streak;
+  if (value == null) return null;
+  if (_streak is EqualUnmodifiableMapView) return _streak;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
 
 /// Create a copy of DashboardStats
 /// with the given fields replaced by the non-null parameter values.
@@ -249,16 +267,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardStats&&const DeepCollectionEquality().equals(other._volumeTrend, _volumeTrend)&&const DeepCollectionEquality().equals(other._muscleSplit, _muscleSplit)&&const DeepCollectionEquality().equals(other._recentPRs, _recentPRs));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardStats&&const DeepCollectionEquality().equals(other._volumeTrend, _volumeTrend)&&const DeepCollectionEquality().equals(other._muscleSplit, _muscleSplit)&&const DeepCollectionEquality().equals(other._recentPRs, _recentPRs)&&const DeepCollectionEquality().equals(other._achievements, _achievements)&&const DeepCollectionEquality().equals(other._streak, _streak));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_volumeTrend),const DeepCollectionEquality().hash(_muscleSplit),const DeepCollectionEquality().hash(_recentPRs));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_volumeTrend),const DeepCollectionEquality().hash(_muscleSplit),const DeepCollectionEquality().hash(_recentPRs),const DeepCollectionEquality().hash(_achievements),const DeepCollectionEquality().hash(_streak));
 
 @override
 String toString() {
-  return 'DashboardStats(volumeTrend: $volumeTrend, muscleSplit: $muscleSplit, recentPRs: $recentPRs)';
+  return 'DashboardStats(volumeTrend: $volumeTrend, muscleSplit: $muscleSplit, recentPRs: $recentPRs, achievements: $achievements, streak: $streak)';
 }
 
 
@@ -269,7 +287,7 @@ abstract mixin class _$DashboardStatsCopyWith<$Res> implements $DashboardStatsCo
   factory _$DashboardStatsCopyWith(_DashboardStats value, $Res Function(_DashboardStats) _then) = __$DashboardStatsCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'volume_trend') List<VolumePoint> volumeTrend,@JsonKey(name: 'muscle_split') List<MuscleSplit> muscleSplit,@JsonKey(name: 'recent_prs') List<PRRecord> recentPRs
+@JsonKey(name: 'volume_trend') List<VolumePoint> volumeTrend,@JsonKey(name: 'muscle_split') List<MuscleSplit> muscleSplit,@JsonKey(name: 'recent_prs') List<PRRecord> recentPRs, List<Map<String, dynamic>> achievements, Map<String, dynamic>? streak
 });
 
 
@@ -286,12 +304,14 @@ class __$DashboardStatsCopyWithImpl<$Res>
 
 /// Create a copy of DashboardStats
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? volumeTrend = null,Object? muscleSplit = null,Object? recentPRs = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? volumeTrend = null,Object? muscleSplit = null,Object? recentPRs = null,Object? achievements = null,Object? streak = freezed,}) {
   return _then(_DashboardStats(
 volumeTrend: null == volumeTrend ? _self._volumeTrend : volumeTrend // ignore: cast_nullable_to_non_nullable
 as List<VolumePoint>,muscleSplit: null == muscleSplit ? _self._muscleSplit : muscleSplit // ignore: cast_nullable_to_non_nullable
 as List<MuscleSplit>,recentPRs: null == recentPRs ? _self._recentPRs : recentPRs // ignore: cast_nullable_to_non_nullable
-as List<PRRecord>,
+as List<PRRecord>,achievements: null == achievements ? _self._achievements : achievements // ignore: cast_nullable_to_non_nullable
+as List<Map<String, dynamic>>,streak: freezed == streak ? _self._streak : streak // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
   ));
 }
 

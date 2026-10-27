@@ -63,3 +63,55 @@ File này lưu trữ các lỗi gặp phải trong quá trình phát triển đ�
 - **Fix Applied**: Sửa số cấp lùi thư mục từ `../../` thành `../../../`.
 - **Prevention**: Khi tính toán relative import đan chéo giữa các feature (Domain-Driven Design), Agent phải luôn kiểm tra cẩn thận chiều sâu tuyệt đối (depth) của cả 2 file trước khi tạo đường dẫn relative.
 - **Status**: Fixed
+
+---
+
+## [2026-10-26] — Product audit: progression authority and atomic completion
+
+- **Severity:** Critical.
+- **Root cause:** Owner-wide write policies and client onboarding allowed changes to level/class XP. Workout completion issued independent parallel writes for user XP, class XP, ledger and completion flags, permitting partial state or duplicate awards on retries.
+- **Repair:** Versioned baseline/hardening migrations restrict table/column privileges and RLS, initialize progression in authenticated RPCs, lock user/workout state, and store an idempotent completion response. Child records become immutable after completion; server triggers snapshot personal-record baselines.
+- **Regression prevention:** Execute migration replay, anonymous/cross-user/direct-XP manipulation, rollback, quest/streak and duplicate-completion tests. True multi-session concurrency and the Supabase gateway require separate full-stack verification; do not infer them from an in-memory test run.
+- **Status:** Implemented; exact executed security and release gates are maintained in `docs/IMPLEMENTATION_STATUS.md`.
+
+## [2026-10-26] — Confirmation-aware auth and swallowed errors
+
+- **Severity:** High.
+- **Root cause:** Signup tried to create the public user row even when email confirmation returned no session. Profile/stat/quest providers converted request failures to null, confusing unavailable data with new-user onboarding or empty screens.
+- **Repair:** Auth-trigger identity creation, confirmation-aware signup/recovery, explicit session handling and recoverable error states. Missing client configuration now displays setup instructions. Public-key configuration rejects secret/service-role keys.
+- **Regression prevention:** Cover confirmed/pending signup, session restoration, provider failure, password-recovery redirects, and privileged-key rejection. Use real email/gateway checks for the final auth acceptance gate.
+- **Status:** Focused auth/config tests passing; full-stack limitations remain in the tracked report.
+
+## [2026-10-26] — Build drift, onboarding navigation and hidden workout controls
+
+- **Severity:** High.
+- **Root cause:** Onboarding referenced removed recommendation APIs and stopped before the ninth confirmation page. Historical progression tests called obsolete signatures. Duplicate theme implementations and hover-only controls reduced consistency/accessibility.
+- **Repair:** Current onboarding API/navigation, regenerated models after domain changes, one theme with compatibility export, reachable touch controls, and updated meaningful regression coverage.
+- **Regression prevention:** Run generation once when annotations change, wait for completion, then analyze/test/build. Existing `BorderStyle.dash` and LevelUpOverlay import incidents remain historical; they were not treated as proof of current defects.
+- **Status:** Integration verification in progress; see the current report rather than assuming earlier fixed entries prove a passing build.
+
+## [2026-10-26] — Credential logging and unsafe future admin advice
+
+- **Severity:** High.
+- **Root cause:** calculate-xp logged a bearer-token prefix; the future admin API document suggested distributing service_role to the browser and reading an application role from the JWT database-role field.
+- **Repair:** Remove credential logging; retain JWT verification and explicit user validation. Admin documentation now requires a publishable key/user session, trusted app_metadata role assignments, server-only privileged operations and transactional auditing. The admin application remains a future proposal.
+- **Regression prevention:** Review logs/configuration and generated bundles for credentials; test both grants and policies. Do not log access tokens even partially.
+- **Status:** Implemented; audit evidence and deployment status remain in `docs/IMPLEMENTATION_STATUS.md`.
+
+
+## [2026-10-26 21:05] - Lỗi Duplicate named argument 'surface' trong AppTheme.darkTheme
+
+- **Type**: Syntax Error
+- **Severity**: High
+- **File**: `app/lib/core/theme/app_theme.dart:39`
+- **Agent**: gymlvlAgent
+- **Root Cause**: Trong quá trình refactor thay thế `background: background` thành `surface` theo Material 3, tham số `surface` bị khai báo 2 lần liên tiếp (`surface: background` và `surface: panelBackground`), gây lỗi biên dịch ở các test suite phụ thuộc theme (`ui_regression_test`, `widget_test`, `workout_widgets_test`).
+- **Error Message**: 
+  ```
+  lib/core/theme/app_theme.dart:39:9: Error: Duplicated named argument 'surface'.
+          surface: panelBackground,
+          ^^^^^^^
+  ```
+- **Fix Applied**: Loại bỏ dòng thừa `surface: background,`, giữ nguyên cấu hình màu panel chuẩn `surface: panelBackground,`. Đồng thời chuẩn hóa format và xử lý 5 linter warnings để `flutter analyze` đạt 0 issues.
+- **Prevention**: Luôn chạy `flutter analyze` hoặc `flutter test` ngay sau khi refactor theme parameters để bắt sớm lỗi duplicated arguments.
+- **Status**: Fixed

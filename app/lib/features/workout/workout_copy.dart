@@ -1,0 +1,143 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/localization/localization_engine.dart';
+
+const _copy = <String, List<String>>{
+  'reload_required': [
+    'An edit could not be saved. Reload the saved session, check your sets, then finish.',
+    'Có thay đổi chưa được lưu. Tải lại buổi tập đã lưu, kiểm tra các hiệp rồi hoàn thành.',
+  ],
+  'reload_saved': ['Reload saved session', 'Tải lại buổi tập đã lưu'],
+  'setup': ['Prepare your session', 'Chuẩn bị buổi tập'],
+  'choose_groups': ['Choose muscle groups', 'Chọn nhóm cơ'],
+  'add_exercise': ['Add exercise', 'Thêm bài tập'],
+  'selected': ['Selected exercises', 'Bài tập đã chọn'],
+  'choose_hint': [
+    'Choose a muscle group or add an exercise.',
+    'Chọn nhóm cơ hoặc thêm bài tập.',
+  ],
+  'begin': ['Begin training', 'Bắt đầu tập'],
+  'finish': ['Finish', 'Hoàn thành'],
+  'finish_title': ['Finish this session?', 'Hoàn thành buổi tập?'],
+  'finish_hint': [
+    'Your completed sets and rewards will be saved together.',
+    'Các hiệp đã tập và phần thưởng sẽ được lưu cùng nhau.',
+  ],
+  'keep_training': ['Keep training', 'Tiếp tục tập'],
+  'saved': ['Session saved', 'Đã lưu buổi tập'],
+  'estimated_xp': ['Estimated XP', 'XP dự kiến'],
+  'pause': ['Pause', 'Tạm dừng'],
+  'resume': ['Resume', 'Tiếp tục'],
+  'paused': ['Session paused', 'Buổi tập tạm dừng'],
+  'leave_title': ['Leave this session?', 'Rời buổi tập?'],
+  'leave_hint': [
+    'Your progress is saved. Pause and return whenever you are ready.',
+    'Tiến độ đã lưu. Tạm dừng và quay lại khi bạn sẵn sàng.',
+  ],
+  'stay': ['Stay', 'Ở lại'],
+  'leave': ['Pause and leave', 'Tạm dừng và rời đi'],
+  'cancel_session': ['Cancel session', 'Hủy buổi tập'],
+  'remove_exercise': ['Remove this exercise?', 'Xóa bài tập này?'],
+  'remove_hint': [
+    'Its logged sets will be removed from this active session.',
+    'Các hiệp của bài tập sẽ bị xóa khỏi buổi tập này.',
+  ],
+  'remove': ['Remove', 'Xóa'],
+  'cancel': ['Cancel', 'Hủy'],
+  'sets': ['sets', 'hiệp'],
+  'reps': ['reps', 'lần'],
+  'rest': ['Rest timer', 'Đồng hồ nghỉ'],
+  'skip_rest': ['Finish rest', 'Kết thúc nghỉ'],
+  'add_set': ['Add set', 'Thêm hiệp'],
+  'delete_set': ['Delete set', 'Xóa hiệp'],
+  'complete_set': ['Mark set complete', 'Đánh dấu hoàn thành hiệp'],
+  'weight': ['Weight (kg)', 'Khối lượng (kg)'],
+  'repetitions': ['Repetitions', 'Số lần lặp'],
+  'save_failed': [
+    'Could not save. Check your connection and retry.',
+    'Chưa lưu được. Kiểm tra kết nối rồi thử lại.',
+  ],
+  'completion_failed': [
+    'Completion was not confirmed. Retry safely; rewards are awarded once.',
+    'Chưa xác nhận hoàn thành. Hãy thử lại; phần thưởng chỉ được cộng một lần.',
+  ],
+  'completed_set_required': [
+    'Complete at least one set before finishing.',
+    'Hoàn thành ít nhất một hiệp trước khi kết thúc.',
+  ],
+  'reps_required': [
+    'Enter at least one repetition before completing this set.',
+    'Nhập ít nhất một lần lặp trước khi hoàn thành hiệp.',
+  ],
+  'active_session_exists': [
+    'Finish or cancel your active session first.',
+    'Hoàn thành hoặc hủy buổi tập hiện tại trước.',
+  ],
+  'exercise_unavailable': [
+    'These exercises are unavailable. Choose from the exercise library.',
+    'Các bài tập này chưa có. Hãy chọn trong thư viện bài tập.',
+  ],
+  'retry': ['Retry', 'Thử lại'],
+  'dismiss': ['Dismiss', 'Đóng'],
+  'load_hint': [
+    'Start light. Adjust loads for comfort and technique; stop if you feel pain.',
+    'Bắt đầu nhẹ. Điều chỉnh tạ theo kỹ thuật và cảm giác; dừng lại nếu đau.',
+  ],
+  'history': ['Workout history', 'Lịch sử tập luyện'],
+  'no_history': [
+    'Your first completed session will appear here.',
+    'Buổi tập đầu tiên hoàn thành sẽ hiển thị ở đây.',
+  ],
+  'details': ['Session details', 'Chi tiết buổi tập'],
+  'not_found': [
+    'This session could not be found.',
+    'Không tìm thấy buổi tập này.',
+  ],
+  'duration': ['Duration', 'Thời lượng'],
+  'volume': ['Volume', 'Khối lượng'],
+  'exercises': ['exercises', 'bài tập'],
+  'today': ['Today', 'Hôm nay'],
+  'yesterday': ['Yesterday', 'Hôm qua'],
+  'search': ['Search exercises', 'Tìm bài tập'],
+  'select_exercises': ['Select exercises', 'Chọn bài tập'],
+  'all': ['All', 'Tất cả'],
+  'no_results': [
+    'No exercises match your search.',
+    'Không tìm thấy bài tập phù hợp.',
+  ],
+  'Chest': ['Chest', 'Ngực'],
+  'Back': ['Back', 'Lưng'],
+  'Legs': ['Legs', 'Chân'],
+  'Shoulders': ['Shoulders', 'Vai'],
+  'Arms': ['Arms', 'Tay'],
+  'Core': ['Core', 'Bụng'],
+  'bodyweight': ['Bodyweight', 'Trọng lượng cơ thể'],
+  'seconds': ['s', 'giây'],
+  'seconds_label': ['Seconds', 'Số giây'],
+  'pause_rest': ['Pause', 'Tạm dừng'],
+  'resume_rest': ['Resume', 'Tiếp tục'],
+  'reset_rest': ['Reset', 'Đặt lại'],
+  'add_30s': ['+30s', '+30s'],
+  'subtract_15s': ['-15s', '-15s'],
+  'interrupted_title': [
+    'Resume interrupted workout?',
+    'Tiếp tục bài tập chưa hoàn thành?',
+  ],
+  'resume_interrupted': ['Resume workout', 'Tiếp tục tập'],
+  'discard_interrupted': ['Discard', 'Hủy bỏ'],
+  'workout_summary': ['Workout Summary', 'Tổng kết buổi tập'],
+  'total_volume': ['Total Volume', 'Tổng khối lượng'],
+  'completed_sets': ['Completed Sets', 'Hiệp hoàn thành'],
+  'earned_xp': ['Earned XP', 'XP nhận được'],
+  'level_progress': ['Level Progress', 'Tiến độ cấp độ'],
+  'finish_workout_celebration': ['Workout Complete!', 'Hoàn thành buổi tập!'],
+  'return_home': ['Return Home', 'Về trang chủ'],
+  'reorder': ['Reorder exercises', 'Sắp xếp bài tập'],
+  'reorder_hint': ['Hold and drag to reorder', 'Giữ và kéo để đổi thứ tự'],
+};
+
+String workoutText(WidgetRef ref, String key) {
+  final words = _copy[key];
+  if (words == null) return key;
+  final mode = ref.watch(localizationModeProvider);
+  return mode == AppLangMode.en ? words[0] : words[1];
+}

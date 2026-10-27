@@ -19,28 +19,24 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signUpWithEmail(String email, String password) async {
-    final AuthResponse res = await _supabase.auth.signUp(
-      email: email,
-      password: password,
-    );
+    await _supabase.auth.signUp(email: email, password: password);
 
-    // After sign-up, create a blank user document in public.users if a user is created
-    // Note: It's safer if Supabase trigger does this, but we can do it client-side if we own the policy
-    if (res.user != null) {
-      final userExists = await _supabase
-          .from('users')
-          .select()
-          .eq('id', res.user!.id)
-          .maybeSingle();
-      
-      if (userExists == null) {
-         await _supabase.from('users').insert({
-          'id': res.user!.id,
-          'email': res.user!.email,
-          'created_at': DateTime.now().toUtc().toIso8601String(),
-         });
-      }
-    }
+    // The database Auth trigger creates identity records, including when email
+    // confirmation means sign-up does not return an authenticated session.
+  }
+
+  @override
+  Future<void> resetPassword(String email) async {
+    const redirect = String.fromEnvironment('AUTH_REDIRECT_URL');
+    await _supabase.auth.resetPasswordForEmail(
+      email.trim(),
+      redirectTo: redirect.isEmpty ? null : redirect,
+    );
+  }
+
+  @override
+  Future<void> updatePassword(String password) async {
+    await _supabase.auth.updateUser(UserAttributes(password: password));
   }
 
   @override

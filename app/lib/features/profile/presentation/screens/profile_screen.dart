@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import '../../../../ui/widgets/status_panel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/candy_colors.dart';
 import '../../../../core/config/supabase_config.dart';
 import '../../../../core/localization/localization_engine.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -30,7 +31,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   int _gymDays = 3;
   int _homeDays = 0;
   List<String> _preferredDays = [];
-  final List<String> _weekDays = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  final List<String> _weekDays = [
+    'mon',
+    'tue',
+    'wed',
+    'thu',
+    'fri',
+    'sat',
+    'sun',
+  ];
 
   @override
   void initState() {
@@ -50,75 +59,102 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     super.dispose();
   }
 
-  void _populateControllers(Map<String, dynamic>? user, Map<String, dynamic>? profile) {
+  void _populateControllers(
+    Map<String, dynamic>? user,
+    Map<String, dynamic>? profile,
+  ) {
     _nameController.text = user?['display_name'] ?? '';
     _ageController.text = (profile?['age'] ?? '').toString();
     _heightController.text = (profile?['height_cm'] ?? '').toString();
     _weightController.text = (profile?['weight_kg'] ?? '').toString();
-    
+
     _gymDays = profile?['weekly_gym_days'] ?? 3;
     _homeDays = profile?['weekly_home_days'] ?? 0;
-    _preferredDays = List<String>.from(profile?['preferred_training_days'] ?? []);
+    _preferredDays = List<String>.from(
+      profile?['preferred_training_days'] ?? [],
+    );
   }
 
   Future<void> _saveProfile() async {
+    if (_isSaving) return;
+    final age = int.tryParse(_ageController.text.trim());
+    final height = double.tryParse(_heightController.text.trim());
+    final weight = double.tryParse(_weightController.text.trim());
+    if (_nameController.text.trim().isEmpty ||
+        _nameController.text.trim().length > 80 ||
+        age == null ||
+        age < 13 ||
+        age > 100 ||
+        height == null ||
+        !height.isFinite ||
+        height < 100 ||
+        height > 250 ||
+        weight == null ||
+        !weight.isFinite ||
+        weight < 25 ||
+        weight > 400 ||
+        _gymDays + _homeDays > 7 ||
+        _gymDays + _homeDays < 1 ||
+        _preferredDays.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('profile_invalid'.tr(ref))));
+      return;
+    }
     setState(() => _isSaving = true);
     try {
       final userId = SupabaseConfig.client.auth.currentUser?.id;
-      if (userId == null) throw Exception('Chưa đăng nhập');
-
-      // Update users table
-      await SupabaseConfig.client.from('users').update({
-        'display_name': _nameController.text.trim(),
-      }).eq('id', userId);
-
-      // Update profiles table
-      final age = int.tryParse(_ageController.text);
-      final height = double.tryParse(_heightController.text);
-      final weight = double.tryParse(_weightController.text);
-
-      await SupabaseConfig.client.from('profiles').update({
-        if (age != null) 'age': age,
-        if (height != null) 'height_cm': height,
-        if (weight != null) 'weight_kg': weight,
-        'weekly_gym_days': _gymDays,
-        'weekly_home_days': _homeDays,
-        'preferred_training_days': _preferredDays,
-      }).eq('id', userId);
-
-      // Refresh providers
+      if (userId == null) throw StateError('No session');
+      await SupabaseConfig.client
+          .from('users')
+          .update({'display_name': _nameController.text.trim()})
+          .eq('id', userId);
+      await SupabaseConfig.client
+          .from('profiles')
+          .update({
+            'age': age,
+            'height_cm': height,
+            'weight_kg': weight,
+            'weekly_gym_days': _gymDays,
+            'weekly_home_days': _homeDays,
+            'preferred_training_days': _preferredDays,
+          })
+          .eq('id', userId);
       ref.invalidate(currentUserProvider);
       ref.invalidate(currentUserProfileProvider);
-
-      setState(() {
-        _isEditing = false;
-        _isSaving = false;
-      });
-
+      if (!mounted) return;
+      setState(() => _isEditing = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('profile_saved'.tr(ref))));
+    } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Đã cập nhật hồ sơ lưu trữ!'), backgroundColor: AppTheme.successGreen),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('request_failed'.tr(ref))));
       }
-    } catch (e) {
-      setState(() => _isSaving = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Lỗi: $e'), backgroundColor: AppTheme.dangerOrange),
-        );
-      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   // ============== CLASS SWITCH MODAL ==============
-  void _showClassPickerSheet(String slot, String currentClassId, String? primaryClassId) {
+  void _showClassPickerSheet(
+    String slot,
+    String currentClassId,
+    String? primaryClassId,
+  ) {
     List<String> allowedSecondary = [];
     if (slot == 'secondary' && primaryClassId != null) {
       allowedSecondary = getRecommendedSecondary(primaryClassId);
       // Include perfect synergies directly just in case it's missed
       for (final syn in kPerfectSynergies) {
-        if (syn.primaryClassId == primaryClassId) allowedSecondary.add(syn.secondaryClassId);
-        if (syn.secondaryClassId == primaryClassId) allowedSecondary.add(syn.primaryClassId);
+        if (syn.primaryClassId == primaryClassId) {
+          allowedSecondary.add(syn.secondaryClassId);
+        }
+        if (syn.secondaryClassId == primaryClassId) {
+          allowedSecondary.add(syn.primaryClassId);
+        }
       }
     }
 
@@ -134,7 +170,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           height: MediaQuery.of(context).size.height * 0.75,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.5), width: 2)),
+            border: Border(
+              top: BorderSide(
+                color: AppTheme.cyanNeon.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
             color: AppTheme.panelBackground,
           ),
           child: Column(
@@ -145,7 +186,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   Text(
                     "${'choose_class'.tr(ref)} ${slot.toUpperCase()}",
-                    style: const TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.cyanNeon),
+                    style: const TextStyle(
+                      fontFamily: CandyFonts.display,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppTheme.cyanNeon,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.white),
@@ -156,13 +202,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 10),
               Text(
                 'retro_leveling_desc'.tr(ref),
-                style: const TextStyle(color: AppTheme.textDim, fontSize: 12, height: 1.5),
+                style: const TextStyle(
+                  color: AppTheme.textDim,
+                  fontSize: 12,
+                  height: 1.5,
+                ),
               ),
               if (slot == 'secondary') ...[
                 const SizedBox(height: 10),
                 Text(
                   'class_locked_synergy'.tr(ref),
-                  style: const TextStyle(color: AppTheme.dangerOrange, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Orbitron'),
+                  style: const TextStyle(
+                    color: AppTheme.dangerOrange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: CandyFonts.display,
+                  ),
                 ),
               ],
               const SizedBox(height: 20),
@@ -173,54 +228,91 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     final classId = kClassDefinitions.keys.elementAt(index);
                     final classDef = kClassDefinitions[classId]!;
                     final isSelected = currentClassId == classId;
-                    
+
                     bool isLocked = false;
                     if (slot == 'secondary' && primaryClassId != null) {
-                      isLocked = !allowedSecondary.contains(classId) && classId != primaryClassId;
+                      isLocked =
+                          classId == primaryClassId ||
+                          !allowedSecondary.contains(classId);
                     }
                     if (slot == 'primary' && currentClassId == classId) {
                       // Already primary
                     }
 
-                    final color = isLocked ? Colors.grey : Color(classDef.colorHex);
+                    final color = isLocked
+                        ? Colors.grey
+                        : Color(classDef.colorHex);
 
                     return GestureDetector(
-                      onTap: isLocked ? null : () {
-                        Navigator.pop(context);
-                        _switchClass(classId, slot);
-                      },
+                      onTap: isLocked
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                              _switchClass(classId, slot);
+                            },
                       child: Opacity(
                         opacity: isLocked ? 0.3 : 1.0,
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: isSelected ? color.withOpacity(0.15) : Colors.black26,
-                            border: Border.all(color: isSelected ? color : Colors.white12, width: isSelected ? 2 : 1),
+                            color: isSelected
+                                ? color.withValues(alpha: 0.15)
+                                : Colors.black26,
+                            border: Border.all(
+                              color: isSelected ? color : Colors.white12,
+                              width: isSelected ? 2 : 1,
+                            ),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Row(
                             children: [
-                              Text(classDef.iconEmoji, style: const TextStyle(fontSize: 28)),
+                              Text(
+                                classDef.iconEmoji,
+                                style: const TextStyle(fontSize: 28),
+                              ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      resolveClassName(classDef, ref.watch(localizationModeProvider)),
-                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color, fontFamily: 'Orbitron'),
+                                      resolveClassName(
+                                        classDef,
+                                        ref.watch(localizationModeProvider),
+                                      ),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: color,
+                                        fontFamily: CandyFonts.display,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      resolveClassFocus(classDef, ref.watch(localizationModeProvider)),
-                                      style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
+                                      resolveClassFocus(
+                                        classDef,
+                                        ref.watch(localizationModeProvider),
+                                      ),
+                                      style: const TextStyle(
+                                        color: AppTheme.textDim,
+                                        fontSize: 12,
+                                      ),
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      resolveClassDesc(classDef, ref.watch(localizationModeProvider)),
-                                      style: TextStyle(color: AppTheme.textDim.withOpacity(0.7), fontSize: 10),
-                                      maxLines: 2, overflow: TextOverflow.ellipsis,
+                                      resolveClassDesc(
+                                        classDef,
+                                        ref.watch(localizationModeProvider),
+                                      ),
+                                      style: TextStyle(
+                                        color: AppTheme.textDim.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                        fontSize: 10,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
@@ -228,7 +320,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               if (isLocked)
                                 const Icon(Icons.lock, color: Colors.grey)
                               else if (isSelected)
-                                Icon(Icons.check_circle, color: color)
+                                Icon(Icons.check_circle, color: color),
                             ],
                           ),
                         ),
@@ -250,12 +342,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.panelBackground,
-        shape: RoundedRectangleBorder(side: BorderSide(color: AppTheme.cyanNeon.withOpacity(0.5)), borderRadius: BorderRadius.circular(16)),
-        title: Text('confirm_switch'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', color: AppTheme.cyanNeon, fontSize: 16)),
-        content: Text('confirm_switch_desc'.tr(ref), style: const TextStyle(color: AppTheme.textMain)),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: AppTheme.cyanNeon.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'confirm_switch'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            color: AppTheme.cyanNeon,
+            fontSize: 16,
+          ),
+        ),
+        content: Text(
+          'confirm_switch_desc'.tr(ref),
+          style: const TextStyle(color: AppTheme.textMain),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('cancel'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text('confirm'.tr(ref), style: const TextStyle(color: AppTheme.cyanNeon))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'cancel'.tr(ref),
+              style: const TextStyle(color: AppTheme.textDim),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'confirm'.tr(ref),
+              style: const TextStyle(color: AppTheme.cyanNeon),
+            ),
+          ),
         ],
       ),
     );
@@ -263,13 +380,25 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     if (confirmed == true) {
       if (!mounted) return;
       try {
-        await ref.read(classControllerProvider.notifier).switchClass(newClassId: classId, slot: slot);
+        await ref
+            .read(classControllerProvider.notifier)
+            .switchClass(newClassId: classId, slot: slot);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Đã đổi Class thành công!'), backgroundColor: AppTheme.successGreen));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('class_switched'.tr(ref)),
+              backgroundColor: AppTheme.successGreen,
+            ),
+          );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppTheme.dangerOrange));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('request_failed'.tr(ref)),
+              backgroundColor: AppTheme.dangerOrange,
+            ),
+          );
         }
       }
     }
@@ -280,12 +409,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.panelBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: AppTheme.dangerOrange.withOpacity(0.5))),
-        title: Text('confirm_logout'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', color: AppTheme.dangerOrange, fontSize: 16)),
-        content: Text('confirm_logout_desc'.tr(ref), style: const TextStyle(color: AppTheme.textMain)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppTheme.dangerOrange.withValues(alpha: 0.5)),
+        ),
+        title: Text(
+          'confirm_logout'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            color: AppTheme.dangerOrange,
+            fontSize: 16,
+          ),
+        ),
+        content: Text(
+          'confirm_logout_desc'.tr(ref),
+          style: const TextStyle(color: AppTheme.textMain),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text('cancel'.tr(ref), style: const TextStyle(color: AppTheme.textDim))),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text('logout'.tr(ref), style: const TextStyle(color: AppTheme.dangerOrange))),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'cancel'.tr(ref),
+              style: const TextStyle(color: AppTheme.textDim),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'logout'.tr(ref),
+              style: const TextStyle(color: AppTheme.dangerOrange),
+            ),
+          ),
         ],
       ),
     );
@@ -305,7 +459,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: Text('system_character'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2.0, fontSize: 16)),
+        title: Text(
+          'system_character'.tr(ref),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+            fontSize: 16,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -314,6 +478,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.edit_rounded, color: AppTheme.cyanNeon),
+              tooltip: 'edit_profile'.tr(ref),
               onPressed: () {
                 final user = userState.value;
                 final profile = profileState.value;
@@ -325,55 +490,83 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       body: userState.when(
         data: (user) {
-          if (user == null) return const Center(child: Text('Không tìm thấy dữ liệu', style: TextStyle(color: AppTheme.textDim)));
+          if (user == null) {
+            return StatusPanel(message: 'no_data_recorded'.tr(ref));
+          }
           final profile = profileState.value;
 
           return Stack(
             children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderSection(user),
-                    const SizedBox(height: 28),
+              LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth > 760
+                        ? (constraints.maxWidth - 720) / 2
+                        : 20,
+                    vertical: 10,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeaderSection(user),
+                      const SizedBox(height: 28),
 
-                    _buildSectionHeader('biometrics_board'.tr(ref)),
-                    const SizedBox(height: 12),
-                    _isEditing ? _buildBiometricsEdit() : _buildBiometricsReadonly(profile),
-                    const SizedBox(height: 28),
+                      _buildSectionHeader('biometrics_board'.tr(ref)),
+                      const SizedBox(height: 12),
+                      _isEditing
+                          ? _buildBiometricsEdit()
+                          : _buildBiometricsReadonly(profile),
+                      const SizedBox(height: 28),
 
-                    _buildSectionHeader('battle_schedule'.tr(ref)),
-                    const SizedBox(height: 12),
-                    _isEditing ? _buildScheduleEdit() : _buildScheduleReadonly(profile),
-                    const SizedBox(height: 28),
+                      _buildSectionHeader('battle_schedule'.tr(ref)),
+                      const SizedBox(height: 12),
+                      _isEditing
+                          ? _buildScheduleEdit()
+                          : _buildScheduleReadonly(profile),
+                      const SizedBox(height: 28),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildSectionHeader('active_classes'.tr(ref)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildClassesSection(classesState),
-                    const SizedBox(height: 28),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: _buildSectionHeader(
+                              'active_classes'.tr(ref),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      _buildClassesSection(classesState),
+                      const SizedBox(height: 28),
 
-                    if (_isEditing) _buildEditActions(),
-                    if (!_isEditing) _buildLogoutButton(),
-                    const SizedBox(height: 40),
-                  ],
+                      if (_isEditing) _buildEditActions(),
+                      if (!_isEditing) _buildLogoutButton(),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                 ),
               ),
               if (classControllerState.isLoading)
                 Container(
                   color: Colors.black54,
-                  child: const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
+                  child: const Center(
+                    child: CircularProgressIndicator(color: AppTheme.cyanNeon),
+                  ),
                 ),
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
-        error: (e, _) => Center(child: Text('Lỗi: $e', style: const TextStyle(color: Colors.red))),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppTheme.cyanNeon),
+        ),
+        error: (_, _) => StatusPanel(
+          message: 'load_failed'.tr(ref),
+          retryLabel: 'retry'.tr(ref),
+          onRetry: () {
+            ref.invalidate(currentUserProvider);
+            ref.invalidate(currentUserProfileProvider);
+          },
+        ),
       ),
     );
   }
@@ -381,124 +574,86 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildSectionHeader(String title) {
     return Row(
       children: [
-        Container(width: 4, height: 16, decoration: BoxDecoration(color: AppTheme.cyanNeon, boxShadow: [BoxShadow(color: AppTheme.cyanNeon, blurRadius: 4)])),
+        Container(
+          width: 4,
+          height: 16,
+          decoration: BoxDecoration(
+            color: AppTheme.cyanNeon,
+            boxShadow: [BoxShadow(color: AppTheme.cyanNeon, blurRadius: 4)],
+          ),
+        ),
         const SizedBox(width: 10),
-        Text(title, style: const TextStyle(color: Colors.white, fontFamily: 'Orbitron', fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 13)),
+        Flexible(
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+              fontSize: 13,
+            ),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildLanguageSelector(WidgetRef ref) {
-    final mode = ref.watch(localizationModeProvider);
-    final isEn = mode == AppLangMode.en;
-
-    return Center(
-      child: GestureDetector(
-        onTap: () {
-          ref.read(localizationModeProvider.notifier).setMode(
-            isEn ? AppLangMode.vi : AppLangMode.en,
-          );
-        },
-        child: Container(
-          width: 72,
-          height: 32,
-          margin: const EdgeInsets.only(right: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.background,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.cyanNeon.withOpacity(0.1),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              AnimatedAlign(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutBack,
-                alignment: isEn ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  width: 38,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppTheme.cyanNeon,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.cyanNeon.withOpacity(0.5),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
-                        style: TextStyle(
-                          fontFamily: 'Orbitron',
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: !isEn ? AppTheme.background : AppTheme.textDim,
-                        ),
-                        child: const Text('VI'),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
-                        style: TextStyle(
-                          fontFamily: 'Orbitron',
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: isEn ? AppTheme.background : AppTheme.textDim,
-                        ),
-                        child: const Text('EN'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildLanguageSelector(WidgetRef ref) => PopupMenuButton<AppLangMode>(
+    icon: const Icon(Icons.language),
+    tooltip: 'VI / EN',
+    initialValue: ref.watch(localizationModeProvider),
+    onSelected: (value) =>
+        ref.read(localizationModeProvider.notifier).setMode(value),
+    itemBuilder: (_) => const [
+      PopupMenuItem(value: AppLangMode.vi, child: Text('VI')),
+      PopupMenuItem(value: AppLangMode.en, child: Text('EN')),
+    ],
+  );
 
   Widget _buildHeaderSection(Map<String, dynamic> user) {
     final level = (user['level'] as num?)?.toInt() ?? 1;
     final title = (user['current_title'] as String?) ?? 'Seeker';
     final displayName = user['display_name'] ?? 'User';
-    final email = SupabaseConfig.client.auth.currentUser?.email ?? '';
+    final email = (user['email'] as String?) ?? '';
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppTheme.panelBackground,
         border: Border(left: BorderSide(color: AppTheme.cyanNeon, width: 4)),
-        boxShadow: [BoxShadow(color: AppTheme.cyanNeon.withOpacity(0.1), blurRadius: 20)],
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.cyanNeon.withValues(alpha: 0.1),
+            blurRadius: 20,
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 64, height: 64,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(color: AppTheme.purpleNeon, width: 2),
-              boxShadow: [BoxShadow(color: AppTheme.purpleNeon.withOpacity(0.3), blurRadius: 12)],
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.purpleNeon.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                ),
+              ],
             ),
-            child: Center(child: Text('Lv$level', style: const TextStyle(fontFamily: 'Orbitron', color: AppTheme.cyanNeon, fontWeight: FontWeight.bold, fontSize: 14))),
+            child: Center(
+              child: Text(
+                'Lv$level',
+                style: const TextStyle(
+                  fontFamily: CandyFonts.mono,
+                  color: AppTheme.cyanNeon,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -508,15 +663,46 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 if (_isEditing)
                   TextField(
                     controller: _nameController,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    decoration: const InputDecoration(border: UnderlineInputBorder(borderSide: BorderSide(color: AppTheme.cyanNeon)), isDense: true, contentPadding: EdgeInsets.only(bottom: 4)),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(color: AppTheme.cyanNeon),
+                      ),
+                      isDense: true,
+                      contentPadding: EdgeInsets.only(bottom: 4),
+                    ),
                   )
                 else
-                  Text(displayName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  Text(
+                    displayName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 const SizedBox(height: 4),
-                Text(title.toUpperCase(), style: const TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.amber,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(email, style: TextStyle(color: AppTheme.textDim.withOpacity(0.7), fontSize: 11)),
+                Text(
+                  email,
+                  style: TextStyle(
+                    color: AppTheme.textDim.withValues(alpha: 0.7),
+                    fontSize: 11,
+                  ),
+                ),
               ],
             ),
           ),
@@ -546,21 +732,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: AppTheme.panelBackground.withOpacity(0.5),
-          border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.2)),
+          color: AppTheme.panelBackground.withValues(alpha: 0.5),
+          border: Border.all(color: AppTheme.cyanNeon.withValues(alpha: 0.2)),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.cyanNeon.withOpacity(0.05),
+              color: AppTheme.cyanNeon.withValues(alpha: 0.05),
               blurRadius: 10,
-            )
+            ),
           ],
         ),
         child: Column(
           children: [
-            Text(value, style: const TextStyle(color: AppTheme.cyanNeon, fontFamily: 'Orbitron', fontSize: 18, fontWeight: FontWeight.bold)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                style: const TextStyle(
+                  color: AppTheme.cyanNeon,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(label.toUpperCase(), style: const TextStyle(color: AppTheme.textDim, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.bold)),
+            Text(
+              label.toUpperCase(),
+              style: const TextStyle(
+                color: AppTheme.textDim,
+                fontSize: 10,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
@@ -570,16 +774,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildBiometricsEdit() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
       child: Column(
         children: [
           Row(
             children: [
-              Expanded(child: _editField('Tuổi', _ageController, TextInputType.number)),
+              Expanded(
+                child: _editField(
+                  'age'.tr(ref),
+                  _ageController,
+                  TextInputType.number,
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _editField('Cao (cm)', _heightController, TextInputType.number)),
+              Expanded(
+                child: _editField(
+                  '${'height'.tr(ref)} (cm)',
+                  _heightController,
+                  TextInputType.number,
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _editField('Nặng (kg)', _weightController, TextInputType.number)),
+              Expanded(
+                child: _editField(
+                  '${'weight'.tr(ref)} (kg)',
+                  _weightController,
+                  const TextInputType.numberWithOptions(decimal: true),
+                ),
+              ),
             ],
           ),
         ],
@@ -587,34 +813,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _editField(String label, TextEditingController controller, TextInputType type) {
+  Widget _editField(
+    String label,
+    TextEditingController controller,
+    TextInputType type,
+  ) {
     return TextField(
       controller: controller,
       keyboardType: type,
       textAlign: TextAlign.center,
-      style: const TextStyle(color: AppTheme.cyanNeon, fontFamily: 'Orbitron', fontSize: 14, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+        color: AppTheme.cyanNeon,
+        fontFamily: CandyFonts.mono,
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+      ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: AppTheme.textDim, fontSize: 12),
-        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white12), borderRadius: BorderRadius.circular(8)),
-        focusedBorder: OutlineInputBorder(borderSide: const BorderSide(color: AppTheme.cyanNeon), borderRadius: BorderRadius.circular(8)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white12),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: AppTheme.cyanNeon),
+          borderRadius: BorderRadius.circular(8),
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         isDense: true,
       ),
     );
   }
 
+  String _dayLabel(String value) {
+    const keys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    const vi = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+    const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final index = keys.indexOf(value);
+    if (index < 0) return value;
+    return ref.watch(localizationModeProvider) == AppLangMode.en
+        ? en[index]
+        : vi[index];
+  }
+
   Widget _buildScheduleReadonly(Map<String, dynamic>? profile) {
     final gymDays = profile?['weekly_gym_days'] ?? 3;
     final homeDays = profile?['weekly_home_days'] ?? 0;
-    final preferredDays = (profile?['preferred_training_days'] as List?)?.cast<String>() ?? [];
+    final preferredDays =
+        (profile?['preferred_training_days'] as List?)?.cast<String>() ?? [];
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.panelBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.purpleNeon.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.purpleNeon.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,21 +875,55 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('gym_home_ratio'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontSize: 12)),
-              Text("$gymDays/$homeDays ${'days'.tr(ref)}", style: const TextStyle(color: Colors.white, fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(
+                  'gym_home_ratio'.tr(ref),
+                  style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
+                ),
+              ),
+              Text(
+                "$gymDays/$homeDays ${'days'.tr(ref)}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: CandyFonts.mono,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          Text('preferred_protocols'.tr(ref), style: const TextStyle(color: AppTheme.textDim, fontSize: 12)),
+          Text(
+            'preferred_protocols'.tr(ref),
+            style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
+          ),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
-            children: preferredDays.map((d) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(color: AppTheme.cyanNeon.withOpacity(0.2), borderRadius: BorderRadius.circular(4), border: Border.all(color: AppTheme.cyanNeon)),
-              child: Text(d, style: const TextStyle(color: AppTheme.cyanNeon, fontSize: 11, fontWeight: FontWeight.bold)),
-            )).toList(),
-          )
+            children: preferredDays
+                .map(
+                  (d) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppTheme.cyanNeon.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: AppTheme.cyanNeon),
+                    ),
+                    child: Text(
+                      _dayLabel(d),
+                      style: const TextStyle(
+                        color: AppTheme.cyanNeon,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
         ],
       ),
     );
@@ -645,42 +932,84 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildScheduleEdit() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: AppTheme.panelBackground, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppTheme.purpleNeon.withOpacity(0.8))),
+      decoration: BoxDecoration(
+        color: AppTheme.panelBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.purpleNeon.withValues(alpha: 0.8)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Số buổi tập Gym/tuần: $_gymDays', style: const TextStyle(color: Colors.white, fontSize: 13)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Buổi gym mỗi tuần: $_gymDays',
+              en: 'Gym sessions per week: $_gymDays',
+            ),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
           Slider(
             value: _gymDays.toDouble(),
-            min: 0, max: 7, divisions: 7,
-            activeColor: AppTheme.cyanNeon, inactiveColor: Colors.white12,
+            min: 0,
+            max: 7,
+            divisions: 7,
+            activeColor: AppTheme.cyanNeon,
+            inactiveColor: Colors.white12,
             onChanged: (val) => setState(() => _gymDays = val.toInt()),
           ),
           const SizedBox(height: 10),
-          Text('Số buổi tự tập ở nhà/tuần: $_homeDays', style: const TextStyle(color: Colors.white, fontSize: 13)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Buổi tập tại nhà mỗi tuần: $_homeDays',
+              en: 'Home sessions per week: $_homeDays',
+            ),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
           Slider(
             value: _homeDays.toDouble(),
-            min: 0, max: 7, divisions: 7,
-            activeColor: AppTheme.purpleNeon, inactiveColor: Colors.white12,
+            min: 0,
+            max: 7,
+            divisions: 7,
+            activeColor: AppTheme.purpleNeon,
+            inactiveColor: Colors.white12,
             onChanged: (val) => setState(() => _homeDays = val.toInt()),
           ),
           const SizedBox(height: 16),
-          const Text('Ngày rảnh tập:', style: TextStyle(color: Colors.white, fontSize: 13)),
+          Text(
+            'preferred_protocols'.tr(ref),
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           Wrap(
-            spacing: 6, runSpacing: 6,
+            spacing: 6,
+            runSpacing: 6,
             children: _weekDays.map((day) {
               final isSelected = _preferredDays.contains(day);
               return FilterChip(
-                label: Text(day, style: TextStyle(color: isSelected ? Colors.black : Colors.white, fontSize: 12)),
+                label: Text(
+                  _dayLabel(day),
+                  style: TextStyle(
+                    color: isSelected ? Colors.black : Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
                 selected: isSelected,
                 selectedColor: AppTheme.cyanNeon,
                 backgroundColor: Colors.black26,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6), side: BorderSide(color: isSelected ? AppTheme.cyanNeon : Colors.white24)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  side: BorderSide(
+                    color: isSelected ? AppTheme.cyanNeon : Colors.white24,
+                  ),
+                ),
                 onSelected: (bool selected) {
                   setState(() {
-                    if (selected) _preferredDays.add(day);
-                    else _preferredDays.remove(day);
+                    if (selected) {
+                      _preferredDays.add(day);
+                    } else {
+                      _preferredDays.remove(day);
+                    }
                   });
                 },
               );
@@ -691,11 +1020,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildClassesSection(AsyncValue<List<Map<String, dynamic>>> classesState) {
+  Widget _buildClassesSection(
+    AsyncValue<List<Map<String, dynamic>>> classesState,
+  ) {
     return classesState.when(
       data: (classes) {
-        final primary = classes.firstWhere((c) => c['slot'] == 'primary', orElse: () => {});
-        final secondary = classes.firstWhere((c) => c['slot'] == 'secondary', orElse: () => {});
+        final primary = classes.firstWhere(
+          (c) => c['slot'] == 'primary',
+          orElse: () => {},
+        );
+        final secondary = classes.firstWhere(
+          (c) => c['slot'] == 'secondary',
+          orElse: () => {},
+        );
 
         final primaryId = primary['class_id'] as String?;
 
@@ -707,20 +1044,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.cyanNeon)),
-      error: (_, __) => const SizedBox(),
+      loading: () => const Center(
+        child: CircularProgressIndicator(color: AppTheme.cyanNeon),
+      ),
+      error: (_, _) => StatusPanel(
+        message: 'load_failed'.tr(ref),
+        retryLabel: 'retry'.tr(ref),
+        onRetry: () => ref.invalidate(userClassesProvider),
+      ),
     );
   }
 
-  Widget _buildClassHoloCard(Map<String, dynamic> uc, String slot, String? primaryId) {
+  Widget _buildClassHoloCard(
+    Map<String, dynamic> uc,
+    String slot,
+    String? primaryId,
+  ) {
     final classId = uc['class_id'] as String?;
     if (classId == null) {
       return GestureDetector(
         onTap: () => _showClassPickerSheet(slot, '', primaryId),
         child: Container(
-          width: double.infinity, padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(border: Border.all(color: Colors.white24, style: BorderStyle.solid), borderRadius: BorderRadius.circular(12)),
-          child: Center(child: Text("+ ${'choose_class'.tr(ref)} ${slot.toUpperCase()}", style: const TextStyle(color: AppTheme.textDim, fontFamily: 'Orbitron', letterSpacing: 1))),
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white24, style: BorderStyle.solid),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              "+ ${'choose_class'.tr(ref)} ${slot.toUpperCase()}",
+              style: const TextStyle(
+                color: AppTheme.textDim,
+                fontFamily: CandyFonts.display,
+                letterSpacing: 1,
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -728,11 +1088,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final classDef = kClassDefinitions[classId];
     final level = (uc['level'] as num?)?.toInt() ?? 1;
     final isGraduated = (uc['is_graduated'] as bool?) ?? false;
-    final color = classDef != null ? Color(classDef.colorHex) : AppTheme.cyanNeon;
+    final color = classDef != null
+        ? Color(classDef.colorHex)
+        : AppTheme.cyanNeon;
 
     return Container(
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border(left: BorderSide(color: color, width: 4)),
       ),
@@ -745,7 +1107,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.all(14),
             child: Row(
               children: [
-                Text(classDef?.iconEmoji ?? '⚔️', style: const TextStyle(fontSize: 28)),
+                Text(
+                  classDef?.iconEmoji ?? '⚔️',
+                  style: const TextStyle(fontSize: 28),
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -753,22 +1118,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            classDef != null 
-                                ? resolveClassName(classDef, ref.watch(localizationModeProvider)).toUpperCase() 
-                                : '', 
-                            style: TextStyle(color: color, fontFamily: 'Orbitron', fontWeight: FontWeight.bold, fontSize: 14),
+                          Flexible(
+                            child: Text(
+                              classDef != null
+                                  ? resolveClassName(
+                                      classDef,
+                                      ref.watch(localizationModeProvider),
+                                    ).toUpperCase()
+                                  : '',
+                              style: TextStyle(
+                                color: color,
+                                fontFamily: CandyFonts.display,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
                           ),
                           const SizedBox(width: 8),
-                          if (isGraduated) const Text('🎓', style: TextStyle(fontSize: 12)),
+                          if (isGraduated)
+                            const Text('🎓', style: TextStyle(fontSize: 12)),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text('${slot.toUpperCase()} · Lv $level', style: const TextStyle(color: AppTheme.textDim, fontSize: 11, letterSpacing: 1)),
+                      Text(
+                        '${slot.toUpperCase()} · Lv $level',
+                        style: const TextStyle(
+                          color: AppTheme.textDim,
+                          fontSize: 11,
+                          letterSpacing: 1,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                Icon(Icons.swap_horiz, color: AppTheme.textDim.withOpacity(0.5)),
+                Icon(
+                  Icons.swap_horiz,
+                  color: AppTheme.textDim.withValues(alpha: 0.5),
+                ),
               ],
             ),
           ),
@@ -784,10 +1170,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: OutlinedButton(
             onPressed: () => setState(() => _isEditing = false),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppTheme.textDim, side: const BorderSide(color: AppTheme.textDim),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 14),
+              foregroundColor: AppTheme.textDim,
+              side: const BorderSide(color: AppTheme.textDim),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: Text('cancel'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
+            child: Text(
+              'cancel'.tr(ref),
+              style: const TextStyle(
+                fontFamily: CandyFonts.display,
+                fontSize: 12,
+                letterSpacing: 1,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -795,12 +1192,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: ElevatedButton(
             onPressed: _isSaving ? null : _saveProfile,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.cyanNeon, foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 14),
+              backgroundColor: AppTheme.cyanNeon,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: _isSaving 
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
-                : Text('save'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.black,
+                    ),
+                  )
+                : Text(
+                    'save'.tr(ref),
+                    style: const TextStyle(
+                      fontFamily: CandyFonts.display,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
+                  ),
           ),
         ),
       ],
@@ -813,10 +1229,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       child: OutlinedButton.icon(
         onPressed: _confirmLogout,
         icon: const Icon(Icons.logout_rounded, size: 18),
-        label: Text('logout'.tr(ref), style: const TextStyle(fontFamily: 'Orbitron', fontSize: 12, letterSpacing: 1)),
+        label: Text(
+          'logout'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            fontSize: 12,
+            letterSpacing: 1,
+          ),
+        ),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.dangerOrange,
-          side: BorderSide(color: AppTheme.dangerOrange.withOpacity(0.5)),
+          side: BorderSide(color: AppTheme.dangerOrange.withValues(alpha: 0.5)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),

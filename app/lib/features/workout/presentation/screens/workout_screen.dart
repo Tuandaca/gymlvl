@@ -4,12 +4,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/candy_colors.dart';
 import '../../../../core/localization/localization_engine.dart';
 import '../../../../ui/widgets/system_button.dart';
 import '../providers/exercise_providers.dart';
 import '../controllers/active_workout_controller.dart';
 import '../controllers/workout_history_controller.dart';
 import '../widgets/workout_summary_card.dart';
+import '../../workout_copy.dart';
 
 class WorkoutScreen extends ConsumerStatefulWidget {
   const WorkoutScreen({super.key});
@@ -23,7 +25,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(activeWorkoutControllerProvider.notifier).checkForActiveWorkout();
+      ref
+          .read(activeWorkoutControllerProvider.notifier)
+          .checkForActiveWorkout();
     });
   }
 
@@ -34,9 +38,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: Text('training_title'.tr(ref)),
-      ),
+      appBar: AppBar(title: Text('training_title'.tr(ref))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
@@ -44,10 +46,9 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           children: [
             // Active workout resume card
             if (workoutState.hasActiveWorkout)
-              _buildResumeCard(workoutState)
-                  .animate()
-                  .fadeIn(duration: 400.ms)
-                  .slideY(begin: -0.2, end: 0),
+              _buildResumeCard(
+                workoutState,
+              ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
 
             // Start new workout
             if (!workoutState.hasActiveWorkout) ...[
@@ -62,7 +63,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 Text(
                   'recent'.tr(ref),
                   style: const TextStyle(
-                    fontFamily: 'Orbitron',
+                    fontFamily: CandyFonts.display,
                     color: AppTheme.cyanNeon,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -90,20 +91,26 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: AppTheme.panelBackground.withOpacity(0.3),
+                      color: AppTheme.panelBackground.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppTheme.cyanNeon.withOpacity(0.05)),
+                        color: AppTheme.cyanNeon.withValues(alpha: 0.05),
+                      ),
                     ),
                     child: Column(
                       children: [
-                        Icon(Icons.history_rounded,
-                            size: 40,
-                            color: AppTheme.textDim.withOpacity(0.3)),
+                        Icon(
+                          Icons.history_rounded,
+                          size: 40,
+                          color: AppTheme.textDim.withValues(alpha: 0.3),
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'no_workouts_yet'.tr(ref),
-                          style: const TextStyle(color: AppTheme.textDim, fontSize: 13),
+                          style: const TextStyle(
+                            color: AppTheme.textDim,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -112,11 +119,12 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
                 return Column(
                   children: workouts
-                      .map((w) => WorkoutSummaryCard(
-                            workout: w,
-                            onTap: () =>
-                                context.push('/workout/detail/${w.id}'),
-                          ))
+                      .map(
+                        (w) => WorkoutSummaryCard(
+                          workout: w,
+                          onTap: () => context.push('/workout/detail/${w.id}'),
+                        ),
+                      )
                       .toList(),
                 );
               },
@@ -127,8 +135,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                 ),
               ),
               error: (err, _) => Center(
-                child: Text('Error: $err',
-                    style: const TextStyle(color: AppTheme.dangerOrange)),
+                child: Text(
+                  'Error: $err',
+                  style: const TextStyle(color: AppTheme.dangerOrange),
+                ),
               ),
             ),
           ],
@@ -139,57 +149,60 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
 
   Widget _buildStartCard() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppTheme.cyanNeon.withOpacity(0.06),
-            AppTheme.purpleNeon.withOpacity(0.04),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.cyanNeon.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.cyanNeon.withOpacity(0.05),
-            blurRadius: 20,
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.fitness_center_rounded,
-              size: 60, color: AppTheme.cyanNeon),
-          const SizedBox(height: 16),
-          Text(
-            'ready_to_level_up'.tr(ref),
-            style: const TextStyle(
-              color: AppTheme.textMain,
-              fontSize: 20,
-              fontFamily: 'Orbitron',
-              fontWeight: FontWeight.bold,
+          width: double.infinity,
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppTheme.cyanNeon.withValues(alpha: 0.06),
+                AppTheme.purpleNeon.withValues(alpha: 0.04),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.cyanNeon.withValues(alpha: 0.2)),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.cyanNeon.withValues(alpha: 0.05),
+                blurRadius: 20,
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'start_workout_desc'.tr(ref),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: AppTheme.textDim,
-              fontSize: 14,
-            ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.fitness_center_rounded,
+                size: 60,
+                color: AppTheme.cyanNeon,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'ready_to_level_up'.tr(ref),
+                style: const TextStyle(
+                  color: AppTheme.textMain,
+                  fontSize: 20,
+                  fontFamily: CandyFonts.display,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'start_workout_desc'.tr(ref),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppTheme.textDim, fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              SystemButton(
+                text: 'start_session'.tr(ref),
+                onPressed: () => context.push('/workout/active'),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          SystemButton(
-            text: 'start_session'.tr(ref),
-            onPressed: () => context.push('/workout/active'),
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 500.ms).scale(
+        )
+        .animate()
+        .fadeIn(duration: 500.ms)
+        .scale(
           begin: const Offset(0.95, 0.95),
           end: const Offset(1, 1),
           duration: 500.ms,
@@ -204,17 +217,17 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppTheme.successGreen.withOpacity(0.15),
-            AppTheme.cyanNeon.withOpacity(0.08),
+            AppTheme.successGreen.withValues(alpha: 0.15),
+            AppTheme.cyanNeon.withValues(alpha: 0.08),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.successGreen.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.successGreen.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.successGreen.withOpacity(0.1),
+            color: AppTheme.successGreen.withValues(alpha: 0.1),
             blurRadius: 15,
           ),
         ],
@@ -232,7 +245,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.successGreen.withOpacity(0.6),
+                      color: AppTheme.successGreen.withValues(alpha: 0.6),
                       blurRadius: 8,
                     ),
                   ],
@@ -242,7 +255,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               Text(
                 'active_workout'.tr(ref),
                 style: const TextStyle(
-                  fontFamily: 'Orbitron',
+                  fontFamily: CandyFonts.display,
                   color: AppTheme.successGreen,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -251,18 +264,81 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
+          Text(
+            workoutText(ref, 'interrupted_title'),
+            style: const TextStyle(
+              color: AppTheme.textMain,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 6),
           Text(
             '${workoutState.exercises.length} ${'exercises'.tr(ref).toLowerCase()} · ${workoutState.totalSets} sets · ${workoutState.formattedElapsed}',
-            style: const TextStyle(color: AppTheme.textMain, fontSize: 14),
+            style: const TextStyle(color: AppTheme.textDim, fontSize: 13),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: SystemButton(
-              text: 'continue_workout'.tr(ref),
-              onPressed: () => context.push('/workout/active'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    side: BorderSide(
+                      color: AppTheme.dangerOrange.withValues(alpha: 0.5),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(workoutText(ref, 'discard_interrupted')),
+                        content: Text(workoutText(ref, 'leave_hint')),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: Text(workoutText(ref, 'cancel')),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppTheme.dangerOrange,
+                            ),
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: Text(
+                              workoutText(ref, 'discard_interrupted'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true && mounted) {
+                      await ref
+                          .read(activeWorkoutControllerProvider.notifier)
+                          .discardLocalBackup();
+                    }
+                  },
+                  child: Text(
+                    workoutText(ref, 'discard_interrupted'),
+                    style: const TextStyle(
+                      color: AppTheme.dangerOrange,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: SystemButton(
+                  text: workoutText(ref, 'resume_interrupted'),
+                  onPressed: () => context.push('/workout/active'),
+                ),
+              ),
+            ],
           ),
         ],
       ),

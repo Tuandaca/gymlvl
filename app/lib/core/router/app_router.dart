@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'auth_redirect.dart';
+import '../../features/auth/presentation/screens/session_gate_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/coach/presentation/coach_screen.dart';
 
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -16,14 +19,18 @@ import '../../features/workout/presentation/screens/workout_history_screen.dart'
 import '../../features/workout/presentation/screens/workout_detail_screen.dart';
 import '../../features/quests/presentation/screens/quests_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/workout/presentation/screens/workout_summary_screen.dart';
+import '../../features/workout/domain/workout.dart';
+import '../../features/workout/domain/workout_exercise.dart';
 import 'main_shell_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
-    _ref.listen(authStateStreamProvider, (_, __) => notifyListeners());
-    _ref.listen(currentUserProvider, (_, __) => notifyListeners());
+    _ref.listen(authStateStreamProvider, (_, _) => notifyListeners());
+    _ref.listen(passwordRecoveryProvider, (_, _) => notifyListeners());
+    _ref.listen(currentUserProvider, (_, _) => notifyListeners());
   }
 }
 
@@ -32,52 +39,35 @@ class RouterNotifier extends ChangeNotifier {
 final appRouterProvider = Provider<GoRouter>((ref) {
   final notifier = RouterNotifier(ref);
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: '/login',
     refreshListenable: notifier,
     redirect: (context, state) {
-      // Đọc biến thay vì watch để tránh việc GoRouter bị khởi tạo lại mỗi khi state đổi.
-      final authStateAsync = ref.read(authStateStreamProvider);
-      final currentUserAsync = ref.read(currentUserProvider);
-
-      final authState = authStateAsync.value;
-      final currentUser = currentUserAsync.value;
-
-      // Vẫn đang tải Auth hoặc chưa kéo xong Profile
-      if (authStateAsync.isLoading || currentUserAsync.isLoading) return null;
-
-      final isAuth = authState?.session != null;
-      final isOnboarded = currentUser?['onboarding_completed'] == true;
-
-      final loc = state.matchedLocation;
-      final isGoingToLogin = loc == '/login';
-      final isGoingToRegister = loc == '/register';
-      final isGoingToOnboarding = loc == '/onboarding';
-
-      // Khởi động không có auth -> login
-      if (!isAuth && !isGoingToLogin && !isGoingToRegister) {
-        return '/login';
-      }
-
-      // Đăng nhập rồi nhưng chưa onboard -> onboarding
-      if (isAuth && !isOnboarded && !isGoingToOnboarding) {
-        return '/onboarding';
-      }
-
-      // Đăng nhập rồi, đã onboard -> chặn quay lại màn hình nhập môn/đăng nhập
-      if (isAuth &&
-          isOnboarded &&
-          (isGoingToLogin || isGoingToRegister || isGoingToOnboarding)) {
-        return '/dashboard';
-      }
-
-      return null;
+      final auth = ref.read(authStateStreamProvider);
+      final user = ref.read(currentUserProvider);
+      final signedIn = auth.value?.session != null;
+      return authRedirect(
+        location: state.matchedLocation,
+        loading:
+            (auth.isLoading && !auth.hasValue) ||
+            (signedIn &&
+                user.isLoading &&
+                user.value?['id'] != auth.value?.session?.user.id),
+        hasError: auth.hasError || (signedIn && user.hasError),
+        signedIn: signedIn,
+        onboarded: user.value?['onboarding_completed'] == true,
+        recoveringPassword: ref.read(passwordRecoveryProvider),
+      );
     },
     routes: [
+      GoRoute(path: '/', redirect: (context, state) => '/dashboard'),
+      GoRoute(path: '/session', builder: (_, _) => const SessionGateScreen()),
       GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        path: '/reset-password',
+        builder: (_, _) => const ResetPasswordScreen(),
       ),
+      GoRoute(path: '/coach', builder: (_, _) => const CoachScreen()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
@@ -134,6 +124,57 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ActiveWorkoutScreen(),
       ),
       GoRoute(
+        path: '/workout/summary',
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is WorkoutSummaryScreen) {
+            return extra;
+          }
+          if (extra is Map<String, dynamic>) {
+            return WorkoutSummaryScreen(
+              workout:
+                  extra['workout'] as Workout? ??
+                  Workout(
+                    id: 'summary-preview',
+                    userId: 'user',
+                    status: WorkoutStatus.completed,
+                    startedAt: DateTime.now(),
+                  ),
+              xpResult: extra['xpResult'] as Map<String, dynamic>?,
+              totalVolumeKg:
+                  (extra['totalVolumeKg'] as num?)?.toDouble() ?? 0.0,
+              durationSeconds: (extra['durationSeconds'] as num?)?.toInt() ?? 0,
+              completedSetsCount:
+                  (extra['completedSetsCount'] as num?)?.toInt() ?? 0,
+              totalSetsCount: (extra['totalSetsCount'] as num?)?.toInt() ?? 0,
+              exercises:
+                  (extra['exercises'] as List<WorkoutExercise>?) ?? const [],
+            );
+          }
+          if (extra is Workout) {
+            return WorkoutSummaryScreen(
+              workout: extra,
+              totalVolumeKg: 0,
+              durationSeconds: 0,
+              completedSetsCount: 0,
+              totalSetsCount: 0,
+            );
+          }
+          return WorkoutSummaryScreen(
+            workout: Workout(
+              id: 'summary-default',
+              userId: 'user',
+              status: WorkoutStatus.completed,
+              startedAt: DateTime.now(),
+            ),
+            totalVolumeKg: 0,
+            durationSeconds: 0,
+            completedSetsCount: 0,
+            totalSetsCount: 0,
+          );
+        },
+      ),
+      GoRoute(
         path: '/workout/history',
         builder: (context, state) => const WorkoutHistoryScreen(),
       ),
@@ -154,4 +195,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.onDispose(() {
+    router.dispose();
+    notifier.dispose();
+  });
+  return router;
 });

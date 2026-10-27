@@ -13,7 +13,7 @@ class SupabaseExerciseRepository implements ExerciseRepository {
         .from('exercises')
         .select()
         .order('name', ascending: true);
-    
+
     return (response as List).map((json) => Exercise.fromJson(json)).toList();
   }
 
@@ -24,7 +24,7 @@ class SupabaseExerciseRepository implements ExerciseRepository {
         .select()
         .ilike('name', '%$query%')
         .order('name', ascending: true);
-    
+
     return (response as List).map((json) => Exercise.fromJson(json)).toList();
   }
 
@@ -35,7 +35,7 @@ class SupabaseExerciseRepository implements ExerciseRepository {
         .select()
         .eq('category', category)
         .order('name', ascending: true);
-    
+
     return (response as List).map((json) => Exercise.fromJson(json)).toList();
   }
 }

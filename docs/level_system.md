@@ -1,3 +1,5 @@
+﻿> Design reference retained for product history. Numeric examples and proposed mechanics are not a release contract. Current implemented rules: [PROGRESSION_GUIDE.md](PROGRESSION_GUIDE.md); verified scope: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
+
 # 📈 Hệ thống Thăng Cấp (Level System) & Đột Phá (Breakthrough)
 
 Ý tưởng của bạn cực kỳ xuất sắc và mang đậm chất **RPG Gamification**. Việc chặn giới hạn cấp độ (Level Cap) và yêu cầu thực hiện "Nhiệm vụ Chuyển Cấp" (Breakthrough Quest) không chỉ tạo động lực cực lớn mà còn giúp User nhận thức rõ ràng sự tiến bộ của bản thân qua từng giai đoạn.
@@ -64,3 +66,4 @@ Quy luật của Gym: *Dùng nó, hoặc mất nó (Use it or lose it)*.
 Người dùng có thể vào Menu **Hồ Sơ (Profile)** để cập nhật số đo (Cân nặng mới, Chiều cao, Tỷ lệ Mỡ).
 - Khi họ vừa cập nhật dữ liệu, thuật toán (Edge Function) trên hệ thống sẽ tự động quét qua và gán lại Thể loại Nhiệm Vụ cho ngày tiếp theo.
 - **Ví dụ**: Khi họ cập nhật "Đã có thêm cục Tạ Đơn (Dumbbell) ở nhà", danh sách Nhiệm vụ Hằng ngày cho ngày mai sẽ lập tức xuất hiện các bài tập liên quan tới tạ đơn thay vì chỉ là hít đất chay. Thử thách Đột Phá chuyển cấp cũng tự động scale độ khó dựa theo cân nặng mới nhất của họ!
+

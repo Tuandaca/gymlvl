@@ -15,36 +15,51 @@ final authStateStreamProvider = StreamProvider<AuthState>((ref) {
   return authRepository.authStateChange;
 });
 
+final passwordRecoveryProvider =
+    NotifierProvider<PasswordRecoveryNotifier, bool>(
+      PasswordRecoveryNotifier.new,
+    );
+
+class PasswordRecoveryNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    ref.listen(authStateStreamProvider, (_, next) {
+      final auth = next.value;
+      if (auth?.event == AuthChangeEvent.passwordRecovery) {
+        state = true;
+      } else if (next.hasValue && auth?.session == null) {
+        state = false;
+      }
+    });
+    return ref.read(authStateStreamProvider).value?.event ==
+        AuthChangeEvent.passwordRecovery;
+  }
+
+  void setRequired(bool value) => state = value;
+}
+
 final currentUserProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final session = ref.watch(authStateStreamProvider).value?.session;
   if (session == null) return null;
-  
-  try {
-    final res = await SupabaseConfig.client
-        .from('users')
-        .select()
-        .eq('id', session.user.id)
-        .maybeSingle();
-    return res;
-  } catch (e) {
-    return null;
-  }
+
+  return await SupabaseConfig.client
+      .from('users')
+      .select()
+      .eq('id', session.user.id)
+      .maybeSingle();
 });
 
-final currentUserProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+final currentUserProfileProvider = FutureProvider<Map<String, dynamic>?>((
+  ref,
+) async {
   final session = ref.watch(authStateStreamProvider).value?.session;
   if (session == null) return null;
-  
-  try {
-    final res = await SupabaseConfig.client
-        .from('profiles')
-        .select()
-        .eq('id', session.user.id)
-        .maybeSingle();
-    return res;
-  } catch (e) {
-    return null;
-  }
+
+  return await SupabaseConfig.client
+      .from('profiles')
+      .select()
+      .eq('id', session.user.id)
+      .maybeSingle();
 });
 
 final authControllerProvider = AsyncNotifierProvider<AuthController, void>(() {
@@ -58,6 +73,7 @@ class AuthController extends AsyncNotifier<void> {
   }
 
   Future<void> signIn(String email, String password) async {
+    if (state.isLoading) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).signInWithEmail(email, password);
@@ -65,6 +81,7 @@ class AuthController extends AsyncNotifier<void> {
   }
 
   Future<void> signUp(String email, String password) async {
+    if (state.isLoading) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).signUpWithEmail(email, password);
@@ -72,9 +89,28 @@ class AuthController extends AsyncNotifier<void> {
   }
 
   Future<void> signOut() async {
+    if (state.isLoading) return;
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       await ref.read(authRepositoryProvider).signOut();
+      ref.read(passwordRecoveryProvider.notifier).setRequired(false);
+    });
+  }
+
+  Future<void> resetPassword(String email) async {
+    if (state.isLoading) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(
+      () => ref.read(authRepositoryProvider).resetPassword(email),
+    );
+  }
+
+  Future<void> updatePassword(String password) async {
+    if (state.isLoading) return;
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(authRepositoryProvider).updatePassword(password);
+      ref.read(passwordRecoveryProvider.notifier).setRequired(false);
     });
   }
 }

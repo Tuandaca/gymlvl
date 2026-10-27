@@ -4,8 +4,6 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
-  connectivity_plus
-  rive_native
   url_launcher_windows
 )
 

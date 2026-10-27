@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../ui/theme/app_theme.dart';
+import '../../workout_copy.dart';
 
-class SetRowWidget extends StatefulWidget {
+class SetRowWidget extends ConsumerStatefulWidget {
   final int setNumber;
   final int reps;
   final double weightKg;
+  final int durationSeconds;
+  final bool isBodyweight;
+  final bool isTimeBased;
   final bool isCompleted;
   final bool isEditable;
   final ValueChanged<int>? onRepsChanged;
   final ValueChanged<double>? onWeightChanged;
+  final ValueChanged<int>? onDurationChanged;
   final ValueChanged<bool>? onCompletedChanged;
   final VoidCallback? onDelete;
 
@@ -18,284 +24,302 @@ class SetRowWidget extends StatefulWidget {
     required this.setNumber,
     required this.reps,
     required this.weightKg,
+    this.durationSeconds = 0,
+    this.isBodyweight = false,
+    this.isTimeBased = false,
     this.isCompleted = false,
     this.isEditable = true,
     this.onRepsChanged,
     this.onWeightChanged,
+    this.onDurationChanged,
     this.onCompletedChanged,
     this.onDelete,
   });
 
   @override
-  State<SetRowWidget> createState() => _SetRowWidgetState();
+  ConsumerState<SetRowWidget> createState() => _SetRowWidgetState();
 }
 
-class _SetRowWidgetState extends State<SetRowWidget> {
-  bool _isHovered = false;
-  bool _isDeleteHovered = false;
-  late FocusNode _weightFocus;
-  late FocusNode _repsFocus;
+class _SetRowWidgetState extends ConsumerState<SetRowWidget> {
+  late final TextEditingController _weight;
+  late final TextEditingController _reps;
+  late final TextEditingController _duration;
+  final _weightFocus = FocusNode();
+  final _repsFocus = FocusNode();
+  final _durationFocus = FocusNode();
+  bool _customWeightExpanded = false;
+
+  String _format(double value) => value == value.truncateToDouble()
+      ? value.toInt().toString()
+      : value.toString();
 
   @override
   void initState() {
     super.initState();
-    _weightFocus = FocusNode()..addListener(() => setState(() {}));
-    _repsFocus = FocusNode()..addListener(() => setState(() {}));
+    _weight = TextEditingController(text: _format(widget.weightKg));
+    _reps = TextEditingController(text: widget.reps.toString());
+    _duration = TextEditingController(text: widget.durationSeconds.toString());
+    _customWeightExpanded = widget.weightKg > 0;
+
+    _weightFocus.addListener(() {
+      if (!_weightFocus.hasFocus) _weight.text = _format(widget.weightKg);
+    });
+    _repsFocus.addListener(() {
+      if (!_repsFocus.hasFocus) _reps.text = widget.reps.toString();
+    });
+    _durationFocus.addListener(() {
+      if (!_durationFocus.hasFocus) {
+        _duration.text = widget.durationSeconds.toString();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant SetRowWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_weightFocus.hasFocus) _weight.text = _format(widget.weightKg);
+    if (!_repsFocus.hasFocus) _reps.text = widget.reps.toString();
+    if (!_durationFocus.hasFocus) {
+      _duration.text = widget.durationSeconds.toString();
+    }
+    if (widget.weightKg > 0) {
+      _customWeightExpanded = true;
+    }
   }
 
   @override
   void dispose() {
+    _weight.dispose();
+    _reps.dispose();
+    _duration.dispose();
     _weightFocus.dispose();
     _repsFocus.dispose();
+    _durationFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted = widget.isCompleted;
-    final rowColor = isCompleted
-        ? AppTheme.successGreen.withOpacity(0.08)
-        : (_isHovered ? AppTheme.cyanNeon.withOpacity(0.03) : Colors.transparent);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: rowColor,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isCompleted
-                ? AppTheme.successGreen.withOpacity(0.4)
-                : (_isHovered ? AppTheme.cyanNeon.withOpacity(0.2) : AppTheme.cyanNeon.withOpacity(0.05)),
-            width: 1.5,
-          ),
-          boxShadow: isCompleted ? [
-            BoxShadow(
-              color: AppTheme.successGreen.withOpacity(0.1),
-              blurRadius: 10,
-              spreadRadius: 1,
-            )
-          ] : [],
+    final motion = !MediaQuery.disableAnimationsOf(context);
+    return AnimatedContainer(
+      duration: Duration(milliseconds: motion ? 150 : 0),
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      decoration: BoxDecoration(
+        color: widget.isCompleted
+            ? AppTheme.successGreen.withValues(alpha: .08)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: widget.isCompleted
+              ? AppTheme.successGreen.withValues(alpha: .4)
+              : AppTheme.textDim.withValues(alpha: .12),
         ),
-        child: Row(
-          children: [
-            // Set# Badge
-            SizedBox(
-              width: 32,
-              child: Center(
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: isCompleted ? AppTheme.successGreen.withOpacity(0.2) : AppTheme.panelBackground,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isCompleted ? AppTheme.successGreen : AppTheme.textDim.withOpacity(0.3),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${widget.setNumber}',
-                      style: TextStyle(
-                        fontFamily: 'Orbitron',
-                        color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 24,
+            child: Text(
+              '${widget.setNumber}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+          const SizedBox(width: 4),
+
+          // WEIGHT COLUMN (or Bodyweight badge)
+          Expanded(
+            child:
+                (widget.isBodyweight &&
+                    !_customWeightExpanded &&
+                    widget.weightKg == 0)
+                ? InkWell(
+                    onTap: widget.isEditable
+                        ? () {
+                            setState(() => _customWeightExpanded = true);
+                            _weightFocus.requestFocus();
+                          }
+                        : null,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 10,
                       ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Weight input
-            Expanded(
-              child: _buildNumberInput(
-                value: widget.weightKg,
-                suffix: 'kg',
-                focusNode: _weightFocus,
-                onChanged: widget.isEditable
-                    ? (val) => widget.onWeightChanged?.call(double.tryParse(val) ?? 0)
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Reps input
-            Expanded(
-              child: _buildNumberInput(
-                value: widget.reps.toDouble(),
-                suffix: 'reps',
-                isInteger: true,
-                focusNode: _repsFocus,
-                onChanged: widget.isEditable
-                    ? (val) => widget.onRepsChanged?.call(int.tryParse(val) ?? 0)
-                    : null,
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Completion checkbox
-            if (widget.isEditable)
-              GestureDetector(
-                onTap: () => widget.onCompletedChanged?.call(!isCompleted),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
                       decoration: BoxDecoration(
-                        color: isCompleted
-                            ? AppTheme.successGreen.withOpacity(0.2)
-                            : AppTheme.background.withOpacity(0.5),
+                        color: AppTheme.panelBackground.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isCompleted
-                              ? AppTheme.successGreen
-                              : AppTheme.cyanNeon.withOpacity(0.3),
-                          width: 1.5,
+                          color: AppTheme.cyanNeon.withValues(alpha: 0.2),
                         ),
-                        boxShadow: isCompleted ? [
-                          BoxShadow(
-                            color: AppTheme.successGreen.withOpacity(0.4),
-                            blurRadius: 8,
-                            spreadRadius: 1,
-                          )
-                        ] : [],
                       ),
-                      child: isCompleted
-                          ? const Icon(Icons.check, color: AppTheme.successGreen, size: 20)
-                          : null,
+                      child: Text(
+                        workoutText(ref, 'bodyweight'),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.cyanNeon,
+                        ),
+                      ),
                     ),
-                    if (isCompleted)
-                      Positioned(
-                        top: -20,
-                        right: -10,
-                        child: const Text(
-                          '+3 XP',
-                          style: TextStyle(
-                            fontFamily: 'Orbitron',
-                            color: AppTheme.successGreen,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                        .animate()
-                        .fadeIn(duration: 200.ms)
-                        .slideY(begin: 1, end: -1, duration: 600.ms, curve: Curves.easeOut)
-                        .fadeOut(delay: 400.ms, duration: 200.ms),
-                      ),
-                  ],
+                  )
+                : _input(
+                    _weight,
+                    _weightFocus,
+                    workoutText(ref, 'weight'),
+                    false,
+                    suffix: 'kg',
+                  ),
+          ),
+          const SizedBox(width: 6),
+
+          // REPS OR DURATION COLUMN
+          Expanded(
+            child: widget.isTimeBased
+                ? _input(
+                    _duration,
+                    _durationFocus,
+                    workoutText(ref, 'seconds_label'),
+                    true,
+                    suffix: workoutText(ref, 'seconds'),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null && parsed <= 7200) {
+                        widget.onDurationChanged?.call(parsed);
+                      }
+                    },
+                  )
+                : _input(
+                    _reps,
+                    _repsFocus,
+                    workoutText(ref, 'repetitions'),
+                    true,
+                    suffix: workoutText(ref, 'reps'),
+                    onChanged: (val) {
+                      final parsed = int.tryParse(val);
+                      if (parsed != null && parsed <= 1000) {
+                        widget.onRepsChanged?.call(parsed);
+                      }
+                    },
+                  ),
+          ),
+
+          // ACTION BUTTONS
+          if (widget.isEditable) ...[
+            SizedBox(
+              width: 48,
+              height: 48,
+              child: IconButton(
+                tooltip: workoutText(ref, 'complete_set'),
+                isSelected: widget.isCompleted,
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  HapticFeedback.selectionClick();
+                  widget.onCompletedChanged?.call(!widget.isCompleted);
+                },
+                icon: Icon(
+                  widget.isCompleted
+                      ? Icons.check_circle
+                      : Icons.circle_outlined,
+                  color: widget.isCompleted
+                      ? AppTheme.successGreen
+                      : AppTheme.textDim,
+                  size: 24,
                 ),
               ),
-            if (!widget.isEditable)
-              Icon(
-                isCompleted ? Icons.check_circle : Icons.circle_outlined,
-                color: isCompleted ? AppTheme.successGreen : AppTheme.textDim,
-                size: 20,
-              ),
-
-            // Delete button
-            if (widget.isEditable && widget.onDelete != null) ...[
-              const SizedBox(width: 4),
-              MouseRegion(
-                onEnter: (_) => setState(() => _isDeleteHovered = true),
-                onExit: (_) => setState(() => _isDeleteHovered = false),
-                child: GestureDetector(
-                  onTap: widget.onDelete,
-                  child: AnimatedOpacity(
-                    opacity: _isHovered || _isDeleteHovered ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: AnimatedScale(
-                      scale: _isDeleteHovered ? 1.2 : 1.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: _isDeleteHovered ? AppTheme.dangerOrange.withOpacity(0.1) : Colors.transparent,
-                        ),
-                        child: const Icon(Icons.close, color: AppTheme.dangerOrange, size: 16),
-                      ),
-                    ),
+            ),
+            if (widget.onDelete != null)
+              SizedBox(
+                width: 44,
+                height: 48,
+                child: IconButton(
+                  tooltip: workoutText(ref, 'delete_set'),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    widget.onDelete?.call();
+                  },
+                  icon: const Icon(
+                    Icons.close,
+                    color: AppTheme.dangerOrange,
+                    size: 20,
                   ),
                 ),
               ),
-            ],
-          ],
-        ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Icon(
+                widget.isCompleted ? Icons.check_circle : Icons.circle_outlined,
+                size: 22,
+                color: widget.isCompleted
+                    ? AppTheme.successGreen
+                    : AppTheme.textDim,
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildNumberInput({
-    required double value,
-    required String suffix,
-    required FocusNode focusNode,
-    bool isInteger = false,
+  Widget _input(
+    TextEditingController controller,
+    FocusNode focus,
+    String label,
+    bool integer, {
+    String? suffix,
     ValueChanged<String>? onChanged,
   }) {
-    final displayValue = isInteger ? value.toInt().toString() : (value == value.toInt() ? value.toInt().toString() : value.toString());
-    final isFocused = focusNode.hasFocus;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      height: 36,
-      decoration: BoxDecoration(
-        color: isFocused ? AppTheme.background : AppTheme.background.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isFocused ? AppTheme.purpleNeon : AppTheme.cyanNeon.withOpacity(0.1),
-          width: isFocused ? 1.5 : 1.0,
+    if (!widget.isEditable) {
+      return Text(
+        '${controller.text} ${suffix ?? (integer ? workoutText(ref, 'reps') : 'kg')}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 13),
+      );
+    }
+    return TextField(
+      controller: controller,
+      focusNode: focus,
+      keyboardType: TextInputType.numberWithOptions(decimal: !integer),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(
+          integer ? RegExp(r'[0-9]') : RegExp(r'[0-9.,]'),
         ),
-        boxShadow: isFocused ? [
-          BoxShadow(
-            color: AppTheme.purpleNeon.withOpacity(0.2),
-            blurRadius: 4,
-            spreadRadius: 1,
-          )
-        ] : [],
+        LengthLimitingTextInputFormatter(integer ? 4 : 7),
+        TextInputFormatter.withFunction((oldValue, newValue) {
+          if (newValue.text.isEmpty) return newValue;
+          final value = double.tryParse(newValue.text.replaceAll(',', '.'));
+          return value != null && value <= 7200 ? newValue : oldValue;
+        }),
+      ],
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      decoration: InputDecoration(
+        labelText: suffix ?? (integer ? workoutText(ref, 'reps') : 'kg'),
+        semanticCounterText: label,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
       ),
-      child: onChanged != null
-          ? TextFormField(
-              focusNode: focusNode,
-              initialValue: value == 0 ? '' : displayValue,
-              keyboardType: isInteger
-                  ? TextInputType.number
-                  : const TextInputType.numberWithOptions(decimal: true),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppTheme.textMain,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                hintText: suffix,
-                hintStyle: TextStyle(
-                  color: AppTheme.textDim.withOpacity(0.5),
-                  fontSize: 12,
-                ),
-              ),
-              onChanged: onChanged,
-            )
-          : Center(
-              child: Text(
-                '$displayValue $suffix',
-                style: TextStyle(
-                  color: widget.isCompleted ? AppTheme.successGreen : AppTheme.textMain,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+      onChanged: (value) {
+        if (onChanged != null) {
+          onChanged(value);
+          return;
+        }
+        if (integer) {
+          final parsed = int.tryParse(value);
+          if (parsed != null && parsed <= 1000) {
+            widget.onRepsChanged?.call(parsed);
+          }
+        } else {
+          final parsed = double.tryParse(value.replaceAll(',', '.'));
+          if (parsed != null && parsed.isFinite && parsed <= 1000) {
+            widget.onWeightChanged?.call(parsed);
+          }
+        }
+      },
     );
   }
 }

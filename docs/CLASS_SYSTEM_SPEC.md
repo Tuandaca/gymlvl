@@ -1,3 +1,5 @@
+﻿> Design reference retained for product history. Numeric examples and proposed mechanics are not a release contract. Current implemented rules: [PROGRESSION_GUIDE.md](PROGRESSION_GUIDE.md); verified scope: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
+
 # 🛡️ Đặc Tả Hệ Thống Đa Phân Lớp (Multi-Class Specification)
 
 Tài liệu này chi tiết hóa cách thức vận hành của hệ thống Phân Lớp trong GymLevel, từ giai đoạn Onboarding đến khi đạt ngưỡng Master.
@@ -124,3 +126,4 @@ Khi tập trung 2 lớp (Lớp X và Lớp Y):
 
 ---
 *Tài liệu này là chuẩn mực để triển khai Module Progression v2.*
+

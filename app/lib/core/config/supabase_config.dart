@@ -1,14 +1,36 @@
+import 'dart:convert';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseConfig {
-  static const String _url = 'https://shulhhxdebsfbsxcborq.supabase.co';
-  static const String _anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNodWxoaHhkZWJzZmJzeGNib3JxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NTQ5MTMsImV4cCI6MjA5MDMzMDkxM30.4sSiGpf2M-um6-AyS5mCeJFqPlFeQSqFAln6f4kPNIo';
+  static const String _url = String.fromEnvironment('SUPABASE_URL');
+  static const String _anonKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+    defaultValue: String.fromEnvironment('SUPABASE_ANON_KEY'),
+  );
+
+  static bool get isConfigured =>
+      Uri.tryParse(_url)?.hasAuthority == true && isPublicClientKey(_anonKey);
+
+  /// Fail closed if someone accidentally places a privileged key in client config.
+  static bool isPublicClientKey(String key) {
+    if (key.startsWith('sb_publishable_')) return true;
+    if (key.startsWith('sb_secret_')) return false;
+    try {
+      final payload = jsonDecode(
+        utf8.decode(base64Url.decode(base64Url.normalize(key.split('.')[1]))),
+      );
+      return payload is Map && payload['role'] == 'anon';
+    } catch (_) {
+      return false;
+    }
+  }
 
   static Future<void> initialize() async {
-    await Supabase.initialize(
-      url: _url,
-      anonKey: _anonKey,
-    );
+    if (!isConfigured) {
+      throw StateError('Provide SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY.');
+    }
+    await Supabase.initialize(url: _url, anonKey: _anonKey);
   }
 
   static SupabaseClient get client => Supabase.instance.client;

@@ -7,26 +7,22 @@ class ExerciseCard extends StatelessWidget {
   final Exercise exercise;
   final VoidCallback? onTap;
 
-  const ExerciseCard({
-    super.key,
-    required this.exercise,
-    this.onTap,
-  });
+  const ExerciseCard({super.key, required this.exercise, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppTheme.panelBackground.withOpacity(0.4),
+        color: AppTheme.panelBackground.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppTheme.cyanNeon.withOpacity(0.1),
+          color: AppTheme.cyanNeon.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -38,8 +34,8 @@ class ExerciseCard extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            splashColor: AppTheme.cyanNeon.withOpacity(0.1),
-            highlightColor: AppTheme.cyanNeon.withOpacity(0.05),
+            splashColor: AppTheme.cyanNeon.withValues(alpha: 0.1),
+            highlightColor: AppTheme.cyanNeon.withValues(alpha: 0.05),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -52,7 +48,7 @@ class ExerciseCard extends StatelessWidget {
                       color: AppTheme.background,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: AppTheme.cyanNeon.withOpacity(0.2),
+                        color: AppTheme.cyanNeon.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Center(
@@ -71,10 +67,11 @@ class ExerciseCard extends StatelessWidget {
                       children: [
                         Text(
                           exercise.name,
-                          style: AppTheme.darkTheme.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: AppTheme.darkTheme.textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         const SizedBox(height: 4),
                         Row(
@@ -87,10 +84,7 @@ class ExerciseCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppTheme.textDim,
-                  ),
+                  const Icon(Icons.chevron_right, color: AppTheme.textDim),
                 ],
               ),
             ),
@@ -104,11 +98,9 @@ class ExerciseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: AppTheme.darkCyan.withOpacity(0.3),
+        color: AppTheme.darkCyan.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: AppTheme.cyanNeon.withOpacity(0.2),
-        ),
+        border: Border.all(color: AppTheme.cyanNeon.withValues(alpha: 0.2)),
       ),
       child: Text(
         text,

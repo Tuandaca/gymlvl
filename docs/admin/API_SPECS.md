@@ -1,7 +1,9 @@
 # API Specifications (Supabase Endpoints) - GymLevel Admin Panel
 
+> Future proposal, not deployed functionality. There is no admin application or implemented admin endpoint. Current verification lives in [IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md).
+
 Do sử dụng hệ sinh thái Supabase, các hệ thống REST API chủ yếu được chia thành 2 loại:
-1. **Direct Data Access (PostgREST API):** Sử dụng Supabase SDK trên Client với quyền `service_role` dành cho Admin (hoặc gán custom claims `role = 'admin'` với RLS Policies).
+1. **Direct Data Access (PostgREST API):** Browser clients use a publishable key and the administrator's user session. RLS and table/column grants enforce permitted operations. Never distribute a secret/service-role key to any client, including an admin browser.
 2. **Edge Functions (Deno):** Xử lý những Business Logic phức tạp hoặc cần trigger bên thứ ba.
 
 ---
@@ -9,9 +11,10 @@ Do sử dụng hệ sinh thái Supabase, các hệ thống REST API chủ yếu 
 ## 1. Authentication & Authorization
 
 ### Cách cấu hình (Custom Role)
-- App sử dụng **Supabase Auth**. Nếu user là Admin, `raw_app_meta_data` sẽ chứa key `{"role": "admin"}`.
-- Toàn bộ queries ở Admin Panel hoạt động thông qua RLS kiểm tra: 
-  `CREATE POLICY "admin_all" ON public.xyz FOR ALL USING (auth.jwt() ->> 'role' = 'admin');`
+- Use **Supabase Auth**. A trusted provisioning process may set `app_role` in `raw_app_meta_data`, exposed in the JWT as `app_metadata`. User-editable metadata must never grant administration.
+- A future policy can inspect `(auth.jwt() -> 'app_metadata' ->> 'app_role') = 'SUPER_ADMIN'`. The JWT's top-level database `role` is not the application role.
+- Design role-specific operations, table/column grants, `USING`/`WITH CHECK` conditions, and audits together. Revocation must account for issued JWTs; sensitive server actions should check the current server-managed assignment.
+- Service-role credentials are restricted to server operations after explicit user authorization. Privileged RPCs require a fixed `search_path`, restricted execution grants, and an atomic audit write.
 
 ---
 
@@ -32,7 +35,7 @@ Do sử dụng hệ sinh thái Supabase, các hệ thống REST API chủ yếu 
 
 ### 2.2 Khóa / Mở khóa người dùng (Ban/Unban)
 - **Loại:** Dùng Supabase RPC hoặc Edge Function `admin-ban-user`.
-- **Lý do dùng Edge Function:** Ta cần ghi đè vào bảng `audit_logs` cùng một lúc với việc khóa (Transaction).
+- **Transaction boundary:** The Edge Function authorizes the administrator and invokes one PostgreSQL transaction/RPC that changes the record and writes the audit entry. Independent Edge database calls are not a transaction.
 - **Endpoint:** `POST` `/functions/v1/admin-action`
 - **Payload:**
   ```json
@@ -90,5 +93,5 @@ Bởi vì Query Analytics trực tiếp trên bảng dữ liệu lớn (Big Data
 
 ## 5. Security & Rate Limiting
 
-- Các api `/functions/v1/admin-*` phải được **Rate-limit** (sử dụng Deno KV).
-- Mọi Request POST/PATCH đều tự động kích hoạt Database Trigger để ghi copy vào bảng `audit_logs` (Lưu User thực hiện, thời gian, state cũ, state mới).
+- Proposed admin endpoints require authentication, permission checks, and a durable rate limiter supported by the selected runtime. Deno KV availability is not assumed.
+- Auditing is a future requirement, not existing behavior. Record actor, timestamp, reason, and bounded before/after data transactionally; avoid secrets and unnecessary personal data.

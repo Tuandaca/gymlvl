@@ -1,0 +1,6 @@
+source,source_repo_or_owner,kind,upstream_license,rights_scope,can_import_now,media_rights_verified,commercial_distribution_ready,action_required,reference
+GymLvl,Tuandaca/gymlvl,own_source,project_owned,review,yes,not_applicable,review,verify_original_contributor_licenses,https://github.com/Tuandaca/gymlvl
+OpenGym_AI_fork,emilfunk/opengym,application_code,AGPL-3.0-or-later,source_reference_only,no,not_applicable,no,clean_room_reimplement_or_compliance_review,https://github.com/emilfunk/opengym
+OpenGym_upstream,DuarteSantos8/openGym,application_code_and_new_catalogue,AGPL-3.0,source_reference_only,no,not_applicable,no,licensing_decision_before_copying,https://github.com/DuarteSantos8/openGym
+Exercise_dataset_text,hasaneyldrm/exercises-dataset,metadata_and_instructions,MIT,MIT_text_only_with_attribution,yes,not_applicable,review,include_license_notice_and_strip_media_links,https://github.com/hasaneyldrm/exercises-dataset/blob/main/LICENSE
+Exercise_dataset_media,Gym_visual,images_gifs_videos,proprietary,NOT_LICENSED_TO_GYMLVL,no,no,no,request_written_license_and_quote,https://gymvisual.com/contact-gymvisual

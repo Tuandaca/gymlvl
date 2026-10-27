@@ -1,51 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'candy_colors.dart';
+import 'candy_theme.dart';
 
 class AppTheme {
-  // Core colors (Solo Leveling & Cyberpunk Aesthetic)
-  static const Color background = Color(0xFF030308); // Deepest void black
-  static const Color panelBackground = Color(0xD90A0D1A);
-  static const Color cyanNeon = Color(0xFF00E5FF);
-  static const Color darkCyan = Color.fromARGB(255, 0, 40, 60);
-  static const Color purpleNeon = Color(0xFFD500F9); // More vibrant magenta-purple
-  static const Color successGreen = Color(0xFF00E676);
-  static const Color dangerOrange = Color(0xFFFF3D00); // More blood red/orange
-  static const Color textMain = Color(0xFFE2E8F0);
-  static const Color textDim = Color(0xFF64748B);
+  // Core colors mapped to Candy Neubrutalism
+  static const Color background = CandyColors.canvas;
+  static const Color panelBackground = CandyColors.card;
+  static const Color cyanNeon = CandyColors.hotPink;
+  static const Color darkCyan = Color(0xFF2B0A1A);
+  static const Color purpleNeon = CandyColors.softLilac;
+  static const Color successGreen = CandyColors.mintGreen;
+  static const Color dangerOrange = CandyColors.coral;
+  static const Color textMain = CandyColors.ink;
+  static const Color textDim = CandyColors.charcoal;
+  static const Color warningYellow = CandyColors.canaryYellow;
+  static const Color goldWarning = CandyColors.canaryYellow;
+
+  // Candy Theme accessors
+  static ThemeData get lightTheme => CandyTheme.lightTheme;
+  static ThemeData get candyTheme => CandyTheme.lightTheme;
+  static ThemeData get darkCandyTheme => CandyTheme.darkTheme;
 
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: const Color(0xFF030308),
+      visualDensity: VisualDensity.standard,
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(48, 48),
+          foregroundColor: const Color(0xFF030308),
+          textStyle: const TextStyle(
+            fontFamily: CandyFonts.body,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
       colorScheme: const ColorScheme.dark(
-        primary: cyanNeon,
-        secondary: purpleNeon,
-        background: background,
-        surface: panelBackground,
-        error: dangerOrange,
+        primary: CandyColors.hotPink,
+        secondary: CandyColors.softLilac,
+        surface: Color(0xD90A0D1A),
+        error: CandyColors.coral,
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.orbitron(color: cyanNeon, fontWeight: FontWeight.bold),
-        displayMedium: GoogleFonts.orbitron(color: cyanNeon, fontWeight: FontWeight.bold),
-        displaySmall: GoogleFonts.orbitron(color: cyanNeon, fontWeight: FontWeight.bold),
-        headlineLarge: GoogleFonts.orbitron(color: textMain, fontWeight: FontWeight.bold),
-        headlineMedium: GoogleFonts.orbitron(color: textMain, fontWeight: FontWeight.bold),
-        headlineSmall: GoogleFonts.orbitron(color: textMain, fontWeight: FontWeight.bold),
-        titleLarge: GoogleFonts.orbitron(color: textMain, fontWeight: FontWeight.w600),
-        bodyLarge: GoogleFonts.inter(color: textMain),
-        bodyMedium: GoogleFonts.inter(color: textMain),
-        bodySmall: GoogleFonts.inter(color: textDim),
-      ),
-      appBarTheme: AppBarTheme(
+      textTheme: ThemeData.dark().textTheme
+          .apply(fontFamily: CandyFonts.body)
+          .copyWith(
+            displayLarge: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: CandyColors.hotPink,
+              fontWeight: FontWeight.w900,
+            ),
+            displayMedium: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: CandyColors.hotPink,
+              fontWeight: FontWeight.w900,
+            ),
+            displaySmall: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: CandyColors.hotPink,
+              fontWeight: FontWeight.w900,
+            ),
+            headlineLarge: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: Color(0xFFE2E8F0),
+              fontWeight: FontWeight.w800,
+            ),
+            headlineMedium: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: Color(0xFFE2E8F0),
+              fontWeight: FontWeight.w800,
+            ),
+            headlineSmall: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: Color(0xFFE2E8F0),
+              fontWeight: FontWeight.w800,
+            ),
+            titleLarge: const TextStyle(
+              fontFamily: CandyFonts.display,
+              color: Color(0xFFE2E8F0),
+              fontWeight: FontWeight.w700,
+            ),
+            bodyLarge: const TextStyle(
+              fontFamily: CandyFonts.body,
+              color: Color(0xFFE2E8F0),
+            ),
+            bodyMedium: const TextStyle(
+              fontFamily: CandyFonts.body,
+              color: Color(0xFFE2E8F0),
+            ),
+            bodySmall: const TextStyle(
+              fontFamily: CandyFonts.body,
+              color: Color(0xFF94A3B8),
+            ),
+          ),
+      appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.orbitron(
-          color: textMain,
+        titleTextStyle: TextStyle(
+          fontFamily: CandyFonts.display,
+          color: Color(0xFFE2E8F0),
           fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 2.0,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 1.0,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/candy_colors.dart';
 import '../../../../ui/widgets/system_button.dart';
 import '../../../../ui/widgets/system_panel.dart';
 import '../../../../ui/widgets/system_text_field.dart';
@@ -20,8 +21,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _nextPage() {
-    if (_currentPage < 7) {
+    if (_currentPage < 8) {
+      if (MediaQuery.of(context).disableAnimations) {
+        _pageController.jumpToPage(_currentPage + 1);
+        return;
+      }
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -34,6 +45,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _prevPage() {
     if (_currentPage > 0) {
+      if (MediaQuery.of(context).disableAnimations) {
+        _pageController.jumpToPage(_currentPage - 1);
+        return;
+      }
       _pageController.previousPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -48,7 +63,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Lỗi: ${next.error}'),
+              content: Text('request_failed'.tr(ref)),
               backgroundColor: Colors.redAccent,
               duration: const Duration(seconds: 4),
             ),
@@ -72,7 +87,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   if (_currentPage > 0 && !isSubmitting)
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppTheme.cyanNeon),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.cyanNeon,
+                      ),
                       onPressed: _prevPage,
                     )
                   else
@@ -82,7 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '[ STEP ${_currentPage + 1}/9 - INITIALIZING ]',
+                          '${'step'.tr(ref)} ${_currentPage + 1}/9',
                           style: const TextStyle(
                             color: AppTheme.cyanNeon,
                             fontSize: 12,
@@ -106,10 +124,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                 borderRadius: BorderRadius.circular(2),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.cyanNeon.withOpacity(0.5),
+                                    color: AppTheme.cyanNeon.withValues(
+                                      alpha: 0.5,
+                                    ),
                                     blurRadius: 8,
                                     spreadRadius: 1,
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -122,7 +142,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ],
               ),
             ),
-            
+
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -172,15 +192,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       canNext = draft.experienceLevel != null;
                       break;
                     case 6:
-                      canNext = draft.age != null && draft.weightKg != null && draft.heightCm != null && draft.gender != null;
+                      canNext =
+                          draft.age != null &&
+                          draft.age! >= 13 &&
+                          draft.age! <= 100 &&
+                          draft.weightKg != null &&
+                          draft.weightKg! >= 25 &&
+                          draft.weightKg! <= 400 &&
+                          draft.heightCm != null &&
+                          draft.heightCm! >= 100 &&
+                          draft.heightCm! <= 250 &&
+                          draft.gender != null;
                       break;
                     case 7:
-                      canNext = draft.preferredDays.isNotEmpty;
+                      canNext =
+                          draft.preferredDays.isNotEmpty &&
+                          draft.weeklyGymDays + draft.weeklyHomeDays > 0 &&
+                          draft.weeklyGymDays + draft.weeklyHomeDays <= 7;
                       break;
                   }
 
                   return SystemButton(
-                    text: _currentPage == 8 ? 'AWAKEN' : 'CONTINUE',
+                    text: (_currentPage == 8 ? 'awaken' : 'continue').tr(ref),
                     isLoading: isSubmitting,
                     onPressed: canNext ? _nextPage : null,
                   );
@@ -204,21 +237,32 @@ class _StepLanguage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(localizationModeProvider);
     return _buildStepContainer(
-      title: '[ SYSTEM LANGUAGE ]',
+      title: translateText(ref, vi: 'NGÔN NGỮ', en: 'LANGUAGE'),
       child: Column(
         children: [
-          const Text('Select Regional Settings for the System.', style: TextStyle(color: AppTheme.textDim)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Chọn ngôn ngữ của bạn.',
+              en: 'Choose your language.',
+            ),
+            style: TextStyle(color: AppTheme.textDim),
+          ),
           const SizedBox(height: 32),
           _NeonChoiceTile(
-            label: 'Tiếng Việt', 
-            isSelected: mode == AppLangMode.vi, 
-            onTap: () => ref.read(localizationModeProvider.notifier).setMode(AppLangMode.vi),
+            label: 'Tiếng Việt',
+            isSelected: mode == AppLangMode.vi,
+            onTap: () => ref
+                .read(localizationModeProvider.notifier)
+                .setMode(AppLangMode.vi),
           ),
           const SizedBox(height: 16),
           _NeonChoiceTile(
-            label: 'English', 
-            isSelected: mode == AppLangMode.en, 
-            onTap: () => ref.read(localizationModeProvider.notifier).setMode(AppLangMode.en),
+            label: 'English',
+            isSelected: mode == AppLangMode.en,
+            onTap: () => ref
+                .read(localizationModeProvider.notifier)
+                .setMode(AppLangMode.en),
           ),
         ],
       ),
@@ -232,27 +276,52 @@ class _StepEnvironment extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
     return _buildStepContainer(
-      title: '[ TRAINING DOMAIN ]',
+      title: translateText(ref, vi: 'KHÔNG GIAN TẬP', en: 'TRAINING SPACE'),
       child: Column(
         children: [
-          const Text('Where will you hunt?', style: TextStyle(color: AppTheme.textDim)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Bạn sẽ tập ở đâu?',
+              en: 'Where will you train?',
+            ),
+            style: TextStyle(color: AppTheme.textDim),
+          ),
           const SizedBox(height: 32),
           _NeonChoiceTile(
-            label: 'Phòng Gym (Full Equipment)', 
-            isSelected: draft.environment == 'gym', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(environment: 'gym')),
+            label: translateText(
+              ref,
+              vi: 'Phòng gym đầy đủ thiết bị',
+              en: 'Fully equipped gym',
+            ),
+            isSelected: draft.environment == 'gym',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(environment: 'gym')),
           ),
           const SizedBox(height: 16),
           _NeonChoiceTile(
-            label: 'Tại Nhà (Dumbbells/Bands)', 
-            isSelected: draft.environment == 'home', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(environment: 'home')),
+            label: translateText(
+              ref,
+              vi: 'Tại nhà với tạ đơn hoặc dây kháng lực',
+              en: 'At home with dumbbells or bands',
+            ),
+            isSelected: draft.environment == 'home',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(environment: 'home')),
           ),
           const SizedBox(height: 16),
           _NeonChoiceTile(
-            label: 'Tập Chay (Calisthenics)', 
-            isSelected: draft.environment == 'calisthenics', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(environment: 'calisthenics')),
+            label: translateText(
+              ref,
+              vi: 'Tập với trọng lượng cơ thể',
+              en: 'Bodyweight training',
+            ),
+            isSelected: draft.environment == 'calisthenics',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(environment: 'calisthenics')),
           ),
         ],
       ),
@@ -267,22 +336,49 @@ class _StepGoals extends ConsumerWidget {
     final draft = ref.watch(onboardingDraftProvider);
 
     return _buildStepContainer(
-      title: '[ SELECT QUEST OBJECTIVES ]',
+      title: translateText(ref, vi: 'MỤC TIÊU TẬP LUYỆN', en: 'TRAINING GOALS'),
       child: Column(
         children: [
-          const Text('Select up to 3 primary goals.', style: TextStyle(color: AppTheme.textDim)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Chọn tối đa 3 mục tiêu.',
+              en: 'Choose up to 3 goals.',
+            ),
+            style: TextStyle(color: AppTheme.textDim),
+          ),
           const SizedBox(height: 32),
-          _buildGoalChoice(ref, draft, 'Giảm Mỡ (Fat Loss)', 'fat_loss'),
+          _buildGoalChoice(
+            ref,
+            draft,
+            translateText(ref, vi: 'Giảm mỡ', en: 'Fat loss'),
+            'fat_loss',
+          ),
           const SizedBox(height: 16),
-          _buildGoalChoice(ref, draft, 'Tăng Cơ (Hypertrophy)', 'hypertrophy'),
+          _buildGoalChoice(
+            ref,
+            draft,
+            translateText(ref, vi: 'Tăng cơ', en: 'Build muscle'),
+            'hypertrophy',
+          ),
           const SizedBox(height: 16),
-          _buildGoalChoice(ref, draft, 'Sức Mạnh (Powerlifting)', 'powerlifting'),
+          _buildGoalChoice(
+            ref,
+            draft,
+            translateText(ref, vi: 'Tăng sức mạnh', en: 'Build strength'),
+            'powerlifting',
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildGoalChoice(WidgetRef ref, UserProfileDraft draft, String title, String val) {
+  Widget _buildGoalChoice(
+    WidgetRef ref,
+    UserProfileDraft draft,
+    String title,
+    String val,
+  ) {
     final isSelected = draft.goals.contains(val);
     return _NeonChoiceTile(
       label: title,
@@ -291,12 +387,18 @@ class _StepGoals extends ConsumerWidget {
       onTap: () {
         if (!isSelected) {
           if (draft.goals.length < 3) {
-            ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(goals: [...draft.goals, val]));
+            ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(goals: [...draft.goals, val]));
           }
         } else {
-          ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(
-            goals: draft.goals.where((g) => g != val).toList()
-          ));
+          ref
+              .read(onboardingDraftProvider.notifier)
+              .set(
+                draft.copyWith(
+                  goals: draft.goals.where((g) => g != val).toList(),
+                ),
+              );
         }
       },
     );
@@ -311,13 +413,22 @@ class _StepPrimaryClass extends ConsumerWidget {
     final recommended = _getRecommendedClasses(draft.goals);
 
     return _buildStepContainer(
-      title: '[ PRIMARY CLASS ]',
+      title: translateText(ref, vi: 'HỆ PHÁI CHÍNH', en: 'PRIMARY CLASS'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: Text('Choose your main training path.', style: TextStyle(color: AppTheme.textDim))),
+          Center(
+            child: Text(
+              translateText(
+                ref,
+                vi: 'Chọn hướng tập luyện chính.',
+                en: 'Choose your main training path.',
+              ),
+              style: TextStyle(color: AppTheme.textDim),
+            ),
+          ),
           const SizedBox(height: 16),
-          
+
           ...kClassDefinitions.values.map((classDef) {
             final isSelected = draft.primaryClassId == classDef.classId;
             return Padding(
@@ -326,15 +437,23 @@ class _StepPrimaryClass extends ConsumerWidget {
                 classDef: classDef,
                 isSelected: isSelected,
                 isSecondary: false,
-                isRecommended: recommended.contains(classDef.classId) && !isSelected,
+                isRecommended:
+                    recommended.contains(classDef.classId) && !isSelected,
                 onTap: () {
                   if (isSelected) {
-                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(primaryClassId: null));
+                    ref
+                        .read(onboardingDraftProvider.notifier)
+                        .update((c) => c.copyWith(primaryClassId: null));
                   } else {
-                    ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
-                      primaryClassId: classDef.classId,
-                      secondaryClassId: null, // Reset secondary when primary changes
-                    ));
+                    ref
+                        .read(onboardingDraftProvider.notifier)
+                        .update(
+                          (c) => c.copyWith(
+                            primaryClassId: classDef.classId,
+                            secondaryClassId:
+                                null, // Reset secondary when primary changes
+                          ),
+                        );
                   }
                 },
               ),
@@ -351,40 +470,71 @@ class _StepSecondaryClass extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
-    
+
     // Check if synergy exists
-    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null) 
+    final synergy =
+        (draft.primaryClassId != null && draft.secondaryClassId != null)
         ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
         : null;
 
     final primaryClassId = draft.primaryClassId;
     if (primaryClassId == null) {
-      return const Center(child: Text('Select Primary Class first.', style: TextStyle(color: AppTheme.dangerOrange)));
+      return Center(
+        child: Text(
+          translateText(
+            ref,
+            vi: 'Chọn hệ phái chính trước.',
+            en: 'Choose a primary class first.',
+          ),
+          style: TextStyle(color: AppTheme.dangerOrange),
+        ),
+      );
     }
 
-    final allowedSecondary = kClassDefinitions[primaryClassId]?.allowedSecondary ?? [];
+    final allowedSecondary = getRecommendedSecondary(primaryClassId);
 
     return _buildStepContainer(
-      title: '[ SECONDARY CLASS ]',
+      title: translateText(ref, vi: 'HỆ PHÁI PHỤ', en: 'SECONDARY CLASS'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: Text('Enhance your build. (Optional, tap to skip if wanted)', style: TextStyle(color: AppTheme.textDim))),
+          Center(
+            child: Text(
+              translateText(
+                ref,
+                vi: 'Bổ sung hệ phái phụ hoặc tiếp tục để bỏ qua.',
+                en: 'Choose an optional second class, or continue to skip.',
+              ),
+              style: TextStyle(color: AppTheme.textDim),
+            ),
+          ),
           const SizedBox(height: 16),
-          
+
           if (synergy != null)
             Center(
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [AppTheme.purpleNeon.withOpacity(0.3), AppTheme.cyanNeon.withOpacity(0.3)]),
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.purpleNeon.withValues(alpha: 0.3),
+                      AppTheme.cyanNeon.withValues(alpha: 0.3),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: AppTheme.purpleNeon, width: 1),
                 ),
                 child: Text(
                   '⚡ ${synergy.synergyName} — Perfect Synergy! +${synergy.bonusPercent}% XP',
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -408,9 +558,16 @@ class _StepSecondaryClass extends ConsumerWidget {
                   onTap: () {
                     if (isLocked) return;
                     if (isSecondary) {
-                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: null));
+                      ref
+                          .read(onboardingDraftProvider.notifier)
+                          .update((c) => c.copyWith(secondaryClassId: null));
                     } else {
-                      ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(secondaryClassId: classDef.classId));
+                      ref
+                          .read(onboardingDraftProvider.notifier)
+                          .update(
+                            (c) =>
+                                c.copyWith(secondaryClassId: classDef.classId),
+                          );
                     }
                   },
                 ),
@@ -423,14 +580,8 @@ class _StepSecondaryClass extends ConsumerWidget {
   }
 }
 
-/// Single class selection tile with RPG styling
+/// Readable, keyboard-accessible class choice at narrow phone widths.
 class _ClassTile extends ConsumerWidget {
-  final ClassDefinition classDef;
-  final bool isSelected;
-  final bool isSecondary;
-  final bool isRecommended;
-  final VoidCallback onTap;
-
   const _ClassTile({
     required this.classDef,
     required this.isSelected,
@@ -438,91 +589,74 @@ class _ClassTile extends ConsumerWidget {
     required this.isRecommended,
     required this.onTap,
   });
-
-  Color get _classColor => Color(classDef.colorHex);
-
-  String get _difficultyLabel {
-    switch (classDef.difficulty) {
-      case 'easy': return '⬛ Dễ';
-      case 'medium': return '🟨 Trung Bình';
-      case 'hard': return '🟧 Khó';
-      case 'hardcore': return '🟥 Cực Khó';
-      default: return '';
-    }
-  }
+  final ClassDefinition classDef;
+  final bool isSelected;
+  final bool isSecondary;
+  final bool isRecommended;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final borderColor = isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : (isRecommended ? Colors.amber.withOpacity(0.5) : Colors.white12));
-    final bgColor = isSelected 
-        ? _classColor.withOpacity(0.15) 
-        : (isSecondary ? AppTheme.purpleNeon.withOpacity(0.1) : Colors.black26);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(
-          color: bgColor,
-          border: Border.all(color: borderColor, width: (isSelected || isSecondary) ? 2 : 1),
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: (isSelected || isSecondary) ? [
-            BoxShadow(color: borderColor.withOpacity(0.2), blurRadius: 12)
-          ] : [],
+    final color = Color(classDef.colorHex);
+    return OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.all(16),
+        backgroundColor: isSelected || isSecondary
+            ? color.withValues(alpha: 0.12)
+            : null,
+        side: BorderSide(
+          color: isSelected || isSecondary ? color : Colors.white24,
         ),
-        child: Row(
-          children: [
-            Text(classDef.iconEmoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        resolveClassName(classDef, ref.watch(localizationModeProvider)),
-                        style: TextStyle(
-                          color: isSelected ? _classColor : (isSecondary ? AppTheme.purpleNeon : Colors.white),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(_difficultyLabel, style: const TextStyle(fontSize: 10)),
-                    ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isSelected || isSecondary
+                ? Icons.check_circle
+                : Icons.shield_outlined,
+            color: color,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  resolveClassName(
+                    classDef,
+                    ref.watch(localizationModeProvider),
                   ),
-                  const SizedBox(height: 2),
-                  Text(resolveClassFocus(classDef, ref.watch(localizationModeProvider)), style: const TextStyle(color: AppTheme.textDim, fontSize: 11)),
+                  style: TextStyle(color: color, fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  resolveClassFocus(
+                    classDef,
+                    ref.watch(localizationModeProvider),
+                  ),
+                  style: const TextStyle(color: AppTheme.textDim, fontSize: 12),
+                ),
+                if (isSelected || isSecondary) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    (isSelected ? 'primary_class' : 'secondary_class').tr(ref),
+                    style: const TextStyle(
+                      color: AppTheme.textMain,
+                      fontSize: 11,
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
-            // Slot Badges
-            if (isSelected)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _classColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: _classColor, width: 1),
-                ),
-                child: Text('PRIMARY', style: TextStyle(color: _classColor, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
-              )
-            else if (isSecondary)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppTheme.purpleNeon.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.purpleNeon, width: 1),
-                ),
-                child: const Text('SECONDARY', style: TextStyle(color: AppTheme.purpleNeon, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
-              )
-            else if (isRecommended)
-              const Text('✨', style: TextStyle(fontSize: 16))
-          ],
-        ),
+          ),
+          if (isRecommended)
+            const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(Icons.auto_awesome, size: 18),
+            ),
+        ],
       ),
     );
   }
@@ -534,27 +668,44 @@ class _StepExperience extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
     return _buildStepContainer(
-      title: '[ PLAYER LEVEL ]',
+      title: translateText(ref, vi: 'KINH NGHIỆM', en: 'EXPERIENCE'),
       child: Column(
         children: [
-          const Text('Scan your current combat experience.', style: TextStyle(color: AppTheme.textDim)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Bạn đã tập luyện bao lâu?',
+              en: 'How experienced are you with training?',
+            ),
+            style: TextStyle(color: AppTheme.textDim),
+          ),
           const SizedBox(height: 32),
           _NeonChoiceTile(
-            label: 'Tân Binh (Beginner)', 
-            isSelected: draft.experienceLevel == 'beginner', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(experienceLevel: 'beginner')),
+            label: translateText(ref, vi: 'Mới bắt đầu', en: 'Beginner'),
+            isSelected: draft.experienceLevel == 'beginner',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(experienceLevel: 'beginner')),
           ),
           const SizedBox(height: 16),
           _NeonChoiceTile(
-            label: 'Tầm Trung (Intermediate)', 
-            isSelected: draft.experienceLevel == 'intermediate', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(experienceLevel: 'intermediate')),
+            label: translateText(
+              ref,
+              vi: 'Đã có kinh nghiệm',
+              en: 'Intermediate',
+            ),
+            isSelected: draft.experienceLevel == 'intermediate',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(experienceLevel: 'intermediate')),
           ),
           const SizedBox(height: 16),
           _NeonChoiceTile(
-            label: 'Chuyên Gia (Advanced)', 
-            isSelected: draft.experienceLevel == 'advanced', 
-            onTap: () => ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(experienceLevel: 'advanced')),
+            label: translateText(ref, vi: 'Nhiều kinh nghiệm', en: 'Advanced'),
+            isSelected: draft.experienceLevel == 'advanced',
+            onTap: () => ref
+                .read(onboardingDraftProvider.notifier)
+                .set(draft.copyWith(experienceLevel: 'advanced')),
           ),
         ],
       ),
@@ -577,18 +728,36 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
   void initState() {
     super.initState();
     final draft = ref.read(onboardingDraftProvider);
-    if (draft.age != null) _ageController.text = draft.age.toString();
-    if (draft.heightCm != null) _heightController.text = draft.heightCm.toString();
-    if (draft.weightKg != null) _weightController.text = draft.weightKg.toString();
+    if (draft.age != null) {
+      _ageController.text = draft.age.toString();
+    }
+    if (draft.heightCm != null) {
+      _heightController.text = draft.heightCm.toString();
+    }
+    if (draft.weightKg != null) {
+      _weightController.text = draft.weightKg.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ageController.dispose();
+    _heightController.dispose();
+    _weightController.dispose();
+    super.dispose();
   }
 
   void _updateDraft() {
     final draft = ref.read(onboardingDraftProvider);
-    ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(
-      age: int.tryParse(_ageController.text),
-      heightCm: double.tryParse(_heightController.text),
-      weightKg: double.tryParse(_weightController.text),
-    ));
+    ref
+        .read(onboardingDraftProvider.notifier)
+        .set(
+          draft.copyWith(
+            age: int.tryParse(_ageController.text),
+            heightCm: double.tryParse(_heightController.text),
+            weightKg: double.tryParse(_weightController.text),
+          ),
+        );
   }
 
   @override
@@ -596,52 +765,107 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
     final draft = ref.watch(onboardingDraftProvider);
 
     return _buildStepContainer(
-      title: '[ SYSTEM SCAN: BODY METRICS ]',
+      title: translateText(ref, vi: 'CHỈ SỐ CƠ THỂ', en: 'BODY METRICS'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: Text('Calibrating physical stats...', style: TextStyle(color: AppTheme.textDim))),
+          Center(
+            child: Text(
+              translateText(
+                ref,
+                vi: 'Thông tin giúp điều chỉnh kế hoạch tập.',
+                en: 'Help us tailor your training.',
+              ),
+              style: TextStyle(color: AppTheme.textDim),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Giới Tính
-          const Text('GENDER', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Text(
+            translateText(ref, vi: 'Giới tính', en: 'Gender'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _genderChip(ref, draft, 'Nam', 'male', Icons.male),
+              _genderChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'Nam', en: 'Male'),
+                'male',
+                Icons.male,
+              ),
               const SizedBox(width: 8),
-              _genderChip(ref, draft, 'Nữ', 'female', Icons.female),
+              _genderChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'Nữ', en: 'Female'),
+                'female',
+                Icons.female,
+              ),
               const SizedBox(width: 8),
-              _genderChip(ref, draft, 'Khác', 'other', Icons.transgender),
+              _genderChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'Khác', en: 'Other'),
+                'other',
+                Icons.transgender,
+              ),
             ],
           ),
           const SizedBox(height: 24),
 
-          const Text('AGE', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Text(
+            translateText(ref, vi: 'Tuổi', en: 'Age'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           const SizedBox(height: 8),
           SystemTextField(
             controller: _ageController,
-            hintText: 'Enter age',
+            hintText: translateText(ref, vi: 'Nhập tuổi', en: 'Enter age'),
             keyboardType: TextInputType.number,
             onChanged: (_) => _updateDraft(),
           ),
           const SizedBox(height: 24),
 
-          const Text('HEIGHT (cm)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Text(
+            translateText(ref, vi: 'Chiều cao (cm)', en: 'Height (cm)'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           const SizedBox(height: 8),
           SystemTextField(
             controller: _heightController,
-            hintText: 'e.g. 175',
+            hintText: translateText(ref, vi: 'Ví dụ: 175', en: 'e.g. 175'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => _updateDraft(),
           ),
           const SizedBox(height: 24),
 
-          const Text('WEIGHT (kg)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Text(
+            translateText(ref, vi: 'Cân nặng (kg)', en: 'Weight (kg)'),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           const SizedBox(height: 8),
           SystemTextField(
             controller: _weightController,
-            hintText: 'e.g. 70.5',
+            hintText: translateText(ref, vi: 'Ví dụ: 70.5', en: 'e.g. 70.5'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => _updateDraft(),
           ),
@@ -650,39 +874,58 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
     );
   }
 
-  Widget _genderChip(WidgetRef ref, UserProfileDraft draft, String label, String value, IconData icon) {
+  Widget _genderChip(
+    WidgetRef ref,
+    UserProfileDraft draft,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     final isSelected = draft.gender == value;
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref.read(onboardingDraftProvider.notifier).set(draft.copyWith(gender: value));
+          ref
+              .read(onboardingDraftProvider.notifier)
+              .set(draft.copyWith(gender: value));
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.cyanNeon.withOpacity(0.15) : AppTheme.panelBackground,
+            color: isSelected
+                ? AppTheme.cyanNeon.withValues(alpha: 0.15)
+                : AppTheme.panelBackground,
             border: Border.all(
               color: isSelected ? AppTheme.cyanNeon : Colors.white24,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(8),
-            boxShadow: isSelected ? [
-              BoxShadow(
-                color: AppTheme.cyanNeon.withOpacity(0.2),
-                blurRadius: 12,
-              )
-            ] : [],
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppTheme.cyanNeon.withValues(alpha: 0.2),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : [],
           ),
           child: Column(
             children: [
-              Icon(icon, color: isSelected ? AppTheme.cyanNeon : Colors.white54, size: 24),
-              const SizedBox(height: 8),
-              Text(label, style: TextStyle(
+              Icon(
+                icon,
                 color: isSelected ? AppTheme.cyanNeon : Colors.white54,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 12,
-              )),
+                size: 24,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? AppTheme.cyanNeon : Colors.white54,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
         ),
@@ -699,15 +942,35 @@ class _StepScheduling extends ConsumerWidget {
     final draft = ref.watch(onboardingDraftProvider);
 
     return _buildStepContainer(
-      title: '[ DEPLOYMENT SCHEDULE ]',
+      title: translateText(ref, vi: 'LỊCH TẬP', en: 'TRAINING SCHEDULE'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Center(child: Text('When and where will you train?', style: TextStyle(color: AppTheme.textDim))),
+          Center(
+            child: Text(
+              translateText(
+                ref,
+                vi: 'Chọn lịch tập phù hợp với bạn.',
+                en: 'Choose a schedule that works for you.',
+              ),
+              style: TextStyle(color: AppTheme.textDim),
+            ),
+          ),
           const SizedBox(height: 32),
-          
+
           // Gym Days
-          const Text('GYM DAYS PER WEEK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Số buổi gym mỗi tuần',
+              en: 'Gym sessions per week',
+            ),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           Slider(
             value: draft.weeklyGymDays.toDouble(),
             min: 0,
@@ -716,14 +979,35 @@ class _StepScheduling extends ConsumerWidget {
             label: draft.weeklyGymDays.toString(),
             activeColor: AppTheme.cyanNeon,
             onChanged: (val) {
-              ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(weeklyGymDays: val.toInt()));
+              ref
+                  .read(onboardingDraftProvider.notifier)
+                  .update(
+                    (c) => c.copyWith(
+                      weeklyGymDays: val.toInt(),
+                      weeklyHomeDays: c.weeklyHomeDays.clamp(
+                        0,
+                        7 - val.toInt(),
+                      ),
+                    ),
+                  );
             },
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Home Days
-          const Text('HOME DAYS PER WEEK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.purpleNeon)),
+          Text(
+            translateText(
+              ref,
+              vi: 'Số buổi tập ở nhà mỗi tuần',
+              en: 'Home sessions per week',
+            ),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.purpleNeon,
+            ),
+          ),
           Slider(
             value: draft.weeklyHomeDays.toDouble(),
             min: 0,
@@ -732,25 +1016,78 @@ class _StepScheduling extends ConsumerWidget {
             label: draft.weeklyHomeDays.toString(),
             activeColor: AppTheme.purpleNeon,
             onChanged: (val) {
-              ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(weeklyHomeDays: val.toInt()));
+              ref
+                  .read(onboardingDraftProvider.notifier)
+                  .update(
+                    (c) => c.copyWith(
+                      weeklyHomeDays: val.toInt(),
+                      weeklyGymDays: c.weeklyGymDays.clamp(0, 7 - val.toInt()),
+                    ),
+                  );
             },
           ),
-          
+
           const SizedBox(height: 32),
-          
-          const Text('PREFERRED DAYS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.cyanNeon)),
+
+          Text(
+            translateText(
+              ref,
+              vi: 'Ngày tập ưu tiên',
+              en: 'Preferred training days',
+            ),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: AppTheme.cyanNeon,
+            ),
+          ),
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _dayChip(ref, draft, 'Thứ 2', 'mon'),
-              _dayChip(ref, draft, 'Thứ 3', 'tue'),
-              _dayChip(ref, draft, 'Thứ 4', 'wed'),
-              _dayChip(ref, draft, 'Thứ 5', 'thu'),
-              _dayChip(ref, draft, 'Thứ 6', 'fri'),
-              _dayChip(ref, draft, 'Thứ 7', 'sat'),
-              _dayChip(ref, draft, 'CN', 'sun'),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T2', en: 'Mon'),
+                'mon',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T3', en: 'Tue'),
+                'tue',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T4', en: 'Wed'),
+                'wed',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T5', en: 'Thu'),
+                'thu',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T6', en: 'Fri'),
+                'fri',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'T7', en: 'Sat'),
+                'sat',
+              ),
+              _dayChip(
+                ref,
+                draft,
+                translateText(ref, vi: 'CN', en: 'Sun'),
+                'sun',
+              ),
             ],
           ),
         ],
@@ -758,23 +1095,39 @@ class _StepScheduling extends ConsumerWidget {
     );
   }
 
-  Widget _dayChip(WidgetRef ref, UserProfileDraft draft, String label, String val) {
+  Widget _dayChip(
+    WidgetRef ref,
+    UserProfileDraft draft,
+    String label,
+    String val,
+  ) {
     final isSelected = draft.preferredDays.contains(val);
     return FilterChip(
       label: Text(label),
       selected: isSelected,
-      selectedColor: AppTheme.cyanNeon.withOpacity(0.2),
+      selectedColor: AppTheme.cyanNeon.withValues(alpha: 0.2),
       checkmarkColor: AppTheme.cyanNeon,
-      labelStyle: TextStyle(color: isSelected ? AppTheme.cyanNeon : Colors.white54, fontSize: 12),
+      labelStyle: TextStyle(
+        color: isSelected ? AppTheme.cyanNeon : Colors.white54,
+        fontSize: 12,
+      ),
       onSelected: (selected) {
         if (selected) {
-          ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
-            preferredDays: [...c.preferredDays, val]
-          ));
+          ref
+              .read(onboardingDraftProvider.notifier)
+              .update(
+                (c) => c.copyWith(preferredDays: [...c.preferredDays, val]),
+              );
         } else {
-          ref.read(onboardingDraftProvider.notifier).update((c) => c.copyWith(
-            preferredDays: c.preferredDays.where((d) => d != val).toList()
-          ));
+          ref
+              .read(onboardingDraftProvider.notifier)
+              .update(
+                (c) => c.copyWith(
+                  preferredDays: c.preferredDays
+                      .where((d) => d != val)
+                      .toList(),
+                ),
+              );
         }
       },
     );
@@ -787,54 +1140,77 @@ class _StepClassConfirmation extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final draft = ref.watch(onboardingDraftProvider);
     final primaryClass = kClassDefinitions[draft.primaryClassId];
-    final secondaryClass = draft.secondaryClassId != null ? kClassDefinitions[draft.secondaryClassId] : null;
-    final synergy = (draft.primaryClassId != null && draft.secondaryClassId != null)
+    final secondaryClass = draft.secondaryClassId != null
+        ? kClassDefinitions[draft.secondaryClassId]
+        : null;
+    final synergy =
+        (draft.primaryClassId != null && draft.secondaryClassId != null)
         ? getSynergyForPair(draft.primaryClassId!, draft.secondaryClassId!)
         : null;
 
     return _buildStepContainer(
-      title: '[ PLAYER AWAKENING ]',
+      title: translateText(ref, vi: 'SẴN SÀNG BẮT ĐẦU', en: 'READY TO BEGIN'),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 24),
-          const Text('EVALUATION COMPLETE', style: TextStyle(color: AppTheme.textDim, letterSpacing: 2)),
+          Text(
+            translateText(ref, vi: 'ĐÃ THIẾT LẬP HỒ SƠ', en: 'PROFILE READY'),
+            style: TextStyle(color: AppTheme.textDim, letterSpacing: 2),
+          ),
           const SizedBox(height: 32),
-          
+
           // Primary Class
-          const Text('YOUR PRIMARY CLASS:', style: TextStyle(fontSize: 12, letterSpacing: 1)),
+          Text(
+            translateText(ref, vi: 'Hệ phái chính:', en: 'Your primary class:'),
+            style: TextStyle(fontSize: 12, letterSpacing: 1),
+          ),
           const SizedBox(height: 8),
           Text(
-            '${primaryClass?.iconEmoji ?? '⚔️'} ${(primaryClass?.className ?? 'WARRIOR').toUpperCase()}', 
+            '${primaryClass?.iconEmoji ?? '⚔️'} ${(primaryClass == null ? '' : resolveClassName(primaryClass, ref.watch(localizationModeProvider))).toUpperCase()}',
             style: TextStyle(
-              fontFamily: 'Orbitron',
-              fontSize: 26, 
-              color: primaryClass != null ? Color(primaryClass.colorHex) : AppTheme.purpleNeon, 
+              fontFamily: CandyFonts.display,
+              fontSize: 26,
+              color: primaryClass != null
+                  ? Color(primaryClass.colorHex)
+                  : AppTheme.purpleNeon,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
               shadows: [
-                Shadow(color: primaryClass != null ? Color(primaryClass.colorHex) : AppTheme.purpleNeon, blurRadius: 20)
-              ]
-            )
+                Shadow(
+                  color: primaryClass != null
+                      ? Color(primaryClass.colorHex)
+                      : AppTheme.purpleNeon,
+                  blurRadius: 20,
+                ),
+              ],
+            ),
           ),
-          
+
           // Secondary Class (if selected)
           if (secondaryClass != null) ...[
             const SizedBox(height: 24),
-            const Text('SECONDARY CLASS:', style: TextStyle(fontSize: 12, letterSpacing: 1, color: AppTheme.textDim)),
+            Text(
+              translateText(ref, vi: 'Hệ phái phụ:', en: 'Secondary class:'),
+              style: TextStyle(
+                fontSize: 12,
+                letterSpacing: 1,
+                color: AppTheme.textDim,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
-              '${secondaryClass.iconEmoji} ${secondaryClass.className.toUpperCase()}', 
+              '${secondaryClass.iconEmoji} ${resolveClassName(secondaryClass, ref.watch(localizationModeProvider)).toUpperCase()}',
               style: TextStyle(
-                fontFamily: 'Orbitron',
-                fontSize: 20, 
-                color: Color(secondaryClass.colorHex), 
+                fontFamily: CandyFonts.display,
+                fontSize: 20,
+                color: Color(secondaryClass.colorHex),
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
                 shadows: [
-                  Shadow(color: Color(secondaryClass.colorHex), blurRadius: 16)
-                ]
-              )
+                  Shadow(color: Color(secondaryClass.colorHex), blurRadius: 16),
+                ],
+              ),
             ),
           ],
 
@@ -844,22 +1220,39 @@ class _StepClassConfirmation extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [AppTheme.purpleNeon.withOpacity(0.2), AppTheme.cyanNeon.withOpacity(0.2)]),
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.purpleNeon.withValues(alpha: 0.2),
+                    AppTheme.cyanNeon.withValues(alpha: 0.2),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.amber, width: 1),
               ),
               child: Text(
                 '⚡ ${synergy.synergyName}',
-                style: const TextStyle(color: Colors.amber, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1),
+                style: const TextStyle(
+                  color: Colors.amber,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ],
 
           const SizedBox(height: 48),
-          const Text(
-            'The system is ready.\nYour journey begins now.', 
+          Text(
+            translateText(
+              ref,
+              vi: 'Mỗi buổi tập là một bước tiến.\nHành trình của bạn bắt đầu hôm nay.',
+              en: 'Every session is a step forward.\nYour journey starts today.',
+            ),
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppTheme.cyanNeon, fontStyle: FontStyle.italic),
+            style: TextStyle(
+              color: AppTheme.cyanNeon,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -867,94 +1260,91 @@ class _StepClassConfirmation extends ConsumerWidget {
   }
 }
 
-
 // --- DUMMY COMMON COMPONENT FOR STEPS ---
 Widget _buildStepContainer({required String title, required Widget child}) {
   return SingleChildScrollView(
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-    child: SystemPanel(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: AppTheme.cyanNeon,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 680),
+        child: SystemPanel(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppTheme.cyanNeon,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 24),
+              const Divider(color: Colors.white10),
+              const SizedBox(height: 24),
+              child,
+            ],
           ),
-          const SizedBox(height: 24),
-          const Divider(color: Colors.white10),
-          const SizedBox(height: 24),
-          child,
-        ],
+        ),
       ),
     ),
   );
 }
 
 class _NeonChoiceTile extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final bool isCheckbox;
-  final VoidCallback onTap;
-
   const _NeonChoiceTile({
     required this.label,
     required this.isSelected,
     required this.onTap,
     this.isCheckbox = false,
   });
+  final String label;
+  final bool isSelected;
+  final bool isCheckbox;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.cyanNeon.withOpacity(0.1) : Colors.black26,
-          border: Border.all(
-            color: isSelected ? AppTheme.cyanNeon : Colors.white12,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isSelected ? [
-            BoxShadow(color: AppTheme.cyanNeon.withOpacity(0.1), blurRadius: 8)
-          ] : [],
-        ),
-        child: Row(
-          children: [
-            if (isCheckbox) ...[
-              Icon(
-                isSelected ? Icons.check_box : Icons.check_box_outline_blank,
-                color: isSelected ? AppTheme.cyanNeon : Colors.white38,
-              ),
-              const SizedBox(width: 16),
-            ] else ...[
-              Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: isSelected ? AppTheme.cyanNeon : Colors.white38,
-              ),
-              const SizedBox(width: 16),
-            ],
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white54,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-          ],
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: OutlinedButton(
+      onPressed: onTap,
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.all(18),
+        backgroundColor: isSelected
+            ? AppTheme.cyanNeon.withValues(alpha: 0.1)
+            : null,
+        side: BorderSide(
+          color: isSelected ? AppTheme.cyanNeon : Colors.white24,
         ),
       ),
-    );
-  }
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(color: AppTheme.textMain),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            isSelected
+                ? Icons.check_circle
+                : (isCheckbox
+                      ? Icons.check_box_outline_blank
+                      : Icons.radio_button_unchecked),
+            color: isSelected ? AppTheme.cyanNeon : AppTheme.textDim,
+          ),
+        ],
+      ),
+    ),
+  );
 }
+
+List<String> _getRecommendedClasses(List<String> goals) => {
+  if (goals.contains('fat_loss')) 'A',
+  if (goals.contains('hypertrophy')) 'B',
+  if (goals.contains('powerlifting')) 'C',
+}.toList();

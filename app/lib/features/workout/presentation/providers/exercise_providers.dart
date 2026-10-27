@@ -6,6 +6,7 @@ import '../../domain/workout_repository.dart';
 import '../../data/supabase_exercise_repository.dart';
 import '../../data/supabase_workout_repository.dart';
 import '../controllers/active_workout_controller.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 
 // ─── Exercise Providers ───
 
@@ -27,8 +28,9 @@ class SearchQueryNotifier extends Notifier<String> {
   void set(String value) => state = value;
 }
 
-final searchQueryProvider =
-    NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
+final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(
+  SearchQueryNotifier.new,
+);
 
 class SelectedCategoryNotifier extends Notifier<String?> {
   @override
@@ -39,7 +41,8 @@ class SelectedCategoryNotifier extends Notifier<String?> {
 
 final selectedCategoryProvider =
     NotifierProvider<SelectedCategoryNotifier, String?>(
-        SelectedCategoryNotifier.new);
+      SelectedCategoryNotifier.new,
+    );
 
 final filteredExercisesProvider = Provider<AsyncValue<List<Exercise>>>((ref) {
   final exercisesAsync = ref.watch(exerciseListProvider);
@@ -58,9 +61,13 @@ final filteredExercisesProvider = Provider<AsyncValue<List<Exercise>>>((ref) {
 // ─── Workout Providers ───
 
 final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
+  ref.watch(
+    authStateStreamProvider.select((state) => state.value?.session?.user.id),
+  );
   return SupabaseWorkoutRepository(SupabaseConfig.client);
 });
 
 final activeWorkoutControllerProvider =
     NotifierProvider<ActiveWorkoutController, ActiveWorkoutState>(
-        ActiveWorkoutController.new);
+      ActiveWorkoutController.new,
+    );

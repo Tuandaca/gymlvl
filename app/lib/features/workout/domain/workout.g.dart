@@ -17,6 +17,13 @@ _Workout _$WorkoutFromJson(Map<String, dynamic> json) => _Workout(
   startedAt: json['started_at'] == null
       ? null
       : DateTime.parse(json['started_at'] as String),
+  trainingStartedAt: json['training_started_at'] == null
+      ? null
+      : DateTime.parse(json['training_started_at'] as String),
+  pausedAt: json['paused_at'] == null
+      ? null
+      : DateTime.parse(json['paused_at'] as String),
+  pausedSeconds: (json['paused_seconds'] as num?)?.toInt() ?? 0,
   completedAt: json['completed_at'] == null
       ? null
       : DateTime.parse(json['completed_at'] as String),
@@ -40,10 +47,13 @@ Map<String, dynamic> _$WorkoutToJson(_Workout instance) => <String, dynamic>{
   'duration_seconds': instance.durationSeconds,
   'notes': instance.notes,
   'started_at': instance.startedAt?.toIso8601String(),
+  'training_started_at': instance.trainingStartedAt?.toIso8601String(),
+  'paused_at': instance.pausedAt?.toIso8601String(),
+  'paused_seconds': instance.pausedSeconds,
   'completed_at': instance.completedAt?.toIso8601String(),
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
-  'workout_exercises': instance.exercises,
+  'workout_exercises': instance.exercises.map((e) => e.toJson()).toList(),
 };
 
 const _$WorkoutStatusEnumMap = {

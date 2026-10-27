@@ -29,25 +29,35 @@ class SystemPanel extends StatelessWidget {
               color: AppTheme.panelBackground,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: AppTheme.cyanNeon.withOpacity(0.3),
+                color: AppTheme.cyanNeon.withValues(alpha: 0.3),
                 width: 1.5,
               ),
-              boxShadow: glow ? [
-                BoxShadow(
-                  color: AppTheme.cyanNeon.withOpacity(0.15),
-                  blurRadius: blurRadius,
-                  spreadRadius: 2,
-                  offset: const Offset(0, 0),
-                )
-              ] : [],
+              boxShadow: glow
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.cyanNeon.withValues(alpha: 0.15),
+                        blurRadius: blurRadius,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 0),
+                      ),
+                    ]
+                  : [],
             ),
             child: child,
           ),
           // Corner decorators
           Positioned(top: 0, left: 0, child: _buildCorner(isTopLeft: true)),
           Positioned(top: 0, right: 0, child: _buildCorner(isTopRight: true)),
-          Positioned(bottom: 0, left: 0, child: _buildCorner(isBottomLeft: true)),
-          Positioned(bottom: 0, right: 0, child: _buildCorner(isBottomRight: true)),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: _buildCorner(isBottomLeft: true),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: _buildCorner(isBottomRight: true),
+          ),
         ],
       ),
     );
@@ -65,10 +75,18 @@ class SystemPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.transparent,
         border: Border(
-          top: isTopLeft || isTopRight ? const BorderSide(color: AppTheme.cyanNeon, width: 2) : BorderSide.none,
-          bottom: isBottomLeft || isBottomRight ? const BorderSide(color: AppTheme.cyanNeon, width: 2) : BorderSide.none,
-          left: isTopLeft || isBottomLeft ? const BorderSide(color: AppTheme.cyanNeon, width: 2) : BorderSide.none,
-          right: isTopRight || isBottomRight ? const BorderSide(color: AppTheme.cyanNeon, width: 2) : BorderSide.none,
+          top: isTopLeft || isTopRight
+              ? const BorderSide(color: AppTheme.cyanNeon, width: 2)
+              : BorderSide.none,
+          bottom: isBottomLeft || isBottomRight
+              ? const BorderSide(color: AppTheme.cyanNeon, width: 2)
+              : BorderSide.none,
+          left: isTopLeft || isBottomLeft
+              ? const BorderSide(color: AppTheme.cyanNeon, width: 2)
+              : BorderSide.none,
+          right: isTopRight || isBottomRight
+              ? const BorderSide(color: AppTheme.cyanNeon, width: 2)
+              : BorderSide.none,
         ),
       ),
     );

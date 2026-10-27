@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import '../../workout_copy.dart';
 import '../../../../ui/theme/app_theme.dart';
+import '../../../../core/theme/candy_colors.dart';
 import '../../../../ui/widgets/system_text_field.dart';
 import '../../../../ui/widgets/system_panel.dart';
 import '../../domain/exercise.dart';
@@ -11,10 +12,7 @@ import '../widgets/exercise_card.dart';
 class ExercisePickerScreen extends ConsumerStatefulWidget {
   final bool multiSelect;
 
-  const ExercisePickerScreen({
-    super.key,
-    this.multiSelect = false,
-  });
+  const ExercisePickerScreen({super.key, this.multiSelect = false});
 
   @override
   ConsumerState<ExercisePickerScreen> createState() =>
@@ -25,13 +23,23 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
   final TextEditingController _searchController = TextEditingController();
   final List<Exercise> _selectedExercises = [];
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(searchQueryProvider.notifier).set('');
+      ref.read(selectedCategoryProvider.notifier).set(null);
+    });
+  }
+
   final List<String> _categories = [
     'Chest',
     'Back',
     'Legs',
     'Shoulders',
     'Arms',
-    'Core'
+    'Core',
   ];
 
   @override
@@ -62,20 +70,20 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
   @override
   Widget build(BuildContext context) {
     final exercisesAsync = ref.watch(filteredExercisesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
+    ref.watch(selectedCategoryProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.multiSelect ? 'CHỌN BÀI TẬP' : 'CHỌN BÀI TẬP'),
+        title: Text(workoutText(ref, 'select_exercises')),
         actions: [
           if (widget.multiSelect && _selectedExercises.isNotEmpty)
             TextButton.icon(
               onPressed: _confirmSelection,
               icon: const Icon(Icons.check, size: 18),
               label: Text(
-                'CHỌN (${_selectedExercises.length})',
+                '${workoutText(ref, 'finish')} (${_selectedExercises.length})',
                 style: const TextStyle(
-                  fontFamily: 'Orbitron',
+                  fontFamily: CandyFonts.mono,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                   letterSpacing: 1,
@@ -98,7 +106,7 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                 children: [
                   SystemTextField(
                     controller: _searchController,
-                    hintText: 'Tìm kiếm bài tập...',
+                    hintText: workoutText(ref, 'search'),
                     prefixIcon: Icons.search,
                     onChanged: (value) {
                       ref.read(searchQueryProvider.notifier).set(value);
@@ -109,9 +117,11 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildCategoryChip(null, 'Tất cả'),
-                        ..._categories
-                            .map((cat) => _buildCategoryChip(cat, cat)),
+                        _buildCategoryChip(null, workoutText(ref, 'all')),
+                        ..._categories.map(
+                          (cat) =>
+                              _buildCategoryChip(cat, workoutText(ref, cat)),
+                        ),
                       ],
                     ),
                   ),
@@ -124,17 +134,22 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
           if (widget.multiSelect)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: AppTheme.cyanNeon.withOpacity(0.08),
+              color: AppTheme.cyanNeon.withValues(alpha: 0.08),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline,
-                      color: AppTheme.cyanNeon.withOpacity(0.7), size: 16),
+                  Icon(
+                    Icons.info_outline,
+                    color: AppTheme.cyanNeon.withValues(alpha: 0.7),
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Chọn nhiều bài tập, sau đó nhấn "CHỌN"',
-                    style: TextStyle(
-                      color: AppTheme.cyanNeon.withOpacity(0.8),
-                      fontSize: 12,
+                  Expanded(
+                    child: Text(
+                      workoutText(ref, 'select_exercises'),
+                      style: TextStyle(
+                        color: AppTheme.cyanNeon.withValues(alpha: 0.8),
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -150,12 +165,14 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.search_off,
-                            size: 64,
-                            color: AppTheme.textDim.withOpacity(0.5)),
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: AppTheme.textDim.withValues(alpha: 0.5),
+                        ),
                         const SizedBox(height: 16),
                         Text(
-                          'Không tìm thấy bài tập nào',
+                          workoutText(ref, 'no_results'),
                           style: AppTheme.darkTheme.textTheme.bodyLarge
                               ?.copyWith(color: AppTheme.textDim),
                         ),
@@ -190,14 +207,18 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.successGreen
-                                          .withOpacity(0.5),
+                                      color: AppTheme.successGreen.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       blurRadius: 8,
                                     ),
                                   ],
                                 ),
-                                child: const Icon(Icons.check,
-                                    color: Colors.white, size: 16),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                             ),
                         ],
@@ -218,8 +239,10 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                 child: CircularProgressIndicator(color: AppTheme.cyanNeon),
               ),
               error: (err, stack) => Center(
-                child: Text('Lỗi: $err',
-                    style: const TextStyle(color: AppTheme.dangerOrange)),
+                child: TextButton(
+                  onPressed: () => ref.invalidate(exerciseListProvider),
+                  child: Text(workoutText(ref, 'retry')),
+                ),
               ),
             ),
           ),
@@ -237,10 +260,11 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
         label: Text(label),
         selected: isSelected,
         onSelected: (selected) {
-          ref.read(selectedCategoryProvider.notifier).set(
-              selected ? category : null);
+          ref
+              .read(selectedCategoryProvider.notifier)
+              .set(selected ? category : null);
         },
-        selectedColor: AppTheme.cyanNeon.withOpacity(0.3),
+        selectedColor: AppTheme.cyanNeon.withValues(alpha: 0.3),
         backgroundColor: Colors.transparent,
         labelStyle: TextStyle(
           color: isSelected ? AppTheme.cyanNeon : AppTheme.textDim,
@@ -252,7 +276,7 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
           side: BorderSide(
             color: isSelected
                 ? AppTheme.cyanNeon
-                : AppTheme.cyanNeon.withOpacity(0.1),
+                : AppTheme.cyanNeon.withValues(alpha: 0.1),
           ),
         ),
         showCheckmark: false,

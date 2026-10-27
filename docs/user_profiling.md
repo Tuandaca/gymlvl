@@ -1,3 +1,5 @@
+﻿> Design reference retained for product history. Numeric examples and proposed mechanics are not a release contract. Current implemented rules: [PROGRESSION_GUIDE.md](PROGRESSION_GUIDE.md); verified scope: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
+
 # 👤 Hệ Thống Phân Loại (User Profiling) & Nhập Môn
 
 Bạn vô cùng tinh tế khi nhận ra không nên nhồi nhét mọi thứ vào `level_system.md`. Chúng ta sẽ tách riêng phần **Thông Số Người Dùng (User Profiling)** thành tài liệu này. Việc thu thập chuẩn xác dữ liệu ở bước Onboarding sẽ là nguồn nhiên liệu để thuật toán A.I (Edge Function) phân phát Nhiệm vụ Hằng Ngày mượt mà nhất.
@@ -48,3 +50,4 @@ Những con số thô để theo dõi tiến độ:
 
 > [!NOTE]
 > Quy tắc thu thập: Ở giao diện App (UI Onboarding), việc chọn Môi trường (Environment) và Mục tiêu (Goals) sẽ sử dụng giao diện thẻ hộp (Card) có icon to rõ rệt để người dùng "chạm là thích". Phần Sinh trắc học sẽ dùng thao tác cuộn số (Wheel Picker) để tránh phải gõ phím quá nhiều.
+

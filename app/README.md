@@ -1,16 +1,12 @@
-# app
+﻿# GymLevel Flutter client
 
-A new Flutter project.
+Run from this directory after configuring the Supabase backend:
 
-## Getting Started
+```powershell
+flutter pub get
+flutter run -d chrome --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
+```
 
-This project is a starting point for a Flutter application.
+Use [the full development guide](../docs/DEVELOPMENT.md) for backend startup, authentication, configuration, generated code, tests, and deployment. Executed checks and release limitations are in [implementation status](../docs/IMPLEMENTATION_STATUS.md).
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The app uses Riverpod and GoRouter. Features live under `lib/features/`, shared configuration/navigation under `lib/core/`, and reusable widgets under `lib/ui/`. Supabase owns persistent data and authoritative progression; local workout state and XP estimates do not grant rewards.

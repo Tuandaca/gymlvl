@@ -12,12 +12,7 @@ class WorkoutTemplates {
       'Lat Pulldown (Cable)',
       'Seated Cable Row',
     ],
-    'Legs': [
-      'Squat (Barbell)',
-      'Leg Press',
-      'Leg Extension',
-      'Lying Leg Curl',
-    ],
+    'Legs': ['Squat (Barbell)', 'Leg Press', 'Leg Extension', 'Lying Leg Curl'],
     'Shoulders': [
       'Overhead Press (Barbell)',
       'Lateral Raise (Dumbbell)',
@@ -29,11 +24,7 @@ class WorkoutTemplates {
       'Tricep Pushdown (Cable)',
       'Skull Crusher (Barbell)',
     ],
-    'Core': [
-      'Plank',
-      'Crunch',
-      'Leg Raise',
-    ],
+    'Core': ['Plank', 'Crunch', 'Leg Raise'],
   };
 
   /// Gộp bài tập từ nhiều nhóm cơ, loại bỏ trùng lặp

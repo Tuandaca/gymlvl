@@ -1,3 +1,7 @@
+// Freezed forwards factory parameter JsonKey annotations to generated fields.
+// See https://pub.dev/packages/freezed#disabling-invalid_annotation_target-warning-and-warning-in-generates-files
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'dashboard_stats.freezed.dart';
@@ -9,6 +13,8 @@ abstract class DashboardStats with _$DashboardStats {
     @JsonKey(name: 'volume_trend') required List<VolumePoint> volumeTrend,
     @JsonKey(name: 'muscle_split') required List<MuscleSplit> muscleSplit,
     @JsonKey(name: 'recent_prs') @Default([]) List<PRRecord> recentPRs,
+    @Default([]) List<Map<String, dynamic>> achievements,
+    Map<String, dynamic>? streak,
   }) = _DashboardStats;
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) =>
@@ -17,10 +23,8 @@ abstract class DashboardStats with _$DashboardStats {
 
 @freezed
 abstract class VolumePoint with _$VolumePoint {
-  const factory VolumePoint({
-    required String date,
-    required double value,
-  }) = _VolumePoint;
+  const factory VolumePoint({required String date, required double value}) =
+      _VolumePoint;
 
   factory VolumePoint.fromJson(Map<String, dynamic> json) =>
       _$VolumePointFromJson(json);
@@ -28,10 +32,8 @@ abstract class VolumePoint with _$VolumePoint {
 
 @freezed
 abstract class MuscleSplit with _$MuscleSplit {
-  const factory MuscleSplit({
-    required String label,
-    required double value,
-  }) = _MuscleSplit;
+  const factory MuscleSplit({required String label, required double value}) =
+      _MuscleSplit;
 
   factory MuscleSplit.fromJson(Map<String, dynamic> json) =>
       _$MuscleSplitFromJson(json);

@@ -1,0 +1,10 @@
+﻿# GymLevel — authoritative roadmap
+
+Updated: 2026-10-26. This local plan is a scope/reference note, not a separate completion checklist.
+
+Supabase Auth and PostgreSQL are the sole backend; Flutter/Riverpod is the client, authenticated Edge Functions and transactional RPCs own rewards. Python/FastAPI is optional and not implemented. The previous alternative-backend setup and schema instructions have been retired.
+
+Order: reproducible schema/security → auth/onboarding → reliable workouts and rewards → daily quests/streaks/classes → responsive bilingual UI → configured Coach → independent checks → verified deployment. Future scope includes notifications, offline catalog sync, avatars, weekly/main/hidden quests, voice/actions and an admin application; each requires a separate tested contract.
+
+Authoritative status: [IMPLEMENTATION_STATUS.md](../../docs/IMPLEMENTATION_STATUS.md). Setup and release: [DEVELOPMENT.md](../../docs/DEVELOPMENT.md).
+

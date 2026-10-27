@@ -15,6 +15,7 @@ _WorkoutSet _$WorkoutSetFromJson(Map<String, dynamic> json) => _WorkoutSet(
   baselineWeightKg: (json['baseline_weight_kg'] as num?)?.toDouble() ?? 0,
   isCompleted: json['is_completed'] as bool? ?? false,
   restSeconds: (json['rest_seconds'] as num?)?.toInt() ?? 0,
+  durationSeconds: (json['duration_seconds'] as num?)?.toInt() ?? 0,
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -30,5 +31,6 @@ Map<String, dynamic> _$WorkoutSetToJson(_WorkoutSet instance) =>
       'baseline_weight_kg': instance.baselineWeightKg,
       'is_completed': instance.isCompleted,
       'rest_seconds': instance.restSeconds,
+      'duration_seconds': instance.durationSeconds,
       'created_at': instance.createdAt?.toIso8601String(),
     };

@@ -1,3 +1,7 @@
+// Freezed forwards factory parameter JsonKey annotations to generated fields.
+// See https://pub.dev/packages/freezed#disabling-invalid_annotation_target-warning-and-warning-in-generates-files
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'quest_instance.freezed.dart';
@@ -9,7 +13,8 @@ abstract class QuestInstance with _$QuestInstance {
     required String id,
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'quest_id') required String questId,
-    @JsonKey(name: 'prescribed_config') required List<PrescribedExercise> config,
+    @JsonKey(name: 'prescribed_config')
+    required List<PrescribedExercise> config,
     @JsonKey(name: 'status') required String status,
     @JsonKey(name: 'expires_at') required DateTime expiresAt,
     @JsonKey(name: 'completed_at') DateTime? completedAt,

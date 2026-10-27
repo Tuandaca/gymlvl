@@ -1,191 +1,111 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../ui/theme/app_theme.dart';
+import '../../workout_copy.dart';
 import '../controllers/workout_history_controller.dart';
 import '../widgets/workout_exercise_tile.dart';
 
 class WorkoutDetailScreen extends ConsumerWidget {
   final String workoutId;
-
   const WorkoutDetailScreen({super.key, required this.workoutId});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(workoutDetailProvider(workoutId));
-
+    final detail = ref.watch(workoutDetailProvider(workoutId));
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('CHI TIẾT BUỔI TẬP'),
-      ),
-      body: detailAsync.when(
-        data: (workout) {
-          if (workout == null) {
-            return const Center(
-              child: Text('Không tìm thấy buổi tập',
-                  style: TextStyle(color: AppTheme.textDim)),
-            );
-          }
-
-          final duration = workout.durationSeconds;
-          final hours = duration ~/ 3600;
-          final minutes = (duration % 3600) ~/ 60;
-          final durationText = hours > 0 ? '${hours}h ${minutes}m' : '${minutes}m';
-
-          final totalSets = workout.exercises.fold(
-              0, (sum, ex) => sum + ex.sets.length);
-          final completedSets = workout.exercises.fold(
-              0,
-              (sum, ex) =>
-                  sum + ex.sets.where((s) => s.isCompleted).length);
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Stats header
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.panelBackground.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                        color: AppTheme.cyanNeon.withOpacity(0.15)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStat(Icons.timer_outlined, durationText, 'Thời gian'),
-                      _buildDivider(),
-                      _buildStat(Icons.list_alt_rounded,
-                          '${workout.exercises.length}', 'Bài tập'),
-                      _buildDivider(),
-                      _buildStat(
-                          Icons.repeat_rounded, '$completedSets/$totalSets', 'Sets'),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Date info
-                if (workout.completedAt != null)
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                    child: Text(
-                      'Hoàn thành: ${_formatDateTime(workout.completedAt!)}',
-                      style: const TextStyle(
-                          color: AppTheme.textDim, fontSize: 12),
-                    ),
-                  ),
-
-                // Notes
-                if (workout.notes != null && workout.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppTheme.panelBackground.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                          color: AppTheme.purpleNeon.withOpacity(0.15)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'GHI CHÚ',
-                          style: TextStyle(
-                            fontFamily: 'Orbitron',
-                            color: AppTheme.purpleNeon,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
+      appBar: AppBar(title: Text(workoutText(ref, 'details'))),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 900),
+          child: detail.when(
+            data: (workout) {
+              if (workout == null) {
+                return Center(child: Text(workoutText(ref, 'not_found')));
+              }
+              final sets = workout.exercises
+                  .expand((e) => e.sets)
+                  .where((s) => s.isCompleted)
+                  .toList();
+              final volume = sets.fold<double>(
+                0,
+                (sum, set) => sum + set.reps * set.weightKg,
+              );
+              return ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Wrap(
+                        spacing: 24,
+                        runSpacing: 16,
+                        children: [
+                          _stat(
+                            workoutText(ref, 'duration'),
+                            '${workout.durationSeconds ~/ 60}m',
                           ),
+                          _stat(workoutText(ref, 'sets'), '${sets.length}'),
+                          _stat(
+                            workoutText(ref, 'volume'),
+                            '${volume.toStringAsFixed(0)} kg',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (workout.completedAt != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        workout.completedAt!.toLocal().toString().substring(
+                          0,
+                          16,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          workout.notes!,
-                          style: const TextStyle(
-                              color: AppTheme.textMain, fontSize: 14),
-                        ),
-                      ],
+                      ),
+                    ),
+                  if (workout.notes?.isNotEmpty ?? false)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Text(workout.notes!),
+                    ),
+                  ...workout.exercises.map(
+                    (exercise) => WorkoutExerciseTile(
+                      key: ValueKey(exercise.id),
+                      workoutExercise: exercise,
+                      isEditable: false,
                     ),
                   ),
                 ],
-
-                const SizedBox(height: 20),
-
-                // Exercises
-                const Text(
-                  'BÀI TẬP',
-                  style: TextStyle(
-                    fontFamily: 'Orbitron',
-                    color: AppTheme.cyanNeon,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, _) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  workoutText(ref, 'save_failed'),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
-
-                ...workout.exercises.map(
-                  (we) => WorkoutExerciseTile(
-                    workoutExercise: we,
-                    isEditable: false,
-                  ),
+                TextButton(
+                  onPressed: () =>
+                      ref.invalidate(workoutDetailProvider(workoutId)),
+                  child: Text(workoutText(ref, 'retry')),
                 ),
               ],
             ),
-          );
-        },
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppTheme.cyanNeon),
-        ),
-        error: (err, stack) => Center(
-          child: Text('Lỗi: $err',
-              style: const TextStyle(color: AppTheme.dangerOrange)),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStat(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Icon(icon, color: AppTheme.cyanNeon, size: 22),
-        const SizedBox(height: 6),
-        Text(
-          value,
-          style: const TextStyle(
-            color: AppTheme.textMain,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            fontFamily: 'Orbitron',
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(color: AppTheme.textDim, fontSize: 11),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(
-      width: 1,
-      height: 40,
-      color: AppTheme.cyanNeon.withOpacity(0.15),
-    );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final local = dateTime.toLocal();
-    return '${local.day}/${local.month}/${local.year} lúc ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
-  }
+  Widget _stat(String label, String value) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(label),
+      const SizedBox(height: 4),
+      Text(
+        value,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      ),
+    ],
+  );
 }

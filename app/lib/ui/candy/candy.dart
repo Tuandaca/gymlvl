@@ -1,0 +1,19 @@
+// Central barrel export for the Candy Neubrutalism design system primitives and tokens.
+export '../../core/theme/candy_colors.dart';
+export '../../core/theme/candy_theme.dart';
+export 'candy_badge.dart';
+export 'candy_bottom_sheet.dart';
+export 'candy_button.dart';
+export 'candy_card.dart';
+export 'candy_dialog.dart';
+export 'candy_empty_state.dart';
+export 'candy_error_state.dart';
+export 'candy_exercise_card.dart';
+export 'candy_navigation_item.dart';
+export 'candy_progress_bar.dart';
+export 'candy_quest_card.dart';
+export 'candy_scaffold.dart';
+export 'candy_skeleton.dart';
+export 'candy_stat_tile.dart';
+export 'candy_text_field.dart';
+export 'candy_workout_set_row.dart';

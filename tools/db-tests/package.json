@@ -1,0 +1,18 @@
+{
+  "name": "gymlvl-verification",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run.mjs",
+    "test:legacy": "node legacy-adoption.mjs",
+    "test:live": "node live-e2e.mjs",
+    "test:edge": "node edge-tests.mjs",
+    "check:edge": "node edge-tests.mjs --check",
+    "test:web": "node browser-smoke.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.4.6",
+    "deno": "2.9.6",
+    "playwright": "1.64.1"
+  }
+}

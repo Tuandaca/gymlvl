@@ -1,3 +1,5 @@
+﻿> Design reference retained for product history. Numeric examples and proposed mechanics are not a release contract. Current implemented rules: [PROGRESSION_GUIDE.md](PROGRESSION_GUIDE.md); verified scope: [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md).
+
 # TÀI LIỆU ĐẶC TẢ HỆ THỐNG PHÂN LOẠI TẬP GYM & LEVEL PROGRESSION
 
 **Phiên bản:** 1.0  
@@ -291,4 +293,5 @@ Tài liệu này được xây dựng nhằm:
 > consistency > intensity > thời gian
 
 Người tập đúng 1 năm có thể vượt xa người tập sai 3 năm.
+
 

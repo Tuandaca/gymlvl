@@ -1,3 +1,7 @@
+// Freezed forwards factory parameter JsonKey annotations to generated fields.
+// See https://pub.dev/packages/freezed#disabling-invalid_annotation_target-warning-and-warning-in-generates-files
+// ignore_for_file: invalid_annotation_target
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'exercise.dart';
 import 'workout_set.dart';
