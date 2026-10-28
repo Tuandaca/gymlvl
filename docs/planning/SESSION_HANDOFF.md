@@ -1,64 +1,78 @@
 # GymLvl — Session Handoff
 
-**Updated:** 2026-10-28 (S3 validation and checkpoint)
-**Last agent:** OpenCode S3 validation (same session as S1 and S2)
-**Mode:** Validation, optimization, documentation, and an authorized Git checkpoint. No application,
-SQL, UI, schema, dependency, CI, or media change.
-**Baseline:** branch `main`. S3 started at `b4063c6`; the infrastructure checkpoint is `59450c0`,
-pushed to `origin/main`. Confirm with `git rev-parse main` before trusting this line.
-**Next task:** **S4 — Wave 2 skill import** (`PLANNED`, requires approval). **M1-01** remains the next
-product task and is still not authorized.
+**Updated:** 2026-10-28 (audit A0.1 complete — governance fix + checkpoint)
+**Last agent:** OpenCode audit A0.1 (same session as S1–S3, A0)
+**Mode:** One agent-permission rule, audit documentation, planning records, and an authorized local
+commit. No application, SQL, UI, schema, dependency, CI, or media change.
+**Baseline:** branch `main` @ `9c8e142` = `origin/main` at entry. A0 + A0.1 are committed locally; the
+push was denied by the project's own `git push *` rule. Confirm with `git rev-parse main` and
+`git ls-remote origin refs/heads/main` before trusting this line.
+**Next task:** **A1 — Architecture, dependencies, configuration and infrastructure** (`READY`, audit
+track). **M1-01** (product) and **S4** (skills) remain unauthorized.
 
 ---
 
-## 0. Current state — agent system complete through S3 (newest)
+## 0. Current state — audit A0.1 complete (newest)
 
 | Item | Value |
 |---|---|
-| S1 discovery | `DONE` — four planning documents under `docs/agent-system/` |
-| S2 Wave 1 install | `DONE` — `.opencode/` with 7 agents, 6 skills, 6 commands, config |
-| S3 validation | `DONE` — `docs/agent-system/S3_VALIDATION_REPORT.md` |
+| S1/S2/S3 tooling | `DONE` — `.opencode/` with 7 agents, 6 skills, 6 commands; checkpoint `59450c0` |
 | Language policy | `AGENTS.md` §0.1, permanent (D-020) |
-| Git | `59450c0` on `main` = `origin/main`; working tree clean |
+| A0 audit | `PASS` — `docs/audit/` initialized (9 files), inventory and plan complete |
+| A0.1 governance | `PASS` (config) — `FND-GOV-001` `Fixed`, `FND-GOV-003` `False Positive`; D-022, D-023 |
+| Findings | 6 total — 2×P1, 2×P2, 2×P3; 2 `Needs Verification`, 2 `Accepted`, 1 `Fixed`, 1 `False Positive` |
+| Active agent | **build**, not `gymlvl-orchestrator` — `default_agent` applies only to new sessions (D-023) |
+| Git | `9c8e142` → A0/A0.1 commit on `main`; push **`BLOCKED`** by `git push *` → `deny` |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified |
 
-**Read first on resume:** `AGENTS.md` §0.1, this section, then `TASK_BOARD.md`.
+**Read first on resume:** `AGENTS.md` §0.1, this section, then `docs/audit/SESSION_HANDOFF.md`, then
+`TASK_BOARD.md`. The audit program keeps its own authoritative state under `docs/audit/`.
 
-### Verification at S3 close
+### Verification at A0.1 close
 
-| Command | Result | Status |
+| Check | Result | Status |
 |---|---|---|
-| `flutter analyze` | `No issues found!` (exit 0) | `PASS` |
-| `flutter test` | `All tests passed!` 126/126 (exit 0) | `PASS` |
-| `dart format --set-exit-if-changed` | `125 files (0 changed)` (exit 0) | `PASS` |
-| SQL regression (`npm.cmd test`) | `PASS 10 SQL verification units` (exit 0) | `PASS` |
-| Edge tests (`npm.cmd run test:edge`) | `15 passed | 0 failed` (exit 0) | `PASS` |
-| Agent discovery and permissions | 7 agents; QA and context-keeper read-only | `PASS` |
-| Delegation tests A–D | Domain-correct output; no file written | `PASS` |
-| Deliberate FAIL | `No tests ran` → reported `FAIL` | `PASS` |
+| Permission rule shape (7 agents parsed) | orchestrator: `edit *` deny + 3 allows (`docs/planning/*`, `docs/agent-system/*`, `docs/audit/*`) | `PASS` |
+| Shell / subagent / webfetch rules unchanged | 15 shell (1 deny, 14 allow), 7 subagent (1 deny, 6 allow) | `PASS` |
+| `mode: primary` still enforced | `subagent(gymlvl-orchestrator)` → `"Agent gymlvl-orchestrator cannot run as a subagent"` | `PASS` |
+| Global Git floor intact | `git push *`, `reset --hard`, `clean -fd`, `clean -fdx`, `filter-branch` denied | `PASS` |
+| Server reloaded the agent definition | `agent.updated` at `2026-10-28T07:06:41.988Z`, 1 s after the write | `PASS` |
+| Product regression | **not rerun** — no application or test configuration changed | `NOT RUN` |
+| End-to-end write as the orchestrator | needs a session whose selected agent is the orchestrator | `NOT RUN` |
+| Push to `origin/main` | `permission.rejected` on `git push *` | `BLOCKED` |
+
+The A0 baseline stands as carried-forward evidence, not as a re-run in A0.1: `flutter analyze` "No issues
+found!" exit 0; `flutter test` 126/126 exit 0; `npm.cmd test` "PASS 10 SQL verification units" exit 0;
+`npm.cmd run test:edge` "15 passed | 0 failed" exit 0 — all at `9c8e142`.
 
 ### Operational rules learned
 
 - **Run shell-dependent subagents sequentially** (D-021). Concurrent launches can lose shell access.
-- Do not trust the S2 note that a new session binds to `gymlvl-orchestrator`; that was **not verified**.
-  Check the active agent at the start of the next session.
-- `context-keeper` and `qa-reviewer` cannot write. The orchestrator applies all planning-document edits.
+- **`default_agent` does not switch a running session.** Check the active agent at session start; a
+  policy value is not evidence of the effective profile (D-023).
+- **A primary agent cannot be delegated to.** `subagent(gymlvl-orchestrator)` is rejected by design;
+  that rejection is a positive proof of `mode: primary`.
+- `context-keeper` and `qa-reviewer` cannot write. The acting primary agent applies the edits.
 
 ### Known open items
 
-- L4: potential deadlock in `active_workout_controller.dart` L207-215 and a null dereference at
-  L659-670. Product defect, proposed for an M1/M3 task.
-- L5: legacy `is_xp_calculated=false` path in `complete_workout` L230 may double-award old rows.
-- L6: the invariant "only `complete_workout` writes XP" is imprecise — `initialize_user`,
-  `sync_daily_data`, and `switch_class` also write progression state.
+- The three product risks formerly tracked here as L4, L5 and L6 are audit findings
+  `FND-CONC-001`, `FND-DATA-001` and `FND-ARCH-001`. Track them in `docs/audit/`, not here.
+- `FND-GOV-001` is `Fixed` at configuration level; one end-to-end write as the orchestrator is still
+  `NOT RUN` and is the first A1 check.
+- The A0/A0.1 commit is **local only** — pushing requires a human action or an approved change to the
+  `git push *` deny rule.
+- `FND-GOV-002` (stale baseline prose in `PROJECT_CONTEXT.md`, plus the `DECISIONS.md` summary table
+  stopping at D-014) is `Accepted` for W4.
 - O-10: Apache-2.0 notice for the `context-window-management` adaptation. Release blocker only.
 - S4 (Wave 2, 14 skills) is `PLANNED` and requires explicit approval.
 
 ### Exact next action
 
-Resume at the next session start by confirming the active agent and a clean tree, then take **M1-01 —
-Baseline stabilization and evidence lock** if the product track is authorized, or **S4** if skill
-import is authorized. Do not start either without explicit go-ahead.
+Run **A1** using the prompt in `docs/audit/SESSION_HANDOFF.md` §6, in a **new** session, after
+confirming the active agent. Do not start A1, M1-01, or S4 without an explicit instruction for that
+stage or task. Before A1, decide whether to publish the local A0/A0.1 commit manually (§9 of
+`docs/audit/SESSION_HANDOFF.md`).
 
 ---
 

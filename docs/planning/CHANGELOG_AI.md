@@ -7,6 +7,126 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 ---
 
+## 2026-10-28 — Audit A0.1: governance fix and A0 checkpoint
+
+**Task:** A0.1 — Multi-agent governance fix (`FND-GOV-001`) and durable Git checkpoint.
+**Status:** `PASS` for the configuration fix; Git push `BLOCKED` by the project deny rule.
+**Baseline:** `main` @ `9c8e142` = `origin/main`, tree carrying the uncommitted A0 artifacts.
+**Scope:** one agent permission rule, audit documents, planning records, one local commit. No
+application code, SQL, Edge Function, CI, dependency, UI, or media change.
+
+### Root cause recorded
+
+`default_agent` is a **session-creation** default, not a live switch (OpenCode V2, *Config → Agent*).
+The session was created before the setting existed, so it kept the built-in build agent. The server
+**did** reload the edited agent definition — `agent.updated` at `2026-10-28T07:06:41.988Z`, one second
+after the write — which rules out "the config is ignored". Recorded as D-023. Confirming the binding
+requires a new session or explicit agent selection; it is **`NOT RUN`** here.
+
+### Changed
+
+- `.opencode/agents/gymlvl-orchestrator.md` (+5 lines): one rule
+  `{ action: edit, resource: "docs/audit/*", effect: allow }` plus a two-line comment. No other rule
+  added, removed, or reordered. Global Git floor untouched.
+- `docs/planning/DECISIONS.md` — D-022 (audit write grant) and D-023 (`default_agent` semantics).
+- `docs/audit/MASTER_FINDINGS.md`, `docs/audit/FINDINGS_REGISTER.json` — `FND-GOV-001` → `Fixed`,
+  `FND-GOV-003` → `False Positive` (confidence `High`, wave `—`), counts corrected.
+- `docs/audit/AUDIT_COVERAGE.md`, `docs/audit/REMEDIATION_PLAN.md`, `docs/audit/SESSION_HANDOFF.md` —
+  coverage note for C-25, W0 status, A0.1 handoff with the A1 brief and acceptance criteria.
+- `docs/planning/SESSION_HANDOFF.md`, `docs/planning/TASK_BOARD.md` — A0.1 state and the A0.1 row.
+
+### Added
+
+- `docs/audit/phases/A0_1_GOVERNANCE.md` — root-cause matrix, the change, 9-row verification matrix,
+  finding resolutions, the reviewer error note, remaining gaps, Git section.
+
+### Verification
+
+| Check | Result | Status |
+|---|---|---|
+| Parse all 7 agent frontmatters | orchestrator edit: `*` deny, then `docs/planning/*`, `docs/agent-system/*`, `docs/audit/*` | `PASS` |
+| Escalation scan | shell 15 (1 deny/14 allow), subagent 7 (1 deny/6 allow), webfetch/websearch/external_directory unchanged | `PASS` |
+| Read-only agents | `qa-reviewer`, `context-keeper`: exactly one `edit` rule, `*` → deny | `PASS` |
+| Primary mode | `subagent(gymlvl-orchestrator)` → `"Agent gymlvl-orchestrator cannot run as a subagent"` | `PASS` |
+| Global Git floor | deny `push`, `reset --hard`, `clean -fd`, `clean -fdx`, `filter-branch`; ask commit/tag/rebase/checkout/switch/stash | `PASS` |
+| `FINDINGS_REGISTER.json` | parses; 6 findings; declared counts equal actual counts | `PASS` |
+| Independent reviewer | `qa-reviewer` read-only inspection, 6/6 checks | `PASS` |
+| Product regression | **not rerun** — no application or test configuration changed; A0 baseline stands as carried-forward evidence | `NOT RUN` |
+| End-to-end orchestrator write | needs a session whose selected agent is the orchestrator | `NOT RUN` |
+| `git push origin main` | `permission.rejected` — the global `git push *` deny rule fired | `BLOCKED` |
+
+### Not done, deliberately
+
+- The deny rule was **not** temporarily relaxed to allow the push (A0.1 forbids it; `AGENTS.md` §8
+  forbids bypassing a protected Git operation). The commit is local and the manual push steps are in
+  `docs/audit/SESSION_HANDOFF.md` §9.
+- No security finding was invented to justify widening permissions. `qa-reviewer`'s claim that
+  `git push *` fails to match bare `git push` was checked against the V2 docs and is wrong; it was not
+  registered.
+
+---
+
+## 2026-10-28 — Audit A0: bootstrap, inventory, and execution plan
+
+**Task:** A0 — Full codebase audit bootstrap, scope inventory, execution planning.
+**Status:** `PASS` (with `FND-GOV-001` recorded as a governance gap)
+**Baseline:** `main` @ `9c8e142` = `origin/main`, clean at entry.
+**Scope:** Read-only inventory and audit documentation. No application code, schema, migration, Edge
+Function, CI, dependency, or media change. No commit, no push.
+
+### Added
+
+- `docs/audit/README.md` — program definition, ID scheme, severity/confidence/status vocabulary.
+- `docs/audit/AUDIT_SCOPE.md` — in/out of scope, constraints, inherited S3 candidates, limitations.
+- `docs/audit/AUDIT_COVERAGE.md` — 27-component matrix, inventory counts, 6 recorded coverage gaps.
+- `docs/audit/MASTER_FINDINGS.md` — 6 findings with full evidence blocks.
+- `docs/audit/FINDINGS_REGISTER.json` — machine-readable mirror (`schema_version` 1.0.0).
+- `docs/audit/REMEDIATION_PLAN.md` — W0–W5 framework, dependencies, non-goals.
+- `docs/audit/SESSION_HANDOFF.md` — stage state, Git state, exact A1 prompt.
+- `docs/audit/phases/A0_BOOTSTRAP.md` — baseline evidence, inventory, 10 high-risk targets.
+
+### Changed
+
+- `docs/planning/SESSION_HANDOFF.md` — current state reset to A0 close.
+- `docs/planning/TASK_BOARD.md` — audit track A0–A6 added; M1 unchanged.
+
+### Findings
+
+| ID | Sev | Conf | Status |
+|---|---|---|---|
+| `FND-CONC-001` | P1 | Medium | `Needs Verification` — inherited from S3 L4 |
+| `FND-DATA-001` | P1 | Medium | `Needs Verification` — inherited from S3 L5 |
+| `FND-ARCH-001` | P2 | High | `Accepted` — inherited from S3 L6 |
+| `FND-GOV-001` | P2 | Confirmed | `Accepted` — no agent can write `docs/audit/**` |
+| `FND-GOV-002` | P3 | Confirmed | `Accepted` — `PROJECT_CONTEXT.md` stale on its own baseline |
+| `FND-GOV-003` | P3 | Low | `Needs Verification` — shell matcher semantics |
+
+### Verification
+
+| Command | Result | Status |
+|---|---|---|
+| `git rev-parse HEAD` | `9c8e142a2bda18d031874438164c37c577dcc057` | `PASS` |
+| `git status --porcelain=v1` | empty at A0 entry | `PASS` |
+| `git ls-remote origin refs/heads/main` | `9c8e142…` — equal | `PASS` |
+| `flutter analyze` | `No issues found!` exit 0 | `PASS` |
+| `flutter test` | `All tests passed!` 126/126 exit 0 | `PASS` |
+| `npm.cmd test` (SQL) | `PASS 10 SQL verification units` exit 0 | `PASS` |
+| `npm.cmd run test:edge` | `15 passed | 0 failed` exit 0 | `PASS` |
+
+### Not verified
+
+- No runtime reproduction of any finding. All findings are static reads or imports from S3. `NOT RUN`.
+- No live Supabase stack, no device build, no coverage measurement. `NOT RUN`.
+
+### Governance observation
+
+The active agent was the built-in build agent, not `gymlvl-orchestrator`. Proven by successful writes
+outside the orchestrator's allowlist (`.opencode/` edit, external temp file, `docs/audit/` write). This
+is consistent with S3 L2 and is the reason `FND-GOV-001` matters: the designated agent cannot write the
+audit directory at all.
+
+---
+
 ## 2026-10-28 — S3 validation, language policy, and first infrastructure checkpoint
 
 **Task:** S3 — Multi-agent validation and optimization.

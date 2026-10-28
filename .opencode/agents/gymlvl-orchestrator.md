@@ -12,6 +12,11 @@ permissions:
   - action: edit
     resource: "docs/agent-system/*"
     effect: allow
+  # `*` matches across `/`, so this covers docs/audit/phases/ as well.
+  # Added in A0.1 to close FND-GOV-001. Do not widen further.
+  - action: edit
+    resource: "docs/audit/*"
+    effect: allow
   - action: shell
     resource: "*"
     effect: deny

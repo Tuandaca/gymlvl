@@ -33,6 +33,11 @@ Status values:
 | D-012 | Documentation-only bootstrap; no feature work | ACCEPTED | 2026-10-28 |
 | D-013 | External backup required before memory edits | ACCEPTED | 2026-10-28 |
 | D-014 | `main` is the sole development branch | ACCEPTED | 2026-10-28 |
+| D-022 | Orchestrator may write `docs/audit/**` (nothing wider) | ACCEPTED | 2026-10-28 |
+| D-023 | `default_agent` is a session-creation default, not a live switch | RECORDED | 2026-10-28 |
+
+> Rows D-015–D-021 are missing from this summary; their sections exist below. The gap is recorded as
+> evidence for `FND-GOV-002` in `docs/audit/MASTER_FINDINGS.md` and is repaired in W4, not here.
 
 ---
 
@@ -290,6 +295,45 @@ permission denial appears. Parallelism is reserved for read-only delegations tha
 **Consequences:** Some latency is traded for reliable verification. A recurring denial should be
 reported as a harness defect rather than worked around by widening permissions.
 **Evidence:** `docs/agent-system/S3_VALIDATION_REPORT.md` §4 TEST B and §10 L1.
+
+## D-022 — The orchestrator may write `docs/audit/**`, and nothing wider
+
+**Status:** ACCEPTED (2026-10-28, A0.1)
+**Context:** A0 discovered that no agent profile could write `docs/audit/**` (`FND-GOV-001`). The
+orchestrator's edit allowlist covered `docs/planning/*` and `docs/agent-system/*` only, so the audit
+program designated an agent that could not persist its own state. A0 artifacts were written by the
+built-in build agent instead.
+**Decision:** Add exactly one rule, `{ action: edit, resource: "docs/audit/*", effect: allow }`, to
+`.opencode/agents/gymlvl-orchestrator.md`, after the existing edit allows. In OpenCode V2 `*` matches
+across `/`, so one rule covers `docs/audit/phases/` as well.
+**Not granted:** repository-wide write, deployment, database mutation, any additional Git operation, or
+access to secret and credential files. No other agent's rules changed. The global Git floor in
+`.opencode/opencode.jsonc` is untouched, including `git push *` → `deny`.
+**Consequences:** The orchestrator can now author and maintain audit documentation. It still cannot
+reach `app/`, `supabase/`, `.github/`, `.opencode/` or `.env`. Read-only agents (`qa-reviewer`,
+`context-keeper`) remain read-only. End-to-end verification under the orchestrator profile is pending
+and requires a session whose selected agent is the orchestrator.
+**Evidence:** `.opencode/agents/gymlvl-orchestrator.md`; `docs/audit/phases/A0_1_GOVERNANCE.md` §3–§4;
+OpenCode V2 permissions guide (wildcard and last-match-wins semantics).
+
+## D-023 — `default_agent` is a session-creation default, not a live switch
+
+**Status:** RECORDED (2026-10-28, A0.1)
+**Context:** `.opencode/opencode.jsonc` sets `default_agent: gymlvl-orchestrator`, yet the A0/A0.1
+session ran as the built-in build agent. The obvious readings — "the config is ignored" and "the
+setting applies immediately" — were both tested and rejected.
+**Fact:** OpenCode V2 documents `default_agent` as the primary agent used *when a session does not
+select one explicitly*. It is read at session creation. Reloading configuration updates the agent
+*definition* (the server logged `agent.updated` one second after the file was written) but does not
+re-bind an existing session's selected agent.
+**Consequences:** A setting-only change can never make a running session switch agents. Confirming the
+binding requires a new session, or the user explicitly selecting `gymlvl-orchestrator`. Any report that
+claims the orchestrator is active must be backed by an observed permission outcome, not by the config
+value. A primary agent is also not reachable through `subagent(...)`; that path is reserved for
+subagents.
+**Evidence:** `~/.local/share/opencode/log/opencode.log` (`agent.updated` events); OpenCode V2
+*Config → Agent*; `subagent(gymlvl-orchestrator)` → `"Agent gymlvl-orchestrator cannot run as a
+subagent"`; `docs/audit/phases/A0_1_GOVERNANCE.md` §1.
 
 ---
 

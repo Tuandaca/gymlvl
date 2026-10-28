@@ -1,9 +1,11 @@
 # GymLvl — Task Board
 
-**Last updated:** 2026-10-28 (S3 validation and checkpoint)
-**Baseline:** branch `main` @ `b4063c6` at the start of S3. `main` is the only development branch.
-**Working tree:** clean at the S3 checkpoint `59450c0`, which carries the S1/S2/S3 infrastructure.
+**Last updated:** 2026-10-28 (audit A0 complete)
+**Baseline:** branch `main` @ `9c8e142` = `origin/main`. `main` is the only development branch.
+**Working tree:** clean at A0 entry; audit artifacts under `docs/audit/` are uncommitted.
 **Current milestone:** M1 — NOT STARTED (unchanged)
+**Next task (audit track):** **A1 — Architecture, dependencies, configuration and infrastructure**
+(`READY`, not started)
 **Next task (tooling track):** **S4 — Wave 2 skill import** (`PLANNED`, requires explicit approval)
 **Next product task:** **M1-01 — Baseline stabilization and evidence lock** (`NEXT`, unchanged; not
 authorized yet)
@@ -55,6 +57,36 @@ rule recorded: run shell-dependent subagents sequentially (D-021).
 
 **S4 next action.** Not authorized. When approved, start with `context-management-context-save`, after
 mapping its storage model onto the nine memory files.
+
+## Full codebase audit (audit track, precedes migration)
+
+Pre-migration evidence program. Read-only against product code. Authoritative state lives in
+`docs/audit/`, not in this board.
+
+| ID | Stage | Status | Evidence |
+|---|---|---|---|
+| A0 | Bootstrap, baseline, inventory, execution plan | `DONE` | `docs/audit/phases/A0_BOOTSTRAP.md`; 6 findings; coverage matrix for 27 components |
+| A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
+| A1 | Architecture, dependencies, configuration, infrastructure, CI | `READY` | Not started; prompt in `docs/audit/SESSION_HANDOFF.md` §6 |
+| A2 | Flutter app, state, lifecycle, concurrency, navigation | `PLANNED` | — |
+| A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` | — |
+| A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
+| A5 | Tests, performance, reliability, observability | `PLANNED` | — |
+| A6 | Reconciliation, verification, triage, remediation plan | `PLANNED` | — |
+
+**A0 notes.** Baseline re-verified at `9c8e142`: analyze clean, 126/126 Flutter, 10/10 SQL, 15/15 Edge.
+Six findings recorded — `FND-CONC-001` (P1), `FND-DATA-001` (P1), `FND-ARCH-001` (P2),
+`FND-GOV-001` (P2), `FND-GOV-002` (P3), `FND-GOV-003` (P3). The first three are inherited from S3 and
+remain unverified.
+The active agent at A0 was the built-in build agent, not `gymlvl-orchestrator`; no agent profile could
+write `docs/audit/**`, which was recorded as a W0 prerequisite, not worked around.
+
+**A0.1 notes.** `FND-GOV-001` fixed at configuration level by adding one edit allow (`docs/audit/*`) to
+`.opencode/agents/gymlvl-orchestrator.md` (D-022); `FND-GOV-003` closed as `False Positive` on the
+authoritative V2 permission semantics. Root cause of the agent-binding symptom recorded as D-023:
+`default_agent` applies at session creation only. A0 + A0.1 were committed on `main`; the push was
+**denied** by the global `git push *` rule and was not worked around. End-to-end orchestrator write
+remains `NOT RUN`. Product regression was **not** rerun — no application or test configuration changed.
 
 ## M1 task table
 
