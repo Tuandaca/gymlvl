@@ -1,9 +1,10 @@
 # GymLvl — Task Board
 
 **Last updated:** 2026-10-28 (A1 complete — 16 findings)
-**Baseline:** branch `main` @ `e8c7c8e` = `origin/main` at A1 entry. `main` is the only development
-branch. Confirm with `git rev-parse main`; the SHA moves.
-**Working tree:** clean at A1 entry; the A1 checkpoint commit is recorded in
+**Baseline:** branch `main` @ `c9cc764` = `origin/main` after the A1 checkpoint push. A1 was measured
+at `e8c7c8e`, the parent of that commit. `main` is the only development branch. Confirm with
+`git rev-parse main`; the SHA moves.
+**Working tree:** clean after the A1 checkpoint commit (`c9cc764`); evidence in
 `docs/audit/SESSION_HANDOFF.md` §3.
 **Current milestone:** M1 — NOT STARTED (unchanged)
 **Next task (audit track):** **A2 — Flutter app, state, lifecycle, concurrency, navigation**

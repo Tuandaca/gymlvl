@@ -7,8 +7,9 @@
 **Mode:** Read-only audit of architecture, dependencies, configuration, infrastructure and CI, plus the
 A1 checkpoint commit and a normal push to `origin/main`. No application, SQL, UI, schema, CI, or
 dependency change.
-**Baseline:** branch `main` @ `e8c7c8e` at A1 entry (= `origin/main`). Confirm with
-`git rev-parse main` and `git ls-remote origin refs/heads/main` before trusting this line.
+**Baseline:** branch `main` @ `c9cc764` = `origin/main` after the A1 checkpoint push. A1 was measured
+at `e8c7c8e`, the parent of that commit. Confirm with `git rev-parse main` and
+`git ls-remote origin refs/heads/main` before trusting this line.
 **Next task:** **A2 — Flutter app, state, lifecycle, concurrency, navigation** (`READY`, audit track;
 prompt in `docs/audit/SESSION_HANDOFF.md` §6). **M1-01** (product) and **S4** (skills) remain
 unauthorized.
@@ -25,8 +26,8 @@ unauthorized.
 | A1 audit | **`PASS`** — `docs/audit/phases/A1_ARCHITECTURE.md` |
 | Findings | **16 total** — 0 `P0`, 3 `P1`, 6 `P2`, 5 `P3`, 2 `P4`; 2 `Needs Verification`, 12 `Accepted`, 1 `Fixed`, 1 `False Positive`. Ten added by A1 |
 | Coverage | C-22, C-25, C-26 `Reviewed (static)`; 3 of 27 reviewed, 1 `In Review`, 22 `Not Reviewed` |
-| Git | `e8c7c8e` at A1 entry; the checkpoint commit SHA is recorded in `docs/audit/SESSION_HANDOFF.md` §3 |
-| Push | normal `git push origin main`, authorized for this task; verified by `git ls-remote origin refs/heads/main` |
+| Git | `c9cc764` on `main`; `origin/main` moved `e8c7c8e` → `c9cc764`. A1 measurements were taken at `e8c7c8e` |
+| Push | `PASS` — `git push origin main` → `e8c7c8e..c9cc764  main -> main`, exit 0; `git ls-remote origin refs/heads/main` equals local HEAD. One approved `--amend` removed a UTF-8 BOM from the unpushed subject line |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified at S3 |
 
 **Read first on resume:** `AGENTS.md` §0.1, this section, `docs/agent-system/ACCESS_POLICY.md`, then

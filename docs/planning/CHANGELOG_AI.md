@@ -90,6 +90,17 @@ started.
 - The Android release defects are invisible to the current CI because it builds web only; that is the
   substance of `FND-TEST-001`, not a separate claim.
 
+### Checkpoint
+
+| Item | Value |
+|---|---|
+| Commit | `c9cc764` — `docs(audit): complete A1 architecture, dependencies and infrastructure audit`; 8 files, +1,716/−181 |
+| Push | `git push origin main` → `e8c7c8e..c9cc764  main -> main`, exit 0 (normal push, authorized for this task) |
+| Remote | `git ls-remote origin refs/heads/main` → `c9cc7649f582a7740232fb206d5319bd32c0db99`, equal to local `main` |
+| Force push | not used, not requested |
+| Amend | one approved `--amend` on the unpushed commit `149fb09`, to strip a UTF-8 BOM that PowerShell `Out-File -Encoding utf8` had prepended to the subject line. Nothing had been pushed before the amend |
+| Tree after commit | clean — `git status --porcelain=v1` empty |
+
 ---
 
 

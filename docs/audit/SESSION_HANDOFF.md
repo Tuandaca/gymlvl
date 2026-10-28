@@ -2,7 +2,8 @@
 
 **Updated:** 2026-10-28 (A1 complete)
 **Stage:** A0 `PASS`; A0.1 `PASS`; **A1 `PASS`** (10 new findings, 2 inventory corrections)
-**Baseline:** `main` @ `e8c7c8e` = `origin/main` at A1 entry, tree clean
+**Baseline:** `main` @ `c9cc764` = `origin/main` after the A1 checkpoint push; A1 was measured at
+`e8c7c8e`, which is still the parent commit
 **Next stage:** **A2 — Flutter app, state management, lifecycle, concurrency, navigation** (`READY`,
 not authorized until the instruction in §6 is given)
 
@@ -63,9 +64,11 @@ step that would promote it is recorded as `NOT RUN` with its reason in `phases/A
 | `origin/main` at A1 entry | `e8c7c8e` — equal to local |
 | Tree at A1 entry | clean, `git status --porcelain=v1` → 0 entries |
 | History | linear: `e8c7c8e → 947da1e → 425686c → e400dbc → 9c8e142 → 59450c0 → b4063c6 → 17ca562` |
-| A1 checkpoint commit | This file is committed as the A1 checkpoint. A commit cannot contain its own SHA, so the SHA and the push outcome are recorded by the one-line record commit that immediately follows, which is the same convention `e8c7c8e` used for the D-024 checkpoint |
-| Push | Normal `git push origin main`, authorized for this task. Verification: `git ls-remote origin refs/heads/main` must equal local `git rev-parse HEAD` |
-| History operations | none — no reset, rebase, amend, checkout, stash, clean, or force-push |
+| A1 checkpoint commit | `c9cc7649f582a7740232fb206d5319bd32c0db99` — `docs(audit): complete A1 architecture, dependencies and infrastructure audit`; 8 files, +1,716/−181 |
+| Push | `git push origin main` → `e8c7c8e..c9cc764  main -> main`, exit 0 (normal push, authorized for this task) |
+| `origin/main` after push | `c9cc7649f582a7740232fb206d5319bd32c0db99` — `git ls-remote origin refs/heads/main` equals local `git rev-parse HEAD` |
+| Tree after commit | clean — `git status --porcelain=v1` empty |
+| History operations | no reset, rebase, checkout, stash, clean, or force-push. **One amend:** the first commit (`149fb09`) carried a UTF-8 BOM at the start of its subject line, produced by PowerShell `Out-File -Encoding utf8`; the user approved `git commit --amend` on the still-unpushed commit to remove it, yielding `c9cc764`. Nothing had been pushed before the amend |
 
 ## 4. What A1 actually did
 
