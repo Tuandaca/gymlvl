@@ -1,8 +1,8 @@
 # GymLvl — Task Board
 
 **Last updated:** 2026-10-28 (D-024 full development access)
-**Baseline:** branch `main` @ `425686c` before the D-024 commit. `main` is the only development branch.
-**Working tree:** the eight `.opencode` policy files plus governance docs were modified for D-024.
+**Baseline:** branch `main` @ `947da1e` = `origin/main` (D-024). `main` is the only development branch.
+**Working tree:** clean after the D-024 commit and push.
 **Current milestone:** M1 — NOT STARTED (unchanged)
 **Next task (audit track):** **A1 — Architecture, dependencies, configuration and infrastructure**
 (`READY`, not started; the 2026-10-28 A1 instruction was withdrawn before any review ran)

@@ -82,9 +82,11 @@ dependency, UI, or media change.
 | Item | Value |
 |---|---|
 | Branch | `main` |
-| Commit | `docs(changelog)` close-out commit; the policy commit SHA is recorded below after the push |
-| Push | normal `git push origin main`, authorized by the user for this task |
+| Commit | `947da1e` — `feat(agents): grant full development access with approval gates (D-024)`; 16 files, +677/−429 |
+| Push | `git push origin main` → `9c8e142..947da1e  main -> main`, exit 0 (normal push, authorized for this task) |
+| Remote | `git ls-remote origin refs/heads/main` → `947da1ef5128f8a19ca6c9dbafd3c7253ed2576c`, equal to local `main` |
 | Force push | not used, not requested |
+| Tree after commit | clean — `git status --porcelain=v1` empty |
 
 ### Not done, deliberately
 

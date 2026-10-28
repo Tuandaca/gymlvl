@@ -5,8 +5,8 @@
 reports `"agent":"build"`. Not the orchestrator.
 **Mode:** Agent permission policy, agent prose, and governance documentation, plus one local commit and
 a normal push to `origin/main`. No application, SQL, UI, schema, CI, or dependency change.
-**Baseline:** branch `main` @ `425686c` before this commit. Confirm with `git rev-parse main` and
-`git ls-remote origin refs/heads/main` before trusting this line.
+**Baseline:** branch `main` @ `947da1e` = `origin/main` after the D-024 push. Confirm with
+`git rev-parse main` and `git ls-remote origin refs/heads/main` before trusting this line.
 **Next task:** **A1 — Architecture, dependencies, configuration and infrastructure** (`READY`, audit
 track). The A1 instruction given earlier on 2026-10-28 was withdrawn by the user before any review ran,
 so **A1 has not started**. **M1-01** (product) and **S4** (skills) remain unauthorized.
@@ -22,8 +22,8 @@ so **A1 has not started**. **M1-01** (product) and **S4** (skills) remain unauth
 | Orchestrator write | `PASS` end-to-end — a throwaway `gymlvl-orchestrator` session wrote `app/.perm-probe-2.md`; confirmed from a second session |
 | A1 audit | **`NOT STARTED`** — `docs/audit/phases/A1_ARCHITECTURE.md` does not exist |
 | Findings | Unchanged: 6 total — 2×P1, 2×P2, 2×P3; 2 `Needs Verification`, 2 `Accepted`, 1 `Fixed`, 1 `False Positive`. `FND-GOV-001` is now verified end-to-end |
-| Git | `425686c` + this commit on `main`; `origin/main` was `9c8e142` before the push |
-| Push | No longer blocked — the `git push *` deny became `allow`; force-push stays gated |
+| Git | `947da1e` on `main`; `origin/main` moved `9c8e142` → `947da1e` |
+| Push | `PASS` — `git push origin main` → `9c8e142..947da1e  main -> main`, exit 0. The old `git push *` deny is gone; force-push stays gated. |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified at S3 |
 
 **Read first on resume:** `AGENTS.md` §0.1, this section, `docs/agent-system/ACCESS_POLICY.md`, then

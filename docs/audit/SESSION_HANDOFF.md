@@ -3,7 +3,7 @@
 **Updated:** 2026-10-28 (D-024 access policy; A1 still not started)
 **Stage:** A0 `PASS`; A0.1 `PASS` for the configuration fix, push `BLOCKED` at the time and now
 unblocked by D-024; **A1 `NOT STARTED`**
-**Baseline:** `main` @ `425686c`; `origin/main` still at `9c8e142` until the D-024 commit is pushed
+**Baseline:** `main` @ `947da1e` = `origin/main` (D-024 committed and pushed 2026-10-28)
 **Next stage:** **A1 — Architecture, dependencies, configuration and infrastructure** (`READY`, not
 authorized until the instruction in §6 is given again)
 
