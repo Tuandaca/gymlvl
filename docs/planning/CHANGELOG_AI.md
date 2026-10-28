@@ -4,6 +4,11 @@ Dated record of agent sessions and project checkpoints. Newest first.
 
 ## 2026-10-28 — A2 scope closure and exact A3 handoff
 
+- **Checkpoint:** a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf on main, eight docs, +317/-27;
+  normal git push origin main -> aa36a4c..a6a57e2 main -> main, exit0. Remote main equals local
+  closure SHA via git ls-remote; status empty after push. This child record retains the outcome;
+  no rewrite/force-push and no A3 execution.
+
 - **Task:** close scoped A2 only; validation PASS against the original seven audit acceptance
   criteria, operational CLOSED with deferred work. No new investigation or A3 execution.
 - **Entry:** main aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5, clean and remote equal; server metadata

@@ -2,6 +2,10 @@
 
 ## Current — A2 scoped audit DONE/CLOSED (2026-10-28)
 
+**Recorded closure checkpoint:** `a6a57e2` on main, normal push exit0; local/remote full SHA
+`a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf` equal, tree clean after push. This child record
+documents the result; A3 remains NEXT, not started.
+
 **Validation:** `PASS` for seven original scoped audit criteria; not product runtime certification.
 **A2:** DONE/CLOSED; 24 findings and22 dispositions retained. Lead10 verification belongs to A5,
 owner flutter-specialist, independent qa-reviewer, exact synthetic recovery acceptance in phase9.3.

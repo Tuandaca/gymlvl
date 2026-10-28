@@ -2,6 +2,10 @@
 
 ## Current — A2 CLOSED; A3 not started (2026-10-28)
 
+**Recorded closure commit:** main `a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf`, eight docs;
+normal push `aa36a4c..a6a57e2  main -> main`, exit0; remote verified equal and status empty
+after push (`PASS`). This child record may advance HEAD; verify actual HEAD/remote on resume.
+
 - **Task/status:** A2 scope closure, `PASS` against seven original audit acceptance criteria;
   operational **CLOSED** with owned A4/A5 deferred work. Not full runtime/product correctness.
 - **Commit:** closure entry main `aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5`, clean, remote equal;
