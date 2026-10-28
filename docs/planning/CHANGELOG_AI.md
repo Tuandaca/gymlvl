@@ -4,6 +4,11 @@ Dated record of agent sessions and project checkpoints. Newest first.
 
 ## 2026-10-28 — A3 Supabase/PostgreSQL/security scoped closure
 
+- **Git outcome:** c535613fe29cf5a435ead44a6c4c26a16e3074ae on main, nine docs +1094/-25;
+  normal git push origin main -> f877e40..c535613 main -> main, exit0. git ls-remote origin
+  refs/heads/main equals local checkpoint SHA; status empty after push. This follow-up records the
+  outcome, not another audit; no force push/rewrite/product change or A4 start.
+
 - **Task/status:** A3 only, scoped PASS/CLOSED with deferred verification. Entry main/remote
   f877e40987423f3804fe0d2887c44d19f3423aff, clean; API primary gymlvl-orchestrator. A4 not started.
 - **Changed:** A3_SUPABASE_SECURITY.md and A3_SQL_EVIDENCE.md new; audit findings/register/coverage/

@@ -2,9 +2,13 @@
 
 ## Current — A3 scoped audit CLOSED; A4 not started (2026-10-28)
 
+**A3 checkpoint:** main c535613fe29cf5a435ead44a6c4c26a16e3074ae, nine docs, normal push
+f877e40..c535613 main -> main, exit0. Remote main equals local full SHA, status empty after push.
+This child outcome record advances documentation only; verify actual HEAD/remote on resume.
+
 - **Task/status:** A3 Supabase/PostgreSQL/security C17-C21 PASS/CLOSED with assigned runtime gaps;
   not production certification. Entry main f877e40987423f3804fe0d2887c44d19f3423aff, clean/remote equal,
-  API gymlvl-orchestrator. Normal docs commit/push authorized; record result after execution.
+  API gymlvl-orchestrator. Normal docs commit/push authorized and completed as recorded above.
 - **Changed files:** A3_SUPABASE_SECURITY.md, A3_SQL_EVIDENCE.md, audit findings/register/coverage/
   handoff; planning TASK_BOARD/SESSION_HANDOFF/CHANGELOG_AI. Nine docs only, no product/permanent test.
 - **Findings:**26; P0 0/P1 3/P2 16/P3 5/P4 2; Confirmed5/High19/Medium2; Accepted21/

@@ -2,10 +2,16 @@
 
 ## Current — A3 scoped security audit CLOSED; A4 not started (2026-10-28)
 
+**Recorded A3 checkpoint:** main `c535613fe29cf5a435ead44a6c4c26a16e3074ae` (`c535613`),
+nine docs, +1094/-25. `git push origin main` -> `f877e40..c535613  main -> main`, exit0.
+`git ls-remote origin refs/heads/main` equals local full checkpoint SHA; status empty after push
+(`PASS`). This child outcome record may advance HEAD; confirm actual HEAD/remote on resume.
+No force push/history rewrite, product change or A4 execution.
+
 - **Task/status:** A3 C17-C21 only; `PASS` against scoped coverage/evidence/QA/consistency conditions,
   operational CLOSED with explicit deferred work. Not production certification or remediation.
 - **Entry:** main `f877e40987423f3804fe0d2887c44d19f3423aff`, clean and remote equal; API metadata
-  `gymlvl-orchestrator`. Normal A3 documentation commit/push authorized; result recorded after execution.
+  `gymlvl-orchestrator`. Normal A3 documentation commit/push authorized and completed as above.
 - **Changed files:** `docs/audit/phases/A3_SUPABASE_SECURITY.md`,
   `docs/audit/phases/A3_SQL_EVIDENCE.md`, `docs/audit/MASTER_FINDINGS.md`,
   `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/AUDIT_COVERAGE.md`, this handoff,

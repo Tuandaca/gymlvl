@@ -2,6 +2,10 @@
 
 ## Current — A3 DONE/CLOSED; A4 NEXT (2026-10-28)
 
+**Checkpoint result:** c535613 on main (nine docs), normal push exit0; full local/remote SHA
+c535613fe29cf5a435ead44a6c4c26a16e3074ae equal, tree clean after push. This child record
+documents outcome only; A4 remains NEXT and not started.
+
 **Validation:** scoped A3 audit PASS/CLOSED, not production/runtime certification. C17-C21 reviewed
 with named limitations; 26 findings (P1 3/P2 16/P3 5/P4 2, Confirmed5/High19/Medium2), previous24
 IDs/classifications unchanged; new SEC003 conditional PUBLIC ACL and SEC004 buffering order.
