@@ -55,6 +55,16 @@ requires a new session or explicit agent selection; it is **`NOT RUN`** here.
 | End-to-end orchestrator write | needs a session whose selected agent is the orchestrator | `NOT RUN` |
 | `git push origin main` | `permission.rejected` — the global `git push *` deny rule fired | `BLOCKED` |
 
+### Git
+
+| Item | Value |
+|---|---|
+| Branch | `main` |
+| Commit | `e400dbc` — `chore(audit): allow orchestrator audit writes and checkpoint A0/A0.1` |
+| Contents | 14 files, +1622/−38: 9 audit documents, 4 planning records, 1 agent configuration file |
+| Push | `permission.rejected` — `{"error":{"type":"permission.rejected","message":"Permission denied: shell"}}` on `git push origin main`; not worked around (A0.1 forbids weakening the rule) |
+| `origin/main` | unchanged at `9c8e142` — the checkpoint is local until pushed manually |
+
 ### Not done, deliberately
 
 - The deny rule was **not** temporarily relaxed to allow the push (A0.1 forbids it; `AGENTS.md` §8
@@ -63,6 +73,8 @@ requires a new session or explicit agent selection; it is **`NOT RUN`** here.
 - No security finding was invented to justify widening permissions. `qa-reviewer`'s claim that
   `git push *` fails to match bare `git push` was checked against the V2 docs and is wrong; it was not
   registered.
+- Product regression was **not** rerun: no file under `app/`, `supabase/`, `tools/` or `.github/`
+  changed, verified by `git status --porcelain=v1` before staging.
 
 ---
 

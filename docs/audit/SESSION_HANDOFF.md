@@ -48,9 +48,10 @@ profile is `NOT RUN` and is tracked in §7.
 | Branch | `main` |
 | HEAD at A0.1 entry | `9c8e142` |
 | Tree at A0.1 entry | 3 planning files `M`, `docs/audit/` untracked |
-| Commit at A0.1 | **PENDING — filled in immediately after the commit** |
-| Remote | `origin/main` at `9c8e142`; **not** advanced by A0.1 |
-| Push | attempted once; **denied** by the global `git push *` rule |
+| Commit at A0.1 | `e400dbc` — `chore(audit): allow orchestrator audit writes and checkpoint A0/A0.1` (14 files, +1622/−38) |
+| Tree after commit | clean, verified with `git status --porcelain=v1` |
+| Remote | `origin/main` still at `9c8e142`; **not** advanced by A0.1 |
+| Push | attempted once; **denied**. The tool call was rejected outright with `{"error":{"type":"permission.rejected","message":"Permission denied: shell"}}` — the global `git push *` → `deny` rule matched the command string, so the whole call was refused, not executed. |
 
 The push denial is expected and was not worked around. `AGENTS.md` §8 forbids bypassing a protected Git
 operation, and A0.1 was explicitly instructed not to weaken the deny rule. Manual push instructions for

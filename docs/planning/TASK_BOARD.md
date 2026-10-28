@@ -84,9 +84,10 @@ write `docs/audit/**`, which was recorded as a W0 prerequisite, not worked aroun
 **A0.1 notes.** `FND-GOV-001` fixed at configuration level by adding one edit allow (`docs/audit/*`) to
 `.opencode/agents/gymlvl-orchestrator.md` (D-022); `FND-GOV-003` closed as `False Positive` on the
 authoritative V2 permission semantics. Root cause of the agent-binding symptom recorded as D-023:
-`default_agent` applies at session creation only. A0 + A0.1 were committed on `main`; the push was
-**denied** by the global `git push *` rule and was not worked around. End-to-end orchestrator write
-remains `NOT RUN`. Product regression was **not** rerun — no application or test configuration changed.
+`default_agent` applies at session creation only. A0 + A0.1 were committed on `main` as `e400dbc`; the
+push was **denied** by the global `git push *` rule and was not worked around, so `origin/main` is still
+at `9c8e142`. End-to-end orchestrator write remains `NOT RUN`. Product regression was **not** rerun — no
+application or test configuration changed.
 
 ## M1 task table
 

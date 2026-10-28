@@ -72,9 +72,16 @@ permissions guide, *Matching*). One rule therefore covers `docs/audit/README.md`
 | Global Git floor intact | read `opencode.jsonc` | deny push, reset --hard, clean -fd, clean -fdx, filter-branch; ask commit, tag, rebase, checkout, switch, stash | `PASS` |
 | Definition reloaded by the server | log `agent.updated` event | `2026-10-28T07:06:41.988Z`, one second after the write | `PASS` |
 | End-to-end write as the orchestrator | requires a session running as orchestrator | not attempted — the profile is not active here | `NOT RUN` |
+| Push the checkpoint | `git push origin main` | `{"error":{"type":"permission.rejected","message":"Permission denied: shell"}}` | `BLOCKED` |
 
 Independent verification: `qa-reviewer` inspected all seven agent files and returned `PASS` on checks
 1–6 of the list above (see §6 for the one item it got wrong).
+
+**Second independent datapoint for `FND-GOV-003`.** The push attempt was rejected at the tool boundary:
+the shell call was never executed, so no part of the command string ran. That is a stronger result than
+the S3 observation (where the deny surfaced on a later sub-command) and confirms the mechanism from the
+other direction: a shell invocation containing a denied segment is refused as a whole. It also confirms
+that the Git floor cannot be reached by appending `git push` to an allowed prefix.
 
 ## 5. Finding resolutions
 
@@ -112,5 +119,6 @@ claim; both were caught by reading the authoritative source rather than by trust
 | Branch | `main` |
 | HEAD at entry | `9c8e142` |
 | Remote at entry | `9c8e142` |
-| Commit | created locally; SHA in `SESSION_HANDOFF.md` §3 |
-| Push | attempted and **denied** by `git push *` → `deny`; no workaround applied |
+| Commit | `e400dbc` — `chore(audit): allow orchestrator audit writes and checkpoint A0/A0.1`; 14 files, +1622/−38; tree clean after |
+| Push | attempted once and **denied**. Exact response: `{"error":{"type":"permission.rejected","message":"Permission denied: shell"}}`. The `git push *` → `deny` rule matched the command string and the whole tool call was refused, so no part of the command ran. No workaround applied. |
+| Remote after | still `9c8e142` — the checkpoint is **local only** until a human pushes it |

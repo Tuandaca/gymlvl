@@ -22,7 +22,7 @@ track). **M1-01** (product) and **S4** (skills) remain unauthorized.
 | A0.1 governance | `PASS` (config) — `FND-GOV-001` `Fixed`, `FND-GOV-003` `False Positive`; D-022, D-023 |
 | Findings | 6 total — 2×P1, 2×P2, 2×P3; 2 `Needs Verification`, 2 `Accepted`, 1 `Fixed`, 1 `False Positive` |
 | Active agent | **build**, not `gymlvl-orchestrator` — `default_agent` applies only to new sessions (D-023) |
-| Git | `9c8e142` → A0/A0.1 commit on `main`; push **`BLOCKED`** by `git push *` → `deny` |
+| Git | `9c8e142` → `e400dbc` on `main` (A0 + A0.1); push **`BLOCKED`** by `git push *` → `deny`, remote still `9c8e142` |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified |
 
 **Read first on resume:** `AGENTS.md` §0.1, this section, then `docs/audit/SESSION_HANDOFF.md`, then
