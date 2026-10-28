@@ -1,33 +1,57 @@
 # GymLvl — Session Handoff
 
-**Updated:** 2026-10-28 (D-024 — full development access)
-**Last agent:** OpenCode Desktop, agent **`build`** — server record `ses_e7e999dd2ffdO3oGdRJnVFBuY1`
-reports `"agent":"build"`. Not the orchestrator.
-**Mode:** Agent permission policy, agent prose, and governance documentation, plus one local commit and
-a normal push to `origin/main`. No application, SQL, UI, schema, CI, or dependency change.
-**Baseline:** branch `main` @ `947da1e` = `origin/main` after the D-024 push. Confirm with
+**Updated:** 2026-10-28 (A1 audit complete — 16 findings)
+**Last agent:** **`gymlvl-orchestrator`** — proven from the server, not from configuration: session
+`ses_e7e81bc84ffeWkbb0tV5jo0jwp` reports `"agent":"gymlvl-orchestrator"` via
+`opencode-cli.exe api get /api/session/<id>`.
+**Mode:** Read-only audit of architecture, dependencies, configuration, infrastructure and CI, plus the
+A1 checkpoint commit and a normal push to `origin/main`. No application, SQL, UI, schema, CI, or
+dependency change.
+**Baseline:** branch `main` @ `e8c7c8e` at A1 entry (= `origin/main`). Confirm with
 `git rev-parse main` and `git ls-remote origin refs/heads/main` before trusting this line.
-**Next task:** **A1 — Architecture, dependencies, configuration and infrastructure** (`READY`, audit
-track). The A1 instruction given earlier on 2026-10-28 was withdrawn by the user before any review ran,
-so **A1 has not started**. **M1-01** (product) and **S4** (skills) remain unauthorized.
+**Next task:** **A2 — Flutter app, state, lifecycle, concurrency, navigation** (`READY`, audit track;
+prompt in `docs/audit/SESSION_HANDOFF.md` §6). **M1-01** (product) and **S4** (skills) remain
+unauthorized.
 
 ---
 
-## 0. Current state — D-024 access policy applied (newest)
+## 0. Current state — A1 complete (newest)
 
 | Item | Value |
 |---|---|
 | Agent access policy | `PASS` — **D-024**. Orchestrator + 5 development specialists have full repository access; irreversible or sensitive operations resolve to `ask`; `qa-reviewer` and `context-keeper` remain read-only |
-| Active agent (this session) | **build**, proven from the server, not from configuration |
-| Orchestrator write | `PASS` end-to-end — a throwaway `gymlvl-orchestrator` session wrote `app/.perm-probe-2.md`; confirmed from a second session |
-| A1 audit | **`NOT STARTED`** — `docs/audit/phases/A1_ARCHITECTURE.md` does not exist |
-| Findings | Unchanged: 6 total — 2×P1, 2×P2, 2×P3; 2 `Needs Verification`, 2 `Accepted`, 1 `Fixed`, 1 `False Positive`. `FND-GOV-001` is now verified end-to-end |
-| Git | `947da1e` on `main`; `origin/main` moved `9c8e142` → `947da1e` |
-| Push | `PASS` — `git push origin main` → `9c8e142..947da1e  main -> main`, exit 0. The old `git push *` deny is gone; force-push stays gated. |
+| Active agent (this session) | **`gymlvl-orchestrator`**, proven from the server, not from configuration |
+| Orchestrator write | `PASS` end-to-end — A1 wrote every `docs/audit/**` artifact while running as the orchestrator |
+| A1 audit | **`PASS`** — `docs/audit/phases/A1_ARCHITECTURE.md` |
+| Findings | **16 total** — 0 `P0`, 3 `P1`, 6 `P2`, 5 `P3`, 2 `P4`; 2 `Needs Verification`, 12 `Accepted`, 1 `Fixed`, 1 `False Positive`. Ten added by A1 |
+| Coverage | C-22, C-25, C-26 `Reviewed (static)`; 3 of 27 reviewed, 1 `In Review`, 22 `Not Reviewed` |
+| Git | `e8c7c8e` at A1 entry; the checkpoint commit SHA is recorded in `docs/audit/SESSION_HANDOFF.md` §3 |
+| Push | normal `git push origin main`, authorized for this task; verified by `git ls-remote origin refs/heads/main` |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified at S3 |
 
 **Read first on resume:** `AGENTS.md` §0.1, this section, `docs/agent-system/ACCESS_POLICY.md`, then
 `docs/audit/SESSION_HANDOFF.md`, then `TASK_BOARD.md`.
+
+### Verification at A1 close (2026-10-28, `main` @ `e8c7c8e`)
+
+| Check | Command | Result | Status |
+|---|---|---|---|
+| Branch / HEAD | `git rev-parse --abbrev-ref HEAD` / `git rev-parse HEAD` | `main` / `e8c7c8e7e346790ac1807dc5c8d4e43c2ee880ef` | `PASS` |
+| Remote equality | `git ls-remote origin refs/heads/main` | `e8c7c8e7e346790ac1807dc5c8d4e43c2ee880ef` — equal to local | `PASS` |
+| Tree | `git status --porcelain=v1` | `CLEAN (0 entries)` at A1 entry | `PASS` |
+| Active agent | `opencode-cli.exe api get /api/session/ses_e7e81bc84ffeWkbb0tV5jo0jwp` | `"agent":"gymlvl-orchestrator"` | `PASS` |
+| Toolchain | `flutter --version` | `Flutter 3.38.5 • channel stable`, `Tools • Dart 3.10.4` | `PASS` |
+| Static analysis | `cd app; flutter analyze` | `No issues found! (ran in 2.5s)`, exit 0 | `PASS` |
+| Formatting | `cd app; dart format --output=none --set-exit-if-changed lib test` | `Formatted 125 files (0 changed) in 0.71 seconds.`, exit 0 | `PASS` |
+| Rule model, documented probes | `node gymlvl-perm-check.mjs` | `RULES VALIDATED: 73 global + 62 agent` / `RESULT: PASS (0 probe failures, 0 schema problems)` | `PASS` |
+| Rule model, 18 destructive-operation probes | `node a1-git-gate-probe.mjs` | `RESULT: FAIL (12 probe failures, 0 schema problems)` — `FND-GOV-004`, `FND-SEC-001` | `FAIL` — the failures are the finding |
+| Register sync | `node a1-sync-check.mjs` | `md findings: 16 json findings: 16`, `mismatches: 0` | `PASS` |
+| Migrations census | `node a1-lines2.mjs` + policy/trigger/function census | 661/349/367 lines (1,377 total, 1,219 non-blank); 17 tables; 44 policy statements → 22 effective; 11 `SECURITY DEFINER`; 10 triggers | `PASS` |
+| Product regression (`flutter test`, SQL, Edge) | not rerun — A1 changed no product, SQL, or test file | — | `NOT RUN` |
+| Android/iOS build | not attempted; would write artifacts and needs an SDK host | — | `NOT RUN` |
+| Live permission probe | not attempted; would require issuing a destructive or secret-reading command | — | `NOT RUN` |
+
+Detail and quoted output: `docs/audit/phases/A1_ARCHITECTURE.md` §12.
 
 ### Verification at D-024 close
 
@@ -66,11 +90,18 @@ Runtime evidence detail lives in `docs/agent-system/ACCESS_POLICY.md` §4.
 
 ### Known open items
 
-- **A1 is not started.** The audit program is otherwise unchanged; `docs/audit/SESSION_HANDOFF.md` §6
-  still holds the authoritative A1 prompt.
-- `FND-GOV-002`: `PROJECT_CONTEXT.md` §2 is 3 commits behind with a 27-short file count, and the
-  `DECISIONS.md` summary table still stops at **D-014** — D-024 was recorded as a section only, not
-  added to the table, so the W4 fix remains a single pass.
+- **A2 is not started.** `docs/audit/SESSION_HANDOFF.md` §6 holds the authoritative A2 prompt and its
+  seven acceptance criteria. A1 is complete: `docs/audit/phases/A1_ARCHITECTURE.md`.
+- `FND-GOV-002`: the stale-claim inventory is **complete** (A1, `phases/A1_ARCHITECTURE.md` §10 — 15
+  claims across nine documents). `PROJECT_CONTEXT.md` §2 is now 7 commits behind with a 37-short file
+  count, and the `DECISIONS.md` summary table still stops at **D-014** while D-015…D-024 have sections.
+  The W4 fix is a single pass.
+- Three release-blocking or template defects in the Android/iOS configuration were registered by A1
+  (`FND-BUG-001` P1, `FND-BUG-002` P2, `FND-BUG-003` P4). `TASK_BOARD` §M1-02 already planned the fixes;
+  the register now has IDs to close.
+- `FND-GOV-004` and `FND-SEC-001` (P2 each) record that the permission layer gates 6 of 18 probed
+  destructive/secret operations. They are `High`, not `Confirmed`, because a live probe would require
+  issuing the destructive command. Closing them is a configuration change needing approval.
 - Two P1 findings (`FND-CONC-001`, `FND-DATA-001`) are inherited and still unverified.
 - Shell secret gates are pattern-based; an obfuscated path such as `Get-Content ("."+"env")` is not
   matched. The `read`-tool gates are stronger than the shell gates.

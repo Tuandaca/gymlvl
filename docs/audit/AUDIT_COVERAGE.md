@@ -1,7 +1,7 @@
 # Audit Coverage
 
-**Stage:** A0
-**Baseline:** `main` @ `9c8e142`
+**Stage:** A1 (matrix opened at A0)
+**Baseline:** `main` @ `e8c7c8e`
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
@@ -16,17 +16,17 @@ directory is `Not Reviewed`. Coverage measures attention, not correctness.
 | `Deferred` | Deliberately postponed, with the reason recorded. |
 | `Out of Scope` | Excluded by `AUDIT_SCOPE.md` §3. |
 
-## 2. Inventory (measured at A0)
+## 2. Inventory (measured at A0, remeasured at A1)
 
 | Area | Files | Lines | Notes |
 |---|---|---|---|
 | `app/lib/**` Dart | 111 | 18,673 | 17 generated (`*.freezed.dart`, `*.g.dart`) |
 | `app/test/**` Dart | 14 | 2,453 | 126 tests reported by `flutter test` (S3) |
-| `supabase/migrations/*.sql` | 3 | 1,222 | 17 tables, 44 policies, 11 `SECURITY DEFINER` functions, 15 distinct functions (18 definitions), 10 triggers |
+| `supabase/migrations/*.sql` | 3 | 1,377 (1,219 non-blank) | 17 tables, 44 `CREATE POLICY` statements, 22 policies effective at tip, 11 `SECURITY DEFINER` functions, 15 distinct functions (18 definitions), 10 triggers |
 | `supabase/tests/*.sql` | 2 | 170 | progression + security regression |
 | `supabase/functions/**` `.ts` | 12 | 443 | 6 deployed handlers + 2 shared modules + 3 test files |
 | `tools/**` (excl. `node_modules`) | 16 | 2,018 | SQL harness, Edge runner, browser smoke, E2E scripts |
-| `.github/workflows` | 1 | 58 | `verify.yml`, 2 jobs |
+| `.github/workflows` | 1 | 52 (48 non-blank) | `verify.yml`, 2 jobs |
 | `.opencode/**` | 20 | — | 7 agents, 6 skills, 6 commands, 1 config |
 | `docs/**` | 60+ | — | Planning memory, audit, verification screenshots |
 
@@ -35,6 +35,19 @@ directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
 Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboarding` 6, `coach` 2,
 `progression` 2, `profile` 1.
+
+**Corrections applied at A1** (`phases/A1_ARCHITECTURE.md` §12, O-2/O-3):
+
+- Migrations: A0 recorded 1,222 lines. Remeasured at `e8c7c8e`: **1,377 total, 1,219 non-blank**
+  (661/349/367 total; 550/335/334 non-blank). `PROJECT_CONTEXT.md:92-94`'s 661/349/367 are total lines
+  and are correct.
+- `verify.yml`: A0 recorded 58 lines. It is **52 (48 non-blank)** and has been unchanged since
+  `56c1122`.
+- Policies: 44 is the count of `CREATE POLICY` **statements**; the baseline set is dropped and replaced
+  by `progression:61-70`, so **22** policies are effective at the migration tip. C-20's "44" is
+  therefore a textual count, not a live count.
+- `SECURITY DEFINER` (11) and triggers (10) are confirmed after excluding one commented-out occurrence
+  of each in `baseline:47` and `baseline:48`.
 
 ## 3. Coverage matrix
 
@@ -59,13 +72,13 @@ Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboardi
 | C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3 | `Not Reviewed` | — | — | Legacy schema; additive-only |
 | C-18 | SQL: progression | `20261026000200_authoritative_progression.sql` | A3, A4 | `Not Reviewed` | — | S3 TEST D read | `FND-DATA-001`, `FND-ARCH-001` carried |
 | C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3 | `Not Reviewed` | — | — | 150 curated rows |
-| C-20 | RLS policies (44) | all migrations | A3 | `Not Reviewed` | — | — | Cannot exercise policies without live DB |
+| C-20 | RLS policies (44 statements, 22 effective at tip) | all migrations | A3 | `Not Reviewed` | — | — | Cannot exercise policies without live DB |
 | C-21 | Edge Functions | `supabase/functions/**` | A3 | `Not Reviewed` | — | 15 unit tests exist | Gateway/auth path untested |
-| C-22 | CI workflow | `.github/workflows/verify.yml` | A1 | `Not Reviewed` | — | — | — |
+| C-22 | CI workflow | `.github/workflows/verify.yml` | A1 | `Reviewed (static)` | `qa-reviewer` (A1) + orchestrator re-read | A1 §6: 52-line workflow read end to end, both jobs, every gate named; gaps recorded as `FND-TEST-001` | Gate list verified statically; runner behaviour, action-pinning supply chain, and a failing run were `NOT RUN` |
 | C-23 | Test harness | `tools/db-tests/**` | A5 | `Not Reviewed` | — | S3 ran it | Single-connection PostgreSQL |
 | C-24 | Flutter tests | `app/test/**` | A5 | `Not Reviewed` | — | — | No golden tests |
-| C-25 | Agent configuration | `.opencode/**` | A1, A6 | `Reviewed (static)` | build (A0), qa-reviewer (A0.1) | A0 grep/read; A0.1 parsed every rule in all 7 agents + negative primary test | Runtime binding unverified in a new session |
-| C-26 | Planning documents | `docs/planning/**` | A1 | `In Review` | build (A0) | A0 measured `PROJECT_CONTEXT.md` §2 as stale (`FND-GOV-002`) | Remaining stale claims not yet inventoried |
+| C-25 | Agent configuration | `.opencode/**` | A1, A6 | `Reviewed (static)` | build (A0), qa-reviewer (A0.1), orchestrator (A1) | A0 grep/read; A0.1 parsed every rule in all 7 agents + negative primary test; A1 parsed 73 global + 62 agent rules and ran 18 destructive-operation probes → 12 ungated (`FND-GOV-004`, `FND-SEC-001`) | Evaluator is a reimplementation of the rule model, not the harness; live per-spelling probe `NOT RUN` |
+| C-26 | Planning documents | `docs/planning/**`, `docs/ARCHITECTURE.md`, `docs/agent-system/*.md` (reference docs only) | A1 | `Reviewed (static)` | build (A0), `context-keeper` (A1) + orchestrator re-check | A1 §10: 15 stale claims across nine documents; dated evidence blocks and stage records explicitly classified as not stale; `FND-GOV-002` evidence extended | Inventory complete, fixes not applied (W4) |
 | C-27 | Legacy Java work | `.agent/`, `.agents/teamwork/` | — | `Out of Scope` | — | — | Preserved user work (D-018) |
 
 ## 4. Known coverage gaps recorded at A0
@@ -83,10 +96,13 @@ These are **observations about test infrastructure**, not yet findings. A5 forma
 
 ## 5. Remaining work
 
-All 27 components are inventoried. At A0, 1 is `Reviewed (static)`, 2 are `In Review`, 23 are
-`Not Reviewed`, 1 is `Out of Scope`. **No component may be described as "audited" until its stage
-closes.**
+All 27 components are inventoried. At A1 close, 3 are `Reviewed (static)` (C-22, C-25, C-26), 1 is
+`In Review` (C-01), 22 are `Not Reviewed`, and 1 is `Out of Scope`. **No component may be described as
+"audited" until its stage closes.**
 
-Stage-by-stage target: A1 closes C-22, C-25, C-26; A2 closes C-01…C-05, C-07, C-08, C-16 and the
+Stage-by-stage target: A1 closed C-22, C-25 and C-26; A2 closes C-01…C-05, C-07, C-08, C-16 and the
 presentation half of C-10/C-11/C-12; A3 closes C-17…C-21; A4 closes C-09, C-13…C-15 and re-verifies
 the inherited candidates; A5 closes C-23, C-24 and the G-series gaps; A6 reconciles.
+
+A1 added no new G-series gap: the missing CI gates it found are recorded as `FND-TEST-001` instead,
+because they are a defect in an existing gate rather than an unmeasured area.

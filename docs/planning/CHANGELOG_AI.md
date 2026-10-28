@@ -7,7 +7,91 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 ---
 
-## 2026-10-28 — D-024: full development access with approval gates
+## 2026-10-28 — A1: architecture, dependencies, configuration and infrastructure audit
+
+**Task:** A1 of the full codebase audit program — read-only review of architecture, dependency
+manifests, Flutter/Dart analyzer and build configuration, localization, CI/CD, OpenCode agent
+governance, migration ordering, and cross-component configuration contracts.
+**Status:** `PASS` (10 new findings; 2 A0 inventory figures corrected; 4 checks `NOT RUN` with reasons).
+**Baseline:** `main` @ `e8c7c8e` = `origin/main` at entry; tree clean.
+**Authoring agent:** **`gymlvl-orchestrator`**, proven from the server — `GET /api/session/
+ses_e7e81bc84ffeWkbb0tV5jo0jwp` → `"agent":"gymlvl-orchestrator"`, `"location":{"directory":
+"D:\\Projects\\gymlvl"}`. Every audit artifact in this entry was written while running as that agent,
+which is the end-to-end confirmation `FND-GOV-001` needed.
+**Scope:** audit artifacts and planning memory only. No application code, SQL, CI, dependency, or
+configuration file was modified. No dependency was installed, no build artifact produced, no database
+started.
+
+### Changed
+
+- `docs/audit/phases/A1_ARCHITECTURE.md` — **new**, 546 lines: baseline and acting-agent verification,
+  architecture and module map, dependency and toolchain analysis, platform/build/localization
+  configuration, CI gate review, agent-rule gate probes, migration ordering and structural census,
+  configuration contracts, the stale-claim inventory, observations not promoted to findings, the
+  verification log, and what a resuming session must not assume.
+- `docs/audit/MASTER_FINDINGS.md` — header moved to A1/`e8c7c8e`/16 findings; `FND-GOV-002` extended
+  with the completed inventory (15 stale claims, nine documents) and a wider path list; ten new
+  findings added with every required field; eight observations added to "Not findings".
+- `docs/audit/FINDINGS_REGISTER.json` — ten findings appended, counts recomputed, `FND-GOV-002` paths,
+  line ranges, evidence, remediation and dependencies updated. Verified by script: 16 findings,
+  declared counts equal actual counts, all 22 fields present on every entry, Markdown and JSON agree on
+  every ID/severity/confidence/status.
+- `docs/audit/AUDIT_COVERAGE.md` — C-22 and C-26 moved to `Reviewed (static)` with named reviewers,
+  C-25 extended with the A1 probe evidence, C-20 annotated (44 statements, 22 effective), inventory
+  corrected (migrations 1,377 total / 1,219 non-blank; `verify.yml` 52 lines), remaining-work counts
+  updated to 3 reviewed / 1 in review / 22 not reviewed / 1 out of scope.
+- `docs/audit/SESSION_HANDOFF.md` — rewritten: A1 `PASS`, 16-finding table, Git state, what A1 did,
+  the exact A2 prompt with executor guidance and seven acceptance criteria, and nine open
+  investigations.
+- `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, this file — A1 recorded.
+
+### Findings added
+
+| ID | Title | Sev | Conf | Wave |
+|---|---|---|---|---|
+| `FND-BUG-001` | Android release manifest declares no `INTERNET` permission | P1 | High | W1 |
+| `FND-BUG-002` | Release build is signed with the debug keystore | P2 | High | W1 |
+| `FND-BUG-003` | Platform display name is the Flutter template default | P4 | High | W1 |
+| `FND-TEST-001` | CI cannot detect platform, formatting, or generated-code regressions | P2 | High | W3 |
+| `FND-INTG-001` | Documented local auth redirect is not in the Auth allowlist | P3 | High | W4 |
+| `FND-ARCH-002` | Two localization mechanisms; the standard one carries no product text | P3 | High | W4 |
+| `FND-ARCH-003` | Stated timezone invariant is narrower than the per-user implementation | P3 | High | W4 |
+| `FND-GOV-004` | Git approval gates do not match the operations `AGENTS.md` §8 forbids | P2 | High | W1 |
+| `FND-SEC-001` | Shell secret gates cover a short list of command spellings | P2 | High | W1 |
+| `FND-GOV-005` | Stale analyzer transcript tracked as `app/analysis.txt` | P4 | High | W4 |
+
+### Verification (this session, `e8c7c8e`)
+
+| Check | Command | Result | Status |
+|---|---|---|---|
+| Branch / HEAD / remote | `git rev-parse --abbrev-ref HEAD`, `git rev-parse HEAD`, `git ls-remote origin refs/heads/main` | `main`, `e8c7c8e7e346790ac1807dc5c8d4e43c2ee880ef`, remote identical | `PASS` |
+| Tree | `git status --porcelain=v1` | `CLEAN (0 entries)` at entry | `PASS` |
+| Active agent | `opencode-cli.exe api get /api/session/ses_e7e81bc84ffeWkbb0tV5jo0jwp` | `"agent":"gymlvl-orchestrator"` | `PASS` |
+| Toolchain | `flutter --version` | `Flutter 3.38.5 • channel stable`, `Tools • Dart 3.10.4` | `PASS` |
+| Static analysis | `cd app; flutter analyze` | `No issues found! (ran in 2.5s)`, exit 0 | `PASS` |
+| Formatting | `cd app; dart format --output=none --set-exit-if-changed lib test` | `Formatted 125 files (0 changed)`, exit 0 | `PASS` |
+| Rule model, documented probes | `node gymlvl-perm-check.mjs` | `RULES VALIDATED: 73 global + 62 agent`; `RESULT: PASS (0 probe failures, 0 schema problems)` | `PASS` |
+| Rule model, 18 destructive/secret probes | `node a1-git-gate-probe.mjs` | `RESULT: FAIL (12 probe failures, 0 schema problems)` | `FAIL` — recorded as `FND-GOV-004`/`FND-SEC-001` |
+| Register sync | `node a1-sync-check.mjs` | `md findings: 16 json findings: 16`; `mismatches: 0` | `PASS` |
+| Migration census | `node a1-lines2.mjs` + policy/trigger/function census | 661/349/367 lines (1,377 total, 1,219 non-blank); 17 tables; 44 policy statements → 22 effective; 11 `SECURITY DEFINER`; 10 triggers | `PASS` |
+| Localization census | `node a1-l10n.mjs` | `outer keys: 104`; `'vi' entries: 104`; `'en' entries: 104` | `PASS` |
+| Product regression (`flutter test`, SQL harness, Edge tests) | not rerun — no product or test file changed | — | `NOT RUN` |
+| `flutter build web` / `apk` / iOS | not attempted — writes artifacts, needs an SDK host | — | `NOT RUN` |
+| `supabase start` + auth recover | not attempted — starts a local stack and mutates local state | — | `NOT RUN` |
+
+### Notes
+
+- A1's four specialist reviews were read-only and sequential (D-021). Every claim that reached a
+  finding was re-derived by the orchestrator with a quoted command; no subagent `PASS` was accepted as
+  evidence.
+- `FND-BUG-001`/`002`/`003` and `FND-TEST-001` overlap `TASK_BOARD` §M1-02/§M1-05, which planned those
+  fixes but never registered them. The register now carries IDs so the fixes can be closed with
+  evidence.
+- The Android release defects are invisible to the current CI because it builds web only; that is the
+  substance of `FND-TEST-001`, not a separate claim.
+
+---
+
 
 **Task:** S5 — reconfigure the seven-agent system for full development autonomy (decision D-024).
 **Status:** `PASS`.

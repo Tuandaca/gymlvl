@@ -1,11 +1,13 @@
 # GymLvl — Task Board
 
-**Last updated:** 2026-10-28 (D-024 full development access)
-**Baseline:** branch `main` @ `947da1e` = `origin/main` (D-024). `main` is the only development branch.
-**Working tree:** clean after the D-024 commit and push.
+**Last updated:** 2026-10-28 (A1 complete — 16 findings)
+**Baseline:** branch `main` @ `e8c7c8e` = `origin/main` at A1 entry. `main` is the only development
+branch. Confirm with `git rev-parse main`; the SHA moves.
+**Working tree:** clean at A1 entry; the A1 checkpoint commit is recorded in
+`docs/audit/SESSION_HANDOFF.md` §3.
 **Current milestone:** M1 — NOT STARTED (unchanged)
-**Next task (audit track):** **A1 — Architecture, dependencies, configuration and infrastructure**
-(`READY`, not started; the 2026-10-28 A1 instruction was withdrawn before any review ran)
+**Next task (audit track):** **A2 — Flutter app, state, lifecycle, concurrency, navigation**
+(`READY`; prompt in `docs/audit/SESSION_HANDOFF.md` §6; requires explicit go-ahead)
 **Next task (tooling track):** **S4 — Wave 2 skill import** (`PLANNED`, requires explicit approval)
 **Next product task:** **M1-01 — Baseline stabilization and evidence lock** (`NEXT`, unchanged; not
 authorized yet)
@@ -68,8 +70,8 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 |---|---|---|---|
 | A0 | Bootstrap, baseline, inventory, execution plan | `DONE` | `docs/audit/phases/A0_BOOTSTRAP.md`; 6 findings; coverage matrix for 27 components |
 | A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
-| A1 | Architecture, dependencies, configuration, infrastructure, CI | `READY` | Not started. The 2026-10-28 A1 attempt was withdrawn before any review ran; no `phases/A1_ARCHITECTURE.md` exists. Prompt in `docs/audit/SESSION_HANDOFF.md` §6 |
-| A2 | Flutter app, state, lifecycle, concurrency, navigation | `PLANNED` | — |
+| A1 | Architecture, dependencies, configuration, infrastructure, CI | `DONE` | `docs/audit/phases/A1_ARCHITECTURE.md`; 10 new findings (16 total); coverage C-22/C-25/C-26 closed; 2 A0 inventory figures corrected |
+| A2 | Flutter app, state, lifecycle, concurrency, navigation | `READY` | Prompt in `docs/audit/SESSION_HANDOFF.md` §6; requires explicit go-ahead |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` | — |
 | A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
 | A5 | Tests, performance, reliability, observability | `PLANNED` | — |
@@ -101,6 +103,21 @@ with a widened read-only shell allowlist. `git push` is no longer denied, so the
 retired. Validation: 66/66 effective-permission probes `PASS`; the orchestrator wrote a previously
 denied path in a live session; the reviewer was denied a write and a commit at runtime. Record:
 `docs/agent-system/ACCESS_POLICY.md`. A1 was **not** started.
+
+**A1 notes (2026-10-28).** Executed read-only against product code at `e8c7c8e`; the acting agent was
+proven from the server as `gymlvl-orchestrator` (`GET /api/session/...` → `"agent":"gymlvl-orchestrator"`),
+not inferred from configuration. `flutter analyze` → `No issues found!`, `dart format
+--set-exit-if-changed` → `Formatted 125 files (0 changed)`. Ten findings added — `FND-BUG-001` (P1,
+Android release manifest has no `INTERNET`), `FND-BUG-002` (P2, debug keystore), `FND-TEST-001` (P2, CI
+gate gaps), `FND-GOV-004` (P2, Git gates miss destructive spellings), `FND-SEC-001` (P2, secret gates
+cover four reader spellings), `FND-INTG-001` (P3, auth redirect not allowlisted), `FND-ARCH-002` (P3,
+two localization mechanisms), `FND-ARCH-003` (P3, timezone invariant), `FND-BUG-003` (P4, template
+display name), `FND-GOV-005` (P4, tracked stale `analysis.txt`) — bringing the register to **16**
+findings. `FND-GOV-002`'s stale-claim inventory is complete (15 claims, nine documents). Two A0
+measurement figures corrected (migrations 1,222 → 1,377 total / 1,219 non-blank; `verify.yml` 58 → 52).
+`FND-BUG-001/002/003` and `FND-TEST-001` overlap `TASK_BOARD` §M1-02/§M1-05, which already planned the
+fixes but never registered them. No application, SQL, CI, dependency, or configuration file was
+modified; no build artifact was produced; no database was started. Product regression was **not** rerun.
 
 ## M1 task table
 
