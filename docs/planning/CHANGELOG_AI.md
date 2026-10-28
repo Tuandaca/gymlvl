@@ -2,6 +2,63 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-28 — A4 scoped audit PASS/CLOSED; A5 not started
+
+- A4 acceptance assessed against review/evidence/owned gaps/material QA/consistency criteria, not
+  remediation or exhaustive runtime/production proof. Real final context-keeper and qa-reviewer
+  follow-ups completed; sessions/commands/results/corrections recorded in A4 phase11. No material
+  closure blocker; corrected stale ownership/header/coverage words, last A2 paragraph historical.
+- QA HEAD/main/status/diff checks exit0, nine docs only; additional exclusion-diff command BLOCKED
+  by shell permission, no retry/bypass or permission change. QA Node/probe/regressions NOT RUN.
+  Pre-existing primary validator source/output retained before review; final cheap gate before commit.
+- 30 findings and24/0/2/1 coverage unchanged from reconciliation; two explicit old reclassifications,
+  four new IDs, exact histories preserved. DATA001 conditional synthetic only; INTG007 still High/NV;
+  no real concurrency, production cohort, crash-recovery or isolated-expiry proof invented.
+- All required current tests and exact primary artifact-validator output remain in phase9/10 and
+  handoffs. Final post-QA validator rerun ->identical errors0/node0/diff0; explicitly staged nine
+  docs and `git diff --cached --check` ->A4_STAGED_DIFF_CHECK_EXIT=0, including new phase/evidence.
+  No material decision/source/schema/permanent-test/permission/dependency change. Normal
+  nine-doc A4 commit/push authorized and pending; record actual checkpoint outcome after execution.
+- Exact bounded A5 prompt persisted in audit handoff, separate authorization required. No A5/A6,
+  remediation, OpenGym migration, full-app Temp copy or prior-directory cleanup.
+
+## 2026-10-28 — A4 review/evidence reconciliation; final gate pending
+
+- main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3; nine authorized documentation paths dirty,
+  remote rechecked equal. No product/SQL/Edge/config/permanent-test/permission/dependency changes.
+- All five required configured agents actually invoked sequentially (phase2 ledger). Independent
+  QA inspected material source/full retained probe evidence; supports conditional P1 DATA001,
+  three new synthetic P2 mechanisms and ARCH001 sole-award wording disproof. No QA runtime claim.
+- Register30: P0 0/P1 3/P2 20/P3 5/P4 2; Confirmed9/High20/Medium1; Accepted24/NV3/Fixed1/FP2.
+  All26 earlier IDs retained,24 old classifications unchanged, exact DATA001/ARCH001 objects retained.
+  New DATA002/INTG005-007; INTG007 stays High/NV because actual Dart quest journey not run.
+- Coverage24 static-reviewed/0 InReview/2 NotReviewed(C23/C24)/1 excluded; no blanket runtime claim.
+- Current node <A4 probe>/probe.mjs ->8groups/15 sequential DBs/108assertions/zero fetch/exit0;
+  specialist plus justified independent primary rerun. Existing SQL runner ->PASS10 PostgreSQL17.5,
+  app analyze ->No issues(3.0s), format ->125files/0changed, tests ->+126 All tests passed, all exit0.
+  Edge NOT RUN (unchanged A3 scope); expected22023/P0001 errors are asserted defect/rollback evidence.
+- Corrected initial catalogue-parser regex FAIL and unnecessary legacy-title-validator FAIL are
+  preserved, no product repair. Falseflag prior-award synthetic duplicate is not production cohort
+  or ordinary-retry duplication. Rollback is after savepoint helper rollback; day/expiry joint check
+  is not isolated expiry proof; independent connections and actual Dart journey remain unexecuted.
+- Primary phase10 retained PowerShell/Node artifact validator -> A4_ARTIFACT_CHECK json30/md30/
+  oldIDs26/unchangedClasses24/exactHistories2/newIDs4/fields22/coverage24-0-2-1/allowedPaths9/
+  unchangedProbeInputs7/errors0; A4_VALIDATION_EXIT node=0 diff=0, PASS. Three primary validator
+  attempts FAIL (Unicode native pipe regex, optional empty test array, trimmed porcelain prefix),
+  corrected in validator only, no finding data change/allowlist expansion; all retained in phase10.
+- Final context/QA artifact gate pending. Exact bounded A5 prompt now
+  in audit handoff; no A5/A6/remediation/migration or Temp copy/cleanup. No material new decision.
+
+## 2026-10-28 — A4 start and actual delegation checkpoint
+
+- A4 only authorized; main/remote c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3 clean at entry,
+  API confirms gymlvl-orchestrator. Existing26 findings retained.
+- Created A4_WORKOUT_PROGRESSION.md with scoped acceptance, exact artifact ownership/safety and
+  actual delegation ledger. context-keeper invoked (ses_e7d46f8ddffeDvA7AjR9bdw4go), restored
+  authoritative scope/deferred work; no source scan or runtime PASS. Other four invocations pending.
+- No source/SQL/Edge/config/test/agent/dependency edits. Next: bounded sequential business reviews,
+  synthetic DATA001/control evidence, independent QA; no A5 or remediation.
+
 ## 2026-10-28 — A3 Supabase/PostgreSQL/security scoped closure
 
 - **Git outcome:** c535613fe29cf5a435ead44a6c4c26a16e3074ae on main, nine docs +1094/-25;

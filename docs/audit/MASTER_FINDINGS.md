@@ -1,12 +1,57 @@
 # Master Findings
 
-**Stage:** A3 CLOSED (scoped security audit acceptance PASS; A2 closure and deferred work retained)
-**Baseline:** `main` @ `f877e40`
-**Counts:** 26 findings — P0: 0, P1: 3, P2: 16, P3: 5, P4: 2. Confirmed: 5, High: 19, Medium: 2, Low: 0.
-**Status:** 3 `Needs Verification`, 21 `Accepted`, 1 `Fixed`, 1 `False Positive`.
+**Stage:** A4 CLOSED — scoped business-logic audit acceptance PASS; explicit deferred gaps retained.
+**Baseline:** `main` @ `c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3` (`c95cb48`).
+**Counts:** 30 findings — P0: 0, P1: 3, P2: 20, P3: 5, P4: 2. Confirmed: 9, High: 20, Medium: 1, Low: 0.
+**Status:** 3 `Needs Verification`, 24 `Accepted`, 1 `Fixed`, 2 `False Positive`.
 
 Scales, ID scheme and status vocabulary are defined in `README.md` §§4–7. The machine-readable
 mirror is `FINDINGS_REGISTER.json`; the two must always agree.
+
+A4 retains all26 earlier IDs and historical evidence. DATA001 becomes P1/Confirmed/Accepted only
+for the synthetic prior-credit plus award-log/completed-false-flag/no-reward-row tuple; production
+cohort unknown and ordinary replay controls pass. ARCH001 becomes P2/High/False Positive after
+checking exact sole-award wording, not Fixed. Add exactly DATA002 and INTG005-007: three P2/Confirmed/
+Accepted SQL mechanisms and one P2/High/Needs Verification timed quest integration contract.
+
+Retained runtime evidence: `phases/A4_SQL_EVIDENCE.md`, groups1-8, exact source/output/hash/command;
+probe exit0,15 sequential independent in-memory DBs,108 assertions including fixture/source guards,
+zero fetch attempts. Primary independently reran the current108 assertions exit0 as reported by the
+orchestrator. No runtime rerun in this documentation-only register write. Independent qa-reviewer
+`ses_e7d23c0d4ffe9IA6MkbszmpEvl` read source/evidence and supports the bounded classifications and
+ARCH001 disproof. Real two-connection scheduling and actual Dart quest journey remain NOT RUN.
+No product, governance, schema, permanent-test or permission change occurred.
+
+### A4 register-write verification (documentation only)
+
+Executed an inline PowerShell here-string piped to `node --input-type=module`, comparing both
+registers with `git show HEAD:<path>` and parsing current JSON. First validator attempt **FAIL**,
+exit1: its extra assertion required byte-identical titles for every old MD/JSON record. The
+pre-existing GOV001 MD title contains `` `docs/audit/**` `` while JSON says `docs/audit`; output was
+`AssertionError [ERR_ASSERTION]: Expected values to be strictly equal`. No legacy title or product
+was repaired. Corrected validator preserves old MD titles, compares current/new titles where changed,
+and still checks all30 current classifications, exact history and all required counts/fields.
+Corrected run **PASS**, exit0:
+
+```text
+A4_REGISTER_CHECK json_parse=PASS json=30 md=30 old_ids_preserved=26 old_classifications_unchanged=24 historical_objects_exact=2 a3_reviews_preserved=2 new_ids=4 new_fields_each=22 md_json_classes_match=30 historical_closures_preserved=true errors=0
+A4_COUNTS {"total":30,"by_severity":{"P0":0,"P1":3,"P2":20,"P3":5,"P4":2},"by_confidence":{"Confirmed":9,"High":20,"Medium":1,"Low":0},"by_status":{"Open":0,"Needs Verification":3,"Accepted":24,"Fixed":1,"Deferred":0,"False Positive":2}}
+VALIDATOR_EXIT=0
+DIFF_CHECK_EXIT=0
+```
+
+`git diff --check` exited0 with no whitespace errors, only LF/CRLF warnings. Git status shows the
+six original authorized dirty documents plus only these two delegated register paths; HEAD remains
+`c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3`. This writer edits no other path. Whole-stage acceptance,
+phase-owned A5 reorder/lost-ack transport deferrals and planning/handoff updates remain with the
+orchestrator. No new ID is assigned to those unexecuted transport candidates.
+
+### Historical A3/A2/A1 metadata — not current classification or closure claims
+
+A3 entry baseline was `main` @ `f877e40987423f3804fe0d2887c44d19f3423aff`; A3 closed with26 findings,
+P1:3/P2:16/P3:5/P4:2, Confirmed5/High19/Medium2 and Accepted21/Needs Verification3/Fixed1/False
+Positive1. The A3/A2 closure objects in JSON and the following dated narrative retain history, not
+A4 closure claims. Current classifications are the per-ID current records and totals above.
 
 A3 adds SEC003 (Confirmed only for a synthetic pre-existing PUBLIC grant) and SEC004 (High/
 Needs Verification for authenticated Edge buffering order). No production vulnerability inferred;
@@ -129,7 +174,7 @@ to test the post-await race. See `phases/A2_FLUTTER.md`.
 
 ---
 
-## FND-DATA-001 — Legacy completion path can award a workout twice
+## FND-DATA-001 — Conditional prior-award legacy tuple can receive another workout credit
 
 | Field | Value |
 |---|---|
@@ -139,9 +184,46 @@ to test the post-await race. See `phases/A2_FLUTTER.md`.
 | Lines | 216 (function), 223-230 (guards), 255 (cap), 264-278 (writes) |
 | Origin | S3 L5 — `supabase-specialist` delegation TEST D (carried, **not re-verified** in A0) |
 | Severity | **P1** |
-| Confidence | **Medium** |
-| Status | `Needs Verification` |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
 | Wave | W1 |
+
+**Current A4 scope.** P1/Confirmed/Accepted only for a synthetic completed false-flag workout with
+reliable prior-award evidence: total_xp10 **and one existing workout award log10**, no
+`workout_rewards` row. `phases/A4_SQL_EVIDENCE.md` groups1-2 executes the current RPC: earned10
+again, total20/logs2/rewards1; identical replay adds no third credit. Ordinary initial/replay,
+legitimate completed-unrewarded recovery and true-flag prior-credit controls pass. Source:
+`20261026000200_authoritative_progression.sql:223-230,264-281`; baseline:361,367-374. Guard checks
+do not classify reliable prior-award provenance before accepting the recovery branch.
+
+**Expected / actual / impact.** At most one award per workout. Actual second global credit/log in
+that explicit tuple is reproduced; P1 conditional progression-integrity impact can affect totals
+and derived level. No production cohort, ordinary-retry failure, historical class/quest duplication
+or independently scheduled concurrency is established. The older broader impact rationale below
+is historical, not additional confirmed scope.
+
+**Evidence and review.** Full bounded probe exit0/108 assertions across8 groups; primary reports
+independent current108-assertion rerun exit0. Independent QA
+`ses_e7d23c0d4ffe9IA6MkbszmpEvl` read source/evidence and supports this conditional promotion.
+Former P1/Medium/Needs Verification and A2/A3 evidence are preserved below and in JSON
+`historical_pre_a4`/`a3_review`. No runtime rerun in this documentation-write turn.
+
+**Current remediation proposal.** Separately approve an additive migration/classification/backfill
+and rollback plan that distinguishes reliable prior-award provenance from legitimate completed-
+unrewarded recovery, verifies counts and handles ambiguous history before guard changes. The old
+true-flag-only backfill recommendation below does not classify the reproduced false-flag tuple.
+Neither blanket rejection of completed false-flag rows nor a nonzero user total alone is safe
+evidence of a prior workout award. Preserve original award provenance and replay behavior.
+
+**Regression / remaining verification.** Incorrect classification can deny legitimate recovery or
+award ambiguous history twice. Related tests: `supabase/tests/progression_regression.sql` and A4
+evidence groups1-2. A5 owner supabase-specialist with independent qa-reviewer: retain all controls;
+after separately authorized fix assert proven prior awards receive no new credit/log and genuinely
+unrewarded recovery receives exactly one. True two-connection retries/different workouts and any
+deployed provenance inventory remain NOT RUN; the latter needs separate explicit authorization.
+Client acknowledgement/hydration remains INTG002, not this mechanism.
+
+### Historical pre-A4 record — P1 / Medium / Needs Verification (superseded)
 
 **Suspected mechanism.** Two independent idempotency guards exist: the `workout_rewards` primary key
 on `workout_id` (guarded at L226-227) and the `workouts.is_xp_calculated` flag (L229). L230 still
@@ -194,8 +276,31 @@ idempotency. P1 / Medium / `Needs Verification` unchanged; A3/A4 own legacy-row 
 | Origin | S3 L6 — `supabase-specialist` delegation TEST D (carried, **not re-verified** in A0) |
 | Severity | **P2** |
 | Confidence | **High** |
-| Status | `Accepted` |
+| Status | `False Positive` |
 | Wave | W1 |
+
+**Current A4 disposition — P2/High/False Positive, not Fixed.** The old finding conflated sole
+authoritative **award** ownership with exclusive ownership of every initialization/maintenance
+write. Exact source: `AGENTS.md:193-194` says "only authoritative award path";
+`docs/planning/ARCHITECTURE.md:255` says "only award path";
+`docs/planning/PROJECT_CONTEXT.md:95-96,169` describes the authoritative completion/reward path and
+transaction that owns all awards. The historical allegation that these passages forbid every
+progression write is unsupported.
+
+`initialize_user` initializes unonboarded state (progression:137-157); `sync_daily_data` maintains
+daily state (192-214); `switch_class` recomputes history without granting another completed-workout
+award (285-305). Expected and observed responsibilities are compatible with the cited contract.
+Provider invocation of server refresh is not a client-owned award. Independent qa-reviewer
+`ses_e7d23c0d4ffe9IA6MkbszmpEvl` read source/evidence and independently challenged the old claim.
+This is static semantic disproof, not a runtime PASS or certification of unknown deployed functions.
+
+**Current remediation / impact.** None under this ID; no current wording defect established. Do not
+rewrite governance/code to repair the unsupported rationale and do not declare Fixed. Preserve the
+historical rationale/addenda below and JSON `historical_pre_a4`/`a3_review`. No runtime regression
+from reclassification. DATA002 separately records actual class-history loss; DATA001 separately
+records conditional duplicate credit. Neither establishes this every-write allegation.
+
+### Historical pre-A4 rationale — P2 / High / Accepted (rejected by current review)
 
 **Mechanism.** `AGENTS.md` §4 and §9 and `ARCHITECTURE.md` state that `complete_workout` is the only
 path that writes XP. Reading the migration shows three further writers of progression state:
@@ -1191,6 +1296,18 @@ control. Retain outside permanent application tests. `NOT RUN` at this recovery 
 | Wave | W1 |
 | Verification method | A5 `flutter-specialist`: use a controlled repository/transport fixture that acknowledges award then fails detail retrieval; assert preserved acknowledgement and recovery behavior. NOT RUN; no backend commit was exercised here. |
 
+**A4 review — classification unchanged P2/High/Accepted.** This ID also owns summary reconciliation,
+not another award bug: `active_workout_screen.dart:75-80` captures local duration/exercises/counts
+before awaiting completion at82;91-100 passes that snapshot into summary. Controller:655-677
+returns authoritative `result.workout`/`result.rewards` plus local fields, and repository:70-76
+hydrates detail separately after award. Summary duration/exercises can therefore describe a
+pre-await local snapshot beside the awarded result. No divergent rendered summary or injected
+transport outcome was executed. A5 flutter-specialist with qa-reviewer: gate pending edits/award/
+detail response, assert displayed duration/exercises reconcile with committed workout and acknowledged
+rewards, and distinguish pre-award failure from post-award hydration failure. The earlier A2
+dependency row's DATA001 Medium/Needs Verification classification is historical; current DATA001
+is Confirmed only for its conditional prior-award tuple. No confidence promotion here.
+
 ---
 
 ## FND-INTG-003 — Coach accepts answers that its next history request rejects
@@ -1249,7 +1366,16 @@ control. Retain outside permanent application tests. `NOT RUN` at this recovery 
 | Wave | W2 |
 | Verification method | A5 `flutter-specialist`: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4. |
 
-## A3 addenda to existing IDs — no classification changes
+**A4 review — classification unchanged P2/High/Accepted.** Actual Flutter Add Set/complete callbacks
+were not executed. The former A4 SQL dependency above is now resolved separately as INTG005:
+`phases/A4_SQL_EVIDENCE.md` group3 accepts persisted0reps/30sec and then rejects final completion
+22023 without award/state change. That distinct backend contradiction does not confirm the
+hidden-positive-rep/zero-visible-duration client mechanism. INTG007 owns generated timed quest
+prescription/default compatibility with High-only integration confidence. A5 flutter-specialist
+with qa-reviewer must execute the actual callbacks, assert modality-consistent visible defaults/
+completion and retain rep controls. Do not duplicate backend or quest findings here.
+
+## Historical A3 addenda to existing IDs — no classification changes at A3
 
 - **FND-DATA-001:** progression.sql:223-230 locks owned workout before ledger/flag checks. Current
   synthetic A/B foreign completion fails42501, no reward rows created. QA correction: existing
@@ -1323,3 +1449,119 @@ control. Retain outside permanent application tests. `NOT RUN` at this recovery 
 | Depends on | A5 transport/resource verification; distinct from INTG003 answer/history schema mismatch. |
 | Wave | W2 |
 | Verification method | A5 supabase-specialist with qa-reviewer: bounded synthetic streams, no traffic flood; assert stop at byte budget, sanitized errors and correct auth/quota order. Separately document gateway limits only with approved non-production access. NOT RUN in A3. |
+
+---
+
+## FND-DATA-002 — Class switching loses previously awarded synergy XP
+
+| Field | Value |
+|---|---|
+| ID | `FND-DATA-002` |
+| Title | Class switching loses previously awarded synergy XP |
+| Category | `DATA` |
+| Component | Class award history and switch_class recomputation |
+| Paths | `supabase/migrations/20261026000200_authoritative_progression.sql`; `docs/audit/phases/A4_SQL_EVIDENCE.md` |
+| Lines | progression:259-265,294-303; A4_SQL_EVIDENCE group4, sections3-4 exact output/source |
+| Origin | A4 Supabase source review/SQL group4; orchestrator independent rerun and qa-reviewer `ses_e7d23c0d4ffe9IA6MkbszmpEvl` |
+| Root cause | Per-session class awards include synergy, but switching reconstructs global award amounts times focus only. Overwriting the equipped row removes its higher existing total; retained class_xp logs are not used when returning. |
+| Evidence | A4 group4: actual B/C Chest completion earns20 global/21 C XP; secondary C->A->C restores20 while the C award log remains21 and global total20. Full probe exit0/108 assertions across8 groups; primary reports independent current rerun exit0; independent QA supports this bounded same-fixture result. No production history read. |
+| Expected behavior | Switching away/back preserves previously awarded class progress including synergy without another global award. |
+| Actual behavior | Synthetic C progress drops21->20 despite retained21-XP class award log; global XP unchanged. |
+| Impact | P2 loss of class progress and potentially level/graduation near a threshold; Confirmed synthetic round trip, not measured deployed population or global duplication. |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
+| Proposed remediation | Separately approve historical class-credit policy and preserve reliable awarded progress including synergy rather than reconstructing solely from global XP. Distinguish previously equipped credit from new-class eligibility; use an approved additive migration if persistence changes. Switching must not award global XP. |
+| Regression risk | Both slots, repeated switches, incomplete legacy class ledgers, graduation thresholds, focus changes and graduated classes. |
+| Related tests | `supabase/tests/progression_regression.sql`; `docs/audit/phases/A4_SQL_EVIDENCE.md` group4 |
+| Missing tests | A5 supabase-specialist with qa-reviewer: retain reproduction; after separately approved fix require C21 after C->A->C, no repeated-switch drift or global/log/reward changes; both-slot, nonsynergy, legacy and graduation controls under approved policy. |
+| Depends on | Approved historical-credit policy/additive implementation if required; ARCH001 is rejected wording rationale, not this derived-state defect. |
+| Wave | W1 |
+| Verification method | Retained A4 group4 full source/command/output reproduces21->20, exit0; primary independently reran108 assertions. Owner supabase-specialist, independent qa-reviewer. No runtime rerun in this register-write turn; A5 adds policy/slot controls without assuming deployment prevalence. |
+
+---
+
+## FND-INTG-005 — Final completion rejects CHECK-valid zero-rep timed sets
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-005` |
+| Title | Final completion rejects CHECK-valid zero-rep timed sets |
+| Category | `INTG` |
+| Component | Workout duration persistence versus authoritative completion validation |
+| Paths | `supabase/migrations/20261027000100_exercise_catalog_metadata.sql`; `supabase/migrations/20261026000200_authoritative_progression.sql`; `app/lib/features/workout/domain/workout_set.dart`; `app/lib/features/workout/data/supabase_workout_repository.dart`; `docs/audit/phases/A4_SQL_EVIDENCE.md` |
+| Lines | catalog migration:359-367; progression:235-238; workout_set:23,30; repository:136-185,189-208; A4_SQL_EVIDENCE group3, sections3-4 exact output/source |
+| Origin | A4 Supabase/Flutter/catalog review and SQL group3; primary independent rerun and qa-reviewer `ses_e7d23c0d4ffe9IA6MkbszmpEvl` |
+| Root cause | Final CHECK/client model accept completed positive-duration/zero-rep sets, but complete_workout rejects reps<1 without considering duration_seconds. |
+| Evidence | Group3 authenticated Plank0reps/30sec persists, then RPC rejects22023 Invalid workout measurements. Eleven-table snapshot is unchanged, credit/log/reward0. Changing only reps to1 permits5 XP. Full probe exit0/108 assertions; primary reports independent rerun exit0; QA supports this SQL scope, not actual Flutter callback execution. |
+| Expected behavior | Approved model/CHECK and final timed completion use a consistent measurement rule without hidden positive reps. |
+| Actual behavior | CHECK-valid0reps/30sec blocks final completion without awarding; positive-rep control succeeds. Any such completed set causes entire-workout rejection. |
+| Impact | P2 timed completion failure and accepted-but-unfinishable data; no partial award, production cohort or hidden-rep client bypass established. |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
+| Proposed remediation | After approval define per-mode measurement/award rules and align RPC validation through an additive migration/function replacement. Preserve invalid0/0 rejection, catalog validation, atomicity and sole-award boundary; do not hide a schema/RPC mismatch in presentation. |
+| Regression risk | Timed/rep/mixed workouts, duration bounds, pace clamp, PR/quest semantics, retries and immutable history. |
+| Related tests | `tools/db-tests/run.mjs:64-100`; `supabase/tests/progression_regression.sql`; A4_SQL_EVIDENCE group3 |
+| Missing tests | A5 supabase-specialist/qa-reviewer: retain0/30 failure and rep control; after approved fix require consistent timed completion/one retry reward. A5 flutter-specialist: actual timed default/save/finish transport fixture, mixed-mode and invalid0/0 controls; NOT RUN. |
+| Depends on | Approved timed award/validation contract; INTG004 is hidden-positive-rep/zero-visible-duration Add Set behavior, INTG007 is quest prescription compatibility. |
+| Wave | W1 |
+| Verification method | Retained group3 actual SQL insert/RPC22023/no-change snapshot and5-XP rep control, exit0. Owner supabase-specialist with independent qa-reviewer. A5 real Flutter/transport journey and complete timed award policy remain NOT RUN. |
+
+---
+
+## FND-INTG-006 — Full Body category does not match full_body class focus
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-006` |
+| Title | Full Body category does not match full_body class focus |
+| Category | `INTG` |
+| Component | Seeded category keys versus class-focus award matching |
+| Paths | `supabase/seed_exercises.sql`; `supabase/migrations/20261026000200_authoritative_progression.sql`; `docs/audit/phases/A4_SQL_EVIDENCE.md` |
+| Lines | seed_exercises:1305-1306,1315,1324,1333,1342,1351; progression:42,45-46,235-236,261,298; A4_SQL_EVIDENCE group5, sections3-4 exact output/source |
+| Origin | A4 exercise-catalog key review, Supabase source/SQL group5, primary rerun and independent qa-reviewer `ses_e7d23c0d4ffe9IA6MkbszmpEvl` |
+| Root cause | Lowercasing Full Body yields full body, not configured full_body in A/D/E focus arrays; award and reconstruction paths use incompatible keys without space/underscore normalization. |
+| Evidence | Group5 three independent single-class A/D/E fixtures: seeded Burpee20 global XP gives8 class XP each; same-day matched Jumping Jack(A/D)/Crunch(E) controls give20 global/20 class XP. Focus contains full_body, no pair synergy or quest confound. Probe exit0/108 assertions; primary independent rerun reported exit0, QA supports bounded evidence. |
+| Expected behavior | Configured Full Body focus matches catalog Full Body exercises and applies the intended focus-match factor. |
+| Actual behavior | Equal20-global-XP sessions credit A/D/E8 versus matched-control20; class reconstruction uses the same incompatible strings. |
+| Impact | P2 configured-focus and derived-class under-credit; Confirmed seeded-key defect, no deployed population, historical repair total or global award change claimed. |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
+| Proposed remediation | Separately approve a canonical category/focus mapping in award and reconstruction, preserving exercise UUIDs/curated metadata. Historical-credit correction needs an approved additive reconciliation plan, not a seed rename or speculative credit update. |
+| Regression risk | All focus keys, A/D/E/nonfocus classes, global/class XP separation, switching, legacy category strings and stable exercise references. |
+| Related tests | `supabase/tests/progression_regression.sql`; A4_SQL_EVIDENCE group5 |
+| Missing tests | A5 exercise-catalog/supabase-specialist with qa-reviewer: all-seed key canonicalization/stable UUIDs; after approved fix Full Body and matched controls receive intended factors while nonfocus and switch-history controls remain correct. |
+| Depends on | Approved canonical-key/historical-reconciliation policy; DATA002 separately owns synergy loss. |
+| Wave | W2 |
+| Verification method | Group5 resolves real seed IDs, executes RPCs and observes8-versus20 at equal20 global XP, exit0. Owner supabase-specialist with exercise-catalog and qa-reviewer; A5 expands canonical-key controls when authorized. No seed/product changes in A4. |
+
+---
+
+## FND-INTG-007 — Generated timed quest rep targets conflict with client timed defaults
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-007` |
+| Title | Generated timed quest rep targets conflict with client timed defaults |
+| Category | `INTG` |
+| Component | Daily quest prescription versus timed initialization and matching |
+| Paths | `supabase/migrations/20261026000200_authoritative_progression.sql`; `app/lib/features/workout/presentation/controllers/active_workout_controller.dart`; `supabase/seed_exercises.sql`; `docs/audit/phases/A4_SQL_EVIDENCE.md` |
+| Lines | progression:205-212,238,245-251; controller:298-317; seed_exercises:1220-1221; A4_SQL_EVIDENCE group6, sections3-4 exact output/source |
+| Origin | A4 catalog/Flutter/Supabase contract review/SQL group6; independent qa-reviewer `ses_e7d23c0d4ffe9IA6MkbszmpEvl` requires High-only integration scope |
+| Root cause | sync_daily_data prescribes3x12 reps for every selected exercise; matching counts reps. Client forces timed-classified initial sets to0reps/30sec even with rep prescription, and generated config has no duration target. |
+| Evidence | Group6 fixture restricts only other seeded quest template types to select full_body deterministically; catalog metadata/RPCs unchanged. Actual generator produces carry-classified Ab Wheel Rollout3x12; source-guarded JS mirror persists timed0/30 and SQL matching gives0/3, other targets3/3. Completion rejects earlier22023 under INTG005. Positive-rep SQL control earns450 quest XP. Probe exit0, primary independent108-assertion rerun reported exit0. Dart/UI and full quest journey did not execute. |
+| Expected behavior | Generated prescriptions, initialization and matching use compatible per-exercise measurements, or unsupported timed targets are explicitly excluded. |
+| Actual behavior | Actual rep target and mirrored timed defaults disagree with0/3 matching sets. Earlier completion validation prevents independently reached end-to-end quest eligibility; a failed Dart quest journey is not established. |
+| Impact | P2 likely incompatible generated timed quest experience/misleading targets. High for the cross-layer contract with bounded SQL evidence, not Confirmed UI failure or independently validated exercise-science classification. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Needs Verification` |
+| Proposed remediation | After approval and real integration verification define mode-aware quest targets/defaults/matching together, or exclude unsupported modes explicitly. Coordinate with INTG005; do not weaken final validation or hide reps. Preserve catalog IDs and transactional award ownership. |
+| Regression risk | Quest rotation/catalog selection, timed/rep/mixed prescriptions, duration/load targets, expiry, restoration and quest reward replacement. |
+| Related tests | `supabase/tests/security_regression.sql:92-111`; `app/test/workout_controller_test.dart`; A4_SQL_EVIDENCE group6 |
+| Missing tests | A5 flutter-specialist/Supabase with independent qa-reviewer: actual generated-quest start/addExercise/save/finish with controlled transport, assert displayed/default measurement and observed eligibility with rep control. Do not bypass INTG005 to claim current eligibility; after separately approved fix test duration matching/one retry award. Catalog owner verifies supported modality separately. |
+| Depends on | INTG005 rejects0-rep completion before quest matching; INTG004 is additional-set hidden reps, not initial target contract. A5 Flutter/SQL fixtures, no production/provider/new dependency required. |
+| Wave | W2 |
+| Verification method | Group6 proves actual SQL generation/persistence/matching counts and positive-rep quest control, not executed Dart. Owner flutter-specialist with supabase-specialist and qa-reviewer, target A5. Actual UI journey and independently reached timed eligibility remain NOT RUN; retain High/Needs Verification. |

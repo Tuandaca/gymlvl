@@ -1,5 +1,27 @@
 # GymLvl — Task Board
 
+## Current — A4 DONE/CLOSED; A5 NEXT / NOT STARTED (2026-10-28)
+
+**Task/status:** A4 PASS/CLOSED for scoped audit criteria, owned deferred gaps retained, not production
+certification. Reviews/probes/material/final QA complete. Entry main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3 clean/remote
+equal, active primary verified. Nine authorized docs only, commit/push authorized but pending.
+**Findings:**30; P0 0/P1 3/P2 20/P3 5/P4 2; Confirmed9/High20/Medium1; Accepted24/NV3/Fixed1/FP2.
+All26 old IDs/history preserved; only DATA001 conditional synthetic confirmation and ARCH001
+sole-award wording disproof change classifications. New DATA002/INTG005-007; INTG007 stays High/NV.
+**Coverage:**24 Reviewed(static)/0 InReview/2 NotReviewed(C23/C24)/1 OutOfScope. No runtime blanket.
+**Evidence:** real sequential five-agent ledger in A4 phase2; SQL probe108 assertions/15 sequential
+DBs, existing SQL10 units, Flutter analyze/format125unchanged/test126 all exit0. Edge NOT RUN.
+**Current artifact gate:** phase10 retained PowerShell/Node -> A4_ARTIFACT_CHECK json30/md30/oldIDs26/
+unchangedClasses24/exactHistories2/newIDs4/fields22/coverage24-0-2-1/allowedPaths9/sourceHashes7/errors0;
+A4_VALIDATION_EXIT node=0 diff=0, PASS. Corrected primary validator FAILs retained, no product changes.
+**Blockers:** no scoped closure blocker established; exact A5 deferred owners/assertions in phase8.
+Final context/QA documentary corrections applied, last coverage A2 mixed-stage paragraph historical;
+QA additional exclusion-diff BLOCKED(permission), no bypass; no QA runtime or exhaustive gate claimed.
+**Next action:** complete authorized A4 docs checkpoint/remote check, then await explicit A5 go-ahead
+using audit handoff exact prompt. No A5/A6/remediation/migration/production/cleanup execution.
+
+## Historical task states (preserved)
+
 ## Current — A3 DONE/CLOSED; A4 NEXT (2026-10-28)
 
 **Checkpoint result:** c535613 on main (nine docs), normal push exit0; full local/remote SHA

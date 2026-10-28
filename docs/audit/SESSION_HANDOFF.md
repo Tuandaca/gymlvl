@@ -1,5 +1,99 @@
 # Audit — Session Handoff
 
+## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
+
+- **Task/status:** A4 workout/XP/progression/business logic only; `PASS` / CLOSED against scoped
+  review/evidence/gaps/independent-QA/consistency criteria. A2/A3 remain CLOSED; no A5 execution.
+- **Commit:** main `c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3`; clean/remote equal at entry,
+  nine expected documentation paths dirty now. Normal docs commit/push authorized, not yet executed.
+  Remote `refs/heads/main` independently rechecked at this SHA during final reconciliation.
+- **Changed files:** `docs/audit/phases/A4_WORKOUT_PROGRESSION.md`,
+  `docs/audit/phases/A4_SQL_EVIDENCE.md`, `docs/audit/MASTER_FINDINGS.md`,
+  `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/AUDIT_COVERAGE.md`,
+  `docs/audit/SESSION_HANDOFF.md`, `docs/planning/TASK_BOARD.md`,
+  `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`. No product/permanent tests.
+- **Coverage/delegation:**24 Reviewed(static)/0 InReview/2 NotReviewed/1 OutOfScope; C23/C24 A5.
+  All five required agents actually invoked sequentially; exact sessions/scopes/results in A4 phase2.
+- **Findings:**30; P0 0/P1 3/P2 20/P3 5/P4 2; Confirmed9/High20/Medium1. Accepted24/
+  NeedsVerification3/Fixed1/FalsePositive2. All26 earlier IDs retained;24 earlier classifications
+  unchanged. DATA001 P1/Confirmed/Accepted only for synthetic previously credited/logged completed
+  falseflag/noledger tuple; ordinary replay controls pass, production cohort unknown. ARCH001
+  P2/High/FalsePositive (not Fixed): sole award is not every maintenance write; exact history retained.
+  Add DATA002 synergy21->20, INTG005 timed SQL22023, INTG006 Full Body focus8vs20 and INTG007 generated
+  timed quest12reps vs0/30 defaults. INTG007 stays High/NV; no actual Dart/controller journey executed.
+- **Verification:** `node <A4 external probe>/probe.mjs` ->8groups/15 sequential DBs/108assertions/
+  zero fetch/exit0; specialist plus justified independent orchestrator rerun. Retained full source/output.
+  `node tools/db-tests/run.mjs` -> `PASS 10 SQL verification units against PostgreSQL 17.5`, exit0.
+  `flutter analyze --no-pub` -> `No issues found! (ran in 3.0s)`, exit0; format ->125files/0changed,
+  exit0; `flutter test --no-pub --reporter expanded` -> `+126: All tests passed!`, exit0. These ran
+  against c95cb48 product source, not copied historical PASS. Edge tests NOT RUN (unchanged A3 scope).
+- **QA:** independent material source/evidence and final artifact-only inspection completed, supports
+  bounded P1 and three synthetic P2 mechanisms; no independent QA runtime claim. Context/QA stale
+  ownership/header/coverage wording corrections applied; last A2 mixed-stage paragraph labeled historical.
+  No material scoped closure blocker found. QA git scope/status/whitespace exit0; extra excluded-path
+  diff BLOCKED by shell permission, not retried or bypassed. Primary allowlist/hash output below was
+  established before that denial; no permissions changed or unsupported QA runtime PASS claimed.
+  Catalogue-parser regex and unnecessary legacy-title validator initial FAILs corrected transparently;
+  no probe assertion unexpectedly failed, expected22023/P0001 errors asserted, no product repair.
+- **Artifact verification:** retained PowerShell extraction/Node validator in A4 phase10 ->
+  `A4_ARTIFACT_CHECK json=30 md=30 old_ids=26 old_classes_unchanged=24 exact_histories=2 a3_reviews=2 new_ids=4 required_fields=22 md_json_classes=30 coverage=24/0/2/1 allowed_paths=9 unchanged_probe_inputs=7 errors=0`;
+  `A4_VALIDATION_EXIT node=0 diff=0`, PASS. Three initial primary validator FAILs (stdin Unicode,
+  overstrict optional array, trimmed porcelain prefix) transparently corrected in validator only;
+  no register data changed or allowlist widened. Full commands/source/output retained before final QA.
+- **Decisions/blockers:** no material architecture/schema/permission/dependency/scope change.
+  No scoped closure blocker established. Real independent scheduling, device/gateway, lost-response,
+  expiry-only and actual Dart quest checks remain unexecuted A5 work with owners/assertions in phase8.
+  Eleven-table rollback is after helper savepoint rollback, not crash recovery. Midnight old-quest
+  control changes day and expiry together. No production prevalence or deployed ACL claim. Prior
+  Temp disposal remains separately approval-gated; no full-app copy, secret access or cleanup.
+- **Next action:** complete authorized A4 docs checkpoint/remote equality and stop; await explicit
+  A5 go-ahead using the exact prompt below. No A5/A6/remediation/migration starts automatically.
+
+## A5 entry prompt — authorization required; NOT started by A4
+
+> Execute **A5 ONLY — Tests, performance, reliability, observability and error handling** after
+> explicit user authorization. Use gymlvl-orchestrator. Read AGENTS, planning handoff/board then
+> canonical context and current audit handoff/coverage/registers; A2 phase8.2/9.3, A3 phase9 and A4
+> phase5/8/10-11 are bounded deferred-evidence sources. Verify active agent/main/HEAD/tree/remote;
+> expected baseline is the completed A4 documentation checkpoint (resolve exact latest main SHA;
+> payload/outcome references below may precede its final child record). Never reset to an old SHA.
+>
+> Create docs/audit/phases/A5_TEST_RELIABILITY.md. Audit C23 SQL/Edge harness and C24 Flutter tests,
+> CI assertions, reliability/error recovery, observability and targeted performance/resource risks.
+> Do not repeat whole-repository scans or already retained DATA001/CONC001/SEC002/PUBLIC-ACL probes
+> without a concrete new assertion. Prioritize a finite test matrix, not exhaustive production proof.
+> Use bounded sequential delegation: flutter-specialist (controller/tests/transport), supabase-specialist
+> (harness/transactions/gateway when available), qa-reviewer (independent material findings),
+> context-keeper (consistency), exercise-catalog or ui-ux-specialist only for their actual deferred scope.
+> Give exact owned paths/criteria/commands; one writer per file, no parallel shell writers.
+>
+> Carry A4 assertions with owners: genuine independent-connection completion/child-write/cancel and
+> midnight-lock schedules (Supabase/QA); partial reorder, committed-but-lost addSet vs rejection and
+> reload controls, zero-row delete and post-award hydration/summary (Flutter/Supabase/QA); actual
+> Dart generated timed quest/Add Set payloads and catalogue UUID replay (Flutter/catalogue/QA).
+> Keep INTG007 High/NV until actual journey evidence; no invented reps or catalogue IDs. Date cases
+> isolate expiry-only and distinguish policy questions from proven defects (Supabase/QA).
+> Retain A2 Lead10 failed-signin->recovery operation-specific error assertion, post-await identity/
+> storage race, interaction/accessibility/device gaps (Flutter/UI/QA), and A3 streaming bounds,
+> JWT/gateway/Auth/full role matrix/resource/timeout/context gaps (Supabase/QA). If a required local
+> stack/device/tool is unavailable, name the exact blocker and finite assertion; do not simulate
+> true concurrency with single-connection Promise.all or require production access to close A5.
+>
+> Preserve all30 IDs/history and mirrored fields/counts; independent QA for material/P0/P1 findings.
+> DATA001 confirms only a synthetic prior-credit/log falseflag/noledger duplicate global award,
+> not a deployed cohort or normal retry failure. ARCH001 is FalsePositive, not Fixed. Three new P2
+> SQL observations are not remediation; INTG004 client hidden reps and INTG005 server rejection differ.
+> Keep audit-only synthetic source/output in docs/evidence or a new exact external task directory;
+> use installed dependencies and synthetic identities, no real users/secrets/provider/production.
+> No product/permanent-test/migration/RLS/Edge/config/permission edits, installs, full-app Temp copy,
+> deletion of prior task directories, deployments, remediation, OpenGym migration, A6 or media work.
+> Run applicable non-destructive checks, persist command/output/limits and honest statuses, update
+> coverage/registers/handoffs/three planning records and evaluate scoped acceptance. Normal A5 Git
+> commits/pushes require actual user authorization; the A4 Git authorization does not carry forward.
+> Report in Vietnamese with actual delegation evidence, exact A6 handoff and stop after A5.
+
+## Historical A3 closure and A4 entry prompt (preserved)
+
 ## Current — A3 scoped security audit CLOSED; A4 not started (2026-10-28)
 
 **Recorded A3 checkpoint:** main `c535613fe29cf5a435ead44a6c4c26a16e3074ae` (`c535613`),

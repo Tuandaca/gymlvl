@@ -1,5 +1,44 @@
 # GymLvl — Session Handoff
 
+## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
+
+- **Task/status:** A4 only, PASS/CLOSED for scoped audit acceptance with explicit deferred gaps;
+  not product/production certification. A2/A3 remain CLOSED; A5 not started.
+- **Commit:** main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3; clean/remote equal at entry, nine
+  authorized docs dirty now. Remote refs/heads/main rechecked equal. Docs commit/push authorized,
+  not executed yet; no product/config/schema/permanent-test/agent/dependency changes.
+- **Changed files:** docs/audit/phases/A4_WORKOUT_PROGRESSION.md,
+  docs/audit/phases/A4_SQL_EVIDENCE.md, docs/audit/MASTER_FINDINGS.md,
+  docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md, docs/audit/SESSION_HANDOFF.md,
+  docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md, docs/planning/CHANGELOG_AI.md.
+- **Findings/coverage:**30 (P0 0/P1 3/P2 20/P3 5/P4 2; Confirmed9/High20/Medium1), Accepted24/
+  NeedsVerification3/Fixed1/FalsePositive2;24 Reviewed(static)/0 InReview/2 NotReviewed/1 OutOfScope.
+  All26 earlier IDs/history retained, only DATA001 and ARCH001 old classifications change. DATA001
+  synthetic prior-credit/log falseflag/noledger duplicate global credit Confirmed; prod cohort and
+  normal-retry duplication not established. ARCH001 FalsePositive (sole award vs maintenance), not
+  Fixed. New DATA002 and INTG005-007; INTG007 timed quest journey remains High/NeedsVerification.
+- **Delegation/QA:** all five required agents actually invoked sequentially; sessions/outputs in A4
+  phase2. Independent material and final artifact-only inspection completed; context/QA stale wording
+  corrections applied. No material closure blocker; no QA runtime rerun. QA scope/status/whitespace
+  exit0; extra exclusion-diff command BLOCKED(permission), not retried or bypassed, permissions unchanged.
+- **Verification:** node <A4 external path>/probe.mjs ->8groups/15 sequential DBs/108assertions/
+  zero fetch/exit0, primary independent rerun also exit0; node tools/db-tests/run.mjs ->PASS10 units/
+  PostgreSQL17.5, exit0; app analyze --no-pub ->No issues found(3.0s), format ->125files/0changed,
+  tests --no-pub --reporter expanded ->+126 All tests passed, all exit0. Edge NOT RUN (unchanged).
+  Initial catalogue-parser/legacy-title-validator FAILs corrected and retained; no product repair.
+- **Artifact verification:** phase10 retained extraction/Node command -> A4_ARTIFACT_CHECK json30/
+  md30/oldIDs26/unchangedClasses24/exactHistories2/newIDs4/fields22/coverage24-0-2-1/allowedPaths9/
+  unchangedProbeInputs7/errors0; A4_VALIDATION_EXIT node=0 diff=0, PASS. Primary validator's three
+  setup/overstrictness FAILs corrected in its own source only and retained; final context/QA completed.
+- **Decisions/blockers:** no material decision or closure blocker established. Independent concurrency,
+  transport-loss/reorder/delete/hydration, actual Dart quest, isolated expiry/device/gateway checks
+  explicitly unexecuted with A5 owners/assertions in A4 phase8 and exact audit handoff prompt. No
+  production inspection, full-app Temp copy or cleanup; prior A2 disposal still approval-gated.
+- **Next action:** complete authorized A4 docs checkpoint/remote equality, then stop and await explicit
+  A5 authorization; use docs/audit/SESSION_HANDOFF.md **A5 entry prompt**. Do not start A5/A6/remediation.
+
+## Historical A3 and prior handoffs (preserved)
+
 ## Current — A3 scoped audit CLOSED; A4 not started (2026-10-28)
 
 **A3 checkpoint:** main c535613fe29cf5a435ead44a6c4c26a16e3074ae, nine docs, normal push
