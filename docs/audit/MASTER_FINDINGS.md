@@ -1,5 +1,40 @@
 # Master Findings
 
+**Stage:** A7 B0 PARTIAL / IN PROGRESS (2026-10-29); B1 not started; no W2-W5 implementation.
+**Baseline:** `main@3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75`, source changes uncommitted at review.
+**Counts:** 35 findings — P0: 0, P1: 3, P2: 24, P3: 6, P4: 2. Confirmed: 16, High: 18, Medium: 1, Low: 0.
+**Status:** 3 `Needs Verification`, 25 `Accepted`, 5 `Fixed`, 2 `False Positive`.
+
+R0-01 safety gate PASS and D-025..028 authorize the bounded B0 corrections. Exactly GOV004/SEC001
+(R0-02), SEC003 (R0-03) and SEC004 (R0-04) become `Fixed` **for repository-scoped correction only**;
+severity/confidence unchanged. The other31 objects/raw JSON spans remain unchanged. Each changed
+object retains its complete exact pre-A7 object, including nested history, in `historical_pre_a7`.
+All earlier closure metadata remains historical, not an A7 whole-batch closure or deployment claim.
+The first per-ID table is current; expandable pre-A7 records below are historical.
+
+Parent reports independent execution: `node --test tools/agent-tests/permission_policy.test.mjs`
+32 passed; `node tools/db-tests/run.mjs`11 SQL units plus ACL10 isolated DBs/365 assertions;
+cached-only/deny-net Deno full Edge44 tests and six handler checks; all exit0/diff0. Specialist real
+RED/green evidence is retained. This docs-only writer does not rerun runtime suites. Execution
+reference: `phases/A7_BATCH_EXECUTION.md`; parent owns stale task-ledger synchronization.
+
+Independent QA `ses_e7c4250a1ffeXk30ceIhMb3Jvk` inspected source and found no material code blocker;
+requested inherited owner/superuser fixtures subsequently added and passed. QA `npm.ps1` was
+execution-policy BLOCKED; source-filter Git permission denied, not retried. **No independent QA
+runtime PASS.** Policy results model permissions, not the live scanner/sandbox; saved approvals are
+unknown and reviewer permissions remain narrow. SEC003 migration tested only in disposable PGlite,
+not deployed; deployment/inventory NOT RUN and migration readiness NOT READY. SEC004 streaming caps
+do not prove DoS protection, hosted memory ceilings or real network cancellation. No new IDs.
+
+**A7 docs-validator initial FAIL retained:** inline Node completed the35-object/history/raw-span/
+classification checks, then an extra global literal-HTML balance assertion failed `13 !== 11`,
+exit1. Baseline already contains9 literal opening details tags and7 closing tokens (including retained
+evidence text); current adds exactly4 matched wrappers. Corrected validator compares the opening/
+closing delta against baseline rather than rewriting unrelated historical text. Initial output:
+`...\Temp\opencode\a7-b0-register-validation-3d9dbb0.log`; initial `git diff --check` exit0.
+
+### Historical A6/A5 register header (preserved; superseded by A7 current header)
+
 **A6 reconciliation (2026-10-29):** all35 finding objects/classifications/history retained; no
 promotion, fix or reclassification. Proposed per-ID owners/tasks/priority and distinct-root
 relationships are in `REMEDIATION_PLAN.md` and `phases/A6_RECONCILIATION.md`; prior wave fields are
@@ -947,6 +982,28 @@ the invariants section is edited once.
 
 | Field | Value |
 |---|---|
+| ID | FND-GOV-004 |
+| Category | GOV |
+| Component | Permission configuration |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Fixed` |
+| Root cause | Historical allow-all shell fallback left alternate Git spellings ungated. R0-02 fixes the repository policy using owner-approved D-026 default shell ask, without depending on a complete spelling denylist; read-only reviewer permissions remain narrow. |
+| Evidence | Real RED/green policy regression and parent independent node --test tools/agent-tests/permission_policy.test.mjs:32 passed, exit0. Alternate/destructive Git and secret-reader spellings are synthetic evaluator inputs, never destructive commands. Original A1 failure is retained in historical_pre_a7. QA source inspection found no material blocker; no QA runtime execution claim. |
+| Actual behavior | Fixed in repository scope: unlisted shell spellings resolve to ask under the tested policy model; qa-reviewer/context-keeper retain read-only restrictions and no broad shell allow override. |
+| Impact | The reproduced policy-model allow fallback is corrected. High confidence remains unchanged: this is not proof of the live scanner, a sandbox, revocation of saved approvals, or prevention of every destructive operation. |
+| Proposed remediation | Implemented R0-02 under D-025/D-026: maintain default shell ask and the permanent32-test policy regression; any live scanner/saved-approval validation requires a separately safe approved check, not destructive probes. |
+| Owner / task | gymlvl-orchestrator / permission-policy implementer; R0-02; independent qa-reviewer source inspection |
+| Wave | W1 (historical roadmap label; A7 B0 approved scope) |
+
+**A7 review:** Repository-only Fixed, High unchanged; no runtime rerun in this docs turn. Full prior
+object in JSON `historical_pre_a7`; evidence/limits in `a7_review` and A7 execution phase.
+
+<details>
+<summary>Historical pre-A7 record — superseded wording/status, not a current unfixed claim</summary>
+
+| Field | Value |
+|---|---|
 | Category | `GOV` |
 | Component | Permission configuration |
 | Path | `.opencode/opencode.jsonc`, `AGENTS.md` §8, `.opencode/agents/gymlvl-orchestrator.md` |
@@ -1009,7 +1066,31 @@ per segment.
 
 ---
 
+</details>
+
 ## FND-SEC-001 — Shell secret gates cover a short list of command spellings
+
+| Field | Value |
+|---|---|
+| ID | FND-SEC-001 |
+| Category | SEC |
+| Component | Permission configuration |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Fixed` |
+| Root cause | Historical allow-all shell fallback made the secret-reader spelling denylist incomplete. R0-02 replaces that fallback with owner-approved D-026 default ask and preserves narrow read-only reviewer permissions; no secret-reader allowlist is claimed complete. |
+| Evidence | Real RED/green policy regression; parent independent node --test tools/agent-tests/permission_policy.test.mjs ->32 passed, exit0, including synthetic alternate readers and reviewer-permission controls. No actual secret read/copied/exfiltrated. Historical A1 observations retained in historical_pre_a7. Independent QA is source inspection only. |
+| Actual behavior | Fixed in repository scope: unlisted shell readers now resolve to ask in the32-test model; qa-reviewer/context-keeper read-only restrictions and sensitive read gates remain preserved. |
+| Impact | The tested default-allow policy bypass is corrected; High confidence is unchanged because live scanner enforcement, saved approvals and actual secret isolation were not verified. Pattern matching is not a sandbox. |
+| Proposed remediation | Implemented R0-02/D-026 default shell ask with permanent policy tests, without adding broad shell allows; maintain sensitive gates and reviewer restrictions. Separately safe live-harness validation remains NOT RUN, never read secrets to test a gate. |
+| Owner / task | gymlvl-orchestrator / permission-policy implementer; R0-02; independent qa-reviewer source inspection |
+| Wave | W1 (historical roadmap label; A7 B0 approved scope) |
+
+**A7 review:** Repository-only Fixed; no live scanner/sandbox or saved-approval assurance, no actual
+secret-reader test. Full pre-A7 object retained in JSON; runtime suites not rerun in this docs turn.
+
+<details>
+<summary>Historical pre-A7 record — superseded wording/status, not a current unfixed claim</summary>
 
 | Field | Value |
 |---|---|
@@ -1067,6 +1148,8 @@ that D-024 removed, so it must not be paired with a broad per-agent allow.
 reviewed change.
 
 ---
+
+</details>
 
 ## FND-GOV-005 — A stale analyzer transcript is tracked as `app/analysis.txt`
 
@@ -1565,6 +1648,31 @@ completion and retain rep controls. Do not duplicate backend or quest findings h
 
 | Field | Value |
 |---|---|
+| ID | FND-SEC-003 |
+| Category | SEC |
+| Component | Legacy database adoption ACL boundary for public.users |
+| Paths | supabase/migrations/20261029000100_effective_progression_acl.sql; tools/db-tests/effective-acl-regression.mjs; tools/db-tests/run.mjs |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Fixed` |
+| Root cause | Historical named-role-only revocation left pre-existing PUBLIC progression column grants effective. R0-03 additive migration now repairs protected PUBLIC/named table and column ACLs, restores only canonical safe edits and transactionally rejects incompatible inherited authority without weakening RLS or revoking platform roles broadly. |
+| Evidence | Real RED actual authenticated own-XP UPDATE unexpectedly succeeded for injected legacy PUBLIC grant after fresh/named controls passed, exit1. First repair attempt removed safe column grants, retained FAIL; canonical safe-edit regrants corrected it. Final focused node tools/db-tests/effective-acl-regression.mjs ->10 isolated PGlite DBs/365 assertions, exit0, including inherited owner/superuser follow-up. Parent independent node tools/db-tests/run.mjs ->11 SQL units plus ACL10DB/365 assertions, exit0. Independent QA source inspection found no material blocker; QA runtime not executed. Historical A3/A5 evidence is retained in historical_pre_a7. |
+| Actual behavior | Fixed in repository scope: fresh/legacy PUBLIC/named/default-materialized ACL controls deny protected own-XP writes while safe profile/notes edits, two-user isolation, anon controls, service grants and authoritative completion/retry survive. Inherited protected-column, NOINHERIT SET-role, owner, superuser and RLS-bypass cases reject adoption and roll back table/column/PUBLIC ACL changes; replay succeeds. |
+| Impact | Conditional adoption defect corrected in the repository and tested only with disposable PGlite databases. Migration has not been applied to any deployed database; effective deployed ACLs and prevalence remain unknown. No guarantee against arbitrary future administrator grants. |
+| Proposed remediation | Implemented R0-03 under D-025/D-027 as a new additive migration with forward-correction rollback guidance and permanent runner integration. Before any separately authorized deployment, inventory effective deployed ACL/role provenance; incompatible inherited authority must fail closed, never restore progression grants. |
+| Owner / task | supabase-specialist; R0-03; independent qa-reviewer source inspection |
+| Missing tests | Authorized effective deployed ACL inventory/adoption including inherited roles before release NOT RUN; no remote database/deploy authorized |
+| Wave | W1 (historical roadmap label; A7 B0 approved scope) |
+
+**A7 review:** Migration applied only to disposable PGlite, never deployed; repository-scoped Fixed
+does not certify deployed ACLs. Owner/superuser cases and transaction rollback pass. Full prior
+object in JSON `historical_pre_a7`; this docs turn reruns no SQL suite.
+
+<details>
+<summary>Historical pre-A7 record — superseded wording/status, not a current unfixed claim</summary>
+
+| Field | Value |
+|---|---|
 | ID | `FND-SEC-003` |
 | Title | Pre-existing PUBLIC progression-column grants survive named-role hardening |
 | Category | `SEC` |
@@ -1590,7 +1698,33 @@ completion and retain rep controls. Do not duplicate backend or quest findings h
 
 ---
 
+</details>
+
 ## FND-SEC-004 — Authenticated Edge handlers fully buffer counted request and provider bodies before checks
+
+| Field | Value |
+|---|---|
+| ID | FND-SEC-004 |
+| Category | SEC |
+| Component | Authenticated Edge request and provider-response resource boundary |
+| Paths | supabase/functions/_shared/http.ts; supabase/functions/ai-coach/service.ts; supabase/functions/_shared/bounded_body.ts; supabase/functions/tests/bounded_body_test.ts |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Fixed` |
+| Root cause | Historical req.text()/upstream.json() fully buffered bodies before UTF-16/answer checks. R0-04 replaces those reads with actual streamed UTF-8 byte counting before decoding/retaining an oversize chunk, cancellation on overflow/non-ok provider and reader-lock cleanup. |
+| Evidence | Real RED against existing handlers/services, not a missing-helper import:4 passed/17 failed, exit1; multibyte caller overflow returned200 instead of413, oversized provider padding was accepted and cancellation missing. GREEN focused29 tests and parent independent full Edge44 tests plus six handler checks all exit0, cached-only/deny-net with synthetic auth/provider. Caps RPC16384/Coach20000/provider262144 bytes; exact/over/multibyte/chunked/lying headers, zero auth consumption, VI/EN, semantic limits, quota order, sanitized errors, provider429/non-ok and lock/cancel cleanup covered. Independent QA source inspection found no material blocker; no QA runtime claim. Historical A5 evidence retained in historical_pre_a7. |
+| Actual behavior | Fixed in repository scope: streamed caller overflow returns413 and provider overflow502; byte count cannot be bypassed by missing/lying Content-Length. Oversize/non-ok provider streams cancel, readers release locks, auth precedes caller reads and original semantic/quota/timeout/malformed-provider mappings remain. A stream may deliver one oversize chunk before rejection; it is not decoded or retained by the helper. |
+| Impact | The reproduced local buffering/unit defect is corrected. Confirmed remains scoped to synthetic bounded-stream mechanisms, not DoS prevention, hosted memory/allocation ceilings, real network cancellation, transport behavior or deployed security. |
+| Proposed remediation | Implemented R0-04/D-028 bounded_body helper and permanent behavioral regression under approved UTF-8 caps; retain semantic/auth/quota/error controls. Separately authorized hosted gateway/transport verification remains NOT RUN; no new timeout or live-provider scope. |
+| Owner / task | supabase-specialist; R0-04; independent qa-reviewer source inspection |
+| Wave | W2 (historical provenance only; correction explicitly authorized as A7 B0 R0-04, no W2 implementation) |
+
+**A7 review:** UTF-8 caps are RPC16384/Coach20000/provider262144 bytes, not UTF-16 units.
+Full pre-A7 JSON object retains nested A5 history. No DoS/network cancellation or hosted-allocation
+proof, provider traffic or deployment; this docs turn reruns no Edge suite.
+
+<details>
+<summary>Historical pre-A7 record — superseded wording/status; nested A5 history remains historical</summary>
 
 | Field | Value |
 |---|---|
@@ -1655,6 +1789,8 @@ completion and retain rep controls. Do not duplicate backend or quest findings h
 </details>
 
 ---
+
+</details>
 
 ## FND-DATA-002 — Class switching loses previously awarded synergy XP
 

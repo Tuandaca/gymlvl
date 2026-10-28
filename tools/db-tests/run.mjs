@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { PGlite } from '@electric-sql/pglite';
 import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
+import { runEffectiveAclRegression } from './effective-acl-regression.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
@@ -99,6 +100,7 @@ try {
   );
   console.log(`VERIFIED static hold / duration_seconds check constraint behavior`);
 
+  await runEffectiveAclRegression();
   console.log(`PASS ${completed} SQL verification units against PostgreSQL ${String((await db.query('show server_version')).rows[0].server_version)}`);
   console.log('LIMITATION: isolated single-connection PostgreSQL; Supabase gateway/Auth/Edge runtime and true concurrent sessions require the local stack.');
 } catch (error) {

@@ -1,3 +1,5 @@
+import { BodyTooLargeError, cancelBody, readBoundedText } from "../_shared/bounded_body.ts";
+
 type CoachMessage = { role: "user" | "assistant"; content: string };
 
 export interface CoachDependencies {
@@ -34,8 +36,11 @@ export async function handleCoachRequest(req: Request, deps: CoachDependencies):
   if (!token) return respond(401, { code: "unauthorized", error: "unauthorized" });
   try {
     if (!await deps.authenticate(token)) return respond(401, { code: "unauthorized", error: "unauthorized" });
-    const bodyText = await req.text();
-    if (bodyText.length > 20000) return respond(413, { code: "message_too_large", error: "message_too_large" });
+    let bodyText: string;
+    try { bodyText = await readBoundedText(req.body, 20000); } catch (error) {
+      if (error instanceof BodyTooLargeError) return respond(413, { code: "message_too_large", error: "message_too_large" });
+      throw error;
+    }
     let body;
     try { body = JSON.parse(bodyText); } catch { return respond(400, { code: "invalid_request", error: "invalid_request" }); }
     const message = body?.message;
@@ -95,13 +100,19 @@ export async function handleCoachRequest(req: Request, deps: CoachDependencies):
       }),
     });
     if (!upstream.ok) {
+      await cancelBody(upstream.body);
       return respond(upstream.status === 429 ? 429 : 502, {
         code: "provider_unavailable",
         error: "coach_temporarily_unavailable",
         message: "Upstream coaching provider is temporarily unavailable.",
       });
     }
-    const result = await upstream.json();
+    let result;
+    try { result = JSON.parse(await readBoundedText(upstream.body, 262144)); } catch (error) {
+      if (error instanceof BodyTooLargeError) return respond(502, { code: "provider_unavailable", error: "coach_temporarily_unavailable" });
+      // Preserve existing timeout/read/malformed-JSON handling in the outer catch.
+      throw error;
+    }
     const answer = result?.choices?.[0]?.message?.content;
     if (typeof answer !== "string" || !answer.trim() || answer.length > 12000) {
       return respond(502, {

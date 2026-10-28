@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { bearerToken, databaseError, HttpError } from "./validation.ts";
+import { BodyTooLargeError, readBoundedText } from "./bounded_body.ts";
 export { HttpError } from "./validation.ts";
 
 export const corsHeaders = {
@@ -33,8 +34,11 @@ export function rpcHandler(name: string, parameters: (body: Record<string, unkno
       requirePost(req);
       const client = await authenticateRequest(req);
       let body: Record<string, unknown> = {};
-      const text = await req.text();
-      if (text.length > 16384) throw new HttpError(413, "Request is too large.");
+      let text: string;
+      try { text = await readBoundedText(req.body, 16384); } catch (error) {
+        if (error instanceof BodyTooLargeError) throw new HttpError(413, "Request is too large.");
+        throw error;
+      }
       if (text) {
         try { body = JSON.parse(text); } catch { throw new HttpError(400, "Invalid JSON request."); }
         if (!body || typeof body !== "object" || Array.isArray(body)) throw new HttpError(400, "Invalid request.");

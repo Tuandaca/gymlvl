@@ -36,7 +36,10 @@ permissions:
     resource: "git ls-remote *"
     effect: allow
   - action: shell
-    resource: "git branch *"
+    resource: "git branch"
+    effect: allow
+  - action: shell
+    resource: "git branch --list *"
     effect: allow
   - action: shell
     resource: "git remote -v"
@@ -89,11 +92,9 @@ permissions:
   - action: shell
     resource: "Get-ChildItem *"
     effect: allow
-  - action: shell
-    resource: "Get-Content *"
-    effect: allow
-  # Must follow the broad allow: an agent rule is appended after the global rules and the last match
-  # wins, so the secret gates have to be repeated last to stay effective.
+  # D-026: no broad Get-Content/Select-String allow; aliases, quoting and trailing options can
+  # bypass filename suffix gates. Use the read/grep tools for inspection under their own policy.
+  # Keep explicit secret denials as well as the shell deny fallback.
   - action: shell
     resource: "Get-Content *.env"
     effect: deny
@@ -112,9 +113,6 @@ permissions:
   - action: shell
     resource: "Get-Content *.keystore"
     effect: deny
-  - action: shell
-    resource: "Select-String *"
-    effect: allow
   - action: shell
     resource: "Test-Path *"
     effect: allow

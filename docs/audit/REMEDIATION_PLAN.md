@@ -1,5 +1,11 @@
 # A6 proposed remediation roadmap
 
+**A7 execution overlay (2026-10-29):** D-025 explicitly authorizes W0/W1 implementation, including
+separate R1-01, under D-026..028 policy decisions and per-task safety/tests/QA. Current task results
+and finding status live in `phases/A7_BATCH_EXECUTION.md` and the finding mirrors. The A6 matrix,
+classifications and proposal-only language below are the preserved planning baseline, not current
+execution status and not authority to execute W2-W5. No OpenGym migration or production deploy.
+
 **Status:** proposal only, 2026-10-29, based on the 35-record A5 register at `main` entry
 `6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3`. No implementation, product decision, migration,
 configuration change or deployment is authorized by this roadmap. A6 is reconciliation, not a

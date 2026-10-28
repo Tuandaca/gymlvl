@@ -1,5 +1,28 @@
 # GymLvl — Session Handoff
 
+## Current — A7 B0/B1 remediation authorized / in progress (2026-10-29)
+
+- **Task/status:** A7 W0/W1 implementation, B0 R0-01..04 PASS local/repository scope with independent
+  source review; B1 authorized next. User separately approved R1-01; D-025..028.
+- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75 clean/remote equal; primary
+  gymlvl-orchestrator verified. External bundle/bare/archive backup verified560files, hashes A7phase2.
+- **Files:** execution record docs/audit/phases/A7_BATCH_EXECUTION.md; decisions, board, handoffs,
+  changelog and finding mirrors as needed; specialists receive exact source/test/config ownership
+  per task before edits. No unexpected changes at entry; do not overwrite unowned work.
+- **Decisions:** default shell ask; additive ACL fail-closed; byte caps RPC16KiB/Coach20000/provider
+ 256KiB; owner-match snapshot with conservative preserved legacy/foreign data. No production/deploy.
+- **Verification:** parent policy32/SQL11+ACL365/Edge44/sixchecks all exit0, diff0; red/green and
+  failed corrections A7phase4. QA npm.ps1/extra Git checks blocked, no bypass/runtime QA claim;
+  independent code review found no material blocker. Current Fixed repo-only GOV004/SEC001/003/004,
+  full history preserved,35 IDs/Accepted25/NV3/Fixed5/FP2; no deployed or sandbox/DoS claim.
+- **Blockers:** B1 environment/signing custody checks pending; live tool permission and deployed DB/
+  network verification NOT RUN. Migration NOT READY; current B0 code/doc changes expected.
+- **Next action:** checkpoint B0 then continue approved eligible B1 tasks sequentially, red/green/QA
+  and durable task
+  checkpoints. Normal A7 commit/push explicitly approved. No B2-B4/remediation outside W0/W1/migration.
+
+## Historical A6 closure (preserved)
+
 ## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
 
 **Checkpoint:** payload main4246b12238e4a904f87c0b843e861b637403d00c, nine docs +761/-3;

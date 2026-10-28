@@ -2,6 +2,32 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — A7 B0 implemented and verified, B1 continues
+
+- R0-02 default shell ask/reviewer gate correction +32 permanent policy tests; R0-03 additive
+  effective-ACL migration +10isolatedDB/365assertions integrated SQLrunner11units; R0-04 streaming
+  UTF8 byte bounds +29focused/44fullEdge/sixchecks. Parent batch commands all exit0/diff0.
+- Actual specialists/independent QA and exact owned paths in A7phase4. Initial red tests observed
+  original defects; intermediate grant/validator failures and corrections retained. Extra owner/
+  superuser rollback fixtures added after review. No material implementation blocker by inspection.
+- QA runtime npm.ps1 blocked by OS policy and source-filter Git denied, not retried/bypassed; stale
+  execution ledger FAIL corrected here. Parent used independently planned explicit Node/Deno gates.
+- GOV004/SEC001/SEC003/SEC004 Fixed in repository scope, full pre-A7 objects/nested history preserved,
+ 31others unchanged;35IDs and severity/confidence unchanged, statusAccepted25/NV3/Fixed5/FP2.
+- Live permission scanner/saved approvals, deployed ACLs, network cancellation/DoS not certified.
+  No production/secret/deploy/CI/dependency changes. B0 checkpoint next, then continue approved B1.
+
+## 2026-10-29 — A7 W0/W1 execution authorization and R0-01
+
+- Entry main3d9dbb0 clean/remote equal; actual gymlvl-orchestrator verified; external bundle/bare/
+  archive560/tree560 backup valid, hashes in A7 execution record. No product edit before approval.
+- User explicitly approved all W0/W1, separate R1-01, normal verified commits/pushes; chose shell
+  default ask, additive effective-ACL fail-closed and bounded UTF-8 requests/provider JSON. D-025..028
+  recorded before material changes. No W2-W5/production/destructive/migration/media authorization.
+- R0-01 synthetic checklist6 assertions exit0: missing approval/material/owner/unsafe tree denied,
+  approved B0/B1 allowed, B2 denied. Not a security sandbox; per-task QA and actual tests still required.
+- Next bounded specialist writes and internal task checkpoints; preserve35 findings/history.
+
 ## 2026-10-29 — A6 payload checkpoint committed and synchronized
 
 - Payload main4246b12238e4a904f87c0b843e861b637403d00c, `docs(audit): reconcile A6 remediation

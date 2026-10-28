@@ -1,5 +1,26 @@
 # Audit — Session Handoff
 
+## Current — A7 B0 implemented; B1 authorized next (2026-10-29)
+
+- **Task/status:** A7 W0/W1 execution; R0-01..04 PASS in repository/local scope, independent B0
+  inspection completed. No implementation beyond W0/W1; migration NOT READY.
+- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75 clean/remote equal, current
+  expected B0 source/test/policy/docs dirty. User explicitly authorizes verified commits/pushes.
+- **Changes:** new effective ACL migration/harness plus runner; bounded-body helper/RPC/Coach/test;
+  shell-default ask and two reviewer restrictions/policy tests; D-025..028 and A7 execution/handoffs/
+  roadmap overlay/finding mirrors. Exact ownership paths in A7phase4. No unrelated edits/deploy.
+- **Verification:** policy32pass; SQL11units+ACL10DB365assertions; Edge44tests+sixchecks; all exit0.
+  Parent `A7_B0_REGRESSION policy=0 sql=0 edge=0 diff=0`. RED failures and corrected failures retained.
+- **Findings:**35 unchanged IDs; GOV004/SEC001/SEC003/SEC004 Fixed repository-only, full pre-A7 objects
+  retained. Accepted25/NV3/Fixed5/FP2; severity0/3/24/6/2, confidence16/18/1. No deployed-security claim.
+- **QA/limits:** no material code blocker by independent inspection; requested extra ACL controls
+  added. QA npm.ps1/extra Git checks blocked, no bypass; ledger stale-evidence FAIL corrected before
+  checkpoint. Live permission harness, actual network/DoS and deployed ACL verification NOT RUN.
+- **Next action:** checkpoint B0 then continue approved R1-01->R1-02->R1-03, independent R1-05 and
+  R1-06/R1-07 prerequisites; do not stop merely because B0 passed. No B2-B4/production/migration.
+
+## Historical A6 closure (preserved)
+
 ## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
 
 **Checkpoint:** payload main `4246b12238e4a904f87c0b843e861b637403d00c`, nine docs +761/-3;

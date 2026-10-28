@@ -1,5 +1,20 @@
 # GymLvl — Task Board
 
+## Current — A7 B0/B1 implementation (2026-10-29)
+
+**Scope:** owner explicitly approved R0-01..04 and R1-01..07, including separate SEC002/R1-01 gate,
+source/permanent tests/local verification and verified normal Git commits/pushes. D-025..028.
+**Entry:** main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75 clean/remote equal; backup560files verified.
+**R0-01:** safety model six assertions PASS; approval/file ownership/tests/rollback gate before each
+task; QA inspected readiness. B0 R0-02..04 implemented and locally verified; policy32/SQL11+ACL365/
+Edge44/sixchecks pass, no material code review blocker. Four repo-only Fixed,35finding history kept.
+Execution ledger docs/audit/phases/A7_BATCH_EXECUTION.md, not A6 historical matrix status.
+**Next action:** checkpoint B0 then authorized R1-01 chain and independent R1-05/environment checks;
+scoped sequential B1 specialist implementation + tests/QA; continue independent
+eligible tasks when another branch is BLOCKED. No W2-W5, migration or production deployment.
+
+## Historical A6 state (preserved)
+
 ## Current — A6 DONE/CLOSED; remediation NOT STARTED (2026-10-29)
 
 **Checkpoint:** payload main4246b12238e4a904f87c0b843e861b637403d00c, nine docs +761/-3;

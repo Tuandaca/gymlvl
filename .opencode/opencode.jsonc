@@ -2,19 +2,19 @@
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "gymlvl-orchestrator",
 
-  // Access policy D-024 (2026-10-28): full development autonomy for the orchestrator and the five
-  // development specialists; qa-reviewer and context-keeper stay read-only.
+  // Access policy D-024, amended by D-026 (2026-10-29): development access with shell approval
+  // by default; qa-reviewer and context-keeper stay read-only.
   //
   // Ordering matters. A later matching rule overrides an earlier one, and agent rules are appended
   // after these global rules. The broad allows therefore come first, and the approval gates for
-  // irreversible or sensitive operations come last so that no agent can widen past them.
+  // irreversible or sensitive operations follow. Agent allows must not override these gates.
   "permissions": [
-    // --- Baseline: full development access ------------------------------------------------
+    // --- Baseline: development access, shell requires approval -----------------------------
     { "action": "read", "resource": "*", "effect": "allow" },
     { "action": "edit", "resource": "*", "effect": "allow" },
     { "action": "glob", "resource": "*", "effect": "allow" },
     { "action": "grep", "resource": "*", "effect": "allow" },
-    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "ask" },
     { "action": "webfetch", "resource": "*", "effect": "allow" },
     { "action": "websearch", "resource": "*", "effect": "allow" },
     { "action": "external_directory", "resource": "*", "effect": "allow" },
@@ -51,7 +51,7 @@
     { "action": "shell", "resource": "more *.env.*", "effect": "ask" },
 
     // --- Git history: rewriting and remote destruction need approval ----------------------
-    // Normal `git commit`, `git fetch`, `git pull`, `git merge` and `git push` stay allowed.
+    // Normal Git commands also require approval through the D-026 shell fallback.
     { "action": "shell", "resource": "git push --force*", "effect": "ask" },
     { "action": "shell", "resource": "git push -f*", "effect": "ask" },
     { "action": "shell", "resource": "git push * +*", "effect": "ask" },
@@ -77,7 +77,7 @@
     { "action": "shell", "resource": "rmdir /s*", "effect": "ask" },
 
     // --- Production database, remote project and deploy -----------------------------------
-    // Local Supabase (`supabase start`, `stop`, `db reset` without `--linked`) stays allowed.
+    // Local Supabase also requires approval through the D-026 shell fallback.
     { "action": "shell", "resource": "supabase db push*", "effect": "ask" },
     { "action": "shell", "resource": "supabase db reset --linked*", "effect": "ask" },
     { "action": "shell", "resource": "supabase db remote*", "effect": "ask" },

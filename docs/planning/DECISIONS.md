@@ -397,6 +397,49 @@ schema problems)` over 66 probes; runtime probes in
 
 ---
 
+## D-025 — A7 bounded W0/W1 implementation and checkpoint authorization
+
+**Status:** ACCEPTED, explicit project-owner response, 2026-10-29.
+**Decision:** Authorize R0-01 through R0-04 and R1-01 through R1-07, including the separately gated
+R1-01/FND-SEC-002, source changes, permanent regression tests, local non-destructive verification,
+logical commits and normal push to origin/main. Execute dependency-safe eligible tasks with internal
+checkpoints; no new per-task cycle unless another material policy or sensitive operation needs approval.
+**Limits:** no B2-B4/W2-W5 implementation, production mutation/deploy, destructive migration/deletion,
+secret exposure, weakened RLS/privacy/XP, OpenGym migration or media. R0-01 approval/scope checks apply
+to every task. An unavailable mandatory environment blocks the affected assertion, not other tasks.
+
+## D-026 — Default shell approval, superseding D-024 shell autonomy
+
+**Status:** ACCEPTED, user chose "Shell default ask", 2026-10-29.
+**Decision:** Change the global shell fallback from allow to ask while preserving every sensitive
+gate and read-only reviewer restriction. Do not add interpreter or other broad shell allow rules to
+route around it. Pattern matching is not a sandbox; test alternate secret readers and destructive Git
+spellings synthetically, never execute them against secrets/history. Other D-024 capabilities remain.
+**Consequences:** routine shell may require approval. Already-granted task approval does not cancel
+tool approval prompts; never bypass a refused prompt. Record evaluator tests separately from live
+harness enforcement. Changes to this policy require another explicit user decision.
+
+## D-027 — Additive effective-ACL hardening for R0-03
+
+**Status:** ACCEPTED, explicit user approval, 2026-10-29.
+**Decision:** Correct unauthorized effective progression privileges in an additive migration; fail
+closed for incompatible inherited privileges, preserve legitimate profile/notes edits and RLS.
+Use isolated fresh/legacy PUBLIC/named-role/two-user controls. Never blanket-revoke platform roles,
+change production ACLs or infer deployed prevalence. Any remote inventory/deploy remains separately gated.
+**Recovery:** preserve grants/provenance in diagnostics without private data; reviewed forward
+correction or fail-closed adoption, not destructive history or weakening protected progression.
+
+## D-028 — Byte-bounded Edge input and provider JSON for R0-04
+
+**Status:** ACCEPTED, explicit user approval, 2026-10-29.
+**Decision:** Enforce UTF-8 byte budgets: RPC request 16 KiB, Coach request 20,000 bytes, provider JSON
+256 KiB. Authenticate before consuming caller body, reject/cancel oversized streams, retain message/
+history/answer semantic validation and sanitized errors. Do not trust Content-Length alone or decode
+unbounded bodies first. Test multibyte/chunked/missing/misleading length and auth/quota/provider controls.
+**Limits:** bounded local stream tests are not hosted memory/DoS/network cancellation proof. No live
+provider traffic, new dependency or deployment. A tighter byte limit intentionally replaces UTF-16
+code-unit interpretation; callers receive the existing appropriate oversize error contract.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:
