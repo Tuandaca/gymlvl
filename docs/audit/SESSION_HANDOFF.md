@@ -2,11 +2,17 @@
 
 ## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
 
+**Recorded A4 payload checkpoint:** main `84462d0acc27a4c9ea0f99a2c0aa16c0940082fb` (`84462d0`),
+nine docs, +1652/-65. `git push origin main` -> `c95cb48..84462d0  main -> main`, exit0.
+`git ls-remote origin refs/heads/main` equals local full payload SHA; status empty after push,
+`A4_CHECKPOINT_EQUAL_CLEAN=PASS`. This outcome-only child record advances documentation HEAD;
+confirm actual HEAD/remote on resume. No force push, history rewrite, product change or A5 execution.
+
 - **Task/status:** A4 workout/XP/progression/business logic only; `PASS` / CLOSED against scoped
   review/evidence/gaps/independent-QA/consistency criteria. A2/A3 remain CLOSED; no A5 execution.
-- **Commit:** main `c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3`; clean/remote equal at entry,
-  nine expected documentation paths dirty now. Normal docs commit/push authorized, not yet executed.
-  Remote `refs/heads/main` independently rechecked at this SHA during final reconciliation.
+- **Commit:** entry main `c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3` clean/remote equal; completed
+  payload main84462d0 as above, clean/remote equal after normal authorized push. Only four handoff/
+  planning documents change in this outcome record; no new source/test/evidence investigation.
 - **Changed files:** `docs/audit/phases/A4_WORKOUT_PROGRESSION.md`,
   `docs/audit/phases/A4_SQL_EVIDENCE.md`, `docs/audit/MASTER_FINDINGS.md`,
   `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/AUDIT_COVERAGE.md`,
@@ -46,8 +52,8 @@
   Eleven-table rollback is after helper savepoint rollback, not crash recovery. Midnight old-quest
   control changes day and expiry together. No production prevalence or deployed ACL claim. Prior
   Temp disposal remains separately approval-gated; no full-app copy, secret access or cleanup.
-- **Next action:** complete authorized A4 docs checkpoint/remote equality and stop; await explicit
-  A5 go-ahead using the exact prompt below. No A5/A6/remediation/migration starts automatically.
+- **Next action:** await explicit A5 go-ahead, then use the exact prompt below after confirming
+  latest main/remote. Stop here; no A5/A6/remediation/migration starts automatically.
 
 ## A5 entry prompt — authorization required; NOT started by A4
 

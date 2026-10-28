@@ -2,9 +2,13 @@
 
 ## Current — A4 DONE/CLOSED; A5 NEXT / NOT STARTED (2026-10-28)
 
+**Checkpoint:** payload main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, nine docs +1652/-65;
+normal push c95cb48..84462d0 exit0. Local/remote full SHA equal and tree clean after push,
+A4_CHECKPOINT_EQUAL_CLEAN=PASS. This four-doc outcome child advances HEAD; verify actual main.
+
 **Task/status:** A4 PASS/CLOSED for scoped audit criteria, owned deferred gaps retained, not production
 certification. Reviews/probes/material/final QA complete. Entry main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3 clean/remote
-equal, active primary verified. Nine authorized docs only, commit/push authorized but pending.
+equal, active primary verified. Nine authorized docs only; normal commit/push completed as above.
 **Findings:**30; P0 0/P1 3/P2 20/P3 5/P4 2; Confirmed9/High20/Medium1; Accepted24/NV3/Fixed1/FP2.
 All26 old IDs/history preserved; only DATA001 conditional synthetic confirmation and ARCH001
 sole-award wording disproof change classifications. New DATA002/INTG005-007; INTG007 stays High/NV.
@@ -17,8 +21,8 @@ A4_VALIDATION_EXIT node=0 diff=0, PASS. Corrected primary validator FAILs retain
 **Blockers:** no scoped closure blocker established; exact A5 deferred owners/assertions in phase8.
 Final context/QA documentary corrections applied, last coverage A2 mixed-stage paragraph historical;
 QA additional exclusion-diff BLOCKED(permission), no bypass; no QA runtime or exhaustive gate claimed.
-**Next action:** complete authorized A4 docs checkpoint/remote check, then await explicit A5 go-ahead
-using audit handoff exact prompt. No A5/A6/remediation/migration/production/cleanup execution.
+**Next action:** await explicit A5 go-ahead, then verify latest main/remote and use audit handoff
+exact A5 prompt. No A5/A6/remediation/migration/production/cleanup execution.
 
 ## Historical task states (preserved)
 

@@ -2,6 +2,19 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-28 — A4 checkpoint committed, pushed and synchronized
+
+- Payload main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, `docs(audit): close A4 workout and
+  progression audit`, nine documentation files +1652/-65. `git push origin main` ->
+  `c95cb48..84462d0 main -> main`, exit0; no force push/history rewrite or product/permanent tests.
+- `git rev-parse HEAD` and `git ls-remote origin refs/heads/main` ->same full84462d0 SHA;
+  `git status --porcelain=v1` ->empty, `A4_CHECKPOINT_EQUAL_CLEAN=PASS` after push.
+- This outcome-only child record changes audit handoff plus three required planning docs; current
+  HEAD advances when it is committed, so verify actual latest main/remote rather than treating the
+  payload SHA as the final child SHA. No findings/evidence/classifications or decisions change.
+- A4 stays PASS/CLOSED; exact A5 prompt persisted, A5 not started and needs explicit go-ahead.
+  No A5/A6/remediation/migration/production action, secret access, full-app Temp copy or cleanup.
+
 ## 2026-10-28 — A4 scoped audit PASS/CLOSED; A5 not started
 
 - A4 acceptance assessed against review/evidence/owned gaps/material QA/consistency criteria, not

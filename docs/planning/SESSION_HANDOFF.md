@@ -2,11 +2,16 @@
 
 ## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
 
+**Recorded A4 payload checkpoint:** main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, nine docs,
+normal push `c95cb48..84462d0 main -> main`, exit0. Local/remote refs/heads/main equal full SHA;
+status empty after push, A4_CHECKPOINT_EQUAL_CLEAN=PASS. This outcome-only child record advances
+documentation HEAD; verify actual HEAD/remote on resume, not a self-referential commit claim.
+
 - **Task/status:** A4 only, PASS/CLOSED for scoped audit acceptance with explicit deferred gaps;
   not product/production certification. A2/A3 remain CLOSED; A5 not started.
-- **Commit:** main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3; clean/remote equal at entry, nine
-  authorized docs dirty now. Remote refs/heads/main rechecked equal. Docs commit/push authorized,
-  not executed yet; no product/config/schema/permanent-test/agent/dependency changes.
+- **Commit:** entry main c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3 clean/remote equal; payload
+  main84462d0 above committed/pushed normally, clean/remote equal. This outcome record edits only
+  four handoff/planning docs; no product/config/schema/permanent-test/agent/dependency changes.
 - **Changed files:** docs/audit/phases/A4_WORKOUT_PROGRESSION.md,
   docs/audit/phases/A4_SQL_EVIDENCE.md, docs/audit/MASTER_FINDINGS.md,
   docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md, docs/audit/SESSION_HANDOFF.md,
@@ -34,8 +39,8 @@
   transport-loss/reorder/delete/hydration, actual Dart quest, isolated expiry/device/gateway checks
   explicitly unexecuted with A5 owners/assertions in A4 phase8 and exact audit handoff prompt. No
   production inspection, full-app Temp copy or cleanup; prior A2 disposal still approval-gated.
-- **Next action:** complete authorized A4 docs checkpoint/remote equality, then stop and await explicit
-  A5 authorization; use docs/audit/SESSION_HANDOFF.md **A5 entry prompt**. Do not start A5/A6/remediation.
+- **Next action:** await explicit A5 authorization, then verify latest main/remote and use
+  docs/audit/SESSION_HANDOFF.md **A5 entry prompt**. Stop; do not start A5/A6/remediation automatically.
 
 ## Historical A3 and prior handoffs (preserved)
 
