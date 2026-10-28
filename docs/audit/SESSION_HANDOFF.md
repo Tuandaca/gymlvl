@@ -1,10 +1,11 @@
 # Audit — Session Handoff
 
-**Updated:** 2026-10-28 (A0.1 close)
-**Stage:** A0 `PASS`; A0.1 `PASS` for the configuration fix, Git **push `BLOCKED`**
-**Baseline:** `main` @ `9c8e142` = `origin/main` at A0/A0.1 entry
+**Updated:** 2026-10-28 (D-024 access policy; A1 still not started)
+**Stage:** A0 `PASS`; A0.1 `PASS` for the configuration fix, push `BLOCKED` at the time and now
+unblocked by D-024; **A1 `NOT STARTED`**
+**Baseline:** `main` @ `425686c`; `origin/main` still at `9c8e142` until the D-024 commit is pushed
 **Next stage:** **A1 — Architecture, dependencies, configuration and infrastructure** (`READY`, not
-authorized until the instruction in §6 is given)
+authorized until the instruction in §6 is given again)
 
 ---
 
@@ -30,7 +31,7 @@ No stage auto-advances. Remediation has not started and must not start from this
 | `FND-CONC-001` | Re-entrant deadlock + post-await null deref in active workout controller | P1 | Medium | `Needs Verification` | W1 |
 | `FND-DATA-001` | Legacy completion path can award twice | P1 | Medium | `Needs Verification` | W1 |
 | `FND-ARCH-001` | XP write invariant narrower than implementation | P2 | High | `Accepted` | W1 |
-| `FND-GOV-001` | No agent could write `docs/audit/**` | P2 | Confirmed | **`Fixed`** (A0.1) | W0 |
+| `FND-GOV-001` | No agent could write `docs/audit/**` | P2 | Confirmed | **`Fixed`** (A0.1 config, end-to-end verified 2026-10-28) | W0 |
 | `FND-GOV-002` | `PROJECT_CONTEXT.md` is stale on its own baseline (3 commits, 27 files) | P3 | Confirmed | `Accepted` | W4 |
 | `FND-GOV-003` | Shell matcher semantics for chained commands | P3 | High | **`False Positive`** (A0.1) | — |
 
@@ -38,8 +39,11 @@ Totals: 6 findings — 0 `P0`, 2 `P1`, 2 `P2`, 2 `P3`. Status: 2 `Needs Verifica
 1 `Fixed`, 1 `False Positive`. `FND-CONC-001`, `FND-DATA-001` and `FND-ARCH-001` are inherited from S3
 and have **not** been re-verified.
 
-`FND-GOV-001` is `Fixed` at **configuration level only**. The end-to-end write under the orchestrator
-profile is `NOT RUN` and is tracked in §7.
+`FND-GOV-001` is `Fixed` and now **verified end-to-end**. D-024 (2026-10-28) replaced the narrow
+orchestrator allowlist with full development access plus approval gates; a live `gymlvl-orchestrator`
+session wrote `app/.perm-probe-2.md` and the write was confirmed from a second session. The audit's
+"one writer per file" rule is now a convention enforced by delegation discipline, not by permissions.
+See `docs/agent-system/ACCESS_POLICY.md`.
 
 ## 3. Git state
 
@@ -61,12 +65,14 @@ the user are in §9.
 
 1. Audit only. No application, migration, or data change.
 2. No deployment, no destructive SQL, no dependency install.
-3. Write access: `docs/audit/**`, `docs/planning/**`, `docs/agent-system/**` (orchestrator profile), and
-   the planning files named in `AGENTS.md` §6.
+3. Write access: **repository-wide** for the orchestrator and the five development specialists since
+   D-024. The audit's own scope discipline (one writer per file, audit-only changes) is now enforced by
+   delegation rules and evidence review, not by the permission layer. `qa-reviewer` and
+   `context-keeper` remain read-only, so independent verification is unchanged.
 4. Shell-dependent subagents run sequentially (D-021).
-5. The active agent in this session is still the **build** agent. `default_agent` is a session-creation
-   default, not a live switch (OpenCode V2, *Config → Agent*; recorded as D-023). The orchestrator
-   profile must be confirmed at the start of the next session, in a **new** session.
+5. The active agent of the session that wrote this handoff was the **build** agent: server session
+   record `ses_e7e999dd2ffdO3oGdRJnVFBuY1` reports `"agent":"build"`. A live `gymlvl-orchestrator`
+   session must still be selected deliberately; `default_agent` is not a live switch (D-023).
 
 ## 5. Files owned by this program
 
@@ -140,13 +146,14 @@ A1 is `PASS` only when all of the following hold:
 
 ## 7. Open investigations carried into A1
 
-| Item | What A1 must resolve |
+| Item | State after 2026-10-28 |
 |---|---|
-| `FND-GOV-001` end-to-end | The rule is in place and was reloaded, but a write **as** the orchestrator has never been executed. The first A1 artifact write is the test. If it is denied, the profile is still wrong and the finding reopens. |
-| Orchestrator binding | Confirm at session start which agent is active. If `build`, report it; do not claim orchestrator operation. `default_agent` only applies to sessions created after the setting. |
-| CI gap | `verify.yml` builds web only with placeholder Supabase variables and never builds Android or iOS. Establish whether that is a documented decision or an unrecorded gap. |
-| Migration scheme | The three migrations are dated but there is no version ledger; establish whether ordering is enforced anywhere. |
-| Documentation currency | `FND-GOV-002` is confirmed: `PROJECT_CONTEXT.md` §2 is 3 commits behind and its tracked-file count is 27 short. A1 must inventory the remaining stale claims in `§§2–5` so W4 fixes them in one pass, and must not treat a dated evidence block as stale merely because it names an older SHA. |
+| `FND-GOV-001` end-to-end | **Resolved.** D-024 broadened the orchestrator; a live orchestrator session wrote `app/.perm-probe-2.md`, independently confirmed with `Test-Path` → `True` and `Get-Content` → `probe` from another session. |
+| Orchestrator binding | **Resolved as a method.** `GET /api/session/<id>` returns the session's `agent` field; the authoring session is `build`. Use that endpoint rather than inferring from configuration. |
+| CI gap | Open. `verify.yml` builds web only with placeholder Supabase variables and never builds Android or iOS. Not yet established whether that is a documented decision or an unrecorded gap (`ARCHITECTURE.md` §9 asserts "No Android APK build in CI today", so it is documented but unevidenced as a decision). |
+| Migration scheme | Open. The three migrations are dated but there is no version ledger; ordering enforcement is unestablished. |
+| Documentation currency | `FND-GOV-002` confirmed: `PROJECT_CONTEXT.md` §2 is 3 commits behind and its tracked-file count is 27 short. A1 must inventory the remaining stale claims in `§§2–5` so W4 fixes them in one pass, and must not treat a dated evidence block as stale merely because it names an older SHA. |
+| A1 artifacts | `docs/audit/phases/A1_ARCHITECTURE.md` **does not exist**. A stub was created during the 2026-10-28 permission probe and deleted when the session was redirected; no A1 review was performed. |
 
 ## 8. Anything a resuming session must not assume
 

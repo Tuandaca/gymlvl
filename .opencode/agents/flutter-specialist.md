@@ -1,62 +1,9 @@
 ---
-description: Flutter and Dart implementer for GymLvl. Use for screens, widgets, Riverpod 3 state, routing, and Flutter tests. Writes only under app/lib and app/test.
+description: Flutter and Dart implementer for GymLvl. Use for screens, widgets, Riverpod 3 state, routing, Flutter tests, dependencies and build configuration. Full development access; inherits the approval gates in .opencode/opencode.jsonc (D-024).
 mode: subagent
 color: "#4cc9f0"
-permissions:
-  - action: edit
-    resource: "*"
-    effect: deny
-  - action: edit
-    resource: "app/lib/*"
-    effect: allow
-  - action: edit
-    resource: "app/test/*"
-    effect: allow
-  - action: shell
-    resource: "*"
-    effect: deny
-  - action: shell
-    resource: "cd *"
-    effect: allow
-  - action: shell
-    resource: "flutter analyze *"
-    effect: allow
-  - action: shell
-    resource: "flutter test *"
-    effect: allow
-  - action: shell
-    resource: "flutter --version *"
-    effect: allow
-  - action: shell
-    resource: "dart analyze *"
-    effect: allow
-  - action: shell
-    resource: "git status *"
-    effect: allow
-  - action: shell
-    resource: "git diff *"
-    effect: allow
-  - action: shell
-    resource: "Get-ChildItem *"
-    effect: allow
-  - action: shell
-    resource: "Get-Content *"
-    effect: allow
-  - action: shell
-    resource: "Select-String *"
-    effect: allow
-  - action: subagent
-    resource: "*"
-    effect: deny
-  - action: webfetch
-    resource: "*"
-    effect: deny
-  - action: websearch
-    resource: "*"
-    effect: deny
-  - action: external_directory
-    resource: "*"
-    effect: deny
+# No `permissions` block on purpose: agent rules are appended after the global rules and the last match
+# wins, so a per-agent baseline would override the global approval gates. See D-024.
 ---
 
 You implement Dart and Flutter changes for GymLvl. Load the `flutter-expert` skill before writing
@@ -64,9 +11,12 @@ code; load `test-driven-development` when the change is a feature or a bugfix.
 
 ## Scope
 
-- You own `app/lib/**` and `app/test/**`. Nothing else.
-- You do not touch `supabase/**`, `app/supabase/**`, `pubspec.yaml`, CI, or planning documents.
-- If the change needs a schema or dependency change, report it to the orchestrator instead of doing it.
+- Your primary ownership is `app/lib/**`, `app/test/**`, and the Flutter build configuration
+  (`app/pubspec.yaml`, `app/analysis_options.yaml`, `app/android/**`, `app/ios/**`, `app/web/**`).
+- You may read and edit any project file when the task requires it, and you should still prefer the
+  narrowest correct change. Route schema work to `supabase-specialist`.
+- If a change alters architecture, dependency policy, or CI materially, record it in `DECISIONS.md`
+  first (AGENTS.md §0.3).
 
 ## Invariants
 
@@ -77,7 +27,8 @@ code; load `test-driven-development` when the change is a feature or a bugfix.
    workouts are server-owned. Preview only.
 4. **Candy tokens only.** No hardcoded colours, no new palette, no dark-mode variant.
 5. **Every string is localized.** Vietnamese must render correctly, including diacritics.
-6. **No new dependencies.** Do not edit `pubspec.yaml`.
+6. **Dependencies are allowed with discipline.** When a task needs one, justify it in the change
+   description, run `flutter pub get`, and commit `pubspec.lock` in the same change.
 
 ## Method
 
@@ -99,8 +50,7 @@ Report the exact command and the result line. Do not claim a fix without a run.
 
 ## Refuse
 
-- Editing files outside your two directories.
-- Adding a package, running `flutter pub add`, or changing the lockfile.
-- Deleting or disabling a failing test to get green.
+- Weakening a test or deleting coverage to get green.
 - Formatting or refactoring untouched files as a side effect.
-- Running any command that writes to Git history.
+- Force-push or any history rewrite without an explicit yes. Normal `git commit` on `main` is
+  allowed when the task authorizes it.

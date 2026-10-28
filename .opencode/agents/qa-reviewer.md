@@ -3,6 +3,8 @@ description: Read-only verifier for GymLvl. Use before declaring a task done, fo
 mode: subagent
 color: "#06d6a0"
 permissions:
+  # Read-only by design. `edit` is denied outright, and shell falls back to `deny` so a reviewer can
+  # never mutate the repository or the database. The allowlist is the inspection and test surface only.
   - action: edit
     resource: "*"
     effect: deny
@@ -11,18 +13,6 @@ permissions:
     effect: deny
   - action: shell
     resource: "cd *"
-    effect: allow
-  - action: shell
-    resource: "flutter analyze *"
-    effect: allow
-  - action: shell
-    resource: "flutter test *"
-    effect: allow
-  - action: shell
-    resource: "flutter --version *"
-    effect: allow
-  - action: shell
-    resource: "dart analyze *"
     effect: allow
   - action: shell
     resource: "git status *"
@@ -40,11 +30,88 @@ permissions:
     resource: "git rev-parse *"
     effect: allow
   - action: shell
+    resource: "git ls-files *"
+    effect: allow
+  - action: shell
+    resource: "git ls-remote *"
+    effect: allow
+  - action: shell
+    resource: "git branch *"
+    effect: allow
+  - action: shell
+    resource: "git remote -v"
+    effect: allow
+  - action: shell
+    resource: "flutter analyze *"
+    effect: allow
+  - action: shell
+    resource: "flutter test *"
+    effect: allow
+  - action: shell
+    resource: "flutter --version *"
+    effect: allow
+  - action: shell
+    resource: "flutter pub get *"
+    effect: allow
+  - action: shell
+    resource: "flutter pub deps *"
+    effect: allow
+  - action: shell
+    resource: "flutter pub outdated *"
+    effect: allow
+  - action: shell
+    resource: "dart analyze *"
+    effect: allow
+  - action: shell
+    resource: "dart format --output=none *"
+    effect: allow
+  - action: shell
+    resource: "dart --version *"
+    effect: allow
+  - action: shell
+    resource: "npm test *"
+    effect: allow
+  - action: shell
+    resource: "npm run test*"
+    effect: allow
+  - action: shell
+    resource: "npm run check*"
+    effect: allow
+  - action: shell
+    resource: "deno check *"
+    effect: allow
+  - action: shell
+    resource: "deno test *"
+    effect: allow
+  - action: shell
+    resource: "node --version *"
+    effect: allow
+  - action: shell
     resource: "Get-ChildItem *"
     effect: allow
   - action: shell
     resource: "Get-Content *"
     effect: allow
+  # Must follow the broad allow: an agent rule is appended after the global rules and the last match
+  # wins, so the secret gates have to be repeated last to stay effective.
+  - action: shell
+    resource: "Get-Content *.env"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.env.*"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.pem"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *id_rsa*"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.p12"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.keystore"
+    effect: deny
   - action: shell
     resource: "Select-String *"
     effect: allow

@@ -3,6 +3,8 @@ description: Read-only context and memory keeper for GymLvl. Use to restore sess
 mode: subagent
 color: "#8ecae6"
 permissions:
+  # Read-only by design. `edit` is denied outright and shell falls back to `deny`; only Git and
+  # filesystem inspection is reachable.
   - action: edit
     resource: "*"
     effect: deny
@@ -25,11 +27,31 @@ permissions:
     resource: "git rev-parse *"
     effect: allow
   - action: shell
+    resource: "git ls-files *"
+    effect: allow
+  - action: shell
+    resource: "git branch *"
+    effect: allow
+  - action: shell
     resource: "Get-ChildItem *"
     effect: allow
   - action: shell
     resource: "Get-Content *"
     effect: allow
+  # Must follow the broad allow: an agent rule is appended after the global rules and the last match
+  # wins, so the secret gates have to be repeated last to stay effective.
+  - action: shell
+    resource: "Get-Content *.env"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.env.*"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *.pem"
+    effect: deny
+  - action: shell
+    resource: "Get-Content *id_rsa*"
+    effect: deny
   - action: shell
     resource: "Select-String *"
     effect: allow

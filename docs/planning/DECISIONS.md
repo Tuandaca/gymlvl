@@ -335,6 +335,66 @@ subagents.
 *Config → Agent*; `subagent(gymlvl-orchestrator)` → `"Agent gymlvl-orchestrator cannot run as a
 subagent"`; `docs/audit/phases/A0_1_GOVERNANCE.md` §1.
 
+## D-024 — Full development access with approval gates, replacing the narrow agent allowlists
+
+**Status:** ACCEPTED (2026-10-28, explicit user instruction; supersedes D-022 and changes the
+mechanism of D-019)
+**Context:** Through S1–S3, A0 and A0.1 the agent system was deliberately restrictive: every agent
+carried a hand-written allowlist, the orchestrator could not run arbitrary shell or edit outside
+`docs/`, and the global floor hard-denied `git push`, `reset --hard`, `clean` and `filter-branch`.
+That posture proved its cost. Agents were blocked on ordinary work (`Get-ChildItem | Select-Object`,
+`git ls-remote`, `webfetch`, `node --version`), each new capability needed a configuration edit and a
+reload, and the audit recorded two governance findings caused by the gaps (`FND-GOV-001`,
+`FND-GOV-003`). The user directed that development autonomy be widened while independent review stays
+independent and irreversible operations stay gated.
+
+**Decision.** A single ordered rule set in `.opencode/opencode.jsonc` replaces every per-agent
+allowlist:
+
+- Global `allow` for `read`, `edit`, `glob`, `grep`, `shell`, `webfetch`, `websearch`,
+  `external_directory`, `question` and `skill`. The orchestrator and the five development specialists
+  (`flutter-specialist`, `supabase-specialist`, `exercise-catalog`, `ui-ux-specialist`) therefore have
+  full read/write/edit/create/delete access, arbitrary shell (including compound commands), Git
+  inspection, `commit`, `fetch`, `pull`, `merge` and normal `push`, Flutter/Dart/Node/npm tooling,
+  builds, code generation, tests, and web research.
+- `ask` gates, placed after the allows so that last-match-wins keeps them effective:
+  force-push (all forms), `--mirror`/`--delete`, `reset --hard`, `git clean`, `filter-branch`,
+  `rebase`, `commit --amend`, `branch -D`, `restore`, `checkout --`, `stash drop|clear`; bulk
+  deletion (`Remove-Item -Recurse`, `rm -rf`, `rmdir /s`); production database and deploy
+  (`supabase db push`, `--linked` reset, `db remote`, `link`, `unlink`, `functions deploy`,
+  `projects`, `secrets`, `psql`); and every secret-file read, including the shell forms
+  (`Get-Content *.env`, `*.env.*`, `*.pem`, `*.p12`, `*.keystore`, `*.jks`, `*id_rsa*`,
+  `*id_ed25519*`, `*.git-credentials`, `type`/`cat`/`more` equivalents).
+- `qa-reviewer` and `context-keeper` stay read-only by construction. Their agent rules are appended
+  after the global set, so `edit *` → `deny` wins, and their shell is a `deny` fallback over an
+  expanded read-only allowlist (Git inspection, `flutter analyze|test|pub deps`, `dart analyze`,
+  `dart format --output=none`, `npm test`/`npm run test*`/`npm run check*`, `deno check|test`,
+  filesystem reads). Their `webfetch`/`websearch`/`subagent` remain denied, so review input cannot be
+  steered from outside and a reviewer cannot spawn another agent.
+- Delegation is limited to the six named GymLvl specialists. `*` is denied, and
+  `gymlvl-orchestrator` stays explicitly denied because it is `mode: primary`.
+
+**Why the development agents carry no `permissions` block.** In OpenCode V2 an agent's rules are
+*appended* to the global rules and the last match wins. A per-agent `shell "*" → allow` would therefore
+silently cancel every global `ask` gate. The gates exist once, globally; agents add only restrictions.
+This is the mechanical reason the blocks were deleted rather than rewritten.
+
+**Not granted:** nothing in the product contract changes. Media import stays forbidden
+(`AGENTS.md` §0.6), AGPL reuse stays forbidden (§0.7), XP and progression stay server-authoritative
+(§4), and destructive Git or database operations still require an explicit human yes. `deny` was
+replaced by `ask`, never by `allow`.
+
+**Consequences:** Normal feature work no longer stalls on permission prompts. The risk moves from
+configuration to judgement: a mistaken `Remove-Item` or a production `supabase db push` reaches the
+user as a prompt rather than being impossible, so the gate value depends on the user reading it.
+`git push` is no longer blocked, which retires the A0.1 push blocker. Saved "allow always" approvals
+are project-scoped and never override a configured `deny`; reviewers have no `allow` to save over.
+
+**Evidence:** `.opencode/opencode.jsonc` (73 global rules); `.opencode/agents/*.md` (7 files);
+validator run `node …/gymlvl-perm-check.mjs D:\Projects\gymlvl` → `RESULT: PASS (0 probe failures, 0
+schema problems)` over 66 probes; runtime probes in
+`docs/agent-system/ACCESS_POLICY.md` §4.
+
 ---
 
 ## Open decisions

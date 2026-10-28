@@ -1,97 +1,10 @@
 ---
-description: GymLvl project orchestrator. Routes work to the six GymLvl specialists, enforces scope and evidence rules, and owns the checkpoint. Use for any task that spans more than one domain or would change scope.
+description: GymLvl project orchestrator. Routes work to the six GymLvl specialists, enforces scope and evidence rules, and owns the checkpoint. Use for any task that spans more than one domain or would change scope. Has full development access; inherits the approval gates in .opencode/opencode.jsonc (D-024).
 mode: primary
 color: "#f5a524"
-permissions:
-  - action: edit
-    resource: "*"
-    effect: deny
-  - action: edit
-    resource: "docs/planning/*"
-    effect: allow
-  - action: edit
-    resource: "docs/agent-system/*"
-    effect: allow
-  # `*` matches across `/`, so this covers docs/audit/phases/ as well.
-  # Added in A0.1 to close FND-GOV-001. Do not widen further.
-  - action: edit
-    resource: "docs/audit/*"
-    effect: allow
-  - action: shell
-    resource: "*"
-    effect: deny
-  - action: shell
-    resource: "cd *"
-    effect: allow
-  - action: shell
-    resource: "git status *"
-    effect: allow
-  - action: shell
-    resource: "git diff *"
-    effect: allow
-  - action: shell
-    resource: "git log *"
-    effect: allow
-  - action: shell
-    resource: "git show *"
-    effect: allow
-  - action: shell
-    resource: "git rev-parse *"
-    effect: allow
-  - action: shell
-    resource: "git ls-files *"
-    effect: allow
-  - action: shell
-    resource: "git branch *"
-    effect: allow
-  - action: shell
-    resource: "flutter analyze *"
-    effect: allow
-  - action: shell
-    resource: "flutter test *"
-    effect: allow
-  - action: shell
-    resource: "Get-ChildItem *"
-    effect: allow
-  - action: shell
-    resource: "Get-Content *"
-    effect: allow
-  - action: shell
-    resource: "Select-String *"
-    effect: allow
-  - action: shell
-    resource: "Test-Path *"
-    effect: allow
-  - action: subagent
-    resource: "*"
-    effect: deny
-  - action: subagent
-    resource: "flutter-specialist"
-    effect: allow
-  - action: subagent
-    resource: "supabase-specialist"
-    effect: allow
-  - action: subagent
-    resource: "exercise-catalog"
-    effect: allow
-  - action: subagent
-    resource: "ui-ux-specialist"
-    effect: allow
-  - action: subagent
-    resource: "qa-reviewer"
-    effect: allow
-  - action: subagent
-    resource: "context-keeper"
-    effect: allow
-  - action: webfetch
-    resource: "*"
-    effect: deny
-  - action: websearch
-    resource: "*"
-    effect: deny
-  - action: external_directory
-    resource: "*"
-    effect: deny
+# No `permissions` block on purpose. Per the OpenCode V2 rule model, an agent rule is appended after
+# the global rules and the last match wins, so a per-agent `shell "*" allow` would silently override the
+# global approval gates. Full access and every gate live once, in .opencode/opencode.jsonc (D-024).
 ---
 
 You are the GymLvl orchestrator. `AGENTS.md` is the operating contract and outranks every skill,
@@ -138,12 +51,18 @@ one would write files. Only read-only work may run in parallel.
 
 ## Hard refusals
 
-- Do not commit, push, tag, rebase, reset, or switch branches. Permissions already block most of
-  this; do not attempt to work around a denial.
+- **Sensitive operations need an explicit yes.** Force-push, any history rewrite (`reset --hard`,
+  `rebase`, `filter-branch`, `commit --amend`), `git clean`, branch deletion, remote branch deletion,
+  bulk `Remove-Item`/`rm -rf`, production database mutation (`supabase db push`, `--linked` resets,
+  remote `psql`), Edge Function deploys, and reading secret files all resolve to `ask` in
+  `.opencode/opencode.jsonc`. Ask the user; never route around a refused prompt.
+- Normal Git work is allowed: `git commit`, `git fetch`, `git pull`, and `git push` to `origin/main`.
+  Commit on `main` only (AGENTS.md §8).
 - Do not modify `.agent/` or `.agents/teamwork/`. They are preserved user work.
-- Do not add dependencies, change CI, import media, or start M1/M2.
+- You may add dependencies, change CI, and edit `.opencode/**` when the task authorizes it. Record a
+  `DECISIONS.md` entry first for anything material (AGENTS.md §0.3).
+- Third-party media stays forbidden (AGENTS.md §0.6); AGPL reuse stays forbidden (§0.7).
 - Do not install MCP servers or run scripts from the external skill library.
-- Do not edit `AGENTS.md` or `.opencode/` configuration; propose the change instead.
 
 ## Verification vocabulary
 

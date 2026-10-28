@@ -1,11 +1,11 @@
 # GymLvl — Task Board
 
-**Last updated:** 2026-10-28 (audit A0 complete)
-**Baseline:** branch `main` @ `9c8e142` = `origin/main`. `main` is the only development branch.
-**Working tree:** clean at A0 entry; audit artifacts under `docs/audit/` are uncommitted.
+**Last updated:** 2026-10-28 (D-024 full development access)
+**Baseline:** branch `main` @ `425686c` before the D-024 commit. `main` is the only development branch.
+**Working tree:** the eight `.opencode` policy files plus governance docs were modified for D-024.
 **Current milestone:** M1 — NOT STARTED (unchanged)
 **Next task (audit track):** **A1 — Architecture, dependencies, configuration and infrastructure**
-(`READY`, not started)
+(`READY`, not started; the 2026-10-28 A1 instruction was withdrawn before any review ran)
 **Next task (tooling track):** **S4 — Wave 2 skill import** (`PLANNED`, requires explicit approval)
 **Next product task:** **M1-01 — Baseline stabilization and evidence lock** (`NEXT`, unchanged; not
 authorized yet)
@@ -49,6 +49,7 @@ schema, dependency, or design. Full record in `docs/agent-system/WAVE1_IMPLEMENT
 | S2 | Wave 1 configuration and skill integration | `DONE` | 7 agents, 6 skills, 6 commands, `.opencode/opencode.jsonc`; V1–V8 recorded |
 | S3 | Validation and optimization on one real task | `DONE` | `S3_VALIDATION_REPORT.md` — 7 agents, 6 skills validated; 5 delegation tests; regression 126/10/15 |
 | S4 | Wave 2 import (remaining 14 skills) | `PLANNED` | Requires approval; ordered list in `S3_VALIDATION_REPORT.md` §9 |
+| S5 | Full development access policy (**D-024**) | `DONE` | `.opencode/opencode.jsonc` (73 global rules), 7 agent files, `docs/agent-system/ACCESS_POLICY.md`; validator 66/66 probes `PASS`; orchestrator write and reviewer read-only verified at runtime |
 
 **S3 notes.** Agent discovery, permissions, read-only enforcement, skills, commands and delegation
 were verified at runtime. Two product findings were documented, not patched: a potential deadlock in
@@ -67,7 +68,7 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 |---|---|---|---|
 | A0 | Bootstrap, baseline, inventory, execution plan | `DONE` | `docs/audit/phases/A0_BOOTSTRAP.md`; 6 findings; coverage matrix for 27 components |
 | A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
-| A1 | Architecture, dependencies, configuration, infrastructure, CI | `READY` | Not started; prompt in `docs/audit/SESSION_HANDOFF.md` §6 |
+| A1 | Architecture, dependencies, configuration, infrastructure, CI | `READY` | Not started. The 2026-10-28 A1 attempt was withdrawn before any review ran; no `phases/A1_ARCHITECTURE.md` exists. Prompt in `docs/audit/SESSION_HANDOFF.md` §6 |
 | A2 | Flutter app, state, lifecycle, concurrency, navigation | `PLANNED` | — |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` | — |
 | A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
@@ -88,6 +89,18 @@ authoritative V2 permission semantics. Root cause of the agent-binding symptom r
 push was **denied** by the global `git push *` rule and was not worked around, so `origin/main` is still
 at `9c8e142`. End-to-end orchestrator write remains `NOT RUN`. Product regression was **not** rerun — no
 application or test configuration changed.
+
+**D-024 notes (2026-10-28, S5).** The user directed full development autonomy. The seven-agent
+architecture, agent names, skills, commands and routing are unchanged; what changed is the permission
+layer. `.opencode/opencode.jsonc` now holds one ordered rule set: broad allows first, then `ask` gates
+for force-push and other history rewrites, bulk deletion, production database/deploy commands, and
+secret reads (including shell forms). The orchestrator and the five development specialists carry **no**
+`permissions` block, because an agent rule is appended after the global rules and the last match wins —
+a per-agent broad allow would cancel every gate. `qa-reviewer` and `context-keeper` keep `edit` → `deny`
+with a widened read-only shell allowlist. `git push` is no longer denied, so the A0.1 push blocker is
+retired. Validation: 66/66 effective-permission probes `PASS`; the orchestrator wrote a previously
+denied path in a live session; the reviewer was denied a write and a commit at runtime. Record:
+`docs/agent-system/ACCESS_POLICY.md`. A1 was **not** started.
 
 ## M1 task table
 

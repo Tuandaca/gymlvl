@@ -7,6 +7,101 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 ---
 
+## 2026-10-28 — D-024: full development access with approval gates
+
+**Task:** S5 — reconfigure the seven-agent system for full development autonomy (decision D-024).
+**Status:** `PASS`.
+**Baseline:** `main` @ `425686c`; `origin/main` at `9c8e142` before this session's push.
+**Authoring agent:** **`build`**, not `gymlvl-orchestrator` — server record
+`ses_e7e999dd2ffdO3oGdRJnVFBuY1` reports `"agent":"build"`. The orchestrator was exercised in separate
+throwaway sessions via `opencode-cli.exe run --agent gymlvl-orchestrator`.
+**Scope:** agent permission policy, agent prose, governance documentation, `.gitignore`-free temporary
+probe files, one local commit and one normal push. No application code, SQL, Edge Function, CI,
+dependency, UI, or media change.
+
+### Changed
+
+- `.opencode/opencode.jsonc` — rewritten as a single ordered rule list. `permissions: []` (empty
+  before) → **73 rules**: broad `allow` for `read`, `edit`, `glob`, `grep`, `shell`, `webfetch`,
+  `websearch`, `external_directory`, `question`, `skill`; then `ask` gates for Git history rewriting
+  (force-push in five forms, `--mirror`, `--delete`, `reset --hard`, `rebase`, `filter-branch`,
+  `commit --amend`, `branch -D`, `restore`, `checkout --`, `clean`, `stash drop|clear`), bulk deletion
+  (`Remove-Item -Recurse`, `rm -rf`, `rm -r`, `rmdir /s`), production Supabase and deploy (`db push`,
+  `db reset --linked`, `db remote`, `link`, `unlink`, `functions deploy`, `projects`, `secrets`,
+  `psql`), and secret reads by both the `read` tool and the shell forms (`Get-Content`, `type`, `cat`,
+  `more`). `subagent *` → `deny`, the six named GymLvl specialists → `allow`,
+  `gymlvl-orchestrator` → explicit `deny` (`mode: primary`).
+- `.opencode/agents/gymlvl-orchestrator.md` — the 27-rule allowlist block deleted; prose updated
+  ("Hard refusals" now describes the `ask` gates and permits normal Git work).
+- `.opencode/agents/flutter-specialist.md`, `supabase-specialist.md`, `exercise-catalog.md`,
+  `ui-ux-specialist.md` — `permissions` block deleted; scope prose widened (dependencies, remote DB
+  gating, web research for provenance, presentation ownership).
+- `.opencode/agents/qa-reviewer.md` — 35 → 41 rules, still read-only: `edit *` → `deny`, shell `deny`
+  fallback over a widened inspection/test allowlist, plus secret shell gates repeating after the broad
+  `Get-Content *` allow. `webfetch`/`websearch`/`subagent` remain `deny`.
+- `.opencode/agents/context-keeper.md` — 17 → 21 rules, same read-only shape.
+- `docs/planning/DECISIONS.md` — **D-024** added (supersedes D-022, changes the mechanism of D-019).
+  The summary table still stops at D-014; not backfilled, that stays W4 / `FND-GOV-002`.
+- `docs/audit/SESSION_HANDOFF.md`, `docs/audit/MASTER_FINDINGS.md`,
+  `docs/audit/FINDINGS_REGISTER.json` — `FND-GOV-001` now verified end-to-end; `FND-GOV-003` carries a
+  post-D-024 note; A1 marked `NOT STARTED`.
+- `docs/planning/SESSION_HANDOFF.md`, `docs/planning/TASK_BOARD.md` — D-024 state, verification table,
+  S5 `DONE`, A1 unchanged.
+
+### Added
+
+- `docs/agent-system/ACCESS_POLICY.md` — what the configuration actually enforces, the 66-probe
+  effective-permission simulation, the runtime probe table, the two fixed gaps, and known limitations.
+
+### Verification
+
+| Check | Result | Status |
+|---|---|---|
+| `.opencode/opencode.jsonc` parses | `OK (73 global rules, default_agent=gymlvl-orchestrator)` | `PASS` |
+| Effective permissions (not file text) | `RESULT: PASS (0 probe failures, 0 schema problems)` over 66 probes, 73 global + 62 agent rules | `PASS` |
+| Secrets gate covers shell, not just `read` | probe #1 found the gap; rules added; `Get-Content .env` → `ask` | `PASS` (after fix) |
+| `*.env.production` matched | probe #2 found the gap; `*.env.*` rules added; `Get-Content app/.env.production` → `ask` | `PASS` (after fix) |
+| Server reloaded the definitions | 8 `agent.updated` events, `07:33:43.390Z`–`07:34:31.580Z`, one per file write | `PASS` |
+| Active agent of this session | `GET /api/session/ses_e7e999dd2ffdO3oGdRJnVFBuY1` → `"agent":"build"` | `PASS` |
+| Shell access | `node --version` → `v22.17.1`; `Get-ChildItem`/`Select-String`/`Remove-Item` all executed | `PASS` |
+| Git read access | `git status --porcelain=v1`, `git log --oneline -8`, `git ls-remote origin refs/heads/main` → `9c8e142…` | `PASS` |
+| Web access | `webfetch https://opencode.ai/v2/docs/permissions` → full page | `PASS` |
+| Orchestrator write, previously denied path | `app/.perm-probe-2.md` written; `Test-Path` → `True`, `Get-Content` → `probe` from a different session | `PASS` |
+| Orchestrator shell, previously denied command | same session: `node --version` → `v22.17.0` | `PASS` |
+| Subagent delegation | `subagent(qa-reviewer)` completed and returned evidence | `PASS` |
+| Reviewer write denial | `Set-Content docs/audit/.qa-write-probe.md` → `{"error":{"type":"permission.rejected",...}}`; `Test-Path` → `False` | `PASS` (denied) |
+| Reviewer Git write denial | `git commit --allow-empty -m "probe"` → `permission.rejected`; HEAD unchanged | `PASS` (denied) |
+| Reviewer tool surface | `tools.write` / `tools.edit` → `Unknown tool` | `PASS` (absent) |
+| Reviewer compound command | `git status; flutter analyze` → `permission.rejected` (per-segment allowlist) | `PASS` (denied) |
+| Secret gate at runtime | no `.env`, `.pem`, or key file exists in the workspace | `NOT RUN` |
+| Product regression (`flutter analyze`/`test`, SQL, Edge) | not rerun — no product or test file changed; A0 baseline stands as carried-forward evidence | `NOT RUN` |
+| `FINDINGS_REGISTER.json` | parses; 6 findings; `P1:2, P2:2, P3:2` matches declared counts | `PASS` |
+
+### Git
+
+| Item | Value |
+|---|---|
+| Branch | `main` |
+| Commit | `docs(changelog)` close-out commit; the policy commit SHA is recorded below after the push |
+| Push | normal `git push origin main`, authorized by the user for this task |
+| Force push | not used, not requested |
+
+### Not done, deliberately
+
+- **A1 was not started.** The earlier A1 instruction was withdrawn before any review ran;
+  `docs/audit/phases/A1_ARCHITECTURE.md` does not exist. A stub created during a permission probe was
+  deleted.
+- **`DECISIONS.md` summary table was not backfilled** (D-015…D-024). That is the existing `FND-GOV-002`
+  / W4 scope, not this task.
+- **`deny` became `ask`, never `allow`.** No formerly forbidden operation was silently permitted.
+- **Product regression was not rerun**: `git status --porcelain=v1` before staging showed only
+  `.opencode/**` and `docs/**`.
+- **The first orchestrator probe was discarded as evidence**: it reported a write of
+  `app/.perm-probe-orchestrator.md` that was absent at cleanup, cause not established. Only the repeat,
+  asserted from a second session, is relied on.
+
+---
+
 ## 2026-10-28 — Audit A0.1: governance fix and A0 checkpoint
 
 **Task:** A0.1 — Multi-agent governance fix (`FND-GOV-001`) and durable Git checkpoint.

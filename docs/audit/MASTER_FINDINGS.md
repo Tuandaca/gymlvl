@@ -195,10 +195,15 @@ rejected, proving `mode: primary`; the server emitted `agent.updated` at
 `2026-10-28T07:06:41.988Z`, one second after the write; `qa-reviewer` independently confirmed the
 allowlist shape read-only.
 
-**End-to-end verification is `NOT RUN`.** Exercising a write as the orchestrator requires a session whose
-selected agent is `gymlvl-orchestrator`; this session is not one, and `default_agent` is a
-session-creation default rather than a live switch (OpenCode V2, *Config → Agent*). The item stays open
-in `SESSION_HANDOFF.md` §7 until a new session proves it.
+**End-to-end verification — `PASS` (2026-10-28).** Exercising a write as the orchestrator required a
+session whose selected agent is `gymlvl-orchestrator`, since `default_agent` is a session-creation
+default rather than a live switch (D-023). That was done twice with
+`opencode-cli.exe run --agent gymlvl-orchestrator`. The decisive probe used a path the old policy
+denied — `app/.perm-probe-2.md` — and the assertion was made from a **different** session:
+`Test-Path` → `True`, `Get-Content` → `probe`. The same session also ran `node --version`, previously
+denied. D-024 subsequently replaced the narrow `docs/audit/*` rule with full development access plus
+approval gates, so the specific allowlist this finding described no longer exists. See
+`docs/agent-system/ACCESS_POLICY.md` §§3–5.
 
 **Dependencies.** Needs to land before A1 if A1 is to run under the orchestrator. A1 can still run
 under the build agent with the gap recorded.
@@ -306,6 +311,10 @@ later rule — including the global `git push *` deny — still applies to the s
 observed S3 behaviour, so `cd *` cannot be used to smuggle a denied command. No repository change is
 required; the matcher's semantics are documented upstream. Retained here with the disproof attached,
 per `README.md` §7.
+
+**Post-D-024 note (2026-10-28).** The `cd *` allow examined above no longer exists: the orchestrator
+now inherits the global rule set and carries no shell allowlist of its own. The disproof still stands;
+only the rule path recorded in this finding is historical.
 
 ---
 

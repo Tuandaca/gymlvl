@@ -2,20 +2,102 @@
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "gymlvl-orchestrator",
 
-  // Project-wide safety floor from AGENTS.md §8.
-  // These apply to every agent, including the built-in build agent.
-  // Destructive history operations are denied outright; reversible Git writes require a human "yes".
+  // Access policy D-024 (2026-10-28): full development autonomy for the orchestrator and the five
+  // development specialists; qa-reviewer and context-keeper stay read-only.
+  //
+  // Ordering matters. A later matching rule overrides an earlier one, and agent rules are appended
+  // after these global rules. The broad allows therefore come first, and the approval gates for
+  // irreversible or sensitive operations come last so that no agent can widen past them.
   "permissions": [
-    { "action": "shell", "resource": "git push *", "effect": "deny" },
-    { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
-    { "action": "shell", "resource": "git clean -fd *", "effect": "deny" },
-    { "action": "shell", "resource": "git clean -fdx *", "effect": "deny" },
-    { "action": "shell", "resource": "git filter-branch *", "effect": "deny" },
-    { "action": "shell", "resource": "git commit *", "effect": "ask" },
-    { "action": "shell", "resource": "git tag *", "effect": "ask" },
-    { "action": "shell", "resource": "git rebase *", "effect": "ask" },
-    { "action": "shell", "resource": "git checkout *", "effect": "ask" },
-    { "action": "shell", "resource": "git switch *", "effect": "ask" },
-    { "action": "shell", "resource": "git stash *", "effect": "ask" }
+    // --- Baseline: full development access ------------------------------------------------
+    { "action": "read", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+    { "action": "shell", "resource": "*", "effect": "allow" },
+    { "action": "webfetch", "resource": "*", "effect": "allow" },
+    { "action": "websearch", "resource": "*", "effect": "allow" },
+    { "action": "external_directory", "resource": "*", "effect": "allow" },
+    { "action": "question", "resource": "*", "effect": "allow" },
+    { "action": "skill", "resource": "*", "effect": "allow" },
+
+    // --- Secrets: never read or export without an explicit decision ------------------------
+    { "action": "read", "resource": "*.env", "effect": "ask" },
+    { "action": "read", "resource": "*.env.*", "effect": "ask" },
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
+    { "action": "read", "resource": "*.pem", "effect": "ask" },
+    { "action": "read", "resource": "*.p12", "effect": "ask" },
+    { "action": "read", "resource": "*.keystore", "effect": "ask" },
+    { "action": "read", "resource": "*.jks", "effect": "ask" },
+    { "action": "read", "resource": "*id_rsa*", "effect": "ask" },
+    { "action": "read", "resource": "*id_ed25519*", "effect": "ask" },
+    { "action": "read", "resource": "*/.git-credentials", "effect": "ask" },
+    // The gates above cover the `read` action. Shell can reach the same bytes, so the read-command
+    // forms are gated too (D-024; matching semantics per FND-GOV-003).
+    { "action": "shell", "resource": "Get-Content *.env", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.env.*", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.pem", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.p12", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.keystore", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.jks", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *id_rsa*", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *id_ed25519*", "effect": "ask" },
+    { "action": "shell", "resource": "Get-Content *.git-credentials", "effect": "ask" },
+    { "action": "shell", "resource": "type *.env", "effect": "ask" },
+    { "action": "shell", "resource": "type *.env.*", "effect": "ask" },
+    { "action": "shell", "resource": "cat *.env", "effect": "ask" },
+    { "action": "shell", "resource": "cat *.env.*", "effect": "ask" },
+    { "action": "shell", "resource": "more *.env", "effect": "ask" },
+    { "action": "shell", "resource": "more *.env.*", "effect": "ask" },
+
+    // --- Git history: rewriting and remote destruction need approval ----------------------
+    // Normal `git commit`, `git fetch`, `git pull`, `git merge` and `git push` stay allowed.
+    { "action": "shell", "resource": "git push --force*", "effect": "ask" },
+    { "action": "shell", "resource": "git push -f*", "effect": "ask" },
+    { "action": "shell", "resource": "git push * +*", "effect": "ask" },
+    { "action": "shell", "resource": "git push --mirror*", "effect": "ask" },
+    { "action": "shell", "resource": "git push --delete*", "effect": "ask" },
+    { "action": "shell", "resource": "git reset --hard*", "effect": "ask" },
+    { "action": "shell", "resource": "git clean *", "effect": "ask" },
+    { "action": "shell", "resource": "git filter-branch*", "effect": "ask" },
+    { "action": "shell", "resource": "git rebase*", "effect": "ask" },
+    { "action": "shell", "resource": "git commit --amend*", "effect": "ask" },
+    { "action": "shell", "resource": "git branch -D*", "effect": "ask" },
+    { "action": "shell", "resource": "git restore*", "effect": "ask" },
+    { "action": "shell", "resource": "git checkout -- *", "effect": "ask" },
+    { "action": "shell", "resource": "git checkout .", "effect": "ask" },
+    { "action": "shell", "resource": "git stash drop*", "effect": "ask" },
+    { "action": "shell", "resource": "git stash clear*", "effect": "ask" },
+
+    // --- Bulk deletion of project or local data -------------------------------------------
+    { "action": "shell", "resource": "Remove-Item -Recurse*", "effect": "ask" },
+    { "action": "shell", "resource": "Remove-Item * -Recurse*", "effect": "ask" },
+    { "action": "shell", "resource": "rm -rf*", "effect": "ask" },
+    { "action": "shell", "resource": "rm -r *", "effect": "ask" },
+    { "action": "shell", "resource": "rmdir /s*", "effect": "ask" },
+
+    // --- Production database, remote project and deploy -----------------------------------
+    // Local Supabase (`supabase start`, `stop`, `db reset` without `--linked`) stays allowed.
+    { "action": "shell", "resource": "supabase db push*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase db reset --linked*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase db remote*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase link*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase unlink*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase functions deploy*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase projects*", "effect": "ask" },
+    { "action": "shell", "resource": "supabase secrets*", "effect": "ask" },
+    { "action": "shell", "resource": "psql *", "effect": "ask" },
+
+    // --- Delegation: the seven GymLvl agents only ------------------------------------------
+    // gymlvl-orchestrator is `mode: primary` and cannot be delegated to; the deny is explicit so
+    // the intent survives a future mode change.
+    { "action": "subagent", "resource": "*", "effect": "deny" },
+    { "action": "subagent", "resource": "gymlvl-orchestrator", "effect": "deny" },
+    { "action": "subagent", "resource": "flutter-specialist", "effect": "allow" },
+    { "action": "subagent", "resource": "supabase-specialist", "effect": "allow" },
+    { "action": "subagent", "resource": "exercise-catalog", "effect": "allow" },
+    { "action": "subagent", "resource": "ui-ux-specialist", "effect": "allow" },
+    { "action": "subagent", "resource": "qa-reviewer", "effect": "allow" },
+    { "action": "subagent", "resource": "context-keeper", "effect": "allow" }
   ]
 }
