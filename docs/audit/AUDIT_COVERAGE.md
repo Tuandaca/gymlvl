@@ -1,7 +1,8 @@
 # Audit Coverage
 
-**Stage:** A2 (reconciled documentation-only PARTIAL checkpoint; matrix opened at A0)
+**Stage:** A2 CLOSED (scoped audit acceptance PASS; runtime deferrals tracked; matrix opened at A0)
 **Baseline:** `main` @ `7eb40f1`
+**Closure entry:** `main` @ `aa36a4c`; original scope/measurement baseline above is retained.
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
@@ -54,11 +55,11 @@ Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboardi
 | ID | Component | Paths | Stage | Status | Reviewer | Evidence source | Known limitation |
 |---|---|---|---|---|---|---|---|
 | C-01 | App bootstrap & DI | `app/lib/main.dart`, `core/config` | A2 | `Reviewed (static)` | flutter-specialist (A2 original + reconciliation) | A2 sections 2.1,8.2 lead13: initialization failure gate inspected | No device bootstrap execution; absence of retry alone not defect |
-| C-02 | Router & shell | `core/router/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 reconciliation) | Four files; A2 section 8.2 leads8,11-13; summary BUG007 | Live auth callbacks/lifecycle/performance deferred A5; lead10 recovery widget probe remains A2 |
+| C-02 | Router & shell | `core/router/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 reconciliation) | Four files; A2 section 8.2 leads8,11-13; summary BUG007 | Live auth callbacks/lifecycle/performance and lead10 recovery widget assertion deferred A5, Flutter/QA |
 | C-03 | Theme & design tokens | `core/theme/**`, `ui/candy/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | A2 section 8.2 leads1,2,5,6; BUG004 | Keyboard, hit regions, text-scale/device checks deferred A5 |
 | C-04 | Shared widgets | `ui/widgets/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Four system/status widgets inspected; phase 2.1/8.2 | Not all interaction/semantics paths executed |
 | C-05 | Localization | `core/localization/**`, `app/lib/l10n/**`, `app/l10n.yaml` | A2 | `Reviewed (static)` | ui-ux-specialist, flutter-specialist (A2) | ARCH002 extended; phase 8.2 leads7,22 | Bilingual clipping/device diacritics and screen-reader behavior deferred A5 |
-| C-06 | Auth feature | `features/auth/**` | A2 | `Reviewed (static)` | flutter-specialist, supabase-specialist; qa-reviewer (A2) | Auth forms/providers/repository inspected; phase 8.2 leads9,10,12,13 | Lead10 remains A2 runtime follow-up; no live Auth server |
+| C-06 | Auth feature | `features/auth/**` | A2 | `Reviewed (static)` | flutter-specialist, supabase-specialist; qa-reviewer (A2) | Auth forms/providers/repository inspected; phase 8.2 leads9,10,12,13 | Lead10 deferred A5 per explicit user closure instruction; owner flutter-specialist, qa-reviewer; assertion in phase8.2.10; no live Auth server |
 | C-07 | Onboarding | `features/onboarding/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Screen/controller inspected; unselected gender label BUG004 | Runtime chip background/large text deferred A5; domain semantics not claimed |
 | C-08 | Dashboard | `features/dashboard/**` | A2 | `Reviewed (static)` | ui-ux-specialist, supabase-specialist (A2) | Unlabeled recent-three KPI BUG005 and quest BUG006 | KPI intended time-window still Needs Verification; domain stats math not executed |
 | C-09 | Workout domain | `features/workout/domain/**` | A4 | `Not Reviewed` | — | — | — |
@@ -97,7 +98,7 @@ These are **observations about test infrastructure**, not yet findings. A5 forma
 ## 5. Remaining work
 
 All 27 components are inventoried. Historical A1 close: 3 reviewed, 1 in review, 22 not reviewed,
-1 out of scope. At this reconciled PARTIAL A2 checkpoint: **13 `Reviewed (static)`, 5 `In Review`,
+1 out of scope. At scoped A2 closure: **13 `Reviewed (static)`, 5 `In Review`,
 8 `Not Reviewed`, 1 `Out of Scope`**. No whole component is promoted to runtime-verified merely
 because existing widget tests passed. **No component may be described as "audited" until its stage closes.**
 
@@ -108,7 +109,8 @@ the inherited candidates; A5 closes C-23, C-24 and the G-series gaps; A6 reconci
 A1 added no new G-series gap: the missing CI gates it found are recorded as `FND-TEST-001` instead,
 because they are a defect in an existing gate rather than an unmeasured area.
 
-A2 remains PARTIAL despite completed static reconciliation: lead10's focused auth/recovery widget
-assertion remains in A2, and a final executable A3 handoff has not been issued. Mixed A2/A4 rows
-explicitly retain the unreviewed domain half. All deferred runtime investigations have owners and
-target stages in A2_FLUTTER section 8.2; no device/runtime coverage percentage is claimed.
+A2 scoped audit is CLOSED after the seven original acceptance criteria are evaluated in A2_FLUTTER
+section9. Lead10 runtime verification explicitly belongs to A5, not a continuing A2 gate. Mixed
+A2/A4 rows retain the unreviewed domain half. Exact A3 entry is in the current audit handoff and
+requires separate authorization. All deferred investigations have owners, stages and assertions in
+phase8.2/9.3; no device/runtime coverage percentage or product correctness guarantee is claimed.

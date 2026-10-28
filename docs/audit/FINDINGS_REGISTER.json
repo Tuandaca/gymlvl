@@ -2,7 +2,24 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A2 (partial final-reconciliation checkpoint)",
+  "stage": "A2 (CLOSED; scoped audit acceptance PASS; deferred verification retained)",
+  "closure": {
+    "date": "2026-10-28",
+    "entry_commit": "aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5",
+    "validation_result": "PASS",
+    "operational_status": "CLOSED",
+    "scope": "Original seven A2 audit acceptance criteria; not product correctness or exhaustive runtime verification",
+    "lead_10": {
+      "disposition": "Deferred by explicit user scope-closure instruction; no finding promotion",
+      "target_stage": "A5",
+      "owner": "flutter-specialist",
+      "independent_reviewer": "qa-reviewer",
+      "acceptance": "Synthetic failed sign-in then recovery navigation must not show password-update failure before submission; successful and rejected submission controls must expose operation-specific state; retain isolated harness, exact command/output and assertions",
+      "runtime_verification": "NOT RUN"
+    },
+    "deferred_work_reference": "docs/audit/phases/A2_FLUTTER.md sections 8.2 and 9.3",
+    "historical_evidence_reference": "docs/audit/phases/A2_PROBES.md; prior regression results remain dated, not current-session PASS"
+  },
   "baseline": {
     "branch": "main",
     "head": "7eb40f1d7e553e9f136abb13f632b8bfb189dc3c",

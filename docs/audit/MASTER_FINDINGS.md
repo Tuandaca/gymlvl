@@ -1,6 +1,6 @@
 # Master Findings
 
-**Stage:** A2 (partial final-reconciliation checkpoint; register opened at A0)
+**Stage:** A2 CLOSED (scoped audit acceptance PASS; deferred work retained; register opened at A0)
 **Baseline:** `main` @ `7eb40f1`
 **Counts:** 24 findings — P0: 0, P1: 3, P2: 14, P3: 5, P4: 2. Confirmed: 4, High: 18, Medium: 2, Low: 0.
 **Status:** 2 `Needs Verification`, 20 `Accepted`, 1 `Fixed`, 1 `False Positive`.
@@ -12,7 +12,12 @@ A2 recovery originally added `FND-SEC-002` without confidence promotion. Final r
 `FND-BUG-004…007` and `FND-INTG-002…004`, and accepts narrowly reproduced controller mechanisms in
 `FND-CONC-001` / `FND-SEC-002`. Their original classifications are retained as historical records.
 `FND-DATA-001` remains P1 / Medium / `Needs Verification`. Remaining leads and deferred assertions
-belong to the phase record, not register totals. A2 remains partial; this is not whole-stage acceptance.
+belong to the phase record, not register totals. A2 is now CLOSED under the original seven scoped
+audit criteria; this is not remediation or exhaustive runtime acceptance. No finding classification
+changes in closure. Lead10 remains an unverified investigation deferred A5 by explicit user instruction:
+owner flutter-specialist, independent qa-reviewer; synthetic failed-signin -> recovery must not show
+password-update failure before submission, with successful/rejected submission controls and retained
+command/output. See A2_FLUTTER sections8.2.10/9. It is not a new Confirmed finding.
 
 Findings inherited from `docs/agent-system/S3_VALIDATION_REPORT.md` §10 keep their origin and are
 explicitly **unverified** until a stage re-checks them.

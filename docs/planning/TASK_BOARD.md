@@ -1,5 +1,19 @@
 # GymLvl — Task Board
 
+## Current — A2 scoped audit DONE/CLOSED (2026-10-28)
+
+**Validation:** `PASS` for seven original scoped audit criteria; not product runtime certification.
+**A2:** DONE/CLOSED; 24 findings and22 dispositions retained. Lead10 verification belongs to A5,
+owner flutter-specialist, independent qa-reviewer, exact synthetic recovery acceptance in phase9.3.
+Other deferred assertions remain A4/A5; no indefinite A2 reopening and no findings promoted here.
+**Coverage:** 13 static-reviewed /5 mixed-stage in review /8 not reviewed /1 excluded; unchanged.
+**Commit/base:** main aa36a4c at closure entry, clean and remote equal. Docs-only closure commit/push
+authorized; no rewrite, product change or cleanup. Prior regression results remain dated evidence.
+**Next audit task:** **A3 — NEXT**, requires explicit go-ahead; exact entry prompt in audit handoff.
+Do not start A3/A4-A6, remediation or migration from this closure task.
+
+## Historical checkpoint records (superseded status lines below)
+
 ## Current A2 reconciliation checkpoint — PARTIAL (2026-10-28)
 
 **Recorded Git checkpoint:** `199bf00` on main (nine docs only), normal push exit 0;
@@ -105,8 +119,8 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A0 | Bootstrap, baseline, inventory, execution plan | `DONE` | `docs/audit/phases/A0_BOOTSTRAP.md`; 6 findings; coverage matrix for 27 components |
 | A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
 | A1 | Architecture, dependencies, configuration, infrastructure, CI | `DONE` | `docs/audit/phases/A1_ARCHITECTURE.md`; 10 new findings (16 total); coverage C-22/C-25/C-26 closed; 2 A0 inventory figures corrected |
-| A2 | Flutter app, state, lifecycle, concurrency, navigation | In progress (partial) | Authorized; recovered inspections, current checks, pending retained probes/triage/QA; current handoff recovery section |
-| A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` | — |
+| A2 | Flutter app, state, lifecycle, concurrency, navigation | `DONE` | Scoped audit PASS/CLOSED; original seven AC reconciled in A2_FLUTTER section9; Lead10 deferred A5 by explicit user instruction; 24 findings/22 dispositions retained |
+| A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `NEXT` | C17-C21; exact entry prompt in current audit handoff; requires separate authorization, not started |
 | A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
 | A5 | Tests, performance, reliability, observability | `PLANNED` | — |
 | A6 | Reconciliation, verification, triage, remediation plan | `PLANNED` | — |

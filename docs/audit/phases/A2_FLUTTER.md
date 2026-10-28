@@ -1,13 +1,14 @@
 # A2 — Flutter application deep audit
 
-**Task:** A2 only; final reconciliation / documentation-only PARTIAL checkpoint, 2026-10-28.
-**Current state:** Section 8 is authoritative. Sections 1-7 and the continuation below preserve
-earlier checkpoint evidence, not current outstanding-work lists. All 22 leads now have dispositions;
-no lead is silently dropped. Current register: 24 findings, P1 3 / P2 14 / P3 5 / P4 2;
-Confirmed 4 / High 18 / Medium 2; Accepted 20 / Needs Verification 2 / Fixed 1 / False Positive 1.
-**Authorization:** The latest user explicitly permits a clearly labeled PARTIAL documentation-only
-commit and normal push once internal consistency passes. This supersedes earlier completed-only Git
-restrictions. No history rewrite, remediation, A3 start, or temporary-directory deletion authorized.
+**Task:** A2 scope closure and A3 handoff, 2026-10-28.
+**Validation result:** `PASS` for the seven scoped audit acceptance criteria, not product correctness.
+**Operational status:** **CLOSED** with explicitly owned A4/A5 deferred verification.
+**Current state:** Section 9 is authoritative; earlier partial-checkpoint evidence and assessments
+remain historical. All 22 leads retain dispositions and all 24 findings retain their classifications.
+**Closure entry:** `main` @ `aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5`, clean, remote equal.
+**Authorization:** Latest user explicitly moves any remaining Lead10 runtime verification to A5 and
+authorizes the normal documentation commit/push. No mandatory acceptance criterion was removed.
+No new investigation, product edit, history rewrite, A3 execution, remediation or Temp deletion.
 
 ## Historical continuation and recovery evidence
 **Latest continuation:** retained synthetic controller probes executed and independently reviewed;
@@ -289,7 +290,7 @@ both finding mirrors and all seven AC, and only then make the authorized normal 
 **Blockers:** no external blocker established; remaining work is finite verification/triage, not
 permission to skip it. Context checkpoint intentionally preserves progress before another long pass.
 
-## 8. Final reconciliation checkpoint — current state
+## 8. Final reconciliation checkpoint — historical assessment; current closure in section 9
 
 ### 8.1 Provenance, scope and critical evidence
 
@@ -349,11 +350,14 @@ stays A3/A4. Post-RPC detail-fetch ambiguity now has its own client finding FND-
    screen helper duplication/reduced motion remain maintenance/accessibility checks, not proven crashes.
 9. **Deferred A5**, owner Flutter/QA: hold profile lookup pending and assert bounded escape/retry
    policy. Lack of an explicit timeout is not proof that normal network requests hang forever.
-10. **Deferred A2 follow-up**, owner flutter-specialist with qa-reviewer: shared AuthController error
-    can appear as password-update failure on reset screen before submission (providers:65-115,
-    reset screen:29,84-94). Needs focused synthetic failed-signin -> recovery-route widget assertion;
-    no production auth needed. This is the one remaining bounded A2 verification item, not silently
-    sent to A3. It prevents a whole-stage completion claim in this checkpoint.
+10. **Deferred A5 by explicit scope-closure instruction**, owner `flutter-specialist`, independent
+    reviewer `qa-reviewer`: shared AuthController error may appear as password-update failure on
+    reset screen before submission (providers:65-115, reset screen:29,84-94). Acceptance: synthetic
+    failed sign-in -> recovery navigation must not display password-update failure before submission;
+    successful submission and rejected submission controls must show correct operation-specific state.
+    Retain isolated harness, exact command/output and assertions. `NOT RUN`; no real account needed.
+    No finding promotion, rejection or fix implied. Historical A2-only gate is superseded explicitly;
+    this was never a mandatory runtime test in the original seven audit acceptance criteria.
 11. **Mixed explicit disposition:** missing custom unknown-route builder **no issue established by
     inspection** (framework error handling exists; customization alone not required). Synthetic summary
     fallback merged **FND-BUG-007**. No database completed-workout record is fabricated.
@@ -452,3 +456,101 @@ Git result: `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` on main, nine docs, +1724
 `git push origin main` -> `7eb40f1..199bf00  main -> main`, exit 0. Remote main equals local full
 SHA via `git ls-remote origin refs/heads/main`; tree empty after push. This child record documents
 that outcome; it does not mark A2 complete. No force push or history rewrite.
+
+## 9. Scoped A2 closure — authoritative current assessment
+
+### 9.1 Closure boundary and governance
+
+The user's A2 Scope Closure instruction explicitly permits Lead10 runtime verification to move to A5.
+The original seven acceptance criteria (audit handoff historical section 6) require documented scope,
+consistent registers, named coverage, concurrency evidence or an honest gap, handoff and user report;
+they do not require an exhaustive widget/device/live-runtime proof or remediation. AC1 explicitly
+allows an item skipped with a reason; AC4 permits an unverified disposition. All original criteria
+are retained verbatim in the audit handoff history. No weaker replacement scale or new CLOSED status
+is being substituted for a failed criterion: this task evaluates scoped audit acceptance as `PASS`.
+`CLOSED` is an operational stage marker, not a runtime verification status.
+
+Read-only context review `ses_e7d8e3512ffe5XRc3csFGsWSyv` independently confirmed that Lead10 was an
+extra checkpoint gate, not one of the original mandatory AC. No architecture/milestone/permission
+change or new durable decision is required. No findings were added, dropped, fixed, or promoted in
+this closure task. The register's findings themselves are unchanged from aa36a4c. Current closure
+commands check documents and preservation; old runtime results stay dated evidence, never fresh PASS.
+
+### 9.2 Seven acceptance criteria — scope closure
+
+1. **AC1 — PASS, artifact/scope gate.** Phase exists and records bootstrap, router/shell, theme,
+   shared widgets, localization and all feature presentation/client scope in sections 2/8. Every
+   original lead 1-22 is dispositioned in 8.2. Runtime omissions have explicit reasons, owners,
+   target stages and verification requirements. The latest instruction approves Lead10 -> A5.
+2. **AC2 — PASS, register gate.** Current-session Node consistency check parses JSON, compares all
+   24 Markdown IDs and first/current severity/confidence/status fields, checks 22 required JSON
+   fields per finding, declared counts and equality of all 24 finding objects to aa36a4c.
+   Closure metadata only changes; existing evidence/classifications are preserved.
+3. **AC3 — PASS, coverage gate.** Required C01-C05/C07/C08/C16 and C10/C11/C12 presentation/client
+   portions have named reviewers and scope evidence. Totals remain 13 static-reviewed/5 mixed-stage
+   in review/8 not reviewed/1 excluded. No unreviewed A4 half or device behavior is relabeled verified.
+4. **AC4 — PASS, evidence/gap-recording gate.** CONC001 cycle has retained real-controller synthetic
+   probe source, named command, observed output and controls (A2_PROBES). Evidence is historical;
+   successful probes intentionally not rerun. Post-await identity race remains `NOT RUN`, owner
+   flutter-specialist, A5, deterministic storage-await/identity-reset assertion. No promotion of it.
+5. **AC5 — PASS, handoff gate.** Current audit handoff records task, base SHA/tree, changed files,
+   decisions, remaining gaps and the exact A3 entry prompt with constraints/acceptance. A3 is READY
+   only for a future explicit authorization, not started by writing the prompt.
+6. **AC6 — PASS, edit-scope gate.** Current `git status --porcelain=v1` and scoped diff show only
+   eight authorized audit/planning artifacts. No application/permanent test/config/SQL/agent change.
+7. **AC7 — PASS, user-report gate.** The Vietnamese closure report names `PASS`/`NOT RUN` correctly,
+   quotes current consistency evidence, distinguishes historical regression results and states
+   CLOSED with deferred work. This is the user-facing closure communication, not another test run.
+
+### 9.3 Deferred-work ownership (does not reopen A2)
+
+- **A5 / flutter-specialist + qa-reviewer:** Lead10 failed-signin/recovery widget assertion and
+  successful/rejected submission controls as detailed in 8.2.10. Hypothesis remains unverified.
+- **A5 / flutter-specialist:** post-await identity-reset race, pending session lookup escape,
+  dispose-before-post-frame ref access and 1Hz shell rebuild budget; exact assertions in 8.2/CONC001.
+- **A5 / ui-ux-specialist with Flutter/QA:** keyboard traversal/activation, semantic hit bounds,
+  localized close control, 320dp/200% VI/EN/bilingual dialogs/labels, diacritics and screen reader.
+- **A5 / Flutter/QA (Edge support for Coach):** KPI approved-window fixture, null quest rewards,
+  no-extra summary/zero or missing rewards, post-award hydration failure, malformed responses,
+  4001-character Coach answer continuation, numeric visible-versus-persisted values and local auth
+  callbacks. Linked findings retain High/Medium rather than invented runtime confirmation.
+- **A4 / supabase-specialist + flutter-specialist:** partial reorder, committed-but-lost addSet
+  response/retry, zero-row delete/authorization distinction, timed duration/reps final-completion
+  contract and quest/day-boundary/progression semantics. No authoritative XP duplication claim.
+- **A3/A4 / supabase-specialist, independent qa-reviewer:** server schema/ownership/legacy cohort
+  underpinning DATA001 and ARCH001; A3 inspects authorization/schema, A4 owns reward/idempotency.
+- **Manual cleanup:** full-copy probe disposal still requires explicit approval for the exact
+  directory after user inventory review. No secret read, deletion or broad Temp cleanup in closure.
+
+### 9.4 Evidence vocabulary and final check
+
+Regression evidence retained from prior reconciliation at 7eb40f1: analyzer `No issues found! (8.5s)`,
+format `125 files (0 changed)`, Flutter `+126: All tests passed!`; retained synthetic probe `+7`.
+All are dated historical evidence, **not current-session regression PASS**. Current Flutter tests,
+analyzer, formatting and successful probes: `NOT RUN` because only closure documents change and the
+user forbids another investigation cycle. No evidence requires a rerun to preserve its original scope.
+
+Current Node/Git/QA closure-check outputs are recorded in the current handoff and changelog. The
+checkpoint commit will state scoped closure and defer Lead10 to A5. Next action after this task is
+to await explicit A3 authorization and then use the exact prompt in the current audit handoff.
+
+Closure execution at aa36a4c (PowerShell here-string piped to Node, inline document validator):
+`CLOSURE_CHECK findings=24 unchanged_objects=24 md=24 fields=22 dispositions=22 lead10=A5
+ac_records=7 authorized_paths=8 errors=0`; `CLOSURE_EXIT node=0 diff=0`. It parses/counts JSON,
+compares every finding object to the entry commit, checks current Markdown classifications, all
+22 field names, lead numbers/Lead10 owner-target-acceptance, named coverage, A3 prompt, AC records
+and the eight-path edit boundary. `git diff --check` -> exit0, only LF/CRLF conversion warnings.
+These are current document/preservation checks (`PASS`), not runtime execution of the hypotheses.
+
+First validator attempt was `FAIL`, exit1: PowerShell's pipe encoding changed Unicode dash literals
+to `?`, causing seven AC-label and one A3-title assertion mismatches. Findings, counts, ownership,
+coverage and scope already matched. ASCII-safe assertion patterns were then used and rerun passed;
+no product/finding changes were made to satisfy the validator. Both outcomes are preserved honestly.
+
+Independent closure QA `ses_e7d88939afferY5zT4orKqmM5Z` used read/grep/Git inspection, found all
+original scope gates supportable and no mandatory substantive blocker; it recommended adding the
+current validator output/encoding-failure note to handoff/changelog before commit (now recorded).
+Its `git status --porcelain=v1` check showed exactly eight allowed docs and HEAD aa36a4c. It did
+not run Node or runtime tests and does not supply an independent runtime PASS. Context-keeper
+`ses_e7d8e3512ffe5XRc3csFGsWSyv` separately confirmed the original AC never required executing Lead10.
+Vietnamese closure commentary reports current `errors=0` document PASS and runtime `NOT RUN`.

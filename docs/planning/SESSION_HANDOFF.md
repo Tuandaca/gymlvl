@@ -1,5 +1,35 @@
 # GymLvl — Session Handoff
 
+## Current — A2 CLOSED; A3 not started (2026-10-28)
+
+- **Task/status:** A2 scope closure, `PASS` against seven original audit acceptance criteria;
+  operational **CLOSED** with owned A4/A5 deferred work. Not full runtime/product correctness.
+- **Commit:** closure entry main `aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5`, clean, remote equal;
+  documentation commit/normal push authorized. Confirm actual HEAD/remote on resume.
+- **Changed files:** audit phase A2_FLUTTER, coverage, both registers, audit handoff; planning
+  TASK_BOARD/SESSION_HANDOFF/CHANGELOG_AI. Eight docs only; A2_PROBES unchanged.
+- **Preservation:** all 24 finding objects/classifications and 22 lead dispositions retained;
+  counts P0 0/P1 3/P2 14/P3 5/P4 2; Confirmed 4/High 18/Medium 2; Accepted20/NeedsVerification2/
+  Fixed1/FalsePositive1. Coverage remains13 static/5 mixed-stage in review/8 not reviewed/1 excluded.
+- **Deferred:** Lead10 -> **A5**, explicit user instruction; flutter-specialist with independent
+  qa-reviewer. Synthetic failed-signin -> recovery must not display password-update failure before
+  submit; successful/rejected submit controls, retained isolated harness/command/output. NOT RUN,
+  no promotion. Other A4/A5 owners and exact assertions in A2_FLUTTER sections8.2/9.3. No open A2 loop.
+- **Verification:** current consistency/preservation/Git checks recorded in audit handoff/changelog.
+  Existing +126 regression/+7 controller, analyzer and format outputs are historical; current Flutter
+  runs NOT RUN intentionally for docs-only scope. Prior QA recorded; closure QA reviews artifacts only.
+- **Current result:** inline Node closure check -> findings24/unchanged_objects24/MD24/fields22/
+  dispositions22/Lead10A5/ACrecords7/authorized_paths8/errors0; node0/diff0. First attempt failed
+  Unicode literal assertions through PowerShell; ASCII-safe rerun passed, no findings/product edits.
+  Closure QA/context inspection supports the original scoped criteria and full deferral/A3 records;
+  QA did not execute runtime tests. Final Vietnamese communication states PASS versus NOT RUN scope.
+- **Decisions/blockers:** no material project decision or waived AC. No A2 closure blocker; future
+  live/device checks stay unverified. Probe Temp removal still needs explicit exact-path approval.
+- **Next action:** wait for explicit A3 authorization, then execute `docs/audit/SESSION_HANDOFF.md`
+  **A3 entry prompt — authorization required**. No A3 or remediation execution in closure.
+
+## Historical A2 partial handoffs (superseded current task/status/next action)
+
 ## Current — A2 reconciled PARTIAL checkpoint (2026-10-28)
 
 **Git checkpoint:** `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` on main, docs-only PARTIAL;

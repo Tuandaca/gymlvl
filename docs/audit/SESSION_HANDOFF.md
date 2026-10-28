@@ -1,5 +1,92 @@
 # Audit — Session Handoff
 
+## Current — A2 scope CLOSED; A3 awaits authorization (2026-10-28)
+
+- **Task:** A2 scope closure and A3 handoff only.
+- **Validation:** `PASS` for the seven original scoped audit acceptance criteria; **operational
+  status CLOSED** with deferred verification. This does not assert product correctness or fixes.
+- **Entry commit:** `main` @ `aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5`, clean and equal to remote
+  at closure entry. Documentation closure commit/push explicitly authorized; result recorded below
+  after execution. Confirm actual branch/HEAD/tree/remote at the next session.
+- **Changed files:** `docs/audit/phases/A2_FLUTTER.md`, `docs/audit/AUDIT_COVERAGE.md`,
+  `docs/audit/MASTER_FINDINGS.md`, `docs/audit/FINDINGS_REGISTER.json`, this file, and
+  `docs/planning/{TASK_BOARD.md,SESSION_HANDOFF.md,CHANGELOG_AI.md}`. No product/permanent-test edits;
+  `A2_PROBES.md` retained unchanged.
+- **What closed:** all 22 leads retain dispositions; 24 finding objects and all severity/confidence/
+  status values remain unchanged from aa36a4c. Register totals: P0 0/P1 3/P2 14/P3 5/P4 2;
+  Confirmed 4/High 18/Medium 2; Accepted 20/Needs Verification 2/Fixed 1/False Positive 1.
+- **Lead10:** explicitly Deferred A5 by current user instruction, owner flutter-specialist,
+  independent qa-reviewer. Synthetic failed-signin -> recovery must not show password-update failure
+  before submission; successful/rejected submission controls must show operation-specific state.
+  Retain isolated harness, exact command/output/assertions; `NOT RUN`, not Confirmed, no new ID.
+- **Other work:** owners/targets/assertions remain in A2_FLUTTER sections8.2/9.3: post-await identity
+  race and UI/auth/lifecycle/contract runtime checks A5; workout/order/retry/reward semantics A4;
+  schema/authorization A3. DATA001 remains unverified server-side. CONC001/SEC002 Confirmed scopes
+  remain narrow synthetic controller behavior, not live account disclosure or server award proof.
+- **Coverage:** 13 Reviewed (static), 5 mixed-stage In Review, 8 Not Reviewed, 1 excluded. Mixed rows
+  retain A4 halves. C09 and C17-C21/C23-C24 remain unreviewed for their assigned later stages.
+- **Evidence:** retained probe command/source/output and independent QA are in A2_PROBES and phase8.4;
+  prior analyzer/format/+126 regression and +7 synthetic results are dated historical evidence.
+  Current-session Flutter analyze/test/format/probes `NOT RUN` intentionally (docs-only closure,
+  no new investigation). Closure consistency/Git checks are current; do not relabel prior runs.
+- **Current closure checks (aa36a4c):** inline Node -> `CLOSURE_CHECK findings=24 unchanged_objects=24
+  md=24 fields=22 dispositions=22 lead10=A5 ac_records=7 authorized_paths=8 errors=0`;
+  `CLOSURE_EXIT node=0 diff=0`. `git diff --check` -> exit0, conversion warnings only (`PASS`).
+  First validator exit1 was Unicode-literal pipe encoding (seven AC labels/one title mismatch);
+  ASCII-safe assertions reran successfully without changing findings or product. It is a recorded
+  validator failure, not an omitted product test failure.
+- **Independent closure review:** context-keeper `ses_e7d8e3512ffe5XRc3csFGsWSyv` confirmed governance;
+  qa-reviewer `ses_e7d88939afferY5zT4orKqmM5Z` inspected all seven criteria/Lead10 deferral/A3 prompt,
+  found no substantive mandatory blocker and requested these current output notes (now included).
+  QA Git scope check passed; its parser/runtime checks NOT RUN. No permissions bypass or new probe.
+- **Decisions:** no architecture/schema/dependency/licensing/permission/milestone change. Lead10
+  transfer is user-approved audit scheduling; original seven criteria not waived or replaced.
+- **Blockers:** none for scoped A2 closure. Deferred tests are future work, not an open A2 loop.
+  Probe-directory disposal still requires exact-path review/approval; no secret reads or cleanup.
+- **Next action:** await explicit A3 go-ahead, then execute the entry prompt below. **A3 not started.**
+
+## A3 entry prompt — authorization required
+
+> Execute **A3 ONLY — Supabase/PostgreSQL, RLS, Auth and Edge Functions** after explicit user
+> authorization. Do not begin A4-A6, remediation, or OpenGym migration.
+>
+> Restore `AGENTS.md`, planning/current audit handoffs, audit README/scope/coverage, both findings
+> mirrors, A1 architecture and A2 sections8-9/probe limitations. Confirm active primary
+> gymlvl-orchestrator via session metadata, main branch, actual HEAD, tree and remote; preserve any
+> expected user work. Closure entry was aa36a4c plus subsequent documentation commits; never reset.
+>
+> Review **C17-C21**: `supabase/migrations/*.sql` (three migrations), effective schema/types/FKs/
+> constraints/indexes/grants/RLS, SQL function exposure and SECURITY DEFINER ownership/search_path,
+> Auth identity boundaries/config, and `supabase/functions/**` handler authentication/authorization,
+> validation, response/error contracts. Read existing SQL/Edge tests and local test harness only as
+> evidence needed for those paths. Treat repo migration state as distinct from deployed/live state.
+>
+> Delegate supabase-specialist this bounded schema/RLS/Auth/Edge scope and qa-reviewer independent
+> high-severity/security validation, sequentially for shell-dependent work. Orchestrator owns all
+> audit/planning artifact writes; name exact file ownership and checks for each delegation. Do not
+> have every agent scan the entire repository. Use read-only alternatives when QA shell is denied.
+>
+> Carry DATA001/ARCH001 as hypotheses/context: inspect relevant schema/authorization, but leave
+> reward arithmetic, completion/idempotency, legacy reward reproduction, timed-set completion and
+> cross-layer workout semantics authoritative to **A4**. Do not claim XP duplication from client
+> evidence or reopen A2 for deferred A5 widget/device verification. Preserve all 24 IDs and history.
+>
+> Use only existing authorized isolated non-production tests when safe and already provisioned;
+> otherwise record BLOCKED/NOT RUN with prerequisite. **No production/live-account or remote DB
+> access, secret-file reads, dependency installation, migrations applied, configuration/product/test
+> changes, deployments, destructive security probes or remediation.** No third-party exercise media.
+> Do not widen permissions or bypass denied commands. Commit/push only if the actual A3 user
+> authorization explicitly permits them; drafting this prompt does not grant A3 execution rights.
+>
+> Produce `docs/audit/phases/A3_SUPABASE.md`; update both findings mirrors with full fields and stable
+> IDs, named C17-C21 coverage, audit handoff and the three required planning records. Every conclusion
+> separates observation from hypothesis and static from runtime evidence; P0/P1 have independent
+> review; no unsupported Confirmed promotion. Record unavailable runtime checks with owner/target/
+> assertion. Validate JSON/count/classification consistency and authorized edit scope. Report actual
+> commands and results in Vietnamese, exact A4 next prompt, limitations and Git state. Stop after A3.
+
+## Historical A2 partial checkpoints (superseded operational status and next actions)
+
 ## Current — A2 reconciled PARTIAL documentation checkpoint (2026-10-28)
 
 **Checkpoint recorded:** `main` @ `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` (`199bf00`),

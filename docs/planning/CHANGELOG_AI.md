@@ -2,6 +2,39 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-28 — A2 scope closure and exact A3 handoff
+
+- **Task:** close scoped A2 only; validation PASS against the original seven audit acceptance
+  criteria, operational CLOSED with deferred work. No new investigation or A3 execution.
+- **Entry:** main aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5, clean and remote equal; server metadata
+  gymlvl-orchestrator. Normal documentation commit/push explicitly authorized.
+- **Changed:** A2_FLUTTER, AUDIT_COVERAGE, MASTER_FINDINGS, FINDINGS_REGISTER, audit SESSION_HANDOFF;
+  planning TASK_BOARD/SESSION_HANDOFF/this log (eight docs). A2_PROBES and product code unchanged.
+- **Scope:** move Lead10 runtime hypothesis to A5 per explicit user instruction, flutter-specialist
+  with qa-reviewer, synthetic failed-signin/recovery plus successful/rejected submit controls, retained
+  harness/command/output. NOT RUN; no Confirmed promotion. This extra checkpoint gate was not an
+  original mandatory AC. Context-keeper independently inspected governance and confirmed that fact.
+- **Preserved:** all24 finding objects/classifications and22 dispositions; no count changes. Severity
+  P0 0/P1 3/P2 14/P3 5/P4 2; confidence4 Confirmed/18 High/2 Medium; status20 Accepted/2 Needs
+  Verification/1 Fixed/1 False Positive. Coverage13 static/5 mixed-stage in review/8 not reviewed/1 out.
+- **Handoff:** exact bounded A3 schema/RLS/Auth/Edge C17-C21 prompt, no automatic execution; A4 owns
+  reward/idempotency semantics, A5 device/widget/contract checks. Deferred owners/assertions retained.
+- **Verification boundary:** prior analyzer/format/+126 regression and +7 controller evidence stays
+  dated, not current runtime PASS. Current Flutter analyze/test/format/probes NOT RUN for docs-only
+  closure, intentionally no further runtime investigation. Current artifact/Git checks recorded below.
+- **Decisions:** no material architecture/schema/dependency/permission/milestone change or waived AC.
+  No Temp cleanup; exact-path user disposal approval still required. Next action: await A3 go-ahead.
+- **Current closure validation at aa36a4c:** inline Node -> CLOSURE_CHECK findings=24
+  unchanged_objects=24 md=24 fields=22 dispositions=22 lead10=A5 ac_records=7 authorized_paths=8
+  errors=0; CLOSURE_EXIT node=0 diff=0. All24 finding objects equal entry commit; scope eight docs.
+  git diff --check exit0, LF/CRLF warnings only. Initial validator FAIL/exit1 was pipe-encoding of
+  Unicode literals (seven AC labels/one title); ASCII-safe assertions reran PASS, no product/finding
+  repairs. Both results recorded, not masked.
+- **QA:** context-keeper ses_e7d8e3512ffe5XRc3csFGsWSyv confirmed no Lead10-runtime requirement in
+  original AC. qa-reviewer ses_e7d88939afferY5zT4orKqmM5Z independently inspected scope/records and
+  found no substantive mandatory blocker, requested current output notes now added; Git scope PASS,
+  its parser/runtime checks NOT RUN. Vietnamese commentary quotes current errors0 and runtime NOT RUN.
+
 ## 2026-10-28 — A2 final reconciliation / PARTIAL documentation checkpoint
 
 - **Checkpoint outcome:** `199bf00271c8038c04a8f8cbdc1fc35e7538e90f`, nine docs, +1724/-69;
