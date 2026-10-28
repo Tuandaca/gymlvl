@@ -1,5 +1,29 @@
 # Audit — Session Handoff
 
+## Current — A5 authorized / in progress (2026-10-28)
+
+- **Task/status:** A5 ONLY, operational PARTIAL checkpoint; scoped acceptance NOT RUN pending UI/
+  QA/finding reconciliation. A4 closed. Flutter/backend reviews and finite synthetic probes completed.
+- **Commit:** main1763ab55e8da994bc1d854ad8fd2cd2299678b45 clean/remote equal at entry; active
+  gymlvl-orchestrator API metadata verified. D-013 bundle/bare/archive backup verified, phase2.
+- **Changed files:** A5_TEST_RELIABILITY.md, optional three retained specialist evidence docs,
+  MASTER_FINDINGS.md, FINDINGS_REGISTER.json, AUDIT_COVERAGE.md, this handoff and three planning
+  records only. No product/permanent-test/CI/dependency/migration/agent/config edits.
+- **Verification/delegation:** context-keeper, flutter-specialist, supabase-specialist actually invoked
+  sequentially, real sessions in A5phase2. Flutter externalprobe18passes/analyze0issues; backend
+  expiry-only/150UUIDreplay/12request+3providerstreams/SQL10/Edge15/sixchecks/EXPLAIN100-1000 exit0.
+  Full retained source/output/failures in A5_FLUTTER_EVIDENCE.md and A5_BACKEND_EVIDENCE.md; UI/QA
+  still pending. No old PASS reused. Existing30 objects/classifications unchanged, no new IDs yet.
+- **Decisions/blockers:** no material change; independent sessions BLOCKED: Docker/Supabase CLI/
+  PostgreSQL executables unavailable in one bounded local prerequisite check. No supported isolated
+  server target, no simulated concurrency. Actual JWT gateway/device/network cancellation still
+  unverified. These are explicit gaps, not mandatory production gates or established closure blockers.
+- **Next action:** persist PARTIAL docs checkpoint, then A5 UI review/probes and independent QA.
+  Normal docs-only/partial commit/push authorized. No A6/remediation/migration, installs, secrets,
+  live provider/users/production, full-app Temp copy or prior-directory cleanup.
+
+## Historical A4 closure and A5 entry prompt (preserved)
+
 ## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
 
 **Recorded A4 payload checkpoint:** main `84462d0acc27a4c9ea0f99a2c0aa16c0940082fb` (`84462d0`),

@@ -2,6 +2,32 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-28 — A5 first PARTIAL evidence checkpoint
+
+- Real Flutter and Supabase sequential delegations completed; source/output/setup failures/hashes
+  retained in A5_FLUTTER_EVIDENCE.md and A5_BACKEND_EVIDENCE.md. Actual sessions in A5phase2.
+- Flutter18 external audit tests pass and analyze0issues; backend expiry-only controls/150UUIDpairs
+  replay/12request+3providerstreamcases/SQL10units/Edge15tests/sixchecks/EXPLAIN100-1000 exit0.
+- Lead10/post-await identity loss and buffering mechanisms observed; transportlostACK/reorder use
+  modeled persistence, not realSQL. Candidates not registered/promoted before material QA. All30
+  existing objects/classifications unchanged. Setup/diagnostic/evidence-builder FAILs retained.
+- True independent sessions BLOCKED: one tool check found no Docker/Supabase/PostgreSQL executable
+  target. No PGlite Promise.all concurrency or production-impact claim. No implementation fixes.
+- Seven documentation paths only; scoped acceptance NOT RUN pending UI/QA/consistency. Authorized
+  incremental PARTIAL commit/push next, then UI/accessibility and independent QA. No A6/remediation.
+
+## 2026-10-28 — A5 authorized start and context checkpoint
+
+- main1763ab55e8da994bc1d854ad8fd2cd2299678b45 clean/remote equal; active gymlvl-orchestrator
+  verified via API. Existing30 finding IDs/history preserved. A5 only, acceptance NOT RUN pending.
+- D-013 external bundle/bare/archive backup verified: clone HEAD equals entrySHA, ZIP555/tree555;
+  full hashes/commands in A5phase2. No extracted/runnable full-app copy or prior-directory cleanup.
+- context-keeper actually invoked(ses_e7cee471effem1IORTQYzbIfD5), finite backlog restored. Corrected
+  stale A4 NEXT/A5 PLANNED audit-track table to match authoritative current state; no plan change.
+- Created A5_TEST_RELIABILITY.md scoped acceptance/ownership/finite inherited assertions and ledger.
+  Other four sequential delegations next. No product/permanent-test/CI/dependency/config changes.
+- Normal docs-only/partial commits/pushes authorized for A5; no A6/remediation/migration/live/secrets.
+
 ## 2026-10-28 — A4 checkpoint committed, pushed and synchronized
 
 - Payload main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, `docs(audit): close A4 workout and

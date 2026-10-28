@@ -1,5 +1,20 @@
 # GymLvl — Task Board
 
+## Current — A5 authorized / in progress (2026-10-28)
+
+**Task/status:** A5 ONLY, scoped acceptance NOT RUN pending tests/reliability/performance/observability
+reviews, evidence, explicit gap dispositions and independent QA. C23/C24 targeted; A4 remains closed.
+**Entry:** main1763ab55e8da994bc1d854ad8fd2cd2299678b45 clean/remote equal, primary verified;
+bundle/bare/archive backup verified(555 files), A5phase2. Preserve all30 findings/history.
+**Progress:** operational PARTIAL checkpoint; actual context/Flutter/Supabase invocations complete.
+Flutter18probe/analyze, backend expiry-only/150UUIDreplay/15streamcases/SQL10/Edge15/sixchecks/
+syntheticEXPLAIN exit0, full evidence retained. Existing30 findings unchanged pending QA/reconciliation.
+Independent sessions BLOCKED(local Docker/Supabase/Postgres executables unavailable), no fake claim.
+**Next action:** persist A5 PARTIAL checkpoint, then UI/QA bounded work. Current ledger/scope in phase.
+Normal docs-only/partial commit/push authorized; no product/tests/CI/config edits or A6/remediation.
+
+## Historical A4 state (preserved)
+
 ## Current — A4 DONE/CLOSED; A5 NEXT / NOT STARTED (2026-10-28)
 
 **Checkpoint:** payload main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, nine docs +1652/-65;
@@ -181,8 +196,8 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A1 | Architecture, dependencies, configuration, infrastructure, CI | `DONE` | `docs/audit/phases/A1_ARCHITECTURE.md`; 10 new findings (16 total); coverage C-22/C-25/C-26 closed; 2 A0 inventory figures corrected |
 | A2 | Flutter app, state, lifecycle, concurrency, navigation | `DONE` | Scoped audit PASS/CLOSED; original seven AC reconciled in A2_FLUTTER section9; Lead10 deferred A5 by explicit user instruction; 24 findings/22 dispositions retained |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `DONE` | Scoped PASS/CLOSED; C17-C21 reviewed with deferred gaps; A3_SUPABASE_SECURITY/A3_SQL_EVIDENCE; 26 findings total, no production certification |
-| A4 | Workout lifecycle, XP, progression, rewards | `NEXT` | Exact A4 prompt in current audit handoff; DATA001/ARCH001/timed/retry/concurrency semantics; requires explicit authorization, not started |
-| A5 | Tests, performance, reliability, observability | `PLANNED` | — |
+| A4 | Workout lifecycle, XP, progression, rewards | `DONE` | Scoped PASS/CLOSED; A4_WORKOUT_PROGRESSION/A4_SQL_EVIDENCE;30 findings, explicit gaps; payload84462d0/outcome1763ab5 |
+| A5 | Tests, performance, reliability, observability | `IN PROGRESS` | Authorized from1763ab5; A5_TEST_RELIABILITY.md finite scope/delegation; no remediation |
 | A6 | Reconciliation, verification, triage, remediation plan | `PLANNED` | — |
 
 **A0 notes.** Baseline re-verified at `9c8e142`: analyze clean, 126/126 Flutter, 10/10 SQL, 15/15 Edge.

@@ -1,5 +1,26 @@
 # GymLvl — Session Handoff
 
+## Current — A5 audit in progress (2026-10-28)
+
+- **Task/status:** A5 only, operational PARTIAL; scoped acceptance NOT RUN pending UI/QA/register
+  reconciliation. Flutter/backend bounded reviews/probes complete. A4 remains closed.
+- **Commit:** main1763ab55e8da994bc1d854ad8fd2cd2299678b45 clean/remote equal at entry; primary
+  gymlvl-orchestrator verified. External bundle/bare/archive backup verified(555 files), A5phase2.
+- **Files:** docs/audit/phases/A5_TEST_RELIABILITY.md, optional A5_FLUTTER_EVIDENCE.md,
+  A5_BACKEND_EVIDENCE.md, A5_UI_EVIDENCE.md; findings mirrors/coverage/audit handoff and three planning
+  records only. No product/permanent-test/migration/CI/dependency/config/permission changes.
+- **Verification:** real context/Flutter/Supabase sessions in A5phase2. External Flutter18tests pass,
+  analyze0issues; backend expiry-only/150UUIDreplay/12request+3providerstreams/SQL10/Edge15/sixchecks/
+  EXPLAIN100-1000 exit0. Exact retained sources/outputs/initial failures in two evidence docs.
+  UI/QA pending; existing30 finding objects/classifications unchanged, no new ID allocated yet.
+- **Decisions/blockers:** no material decision/closure blocker established. Independent sessions
+  BLOCKED: local Docker/Supabase/PostgreSQL executables unavailable; no supported isolated server.
+  JWT gateway/device/cancellation unverified; no single-connection concurrency claim.
+- **Next action:** persist A5 PARTIAL checkpoint then UI review/probes and material QA. Normal
+  docs commits/pushes authorized; no A6/remediation/migration/secret/live/cleanup/full-app Temp copy.
+
+## Historical A4 closure (preserved)
+
 ## Current — A4 PASS/CLOSED; A5 NOT STARTED (2026-10-28)
 
 **Recorded A4 payload checkpoint:** main84462d0acc27a4c9ea0f99a2c0aa16c0940082fb, nine docs,
