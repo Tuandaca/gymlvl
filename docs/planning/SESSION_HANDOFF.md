@@ -1,5 +1,53 @@
 # GymLvl — Session Handoff
 
+## Current — A3 scoped audit CLOSED; A4 not started (2026-10-28)
+
+- **Task/status:** A3 Supabase/PostgreSQL/security C17-C21 PASS/CLOSED with assigned runtime gaps;
+  not production certification. Entry main f877e40987423f3804fe0d2887c44d19f3423aff, clean/remote equal,
+  API gymlvl-orchestrator. Normal docs commit/push authorized; record result after execution.
+- **Changed files:** A3_SUPABASE_SECURITY.md, A3_SQL_EVIDENCE.md, audit findings/register/coverage/
+  handoff; planning TASK_BOARD/SESSION_HANDOFF/CHANGELOG_AI. Nine docs only, no product/permanent test.
+- **Findings:**26; P0 0/P1 3/P2 16/P3 5/P4 2; Confirmed5/High19/Medium2; Accepted21/
+  NeedsVerification3/Fixed1/FalsePositive1. All24 prior IDs/classifications preserved; addenda on
+  DATA001/ARCH001/SEC002. SEC003 conditional PUBLIC ACL fixture Confirmed, not production exploit;
+  SEC004 buffering High/NeedsVerification, not confirmed DoS. No P0/P1 new finding.
+- **Coverage:**18 static-reviewed/5 mixed-stage InReview/3 NotReviewed/1 excluded. A3 security halves
+  complete, C18 reward semantics A4; C09/C23/C24 still not reviewed; no whole-row runtime claim.
+- **Current checks:** SQL runner10 units/PostgreSQL17.5 PASS; Edge deny-net/cached-only/synthetic env
+  15passed0failed, six handler checks PASS. Custom default FAIL falsifies named-role grant hypothesis;
+  independent PUBLIC14 and named-control4 assertions PASS, exact source/output retained. No concealed
+  failure, no live DB/provider traffic/secret reads/installs or persistent migration applied.
+- **QA:** material source + repository retained evidence review completed; initial external read
+  BLOCKED not bypassed. Fresh B-vs-A controls support limited server boundary, not local cache repair.
+- **Current artifact checks:** orchestrator inline Node -> A3_CHECK json=26 md=26 old_ids_preserved=24
+  old_classifications_preserved=24 required_fields=22 allowed_paths=9 errors=0; node0/diff0, current
+  baseline f877e40. QA Git scope/whitespace pass; final missing durable output note was flagged and
+  corrected here/phase12/audit handoff/changelog. Its parser/runtime checks NOT RUN.
+- **Decisions/blockers:** no architecture/schema/dependency/permission change. Gateway/concurrency/
+  deployed ACL verification unavailable and explicitly deferred; no A3 closure blocker. A2 Temp
+  deletion still requires exact-path user approval; no cleanup.
+- **Deferred:** A4 Supabase/Flutter/QA reward/legacy/order/retry/timed/domain semantics; A5 Supabase/
+  Flutter/UI/QA gateway/Auth/resource/fullrole matrix; separate authorized deployment ACL inventory.
+  Exact acceptance assertions in A3 phase9. Existing A2 Lead10 remains A5; A2 not reopened.
+- **Next action:** await explicit A4 authorization, then audit handoff **A4 entry prompt**; do not
+  begin A4, remediation or migration from this A3 task.
+
+## Historical start/closure records (preserved)
+
+## Current — A3 audit in progress (2026-10-28)
+
+- **Task/status:** A3 C17-C21 only, in progress; acceptance NOT RUN pending inspection/QA.
+- **Entry:** main f877e40987423f3804fe0d2887c44d19f3423aff, clean, remote equal; API agent
+  gymlvl-orchestrator. A2 PASS/CLOSED preserved; no new A2 or A4 work.
+- **Files:** A3_SUPABASE_SECURITY.md, audit findings/register/coverage/handoff and three planning
+  records only. Name follows current explicit user instruction; no source/config/schema/test edits.
+- **Verification:** Git and active-agent checks executed; SQL/Edge checks pending, no historical PASS reuse.
+- **Decisions/blockers:** no new material decision; no external blocker established yet.
+- **Next action:** sequential bounded Supabase schema/security review, Flutter Auth/contract review,
+  independent QA; current progress retained in A3 phase, no live/production access or remediation.
+
+## Historical A2 closure (preserved)
+
 ## Current — A2 CLOSED; A3 not started (2026-10-28)
 
 **Recorded closure commit:** main `a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf`, eight docs;

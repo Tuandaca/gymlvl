@@ -2,6 +2,54 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-28 — A3 Supabase/PostgreSQL/security scoped closure
+
+- **Task/status:** A3 only, scoped PASS/CLOSED with deferred verification. Entry main/remote
+  f877e40987423f3804fe0d2887c44d19f3423aff, clean; API primary gymlvl-orchestrator. A4 not started.
+- **Changed:** A3_SUPABASE_SECURITY.md and A3_SQL_EVIDENCE.md new; audit findings/register/coverage/
+  handoff and three planning records updated. Nine docs only, no application/SQL/Edge/test/config/
+  lock/dependency/agent change. Current artifact filename explicitly follows user request.
+- **Review:** sequential Supabase schema/grants/RLS/functions/Edge and Flutter client/Auth boundaries,
+  independent QA material challenge and retained evidence inspection. All C17-C21 read; fresh role
+  controls corroborate no tested B-vs-A bypass, not proof for every table/deployment.
+- **New findings:** SEC003 P2/Confirmed/Accepted only for injected pre-existing PUBLIC UPDATE(total_xp)
+  surviving named-role hardening, own XP777; SEC004 P2/High/NeedsVerification for post-buffer body size
+  checks, resource impact not reproduced. No unconditional production vulnerability asserted.
+- **Counts:**26, P0 0/P1 3/P2 16/P3 5/P4 2; Confirmed5/High19/Medium2; Accepted21/
+  NeedsVerification3/Fixed1/FalsePositive1. Original24 classes retained with three A3 addenda.
+  Coverage18 reviewed-static/5 inreview/3 not reviewed/1 excluded; no whole-row runtime promotion.
+- **Current tests:** node tools/db-tests/run.mjs -> PASS10 units/PostgreSQL17.5,150 catalog rows,
+  metadata/duration checks, exit0. Installed frozen/cached-only Deno deny-net synthetic limited env ->
+  15passed0failed; six handler check targets pass, exit0. No dependencies fetched or live requests.
+- **Contrary evidence:** original custom probe FAIL/exit1 falsifies explicit authenticated column
+  grant survival. Fresh controls passed before failure; assertion retained. PUBLIC continuation
+  PASS14 assertions and diagnostic named denial PASS4 assertions, independent orchestrator rerun.
+  Exact187-line source normalized hash matched external executed variant version; all outputs
+  retained. No product repair or hidden failed test. No A4 reward-arithmetic/legacy-cohort test.
+- **QA:** original external evidence read BLOCKED, not retried; supported in-repo evidence read
+  completed. Corrected named-role hypothesis, DATA001 existing-test description and17tables/22policies
+  wording; narrow synthetic and static confidence scopes retained. QA does not claim its own runtime run.
+- **Deferred/next:** A4 Supabase/Flutter/QA authoritative reward/legacy/retry/timed/concurrency semantics;
+  A5 gateway/resource/fullrole matrix/performance policy checks; deployed ACL/history needs separate
+  authorization. Exact A4 entry prompt recorded; wait for go-ahead. No remediation/migration/cleanup.
+- **Current consistency at f877e40:** PowerShell here-string -> Node JSON parse/tally/mirror/prior-ID/
+  field/coverage/scope assertions -> A3_CHECK json=26 md=26 old_ids_preserved=24
+  old_classifications_preserved=24 required_fields=22 allowed_paths=9 errors=0; A3_VALIDATION_EXIT
+  node=0 diff=0. Counts26 and18/5/3/1 coverage match, nine authorized docs only, product unchanged.
+  git diff --check exit0 with conversion warnings only. Final QA found no substantive security
+  blocker, but FAIL flagged missing persisted current parser output; now recorded durably in phase12,
+  audit/planning handoffs and this log. Earlier17tables/22policies wording correction retained.
+
+## 2026-10-28 — A3 start checkpoint
+
+- A3 only authorized; current baseline main/remote f877e40987423f3804fe0d2887c44d19f3423aff, tree clean,
+  primary API agent gymlvl-orchestrator. A2 remains closed and its 24 findings are carried unchanged.
+- Created A3_SUPABASE_SECURITY.md using current user artifact name; recorded scope/acceptance,
+  safe test boundary and pending sequential reviews. Updated audit/planning handoffs/task board.
+- Git/metadata checks executed; SQL/Edge verification pending, no old PASS copied. No product,
+  configuration, permission, migration or dependency edits. No live stack/production/secret access.
+- Next A3 action: bounded schema/RLS/RPC review, client/Auth/Edge review and QA; no A4/remediation.
+
 ## 2026-10-28 — A2 scope closure and exact A3 handoff
 
 - **Checkpoint:** a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf on main, eight docs, +317/-27;

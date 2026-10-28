@@ -1,8 +1,7 @@
 # Audit Coverage
 
-**Stage:** A2 CLOSED (scoped audit acceptance PASS; runtime deferrals tracked; matrix opened at A0)
-**Baseline:** `main` @ `7eb40f1`
-**Closure entry:** `main` @ `aa36a4c`; original scope/measurement baseline above is retained.
+**Stage:** A3 CLOSED (scoped security audit acceptance PASS; deferred work retained; matrix opened at A0)
+**Baseline:** `main` @ `f877e40` for A3; earlier inventory/measurements retain their dated provenance.
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
@@ -70,11 +69,11 @@ Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboardi
 | C-14 | Progression engine | `features/progression/**` | A2 display, A4 domain | `In Review` | ui-ux-specialist (A2) | Display half read; ARCH002 copy evidence extended | Engine/reward authority remains A4 |
 | C-15 | Coach (AI client) | `features/coach/**` | A2 client, A4 semantics | `In Review` | ui-ux-specialist, supabase-specialist, flutter-specialist (A2) | Screen/repository static review; INTG003; blanket error-flattening rejected | A4 semantics pending; 4001-character continuation contract test A5 |
 | C-16 | Profile | `features/profile/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Explicit white-on-white BUG004; whole screen previously read | Device rendering/large text and screen-reader behavior A5 |
-| C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3 | `Not Reviewed` | — | — | Legacy schema; additive-only |
-| C-18 | SQL: progression | `20261026000200_authoritative_progression.sql` | A3, A4 | `Not Reviewed` | — | S3 TEST D read | `FND-DATA-001`, `FND-ARCH-001` carried |
-| C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3 | `Not Reviewed` | — | — | 150 curated rows |
-| C-20 | RLS policies (44 statements, 22 effective at tip) | all migrations | A3 | `Not Reviewed` | — | — | Cannot exercise policies without live DB |
-| C-21 | Edge Functions | `supabase/functions/**` | A3 | `Not Reviewed` | — | 15 unit tests exist | Gateway/auth path untested |
+| C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3 | `Reviewed (static)` | supabase-specialist; orchestrator critical-path re-read | A3 phase5/6 effective17-table matrix, full baseline read; actual migration harness passes | Fresh in-memory schema, not deployed/adopted catalog; later hardening supersedes baseline policies; weak constraints/FK indexes deferred A4/A5 |
+| C-18 | SQL: progression | `20261026000200_authoritative_progression.sql` | A3, A4 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | A3 security scope: all functions/grants/guards read, PUBLIC ACL probe SEC003; DATA001/ARCH001 addenda | This status covers A3 schema/authorization inspection only; authoritative reward arithmetic/idempotency/legacy cohort and concurrent sessions remain A4 |
+| C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3 | `Reviewed (static)` | supabase-specialist | Full migration read, metadata/slug/duration constraints; harness 150 rows and seed replay PASS | NOT VALID legacy rows not certified; timed final-completion semantics remain A4, no media imported |
+| C-20 | RLS policies (44 statements, 22 effective at tip) | all migrations | A3 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | A3_SQL_EVIDENCE real SET ROLE A/B/anon subset; foreign RPC/insert/reparent denied; policies on all17 tables reviewed | No whole-row runtime claim: live JWT/gateway/full17-table operation matrix and inherited deployment ACLs unverified; no unconditional production/RLS bypass found |
+| C-21 | Edge Functions | `supabase/functions/**` | A3 | `Reviewed (static)` | supabase-specialist, qa-reviewer; Flutter client boundary review | All16 tracked source/support files, six handlers;15 tests pass deny-net/cached-only with synthetic env, six handler typechecks pass; SEC004 | Stubbed tests not deployed gateway/Auth/runtime; streaming resource limits A5, service-role/deployed secrets not inspected |
 | C-22 | CI workflow | `.github/workflows/verify.yml` | A1 | `Reviewed (static)` | `qa-reviewer` (A1) + orchestrator re-read | A1 §6: 52-line workflow read end to end, both jobs, every gate named; gaps recorded as `FND-TEST-001` | Gate list verified statically; runner behaviour, action-pinning supply chain, and a failing run were `NOT RUN` |
 | C-23 | Test harness | `tools/db-tests/**` | A5 | `Not Reviewed` | — | S3 ran it | Single-connection PostgreSQL |
 | C-24 | Flutter tests | `app/test/**` | A5 | `Not Reviewed` | — | — | No golden tests |
@@ -98,8 +97,8 @@ These are **observations about test infrastructure**, not yet findings. A5 forma
 ## 5. Remaining work
 
 All 27 components are inventoried. Historical A1 close: 3 reviewed, 1 in review, 22 not reviewed,
-1 out of scope. At scoped A2 closure: **13 `Reviewed (static)`, 5 `In Review`,
-8 `Not Reviewed`, 1 `Out of Scope`**. No whole component is promoted to runtime-verified merely
+1 out of scope. A2 closed at13 reviewed/5 in review/8 not reviewed/1 out. At A3 scope review:
+**18 `Reviewed (static)`, 5 `In Review`, 3 `Not Reviewed`, 1 `Out of Scope`**. No whole component is promoted to runtime-verified merely
 because existing widget tests passed. **No component may be described as "audited" until its stage closes.**
 
 Stage-by-stage target: A1 closed C-22, C-25 and C-26; A2 closes C-01…C-05, C-07, C-08, C-16 and the
@@ -114,3 +113,9 @@ section9. Lead10 runtime verification explicitly belongs to A5, not a continuing
 A2/A4 rows retain the unreviewed domain half. Exact A3 entry is in the current audit handoff and
 requires separate authorization. All deferred investigations have owners, stages and assertions in
 phase8.2/9.3; no device/runtime coverage percentage or product correctness guarantee is claimed.
+
+A3 reviews C17-C21 for security/schema/Edge scope. C09 (workout domain), C23 (test harness audit)
+and C24 (full Flutter test audit) remain Not Reviewed; C10/C12-C15 retain mixed A4 portions In Review.
+C18's A3-only reviewed label does not certify reward semantics. Deferred role/gateway/resource/
+concurrency and adoption checks have owners/stages/assertions in A3 phase9. Positive synthetic
+controls do not assert every resource/role/deployed environment is verified.

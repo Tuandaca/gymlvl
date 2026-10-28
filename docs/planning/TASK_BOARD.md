@@ -1,5 +1,31 @@
 # GymLvl — Task Board
 
+## Current — A3 DONE/CLOSED; A4 NEXT (2026-10-28)
+
+**Validation:** scoped A3 audit PASS/CLOSED, not production/runtime certification. C17-C21 reviewed
+with named limitations; 26 findings (P1 3/P2 16/P3 5/P4 2, Confirmed5/High19/Medium2), previous24
+IDs/classifications unchanged; new SEC003 conditional PUBLIC ACL and SEC004 buffering order.
+**Coverage:**18 reviewed-static/5 mixed-stage InReview/3 NotReviewed/1 excluded; A4 halves remain pending.
+**Evidence:** SQL10 units, Edge15 tests, six handler checks PASS; custom named-role hypothesis FAIL
+retained and disproved, PUBLIC14/named-control4 assertions PASS. No source/config/dependency changes.
+**Entry:** main f877e40 clean/remote equal, agent verified; normal A3 docs checkpoint authorized.
+**Next task:** A4 NEXT, separate user authorization required; exact prompt in audit handoff. No
+automatic A4/remediation/migration. Deferred A4/A5 owners/assertions in A3 phase9; A2 stays closed.
+
+## Historical task states (superseded current/next status below)
+
+## Current — A3 authorized / in progress (2026-10-28)
+
+**Task:** A3 Supabase/PostgreSQL/security C17-C21 only. A2 stays PASS/CLOSED.
+**Entry:** main f877e40987423f3804fe0d2887c44d19f3423aff, clean and remote equal, agent verified.
+**Acceptance:** component coverage/gaps, traceable findings, assigned deferred assertions, independent
+QA, synchronized artifacts, current safe SQL/Edge evidence and exact A4 handoff; see A3 phase section1.
+**Next action:** bounded sequential security reviews; whole-stage acceptance NOT RUN until reconciliation.
+**Constraints:** documents only, no product/schema/config/permission change, production/secret access,
+deployment or A4/remediation. Normal/partial A3 docs checkpoint explicitly authorized by user.
+
+## Historical A2 closure and prior task states (preserved)
+
 ## Current — A2 scoped audit DONE/CLOSED (2026-10-28)
 
 **Recorded closure checkpoint:** `a6a57e2` on main, normal push exit0; local/remote full SHA
@@ -124,8 +150,8 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
 | A1 | Architecture, dependencies, configuration, infrastructure, CI | `DONE` | `docs/audit/phases/A1_ARCHITECTURE.md`; 10 new findings (16 total); coverage C-22/C-25/C-26 closed; 2 A0 inventory figures corrected |
 | A2 | Flutter app, state, lifecycle, concurrency, navigation | `DONE` | Scoped audit PASS/CLOSED; original seven AC reconciled in A2_FLUTTER section9; Lead10 deferred A5 by explicit user instruction; 24 findings/22 dispositions retained |
-| A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `NEXT` | C17-C21; exact entry prompt in current audit handoff; requires separate authorization, not started |
-| A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
+| A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `DONE` | Scoped PASS/CLOSED; C17-C21 reviewed with deferred gaps; A3_SUPABASE_SECURITY/A3_SQL_EVIDENCE; 26 findings total, no production certification |
+| A4 | Workout lifecycle, XP, progression, rewards | `NEXT` | Exact A4 prompt in current audit handoff; DATA001/ARCH001/timed/retry/concurrency semantics; requires explicit authorization, not started |
 | A5 | Tests, performance, reliability, observability | `PLANNED` | — |
 | A6 | Reconciliation, verification, triage, remediation plan | `PLANNED` | — |
 

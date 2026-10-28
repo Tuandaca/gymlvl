@@ -1,12 +1,18 @@
 # Master Findings
 
-**Stage:** A2 CLOSED (scoped audit acceptance PASS; deferred work retained; register opened at A0)
-**Baseline:** `main` @ `7eb40f1`
-**Counts:** 24 findings — P0: 0, P1: 3, P2: 14, P3: 5, P4: 2. Confirmed: 4, High: 18, Medium: 2, Low: 0.
-**Status:** 2 `Needs Verification`, 20 `Accepted`, 1 `Fixed`, 1 `False Positive`.
+**Stage:** A3 CLOSED (scoped security audit acceptance PASS; A2 closure and deferred work retained)
+**Baseline:** `main` @ `f877e40`
+**Counts:** 26 findings — P0: 0, P1: 3, P2: 16, P3: 5, P4: 2. Confirmed: 5, High: 19, Medium: 2, Low: 0.
+**Status:** 3 `Needs Verification`, 21 `Accepted`, 1 `Fixed`, 1 `False Positive`.
 
 Scales, ID scheme and status vocabulary are defined in `README.md` §§4–7. The machine-readable
 mirror is `FINDINGS_REGISTER.json`; the two must always agree.
+
+A3 adds SEC003 (Confirmed only for a synthetic pre-existing PUBLIC grant) and SEC004 (High/
+Needs Verification for authenticated Edge buffering order). No production vulnerability inferred;
+the named authenticated-column grant survival hypothesis was disproved and retained as contrary
+evidence. All 24 earlier IDs/classifications remain. DATA001/ARCH001/SEC002 A3 addenda below do not
+extend reward semantics or local-cache evidence beyond the checks actually executed.
 
 A2 recovery originally added `FND-SEC-002` without confidence promotion. Final reconciliation adds
 `FND-BUG-004…007` and `FND-INTG-002…004`, and accepts narrowly reproduced controller mechanisms in
@@ -1242,3 +1248,78 @@ control. Retain outside permanent application tests. `NOT RUN` at this recovery 
 | Depends on | DEFERRED A4, owner supabase-specialist: inspect/test the distinct SQL duration-versus-reps mismatch at `supabase/migrations/20261026000200_authoritative_progression.sql:238` against `20261027000100_exercise_catalog_metadata.sql:362-366`; assert reps=0/duration>0 valid timed completion is consistently handled. Not part of Confirmed backend evidence. |
 | Wave | W2 |
 | Verification method | A5 `flutter-specialist`: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4. |
+
+## A3 addenda to existing IDs — no classification changes
+
+- **FND-DATA-001:** progression.sql:223-230 locks owned workout before ledger/flag checks. Current
+  synthetic A/B foreign completion fails42501, no reward rows created. QA correction: existing
+  progression regression already exercises completed-unrewarded recovery and true-flag denial of
+  another award; it does not reproduce a previously awarded false-flag/no-ledger cohort. Production
+  cohort unknown. P1/Medium/Needs Verification retained; A4 supabase-specialist with qa-reviewer owns
+  authoritative legacy reward/arithmetic/replay verification. No duplicate finding.
+- **FND-ARCH-001:** effective function inspection confirms auth.uid-scoped initialization/daily
+  maintenance/class recomputation; not another confirmed reward bypass. A4 owns fourth-writer and
+  semantic verification before editorial remediation. Classification unchanged.
+- **FND-SEC-002:** A3_SQL_EVIDENCE fresh-tip real SET ROLE fixtures hide foreign workout/set reads;
+  reject foreign begin/pause/cancel/complete/child insert and parent reassignment; hidden-row UPDATE
+  affects zero rows, original A data unchanged. This is separate backend evidence, not a repair to
+  local cache or proof of all-table/deployed isolation. Existing Confirmed scope remains synthetic
+  controller adoption; no server IDOR added. Conditional PUBLIC ACL risk is separately SEC003.
+
+---
+
+## FND-SEC-003 — Pre-existing PUBLIC progression-column grants survive named-role hardening
+
+| Field | Value |
+|---|---|
+| ID | `FND-SEC-003` |
+| Title | Pre-existing PUBLIC progression-column grants survive named-role hardening |
+| Category | `SEC` |
+| Component | Legacy database adoption ACL boundary for public.users |
+| Paths | `supabase/migrations/20261026000200_authoritative_progression.sql`; `docs/audit/phases/A3_SQL_EVIDENCE.md` |
+| Lines | progression:59-79; retained source and all three variant outputs in evidence document |
+| Origin | A3 supabase-specialist, challenged by qa-reviewer, current synthetic PGlite tests and orchestrator rerun |
+| Root cause | Revocation targets anon/authenticated, not PUBLIC. Prior PUBLIC UPDATE(total_xp) survives and own_users_edit permits own-row update. Named-role column-grant survival was DISPROVED; excluded from finding. |
+| Evidence | Exact187-line probe in A3_SQL_EVIDENCE. Original default FAIL/exit1 after fresh boundaries passed: authenticated column grant removed (false!==true). Diagnostic named-column denial PASS/exit0. PUBLIC variant PASS/exit0, 2 DBs/14 assertions: injected pre-existing PUBLIC column grant permits own total_xp=777; foreign user remains hidden. PUBLIC SELECT inheritance does not bypass RLS (anon sees0). Orchestrator independently reran both explicit variants, exits0. Confirmed synthetic condition only, deployed ACL unknown. |
+| Expected behavior | Adoption removes effective unauthorized progression writes from supported privilege sources or rejects incompatible legacy ACL state before traffic. |
+| Actual behavior | Synthetic PUBLIC column grant persists and permits own-row progression UPDATE. Fresh and named-role controls deny. No cross-user or anonymous RLS bypass reproduced. |
+| Impact | Conditional migration-adoption progression-authority violation; P2 with unknown deployed prevalence, not unconditional fresh-install or production vulnerability. |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
+| Proposed remediation | Separately approve effective table/column/PUBLIC/inherited-role ACL reconciliation and fail-closed adoption checks, preserving intended platform/profile/notes grants. No audit migration patch. |
+| Regression risk | Legacy roles/default grants, profile/notes edits, catalog reads and platform integrations; blanket revocation can break legitimate roles. |
+| Related tests | `supabase/tests/security_regression.sql`; `docs/audit/phases/A3_SQL_EVIDENCE.md` |
+| Missing tests | Permanent PUBLIC ACL adoption regression with fresh/named-role controls; separately authorized deployed effective ACL inventory (NOT RUN). |
+| Depends on | Deployed PUBLIC condition unknown; no live access authorized; distinct from DATA001 legacy reward-state ambiguity. |
+| Wave | W1 |
+| Verification method | supabase-specialist with qa-reviewer: retained default intentionally FAIL; --named-column-control denial PASS; --remaining-public-cases conditional reproduction PASS. After approved remediation invert PUBLIC own-write assertion and keep allowed-field controls. Production inventory requires separate authorization. |
+
+---
+
+## FND-SEC-004 — Edge request-size checks occur after full authenticated body buffering
+
+| Field | Value |
+|---|---|
+| ID | `FND-SEC-004` |
+| Title | Edge request-size checks occur after full authenticated body buffering |
+| Category | `SEC` |
+| Component | Authenticated Edge request/provider-response resource boundary |
+| Paths | `supabase/functions/_shared/http.ts`; `supabase/functions/ai-coach/service.ts` |
+| Lines | http:33-40; service:35-48,66-80,104-106 |
+| Origin | A3 bounded Supabase/Edge review, independent qa-reviewer and orchestrator source inspection |
+| Root cause | req.text() fully buffers before 16384/20000 UTF-16-unit checks; not a streaming byte ceiling. Coach quota follows buffering; provider JSON parses before answer-length validation. |
+| Evidence | Inspection only: both handlers authenticate first then materialize body before413. Existing15 stubbed tests pass but do not exercise streamed allocation or gateway limits. Provider json() at104 precedes answer check106. No resource exhaustion or production vulnerability reproduced. |
+| Expected behavior | If intended as resource protection, reject/cancel oversized bodies before full materialization, with defined byte semantics and bounded upstream response policy. |
+| Actual behavior | Limits constrain accepted parsed content, not bytes buffered before rejection. Gateway ceilings and real allocation exposure unmeasured. |
+| Impact | Provisional P2 authenticated resource-pressure risk; platform ceilings may mitigate. High only for buffering order, not demonstrated DoS. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Needs Verification` |
+| Proposed remediation | Separately approve byte-based input/output budgets and bounded streaming cancellation or verified platform ceilings, preserving semantic validation and sanitized errors. |
+| Regression risk | Multibyte VI/EN, chunked or missing-length input, malformed JSON, authenticated rejection and provider response handling. |
+| Related tests | `supabase/functions/tests/http_handler_test.ts`; `supabase/functions/ai-coach/service_test.ts` |
+| Missing tests | Counted synthetic stream early cancellation, multibyte boundary, bounded provider response; approved non-production gateway limit evidence (NOT RUN). |
+| Depends on | A5 transport/resource verification; distinct from INTG003 answer/history schema mismatch. |
+| Wave | W2 |
+| Verification method | A5 supabase-specialist with qa-reviewer: bounded synthetic streams, no traffic flood; assert stop at byte budget, sanitized errors and correct auth/quota order. Separately document gateway limits only with approved non-production access. NOT RUN in A3. |

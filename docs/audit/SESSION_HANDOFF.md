@@ -1,5 +1,113 @@
 # Audit — Session Handoff
 
+## Current — A3 scoped security audit CLOSED; A4 not started (2026-10-28)
+
+- **Task/status:** A3 C17-C21 only; `PASS` against scoped coverage/evidence/QA/consistency conditions,
+  operational CLOSED with explicit deferred work. Not production certification or remediation.
+- **Entry:** main `f877e40987423f3804fe0d2887c44d19f3423aff`, clean and remote equal; API metadata
+  `gymlvl-orchestrator`. Normal A3 documentation commit/push authorized; result recorded after execution.
+- **Changed files:** `docs/audit/phases/A3_SUPABASE_SECURITY.md`,
+  `docs/audit/phases/A3_SQL_EVIDENCE.md`, `docs/audit/MASTER_FINDINGS.md`,
+  `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/AUDIT_COVERAGE.md`, this handoff,
+  `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`.
+  No product/SQL/Edge/config/agent/permanent test/dependency edits.
+- **Findings:** 26, P0 0/P1 3/P2 16/P3 5/P4 2; Confirmed5/High19/Medium2; Accepted21/
+  NeedsVerification3/Fixed1/FalsePositive1. All previous24 IDs/classifications retained; only
+  DATA001/ARCH001/SEC002 get A3 addenda. New SEC003 P2/Confirmed/Accepted is conditional synthetic
+  PUBLIC grant inheritance, not deployed vulnerability. SEC004 P2/High/Needs Verification is
+  authenticated buffering order with actual resource impact unverified. No new P0/P1 finding.
+- **Coverage:**18 Reviewed(static)/5 mixed A2-A4 InReview/3 NotReviewed/1 excluded. C17-C21 static
+  review complete; C18 only A3 security/schema scope, reward semantics still A4. C09/C23/C24 remain
+  unreviewed for assigned later stages; no whole-row runtime promotion.
+- **Current verification (f877e40):** `node tools/db-tests/run.mjs` -> PASS10 units/PostgreSQL17.5,
+  catalog150 and duration checks, exit0. Installed Deno direct cached-only/deny-net/synthetic limited
+  env ->15 tests passed/0 failed, exit0; cached-only frozen-lock six handler typechecks exit0.
+- **Custom evidence:** original default audit-probe.mjs FAIL/exit1 disproves named authenticated
+  column-grant survival after hardening. Fresh A/B controls passed first. Independent PUBLIC cases
+  PASS/exit0 (14 assertions) show own XP777 only with synthetic pre-existing PUBLIC column grant;
+  named-column denial control PASS/exit0 (4 assertions). Orchestrator independently reran variants;
+  retained187-line source and per-variant outputs in A3_SQL_EVIDENCE. Never describe whole suite green.
+- **Security observations:** effective tip has17 RLS tables and11 pinned-path definers, fixed UID-derived
+  RPCs, parent guards, explicit Edge getUser and caller-token DB requests. Synthetic B foreign
+  workout/set reads and RPCs/inserts/reparenting denied. This corroborates backend boundaries without
+  repairing SEC002 local backup or proving real gateway/all-table/production isolation.
+- **QA:** supabase specialist DB/Edge reviews, Flutter client-boundary review and qa-reviewer material
+  challenge/follow-up completed sequentially. Initial QA external-directory read BLOCKED, not retried;
+  complete synthetic source/output published in normal audit evidence for supported read inspection.
+  QA supported narrow conclusions, corrected named-role hypothesis/DATA001 test-gap wording, and
+  policy wording17tables/22policies; fixes recorded. Independent runtime rerun not claimed by QA.
+- **Current consistency (f877e40):** orchestrator PowerShell here-string -> Node JSON/parser/tally/
+  previous-ID/classification/field/coverage/scope/handoff assertions -> `A3_CHECK json=26 md=26
+  old_ids_preserved=24 old_classifications_preserved=24 required_fields=22 allowed_paths=9 errors=0`;
+  `A3_VALIDATION_EXIT node=0 diff=0`. `git diff --check` exit0, LF/CRLF warnings only (`PASS`).
+  QA's final inspection found no substantive security blocker but flagged absent persisted parser
+  output (FAIL); this note/phase12/changelog now records it. QA did not run parser or runtime tests.
+- **Deferred owners/assertions:** A4 supabase-specialist + Flutter/qa-reviewer: legacy reward/state,
+  arithmetic, replay, concurrent writers, timed duration/reps and order/retry/domain contracts.
+  A5 Supabase/Flutter/QA: SEC004 counted-stream bounds, real JWT/gateway/Auth transport, full17-table
+  operation/ACL matrix, context/timeout/AI destination policy and FK query scaling. Approved environment
+  inventory of deployed ACLs/migration history requires separate explicit authorization. Phase9 lists
+  concrete assertions. No live accounts/project/secrets used or inspected.
+- **Decisions/blockers:** no material project change or waived acceptance. Existing in-memory tests
+  initialize only disposable databases; no persistent/local Supabase migration or production mutation.
+  No A3 closure blocker after recorded gaps; unavailable gateway/concurrency checks are deferred.
+  A2 Temp disposal approval still required; no cleanup or new full-app copy.
+- **Next action:** await explicit A4 authorization, then use the exact prompt below. No A4 execution.
+
+## A4 entry prompt — authorization required
+
+> Execute **A4 ONLY — Workout lifecycle, XP, progression and rewards** after explicit user go-ahead.
+> Verify primary gymlvl-orchestrator metadata, main/HEAD/tree/remote; preserve user work. Read AGENTS,
+> current audit/planning handoffs, scope/coverage/registers, A2 section8.2/9 and A3 phase/evidence.
+> Entry was f877e40 plus A3 documentation commits; confirm actual HEAD, never reset.
+>
+> Review C09 and A4 halves of C10/C12-C15: workout lifecycle/setup/training/pause/resume/cancel/
+> completion, client pending mutations and retry/recovery contracts, authoritative progression,
+> class XP/synergy, PRs, quest/streak/date boundaries and AI no-write boundary. Inspect complete_workout
+> transaction/user/workout/parent locks, ledger/flag replay, trusted inputs and derived results.
+> Prioritize DATA001 previously-awarded false-flag/no-ledger hypothesis; existing completed-unrewarded
+> recovery and true-flag tests are not that fixture. Do not assume a live legacy cohort exists.
+>
+> Carry INTG004 timed duration/reps completion and A2 order/addSet lost-response/reparent contracts;
+> prove or explicitly defer with owner/stage/assertion. Confirm no second independent award path;
+> ARCH001 initialization/daily maintenance/class recomputation must be distinguished from awards.
+> SEC003 is conditional pre-existing PUBLIC ACL exposure, not a fresh-install or actual deployed
+> vulnerability. SEC002 local controller reproduction is complete; do not repeat it or treat backend
+> positives as a local fix. Keep A5 device/widget/resource/gateway investigations in A5.
+>
+> Delegate bounded server/business logic to supabase-specialist, controller/domain contract to
+> flutter-specialist, independent material finding review to qa-reviewer; sequential shell work,
+> one artifact writer per file. Use existing installed isolated tests/synthetic fixtures and deny
+> live/provider traffic. Single-connection PGlite cannot establish actual concurrent-session behavior;
+> record that limitation rather than requiring unavailable production verification to close scope.
+>
+> Create docs/audit/phases/A4_WORKOUT_PROGRESSION.md; preserve26 findings/stable IDs/history and update
+> mirrors, named coverage and current handoffs/three planning records. Record expected/actual,
+> exact commands/output, confidence and deferred assertions. Retain repro source in audit docs,
+> not permanent product tests. Existing tests may be run; no product/SQL/RLS/Edge/config/agent changes,
+> installs, real-user/production/secret access, deployments, destructive probes or remediation.
+> Do not create another full-app Temp copy or delete earlier task directories. Git actions require
+> actual A4 user authorization, not this prompt alone. Validate counts/classifications/edit scope,
+> evaluate scoped closure honestly, give Vietnamese report and exact A5 handoff. Stop after A4.
+
+## Historical A3 start and A2 records (superseded status/next actions below)
+
+## Current — A3 in progress (2026-10-28)
+
+**Task:** A3 Supabase/PostgreSQL/security C17-C21 only. Authorized by current user; no A4/remediation.
+**Status:** In progress; whole-stage acceptance `NOT RUN` pending inspection/reconciliation/QA.
+**Entry:** main `f877e40987423f3804fe0d2887c44d19f3423aff`, tree clean and remote equal; session API
+confirms primary `gymlvl-orchestrator`. Existing 24 findings preserved at entry.
+**Owned artifacts:** new `docs/audit/phases/A3_SUPABASE_SECURITY.md` (current user filename replaces
+older prompt's A3_SUPABASE.md); findings mirrors, coverage, this handoff and three planning records.
+**Safety:** docs-only writes; no live/remote DB/secret access, installs/deploys/config/source changes.
+Current authorization allows existing synthetic in-memory SQL and stubbed Edge tests; inspect runner
+before execution. All results must be current or explicitly historical.
+**Next action:** bounded sequential schema/RLS/RPC review, Auth/Edge client boundary review and QA;
+persist results in A3 phase. User authorizes normal A3 docs checkpoint including PARTIAL if interrupted.
+
+## Historical A2 closure and entry prompt (preserved)
+
 ## Current — A2 scope CLOSED; A3 awaits authorization (2026-10-28)
 
 **Closure checkpoint:** `a6a57e2546afa8dbd3dd7113bc1096a6e99f5cdf` (`a6a57e2`) on main;

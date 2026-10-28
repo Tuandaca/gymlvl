@@ -2,7 +2,19 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A2 (CLOSED; scoped audit acceptance PASS; deferred verification retained)",
+  "stage": "A3 (CLOSED; scoped security audit acceptance PASS; deferred verification retained)",
+  "a3_closure": {
+    "date": "2026-10-28",
+    "entry_commit": "f877e40987423f3804fe0d2887c44d19f3423aff",
+    "validation_result": "PASS",
+    "operational_status": "CLOSED",
+    "scope": "C17-C21 security/schema/Edge review, isolated test evidence, explicit gaps and independent review; not production certification or A4 reward semantics",
+    "new_findings": ["FND-SEC-003", "FND-SEC-004"],
+    "evidence_reference": "docs/audit/phases/A3_SUPABASE_SECURITY.md; docs/audit/phases/A3_SQL_EVIDENCE.md",
+    "deferred_work_reference": "A3_SUPABASE_SECURITY.md section9; A4 reward/legacy/concurrency and A5 gateway/resource/full role-matrix checks",
+    "test_boundary": "SQL10 units and Edge15 tests/six typechecks pass; original custom named-role survival assertion FAIL retained; conditional PUBLIC14 assertions and named-denial4 assertions pass; no live/production access",
+    "prior_closure_note": "The closure object below retains A2 history; a3_closure is the current stage record"
+  },
   "closure": {
     "date": "2026-10-28",
     "entry_commit": "aa36a4c36e6c46cc7ae1f2fdd3e117f2a8a3a4c5",
@@ -22,16 +34,16 @@
   },
   "baseline": {
     "branch": "main",
-    "head": "7eb40f1d7e553e9f136abb13f632b8bfb189dc3c",
-    "head_short": "7eb40f1",
-    "remote_head": "7eb40f1d7e553e9f136abb13f632b8bfb189dc3c",
-    "working_tree": "clean at recovery entry; audit documentation edits pending"
+    "head": "f877e40987423f3804fe0d2887c44d19f3423aff",
+    "head_short": "f877e40",
+    "remote_head": "f877e40987423f3804fe0d2887c44d19f3423aff",
+    "working_tree": "clean at A3 entry; documentation-only A3 edits pending"
   },
   "counts": {
-    "total": 24,
-    "by_severity": { "P0": 0, "P1": 3, "P2": 14, "P3": 5, "P4": 2 },
-    "by_confidence": { "Confirmed": 4, "High": 18, "Medium": 2, "Low": 0 },
-    "by_status": { "Open": 0, "Needs Verification": 2, "Accepted": 20, "Fixed": 1, "Deferred": 0, "False Positive": 1 }
+    "total": 26,
+    "by_severity": { "P0": 0, "P1": 3, "P2": 16, "P3": 5, "P4": 2 },
+    "by_confidence": { "Confirmed": 5, "High": 19, "Medium": 2, "Low": 0 },
+    "by_status": { "Open": 0, "Needs Verification": 3, "Accepted": 21, "Fixed": 1, "Deferred": 0, "False Positive": 1 }
   },
   "findings": [
     {
@@ -62,6 +74,7 @@
     },
     {
       "id": "FND-DATA-001",
+      "a3_review": "2026-10-28 at f877e40: progression.sql:223-230 locks owned workout before ledger/flag guards, denying foreign ID; synthetic A/B foreign complete returns 42501 and creates no reward rows. QA correction: existing progression_regression.sql already covers completed-unrewarded recovery and a true-flag denial of another award. It does not reproduce an already-awarded false-flag/no-ledger historical cohort. No deployed cohort or duplicate-award semantics tested. Keep P1/Medium/Needs Verification; authoritative legacy reward/arithmetic/replay belongs to A4, owner supabase-specialist with qa-reviewer.",
       "title": "Legacy completion path can award a workout twice",
       "category": "DATA",
       "component": "public.complete_workout",
@@ -88,6 +101,7 @@
     },
     {
       "id": "FND-ARCH-001",
+      "a3_review": "Static effective-function review confirms initialize_user, sync_daily_data and switch_class derived-state writes and auth.uid scoping. This is not an extra confirmed award bypass. No classification change; A4 verifies authoritative semantics/fourth-writer question before wording remediation.",
       "title": "The stated XP write invariant is narrower than the implementation",
       "category": "ARCH",
       "component": "Architecture contract vs database functions",
@@ -512,6 +526,7 @@
     },
     {
       "id": "FND-SEC-002",
+      "a3_review": "Backend controls remain distinct from confirmed local synthetic adoption. Real SET ROLE authenticated A/B fixtures in A3_SQL_EVIDENCE show fresh-tip foreign workout/set SELECT hidden; foreign begin/pause/cancel/complete and child inserts rejected; child reparent rejected; no change to A data or award rows. This does not repair the local backup, prove all-table/production isolation, or extend the original finding to server IDOR. User Auth/gateway and deployed ACL checks remain unverified; FND-SEC-003 separately records conditional PUBLIC ACL inheritance.",
       "title": "Global workout backup is adopted under a different synthetic controller identity",
       "category": "SEC",
       "component": "Client workout snapshot recovery and session isolation",
@@ -701,6 +716,54 @@
       "depends_on": ["DEFERRED A4, owner supabase-specialist: inspect/test the distinct SQL duration-versus-reps mismatch at supabase/migrations/20261026000200_authoritative_progression.sql:238 against 20261027000100_exercise_catalog_metadata.sql:362-366; assert reps=0/duration>0 valid timed completion is consistently handled. Not part of Confirmed backend evidence."],
       "wave": "W2",
       "verification_method": "A5 flutter-specialist: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4."
+    },
+    {
+      "id": "FND-SEC-003",
+      "title": "Pre-existing PUBLIC progression-column grants survive named-role hardening",
+      "category": "SEC",
+      "component": "Legacy database adoption ACL boundary for public.users",
+      "paths": ["supabase/migrations/20261026000200_authoritative_progression.sql", "docs/audit/phases/A3_SQL_EVIDENCE.md"],
+      "line_ranges": ["authoritative_progression.sql:59-79", "A3_SQL_EVIDENCE.md: retained source and all three variant outputs"],
+      "origin": "A3 supabase-specialist mechanism review; independently challenged by qa-reviewer; current synthetic PGlite execution and orchestrator rerun",
+      "root_cause": "Migration revokes table privileges from anon/authenticated but not PUBLIC. A pre-existing PUBLIC UPDATE(total_xp) remains effective for authenticated, whose own_users_edit policy permits its own row. Named-role column-grant survival was separately DISPROVED and is not this mechanism.",
+      "evidence": "A3_SQL_EVIDENCE retains exact 187-line source and original FAIL: explicit authenticated column grant was removed (false!==true), fresh A/B isolation assertions passed before that failed hypothesis. Named-column diagnostic exits 0 and denies XP UPDATE with 42501. Independent --remaining-public-cases exits 0 (2 DBs/14 assertions): injected PUBLIC UPDATE(total_xp) before hardening survives, own authenticated total_xp becomes 777; other user hidden. PUBLIC SELECT case retains ACL but anon sees zero rows under RLS. Orchestrator reran both explicit variants, exits0. Confirmed only for this synthetic pre-existing PUBLIC condition; no production ACL or deployed exploit observed.",
+      "expected_behavior": "Adoption either removes effective unauthorized progression-write privileges from all supported privilege sources or explicitly rejects incompatible legacy ACL state before accepting traffic.",
+      "actual_behavior": "Synthetic PUBLIC column privilege persists after migration and permits own-row progression UPDATE; fresh tip and explicit named-role column-grant controls deny it. No cross-user or anonymous RLS bypass was reproduced.",
+      "impact": "Conditional progression-authority violation on adopted databases with the injected-equivalent legacy PUBLIC grant. P2 for a migration-adoption risk with unknown deployed prevalence; not an unconditional fresh-install/production vulnerability.",
+      "severity": "P2",
+      "confidence": "Confirmed",
+      "status": "Accepted",
+      "proposed_remediation": "After separate approval, reconcile effective table/column privileges including PUBLIC and inherited role grants during adoption; fail closed on unexpected grants and preserve legitimate profile/notes grants. Do not patch migrations during audit.",
+      "regression_risk": "Existing deployment roles/default privileges, allowed profile/notes edits, catalog reads and migration adoption; blanket revocation could break legitimate platform roles.",
+      "related_tests": ["supabase/tests/security_regression.sql", "docs/audit/phases/A3_SQL_EVIDENCE.md"],
+      "missing_tests": ["Permanent synthetic PUBLIC progression-column/table ACL adoption regression with fresh/named-role controls", "Authorized effective deployed ACL inventory including inherited roles before release; NOT RUN"],
+      "depends_on": ["Production ACL existence is unknown and live access not authorized; do not equate this condition with DATA001 legacy reward-state ambiguity"],
+      "wave": "W1",
+      "verification_method": "Owner supabase-specialist, independent qa-reviewer: extract A3_SQL_EVIDENCE source to unused external audit directory; run default (original disproved assertion intentionally FAIL), --named-column-control (denial PASS), --remaining-public-cases (conditional reproduction PASS). After remediation invert PUBLIC own-write assertion; verify fresh, profile/notes and role controls. Real deployment check requires separate explicit authorization."
+    },
+    {
+      "id": "FND-SEC-004",
+      "title": "Edge request-size checks occur after full authenticated body buffering",
+      "category": "SEC",
+      "component": "Authenticated Edge request and provider-response resource boundary",
+      "paths": ["supabase/functions/_shared/http.ts", "supabase/functions/ai-coach/service.ts"],
+      "line_ranges": ["http.ts:33-40", "service.ts:35-48,66-80,104-106"],
+      "origin": "A3 bounded Edge review by supabase-specialist, independent qa-reviewer and orchestrator source inspection",
+      "root_cause": "Both paths await req.text() before rejecting excessive JS-string length. Limits are 16384/20000 UTF-16 units, not streaming byte ceilings. Coach quota follows buffering; provider JSON is also fully parsed before answer-length validation.",
+      "evidence": "Inspection only: authenticated shared handler http.ts:34-37 and Coach service.ts:36-38 fully materialize request text before 413. Existing 15 unit tests pass but exercise bounded synthetic strings, not streamed allocation or gateway limits. service.ts:104 parses upstream JSON before checking 12000-character answer. No resource exhaustion or production vulnerability reproduced.",
+      "expected_behavior": "If these limits are intended as resource protection, reject/cancel oversized bodies before full materialization with defined byte semantics and a bounded upstream response policy.",
+      "actual_behavior": "Application limits constrain accepted parsed content, not bytes buffered before rejection. Deployed gateway/runtime limits and actual allocation exposure were not measured.",
+      "impact": "Provisional P2 authenticated resource-pressure risk; authentication is required and platform request limits may mitigate it. High confidence in buffering order only, not in a demonstrated denial-of-service exploit.",
+      "severity": "P2",
+      "confidence": "High",
+      "status": "Needs Verification",
+      "proposed_remediation": "After approval, define byte-based request/response budgets and use bounded streaming reads/cancellation or verified platform-enforced ceilings; retain semantic validation and sanitized errors.",
+      "regression_risk": "Multibyte VI/EN text, chunked/missing-length requests, malformed JSON, authenticated rejection paths and provider response handling.",
+      "related_tests": ["supabase/functions/tests/http_handler_test.ts", "supabase/functions/ai-coach/service_test.ts"],
+      "missing_tests": ["Synthetic counted ReadableStream proves early cancel before consuming excess input", "Multibyte byte-versus-string-unit boundary and bounded provider response fixtures", "Approved non-production gateway request-limit evidence; NOT RUN"],
+      "depends_on": ["A5 transport/resource verification; distinct from INTG003 accepted-answer/history schema mismatch"],
+      "wave": "W2",
+      "verification_method": "Owner supabase-specialist with qa-reviewer, target A5: bounded synthetic stream/response fixtures, no real traffic flood; assert consumption stops at byte budget, errors remain sanitized, and quota/auth order remains correct. Separately document gateway ceilings only under approved non-production access. NOT RUN in A3."
     }
   ]
 }
