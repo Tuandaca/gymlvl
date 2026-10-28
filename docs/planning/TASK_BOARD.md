@@ -2,6 +2,11 @@
 
 ## Current — A5 DONE/CLOSED; A6 NEXT / NOT STARTED (2026-10-28)
 
+**Checkpoint (2026-10-29):** closure payload mainab19e97bd7c143ee7a140a461d774a4ebfea7443,
+nine-doc delta after PARTIAL614ee7c, aggregate11docs. Normal push614ee7c..ab19e97 exit0,
+local/remote fullSHA equal/tree clean after push, A5_CLOSURE_EQUAL_CLEAN=PASS. Four-doc outcome
+child advances HEAD; verify actual latest main on resume.
+
 **Task/status:** A5 PASS/CLOSED for scoped audit acceptance; reviews/probes/material/final QA/context
 complete, no material closure blocker; primary artifact validator PASS. main614ee7cb6f99846b00fd71eec43637cb296268be PARTIAL checkpoint pushed normally,
 remote equal/clean after push; entry1763ab5. Eleven expected docs since entry, no implementation.
@@ -16,8 +21,8 @@ policy assertions owner/wave/trigger in phase6. No material decision or exhausti
 **Artifact check:** phase8 retained extraction/Node ->json35/md35/oldIDs30/unchangedClasses25/
 unchangedObjects24/histories6/newIDs5/fields22/coverage26-0-0-1/allowedPaths11/inputHashes65/errors0,
 A5_VALIDATION_EXIT node=0 diff=0, PASS. Two initial validator-only corrections retained, no data change.
-**Next action:** complete authorized A5 docs checkpoint/remote check, then await explicit A6 with audit handoff
-exact prompt. No A6/remediation/migration automatically.
+**Next action:** await explicit A6, then verify latest main/remote and use audit handoff exact prompt.
+No A6/remediation/migration automatically.
 
 ## Historical A5 progress (preserved)
 

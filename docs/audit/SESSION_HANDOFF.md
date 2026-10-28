@@ -2,11 +2,18 @@
 
 ## Current — A5 PASS/CLOSED; A6 NOT STARTED (2026-10-28)
 
+**Checkpoint outcome (2026-10-29):** closure payload main
+`ab19e97bd7c143ee7a140a461d774a4ebfea7443` (`ab19e97`), nine-doc delta +2428/-143 after
+PARTIAL614ee7c; aggregate A5 scope11 docs. `git push origin main` ->`614ee7c..ab19e97 main -> main`,
+exit0. `git ls-remote origin refs/heads/main` equals local full payload SHA; status empty after push,
+`A5_CLOSURE_EQUAL_CLEAN=PASS`. This outcome-only four-doc child record advances documentation HEAD;
+verify actual latest main/remote on resume, not the payload SHA alone. No history rewrite or A6 work.
+
 - **Task/status:** A5 ONLY; PASS/CLOSED against scoped review/evidence/owned gaps/independent QA/
   consistency criteria, not product/production certification. A4 remains closed, A6 not started.
-- **Commit:** main614ee7cb6f99846b00fd71eec43637cb296268be, authorized PARTIAL docs checkpoint
-  from entry1763ab55e8da994bc1d854ad8fd2cd2299678b45; normal push1763ab5..614ee7c exit0,
-  local/remote equal and clean after that checkpoint. Current expected docs dirty for reconciliation.
+- **Commit:** entry main1763ab55e8da994bc1d854ad8fd2cd2299678b45; authorized PARTIAL614ee7c then
+  closure payload ab19e97 above, both normally pushed and verified remote-equal/clean. Only audit
+  handoff and three planning records change in this outcome child; no findings/evidence changes.
 - **Changed files since entry:** docs/audit/phases/A5_TEST_RELIABILITY.md,
   docs/audit/phases/A5_FLUTTER_EVIDENCE.md, docs/audit/phases/A5_BACKEND_EVIDENCE.md,
   docs/audit/phases/A5_UI_EVIDENCE.md, docs/audit/MASTER_FINDINGS.md,
@@ -40,8 +47,8 @@
   `A5_ARTIFACT_CHECK json=35 md=35 old_ids=30 old_classes_unchanged=25 old_objects_unchanged=24 exact_histories=6 new_ids=5 required_fields=22 md_json_classes=35 coverage=26/0/0/1 allowed_paths=11 unchanged_inputs=65 errors=0`;
   `A5_VALIDATION_EXIT node=0 diff=0`, PASS. Initial two overstrict metadata-shape validator FAILs
   corrected only in validator, fully retained. No schema/allowlist/finding change to satisfy it.
-- **Next action:** complete authorized A5 docs checkpoint/remote verification, then stop and await
-  explicit A6 authorization using the exact prompt below. No A6/remediation/migration automatically.
+- **Next action:** await explicit A6 authorization, then confirm latest main/remote and use the
+  exact prompt below. Stop here; no A6/remediation/migration automatically.
 
 ## A6 entry prompt — authorization required; NOT started by A5
 
