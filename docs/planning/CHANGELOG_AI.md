@@ -11,7 +11,7 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 **Task:** S3 — Multi-agent validation and optimization.
 **Status:** `PASS`
-**Baseline:** `main` @ `b4063c6` at start; checkpoint commit at close.
+**Baseline:** `main` @ `b4063c6` at start; infrastructure checkpoint `59450c0` pushed to `origin/main`.
 **Scope:** Validation, documentation, agent configuration, and an authorized Git checkpoint. No
 application code, SQL, Edge Function, CI, dependency, UI, or media change.
 

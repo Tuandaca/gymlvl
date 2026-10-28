@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-28 (S3 validation and checkpoint)
 **Baseline:** branch `main` @ `b4063c6` at the start of S3. `main` is the only development branch.
-**Working tree:** clean after the S3 checkpoint commit, which carries the S1/S2/S3 infrastructure.
+**Working tree:** clean at the S3 checkpoint `59450c0`, which carries the S1/S2/S3 infrastructure.
 **Current milestone:** M1 — NOT STARTED (unchanged)
 **Next task (tooling track):** **S4 — Wave 2 skill import** (`PLANNED`, requires explicit approval)
 **Next product task:** **M1-01 — Baseline stabilization and evidence lock** (`NEXT`, unchanged; not

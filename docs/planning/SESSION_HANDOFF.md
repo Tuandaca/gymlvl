@@ -4,7 +4,8 @@
 **Last agent:** OpenCode S3 validation (same session as S1 and S2)
 **Mode:** Validation, optimization, documentation, and an authorized Git checkpoint. No application,
 SQL, UI, schema, dependency, CI, or media change.
-**Baseline:** branch `main`; S3 started at `b4063c6` and ends at the S3 checkpoint commit.
+**Baseline:** branch `main`. S3 started at `b4063c6`; the infrastructure checkpoint is `59450c0`,
+pushed to `origin/main`. Confirm with `git rev-parse main` before trusting this line.
 **Next task:** **S4 — Wave 2 skill import** (`PLANNED`, requires approval). **M1-01** remains the next
 product task and is still not authorized.
 
@@ -18,7 +19,7 @@ product task and is still not authorized.
 | S2 Wave 1 install | `DONE` — `.opencode/` with 7 agents, 6 skills, 6 commands, config |
 | S3 validation | `DONE` — `docs/agent-system/S3_VALIDATION_REPORT.md` |
 | Language policy | `AGENTS.md` §0.1, permanent (D-020) |
-| Git | Committed and pushed at the S3 checkpoint; tree expected clean |
+| Git | `59450c0` on `main` = `origin/main`; working tree clean |
 | Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified |
 
 **Read first on resume:** `AGENTS.md` §0.1, this section, then `TASK_BOARD.md`.
