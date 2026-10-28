@@ -1,5 +1,26 @@
 # GymLvl — Task Board
 
+## Current — A5 DONE/CLOSED; A6 NEXT / NOT STARTED (2026-10-28)
+
+**Task/status:** A5 PASS/CLOSED for scoped audit acceptance; reviews/probes/material/final QA/context
+complete, no material closure blocker; primary artifact validator PASS. main614ee7cb6f99846b00fd71eec43637cb296268be PARTIAL checkpoint pushed normally,
+remote equal/clean after push; entry1763ab5. Eleven expected docs since entry, no implementation.
+**Findings:**35, severity0/3/24/6/2 confidence16/18/1 Accepted29/NV3/Fixed1/FP2; all30oldIDs,
+six exact histories,24 unchanged objects. NewBUG008/009, INTG008/009, TEST002; transport pair High/NV.
+**Coverage:**26Reviewed(static)/0InReview/0NotReviewed/1OutOfScope; no runtime blanket promotion.
+**Evidence:** actual five-agent sequential ledger; Flutter18probe/126regressions/analyze/format,
+SQL10/Edge15/sixchecks pass; backend15streamcases/150UUIDpairs/expiry-only pass. Targeted UI FAIL
+8pass2fixturefail, external analyzer FAIL(package-context), not hidden by green regression suite.
+**Blockers:** independent sessions/fullJWTgateway stack unavailable; finite device/network/telemetry/
+policy assertions owner/wave/trigger in phase6. No material decision or exhaustive production gate.
+**Artifact check:** phase8 retained extraction/Node ->json35/md35/oldIDs30/unchangedClasses25/
+unchangedObjects24/histories6/newIDs5/fields22/coverage26-0-0-1/allowedPaths11/inputHashes65/errors0,
+A5_VALIDATION_EXIT node=0 diff=0, PASS. Two initial validator-only corrections retained, no data change.
+**Next action:** complete authorized A5 docs checkpoint/remote check, then await explicit A6 with audit handoff
+exact prompt. No A6/remediation/migration automatically.
+
+## Historical A5 progress (preserved)
+
 ## Current — A5 authorized / in progress (2026-10-28)
 
 **Task/status:** A5 ONLY, scoped acceptance NOT RUN pending tests/reliability/performance/observability
@@ -197,8 +218,8 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A2 | Flutter app, state, lifecycle, concurrency, navigation | `DONE` | Scoped audit PASS/CLOSED; original seven AC reconciled in A2_FLUTTER section9; Lead10 deferred A5 by explicit user instruction; 24 findings/22 dispositions retained |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `DONE` | Scoped PASS/CLOSED; C17-C21 reviewed with deferred gaps; A3_SUPABASE_SECURITY/A3_SQL_EVIDENCE; 26 findings total, no production certification |
 | A4 | Workout lifecycle, XP, progression, rewards | `DONE` | Scoped PASS/CLOSED; A4_WORKOUT_PROGRESSION/A4_SQL_EVIDENCE;30 findings, explicit gaps; payload84462d0/outcome1763ab5 |
-| A5 | Tests, performance, reliability, observability | `IN PROGRESS` | Authorized from1763ab5; A5_TEST_RELIABILITY.md finite scope/delegation; no remediation |
-| A6 | Reconciliation, verification, triage, remediation plan | `PLANNED` | — |
+| A5 | Tests, performance, reliability, observability | `DONE` | Scoped PASS/CLOSED from1763ab5; PARTIAL614ee7c, final phase/evidence/35 findings and26static+1excluded; no remediation |
+| A6 | Reconciliation, verification, triage, remediation plan | `NEXT` | Exact A6 prompt in audit handoff; requires separate authorization, NOT STARTED |
 
 **A0 notes.** Baseline re-verified at `9c8e142`: analyze clean, 126/126 Flutter, 10/10 SQL, 15/15 Edge.
 Six findings recorded — `FND-CONC-001` (P1), `FND-DATA-001` (P1), `FND-ARCH-001` (P2),

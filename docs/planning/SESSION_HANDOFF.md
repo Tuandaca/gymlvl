@@ -1,5 +1,41 @@
 # GymLvl — Session Handoff
 
+## Current — A5 PASS/CLOSED; A6 NOT STARTED (2026-10-28)
+
+- **Task/status:** A5 only, PASS/CLOSED for scoped audit acceptance, not product/production
+  certification; mandatory scope reviewed or finite owned gaps dispositioned. A4 closed; A6 not started.
+- **Commit:** main614ee7cb6f99846b00fd71eec43637cb296268be authorized PARTIAL checkpoint; push
+ 1763ab5..614ee7c exit0, remote equal/clean after push. Entry1763ab55e8da994bc1d854ad8fd2cd2299678b45.
+  Current expected docs dirty for closure; no product/permanent tests/CI/dependency/config changes.
+- **Files since entry:** docs/audit/phases/A5_TEST_RELIABILITY.md,
+  docs/audit/phases/A5_FLUTTER_EVIDENCE.md, docs/audit/phases/A5_BACKEND_EVIDENCE.md,
+  docs/audit/phases/A5_UI_EVIDENCE.md, docs/audit/MASTER_FINDINGS.md,
+  docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md, docs/audit/SESSION_HANDOFF.md,
+  docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md, docs/planning/CHANGELOG_AI.md.
+- **Findings/coverage:**35 severity0/3/24/6/2, confidence16/18/1, Accepted29/NV3/Fixed1/FP2;
+ 30 oldIDs/history preserved, six exact pre-A5 objects, five narrow promotions/five newIDs,
+ 24 unchanged objects. New BUG008/009, INTG008/009, TEST002; transport pair stays High/NV.
+  Coverage26static/0InReview/0NotReviewed/1excluded, no blanket runtime claim.
+- **Delegation/QA:** all five actually invoked sequentially; material source/evidence inspection
+  and final artifact/context reviews completed, no material closure blocker; stale documentary words
+  corrected. QA source-diff BLOCKED(permission), keeper exit wrappers rejected, no retry/bypass or QA
+  runtime claim; weak disabled counter qualified. Scope-qualified findings phase5, gaps phase6.
+- **Verification:** primary analyze0issues(62.9s)/format125unchanged/test126, SQL10/Edge15/sixchecks
+  all exit0; specialist Flutter18/streams15/UUID150/expiry-only/plans pass. UI aggregate FAIL8pass2
+  nullable-chip fixture fails; external-file analyzer FAIL296 package-context issues, not app defects.
+  Full retained commands/source/output/failures; defect-observing green never means a fix.
+- **Decisions/blockers:** none material. Independent sessions/fullAuthJWTgateway require supported
+  isolated stack (Docker/Supabase/Postgres commands unavailable); device/network/telemetry/performance
+  budgets unexecuted, finite owner/wave/trigger assertions retained. No production requirement.
+- **Artifact verification:** phase8 retained extraction/Node ->A5_ARTIFACT_CHECK json35/md35/oldIDs30/
+  unchangedClasses25/unchangedObjects24/histories6/newIDs5/fields22/coverage26-0-0-1/allowedPaths11/
+  unchangedInputs65/errors0, A5_VALIDATION_EXIT node=0 diff=0, PASS. Two primary validator metadata-
+  shape FAILs corrected in validator only, retained; no finding change or permission widening.
+- **Next action:** complete authorized A5 docs checkpoint/remote check,
+  then stop and await explicit A6 go-ahead; exact audit handoff **A6 entry prompt**. No remediation.
+
+## Historical A5 start/PARTIAL state (preserved)
+
 ## Current — A5 audit in progress (2026-10-28)
 
 - **Task/status:** A5 only, operational PARTIAL; scoped acceptance NOT RUN pending UI/QA/register

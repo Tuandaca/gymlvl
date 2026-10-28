@@ -1,7 +1,7 @@
 # Audit Coverage
 
-**Stage:** A4 CLOSED (scoped business-logic audit acceptance PASS, explicit deferred gaps; matrix opened at A0)
-**Baseline:** `main` @ `c95cb48` for A4; earlier inventory/measurements retain their dated provenance.
+**Stage:** A5 CLOSED (scoped testing/reliability audit acceptance PASS; explicit failed/blocked/unexecuted gaps)
+**Baseline:** `main` @ `1763ab5` for A5; PARTIAL614ee7c advances docs only; earlier inventory retains provenance.
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
@@ -54,36 +54,37 @@ Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboardi
 | ID | Component | Paths | Stage | Status | Reviewer | Evidence source | Known limitation |
 |---|---|---|---|---|---|---|---|
 | C-01 | App bootstrap & DI | `app/lib/main.dart`, `core/config` | A2 | `Reviewed (static)` | flutter-specialist (A2 original + reconciliation) | A2 sections 2.1,8.2 lead13: initialization failure gate inspected | No device bootstrap execution; absence of retry alone not defect |
-| C-02 | Router & shell | `core/router/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 reconciliation) | Four files; A2 section 8.2 leads8,11-13; summary BUG007 | Live auth callbacks/lifecycle/performance and lead10 recovery widget assertion deferred A5, Flutter/QA |
-| C-03 | Theme & design tokens | `core/theme/**`, `ui/candy/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | A2 section 8.2 leads1,2,5,6; BUG004 | Keyboard, hit regions, text-scale/device checks deferred A5 |
-| C-04 | Shared widgets | `ui/widgets/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Four system/status widgets inspected; phase 2.1/8.2 | Not all interaction/semantics paths executed |
-| C-05 | Localization | `core/localization/**`, `app/lib/l10n/**`, `app/l10n.yaml` | A2 | `Reviewed (static)` | ui-ux-specialist, flutter-specialist (A2) | ARCH002 extended; phase 8.2 leads7,22 | Bilingual clipping/device diacritics and screen-reader behavior deferred A5 |
-| C-06 | Auth feature | `features/auth/**` | A2 | `Reviewed (static)` | flutter-specialist, supabase-specialist; qa-reviewer (A2) | Auth forms/providers/repository inspected; phase 8.2 leads9,10,12,13 | Lead10 deferred A5 per explicit user closure instruction; owner flutter-specialist, qa-reviewer; assertion in phase8.2.10; no live Auth server |
-| C-07 | Onboarding | `features/onboarding/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Screen/controller inspected; unselected gender label BUG004 | Runtime chip background/large text deferred A5; domain semantics not claimed |
+| C-02 | Router & shell | `core/router/**` | A2, A5 | `Reviewed (static)` | flutter-specialist, qa-reviewer | A2 source review plus A5 actual router/Auth Lead10 fixture, BUG008 | Live callback/device back-stack and route-wide keyboard traversal unexecuted; Flutter/QA W2/W4 |
+| C-03 | Theme & design tokens | `core/theme/**`, `ui/candy/**` | A2, A5 | `Reviewed (static)` | ui-ux-specialist, qa-reviewer | A5 real Candy keyboard vs System positive control BUG009; narrow hit/text fixtures; A2 retained | Primitive fixtures not all variants/screens/device; disabled counter weak, no loading claim; UI/QA W2 |
+| C-04 | Shared widgets | `ui/widgets/**` | A2, A5 | `Reviewed (static)` | ui-ux-specialist | A2 four widgets; A5 SystemButton keyboard control and StatusPanel320dp/200% VI/EN | Not all interaction/semantics/focus paths executed; UI/QA W2 |
+| C-05 | Localization | `core/localization/**`, `app/lib/l10n/**`, `app/l10n.yaml` | A2, A5 | `Reviewed (static)` | ui-ux-specialist, flutter-specialist | A5 actual dictionary/provider/delegates/fonts VI/EN component fixtures, ARCH002 retained | Raster sample not physical/screen-reader/all translations; bilingual and complete-flow clipping unexecuted, UI/QA W2/W4 |
+| C-06 | Auth feature | `features/auth/**` | A2, A5 | `Reviewed (static)` | flutter-specialist, supabase-specialist, qa-reviewer | Lead10 actual controller/forms/router synthetic failed-signin/recovery plus update controls, BUG008 | Real token issuer/refresh/recovery/gateway not run; supported isolated Auth stack required, Flutter/Supabase/QA W4 |
+| C-07 | Onboarding | `features/onboarding/**` | A2, A5 | `Reviewed (static)` | ui-ux-specialist | A2 static BUG004; A5 actual fixture reaches gender assertion but two whole tests FAIL on nullable chip-paint sampling | Selected/day-chip contrast NOT RUN to completion; no whole-test PASS; finite UI/QA W2 composited-paint/320dp200% assertion |
 | C-08 | Dashboard | `features/dashboard/**` | A2 | `Reviewed (static)` | ui-ux-specialist, supabase-specialist (A2) | Unlabeled recent-three KPI BUG005 and quest BUG006 | KPI intended time-window still Needs Verification; domain stats math not executed |
-| C-09 | Workout domain | `features/workout/domain/**` | A4 | `Reviewed (static)` | flutter-specialist, exercise-catalog (A4) | Seven hand-written domain files read; presets/catalog/modalities and validity cross-referenced; A4 phase5/7 | Generated files not line-by-line reviewed; actual Dart timed-quest journey A5, no whole-domain runtime claim |
-| C-10 | Workout controllers | `features/workout/presentation/controllers/**` | A2, A4 | `Reviewed (static)` | flutter-specialist, supabase-specialist, qa-reviewer, orchestrator (A2/A4) | A4 phase5/6; pending edits/completion/cancel/timer contracts; existing126 Flutter tests rerun, DATA001 controls | Post-await/storage race and transport-loss/reorder fixtures A5; controller memoization not cross-device idempotency |
-| C-11 | Workout screens/widgets | `features/workout/presentation/{screens,widgets}/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 recovery + reconciliation) | Exact manifest phase 2.2, all leads dispositioned in 8.2; INTG004/BUG007 | A4 timed SQL inspection/probe is INTG005; actual Dart/UI journey and numeric/locale/lifecycle runtime remain A5 |
-| C-12 | Repositories (client data layer) | `features/*/data/**` | A2, A4 | `Reviewed (static)` | flutter-specialist, supabase-specialist (A2-A4) | Existing client/Auth/Coach/exercise static reviews retained; A4 workout persistence/RPC/retry inspected; INTG002 addendum | Actual committed-response loss/reorder/delete transport fixtures A5; gateway/RLS production not inferred |
-| C-13 | Quests | `features/quests/**` | A2 presentation, A4 domain | `Reviewed (static)` | supabase-specialist, exercise-catalog, flutter-specialist, qa-reviewer (A4) | Model/generator/matcher/defaults; actual SQL generation + mirrored client defaults, fixed local-day/streak controls; INTG007 | Dart journey not executed, expiry/day joint control not isolated expiry proof, lock-wait/timezone-history cases A5 |
-| C-14 | Progression engine | `features/progression/**` | A2 display, A4 domain | `Reviewed (static)` | flutter-specialist, supabase-specialist, qa-reviewer (A4) | Preview/SQL rules and sole award vs maintenance read; replay/conditional legacy/rollback/class focus/synergy probes; DATA001/002, INTG006 | Single connection not independent concurrency; no production cohort or full preview parity asserted |
-| C-15 | Coach (AI client) | `features/coach/**` | A2 client, A4 semantics | `Reviewed (static)` | flutter-specialist, supabase-specialist (A2/A3 source review retained; A4 authority cross-check) | Existing unchanged optional chat-only client/handler contract; calculate-xp delegates sole award; no AI workout/progression write capability observed | No provider/device rerun in A4; INTG003 continuation and A3 resource/gateway checks remain A5 |
-| C-16 | Profile | `features/profile/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Explicit white-on-white BUG004; whole screen previously read | Device rendering/large text and screen-reader behavior A5 |
-| C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3 | `Reviewed (static)` | supabase-specialist; orchestrator critical-path re-read | A3 phase5/6 effective17-table matrix, full baseline read; actual migration harness passes | Fresh in-memory schema, not deployed/adopted catalog; later hardening supersedes baseline policies; weak constraints/FK indexes deferred A4/A5 |
+| C-09 | Workout domain | `features/workout/domain/**` | A4, A5 | `Reviewed (static)` | flutter-specialist, exercise-catalog | A4 seven domain files; A5 actual QuestInstance/controller seeded generated JSON and HTTP defaults INTG007 | Fake completion22023/local predicate are not SQL/gateway E2E; full timed-row UI/gateway assertion remains Flutter/Supabase/QA W2 |
+| C-10 | Workout controllers | `features/workout/presentation/controllers/**` | A2, A4, A5 | `Reviewed (static)` | flutter-specialist, qa-reviewer | A5 post-await identity/completion/cancel CONC001 addendum; lost-ACK/reorder/hydration/Dart-mode fixtures | B controller state loss not B DB mutation; persistence mocked; real gateway/transport schedules W1 Flutter/Supabase/QA |
+| C-11 | Workout screens/widgets | `features/workout/presentation/{screens,widgets}/**` | A2, A5 contract | `Reviewed (static)` | flutter-specialist, ui-ux-specialist | A2 manifest/lead dispositions retained; A5 actual Add Set method used by screen INTG004, not rendered row tap | Real timed-row tap/hidden-field/keyboard/numeric/background flow not executed; UI/Flutter/QA W2 |
+| C-12 | Repositories (client data layer) | `features/*/data/**` | A2, A4, A5 | `Reviewed (static)` | flutter-specialist, supabase-specialist | Real repository HTTP sequence with injected transport; INTG002, INTG008/009, legitimate204/forbidden403 delete controls | Modeled server commits not PostgreSQL/gateway duplicate or authorization proof; W1 isolated-stack controls |
+| C-13 | Quests | `features/quests/**` | A2, A4, A5 | `Reviewed (static)` | supabase-specialist, flutter-specialist, qa-reviewer | A5 generated SQL JSON->actual Dart mismatch closes mirrored-client gap; isolated same-day expiry-only controls pass | No rendered quest-to-realSQL award journey; lock-wait/timezone-history policy and concurrency need approved isolated stack, W1/W2 |
+| C-14 | Progression engine | `features/progression/**` | A2, A4, A5 tests | `Reviewed (static)` | flutter-specialist, supabase-specialist, qa-reviewer | A4 bounded reward evidence retained; A5 test meaning and fake commit/replay limitations reviewed | Single connection not independent concurrency; no production cohort or full preview parity, W1 Supabase/QA |
+| C-15 | Coach (AI client) | `features/coach/**` | A2, A4, A5 reliability | `Reviewed (static)` | flutter-specialist, supabase-specialist | Optional chat-only boundary retained; A5 counted streams/provider/error/timeout/context review SEC004 | INTG003 actual4001-character continuation NOT RUN; real provider/network/timeouts/gateway unexecuted, W2/W4 |
+| C-16 | Profile | `features/profile/**` | A2, A5 | `Reviewed (static)` | ui-ux-specialist, qa-reviewer | Actual ProfileScreen display/edit foreground1:1 under light theme, VI/EN390dp100%, BUG004 | Not full profile/modal/device320dp200%/screen-reader coverage; UI/QA W2 |
+| C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3, A5 harness | `Reviewed (static)` | supabase-specialist; orchestrator critical-path re-read | A3 full baseline/security review; A5 FK19/15leading-index census and bounded EXPLAIN | Fresh in-memory schema not deployed/adopted; four FK index absences not proof of slowdown; W1/W3 policy/scale follow-up |
 | C-18 | SQL: progression | `20261026000200_authoritative_progression.sql` | A3, A4 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | A3 security plus A4 award/maintenance/class/quest/date business review; A4_SQL_EVIDENCE8groups/108assertions and existing SQL suite | Conditional prior-award fixture not production cohort; single-connection replay/rollback not independent scheduling or transport recovery |
-| C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3, A4 contract | `Reviewed (static)` | supabase-specialist, exercise-catalog | Full migration read, metadata/slug/duration constraints; harness150 rows/seed replay; A4 timed CHECK vs completion probe INTG005 | NOT VALID deployed legacy rows not certified; actual Dart timed-quest journey remains A5, no media imported |
-| C-20 | RLS policies (44 statements, 22 effective at tip) | all migrations | A3 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | A3_SQL_EVIDENCE real SET ROLE A/B/anon subset; foreign RPC/insert/reparent denied; policies on all17 tables reviewed | No whole-row runtime claim: live JWT/gateway/full17-table operation matrix and inherited deployment ACLs unverified; no unconditional production/RLS bypass found |
-| C-21 | Edge Functions | `supabase/functions/**` | A3 | `Reviewed (static)` | supabase-specialist, qa-reviewer; Flutter client boundary review | All16 tracked source/support files, six handlers;15 tests pass deny-net/cached-only with synthetic env, six handler typechecks pass; SEC004 | Stubbed tests not deployed gateway/Auth/runtime; streaming resource limits A5, service-role/deployed secrets not inspected |
+| C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3, A4, A5 | `Reviewed (static)` | supabase-specialist, exercise-catalog, flutter-specialist | A4 timed CHECK/completion INTG005; A5 all150slug/UUID pairs preserved on seed replay and actual generated JSON->Dart defaults | Deployed NOT VALID legacy rows and complete timed SQL/gateway journey not certified; W1/W2, no media |
+| C-20 | RLS policies (44 statements, 22 effective at tip) | all migrations | A3, A5 harness | `Reviewed (static)` | supabase-specialist, qa-reviewer | A3 role subset retained; A5 maps original assertions versus full17-table operations and GUC/JWT limitations | Complete role/JWT/gateway matrix BLOCKED without approved isolated stack; no live/deployed bypass inferred, W1/W4 |
+| C-21 | Edge Functions | `supabase/functions/**` | A3, A5 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | A5 current15tests/sixchecks plus12request/3provider counted streams; auth before buffering and SEC004 bounded mechanism | No hostedJWT/networkcancel/DoS/memory/actual15s enforcement/telemetry proof; W2/W4 Supabase/QA |
 | C-22 | CI workflow | `.github/workflows/verify.yml` | A1 | `Reviewed (static)` | `qa-reviewer` (A1) + orchestrator re-read | A1 §6: 52-line workflow read end to end, both jobs, every gate named; gaps recorded as `FND-TEST-001` | Gate list verified statically; runner behaviour, action-pinning supply chain, and a failing run were `NOT RUN` |
-| C-23 | Test harness | `tools/db-tests/**` | A5 | `Not Reviewed` | — | S3 ran it | Single-connection PostgreSQL |
-| C-24 | Flutter tests | `app/test/**` | A5 | `Not Reviewed` | — | — | No golden tests |
+| C-23 | Test harness | `tools/db-tests/**` | A5 | `Reviewed (static)` | supabase-specialist, qa-reviewer, orchestrator | All16 tracked harness text/code files plus SQL/Edge fixtures/CI inspected;10 unit meaning/mocks/role inventory/optional live-script limits; A5_BACKEND_EVIDENCE | Single-connection not concurrency; optional live/private/browser scripts intentionally NOT RUN; no production/coverage certification |
+| C-24 | Flutter tests | `app/test/**` | A5 | `Reviewed (static)` | flutter-specialist, ui-ux-specialist, qa-reviewer, orchestrator | All14files/2624lines,13discovered+wrapper; real/reference fixture distinction TEST002; current126regressions and bounded probes | No coverage percentage/golden/device/frame budget; targeted UI aggregate FAIL8pass2fixturefail, not126suite failure; explicit wave-owned gaps |
 | C-25 | Agent configuration | `.opencode/**` | A1, A6 | `Reviewed (static)` | build (A0), qa-reviewer (A0.1), orchestrator (A1) | A0 grep/read; A0.1 parsed every rule in all 7 agents + negative primary test; A1 parsed 73 global + 62 agent rules and ran 18 destructive-operation probes → 12 ungated (`FND-GOV-004`, `FND-SEC-001`) | Evaluator is a reimplementation of the rule model, not the harness; live per-spelling probe `NOT RUN` |
 | C-26 | Planning documents | `docs/planning/**`, `docs/ARCHITECTURE.md`, `docs/agent-system/*.md` (reference docs only) | A1 | `Reviewed (static)` | build (A0), `context-keeper` (A1) + orchestrator re-check | A1 §10: 15 stale claims across nine documents; dated evidence blocks and stage records explicitly classified as not stale; `FND-GOV-002` evidence extended | Inventory complete, fixes not applied (W4) |
 | C-27 | Legacy Java work | `.agent/`, `.agents/teamwork/` | — | `Out of Scope` | — | — | Preserved user work (D-018) |
 
 ## 4. Known coverage gaps recorded at A0
 
-These are **observations about test infrastructure**, not yet findings. A5 formalizes them.
+These are historical A0 observations. A5 dispositions below distinguish actual findings, positive
+evidence and finite gaps; an absent test style is not automatically a product defect.
 
 | # | Observation | Why it matters |
 |---|---|---|
@@ -97,8 +98,8 @@ These are **observations about test infrastructure**, not yet findings. A5 forma
 ## 5. Remaining work
 
 All 27 components are inventoried. Historical A1 close: 3 reviewed, 1 in review, 22 not reviewed,
-1 out of scope. A2 closed at13 reviewed/5 in review/8 not reviewed/1 out; A3 at18/5/3/1. At A4 reconciliation:
-**24 `Reviewed (static)`, 0 `In Review`, 2 `Not Reviewed`, 1 `Out of Scope`**. No whole component is promoted to runtime-verified merely
+1 out of scope. A2 closed at13 reviewed/5 in review/8 not reviewed/1 out; A3 at18/5/3/1; A4 at24/0/2/1.
+**26 `Reviewed (static)`, 0 `In Review`, 0 `Not Reviewed`, 1 `Out of Scope`** at A5 reconciliation. No whole component is promoted to runtime-verified merely
 because existing widget tests passed. **No component may be described as "audited" until its stage closes.**
 
 Stage-by-stage target: A1 closed C-22, C-25 and C-26; A2 closes C-01…C-05, C-07, C-08, C-16 and the
@@ -115,8 +116,17 @@ A2/A4 rows retain the unreviewed domain half. Exact A3 entry is in the current a
 requires separate authorization. All deferred investigations have owners, stages and assertions in
 phase8.2/9.3; no device/runtime coverage percentage or product correctness guarantee is claimed.
 
-A3 reviewed C17-C21 for security/schema/Edge scope. A4 completes C09/C10/C12-C15 and C18 business
-inspection with bounded isolated evidence, not exhaustive formal verification. C23 harness and C24
-full Flutter-test audit remain Not Reviewed for A5. Deferred transport/gateway/concurrency/adoption,
-device and resource checks retain owners/stages/assertions in A2/A3 records and A4 phase8. Positive
-synthetic controls do not assert every resource/role/deployed environment is verified.
+A3/A4 inspection/evidence remains historical. A5 completes C23/C24 read coverage, inherited finite
+runtime assertions or explicit dispositions, not exhaustive formal verification. Remaining transport/
+gateway/concurrency/adoption/device checks have owners, triggers and assertions in A5 phase6 and
+specialist evidence; A6 triages them into approval-gated owner waves, not automatic runtime work.
+Positive synthetic controls do not assert every resource/role/deployed environment is verified.
+
+**A5 dispositions for A0 G-series:** G01 no goldens ->W3 Flutter/UI visual regression policy, no
+automatic finding. G02 generated/Freezed suppressions ->positive retained fact, not a defect. G03 no
+direct quest/stats tests ->W3 regression gap; A5 actual model/default fixtures and SQL stats controls
+are audit evidence, not added permanent coverage. G04 wrapper ->harmless manual entrypoint, not
+another discovered suite (actual4lines). G05 single connection ->BLOCKED actual sessions/full gateway,
+role subset exists and is not cryptographic JWT proof. G06 no coverage metric ->NOT RUN intentionally,
+no percentage or threshold invented; W3 owner proposes meaningful coverage goals after approval.
+Additional production-versus-replica coverage weakness is TEST002, not a duplicate of TEST001 CI gaps.

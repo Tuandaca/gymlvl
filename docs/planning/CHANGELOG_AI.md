@@ -2,6 +2,59 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — A5 final precommit gate
+
+- Continued only the already-authorized A5 checkpoint; main614ee7c, nine expected dirty docs.
+- Retained phase8 validator rerun after final closure metadata/QA wording ->same35records/30oldIDs/
+  25unchangedClasses/24unchangedObjects/sixHistories/fiveNew/22fields/26-0-0-1/11allowedDocs/
+  65unchangedInputs/errors0; A5_VALIDATION_EXIT node=0 diff=0, PASS. No new product/runtime work.
+- Normal documentation commit/push and final remote synchronization next; stop before A6.
+- Explicit authorized-path staging ->nine changed docs; git diff --cached --check ->
+  A5_STAGED_DIFF_CHECK_EXIT=0, PASS including new UI evidence. No product/permanent-test/config paths.
+
+## 2026-10-28 — A5 scoped audit PASS/CLOSED; A6 not started
+
+- A5.1-A5.7/C23/C24 reviewed with finite evidence/gap dispositions; closure against audit-only
+  criteria, not remediation/production or exhaustive runtime proof. Final context and QA artifact
+  inspections found no material blocker; stale coverage/pending-output wording corrected only.
+- Actual five-agent sequential ledger and register-only followups retained.35 mirrored findings,
+  severity0/3/24/6/2 confidence16/18/1 status29/3/1/2; old30 IDs, six complete histories and24 unchanged
+  objects preserved. Coverage26static/0/0/1, no blanket runtime promotion. No material decision.
+- Primary current126regressions/analyze/format/SQL10/Edge15/six checks PASS; Flutter18 and finite
+  backend assertions PASS. UI aggregate FAIL8pass2fixturefail and external analyzer FAILpackagecontext
+  remain explicit. True sessions/JWT stack BLOCKED; device/network/host telemetry/profile budgets
+  NOT RUN. Green observation tests are not fixes. Exact commands/output in phase7/8 and evidence.
+- QA extra source-diff BLOCKED and keeper exit wrappers rejected, not retried/bypassed; independent
+  runtime validation NOT RUN by reviewers. Primary full artifact validator output retained before
+  review; final precommit rerun/staged whitespace gate follows, normal docs checkpoint authorized.
+- Exact A6 reconciliation/verification/triage/remediation-plan prompt persisted, new go-ahead needed.
+  No A6/remediation/migration/product/permanent-test/CI/config/dependency/permission changes or cleanup.
+
+## 2026-10-28 — A5 material QA and register/coverage reconciliation
+
+- PARTIAL payload614ee7cb6f99846b00fd71eec43637cb296268be committed/pushed1763ab5..614ee7c exit0;
+  local/remote equal and tree clean after push. Subsequent UI/QA/register-only delegations sequential.
+- All five required configured agents invoked; full sessions/scopes/results in A5phase2. QA supports
+  five newIDs and narrow five promotions; CONC001 identity-await addendum distinct from queuecycle.
+  Exact six pre-A5 objects/nested histories retained,24 others unchanged; formatting-only followup
+  restores those24 raw object spans. Counts35, severity0/3/24/6/2 confidence16/18/1, status29/3/1/2.
+- New BUG008 recovery contamination, BUG009 keyboard primitive, INTG008 lostACK/INTG009 reorder
+  High/NV modeled persistence, TEST002 local-replica regression target. No duplicates or fixes.
+- C23/C24 fully read; coverage26static/0InReview/0NotReviewed/1excluded. Scoped remaining assertions
+  assigned owners/triggers/waves; no numeric coverage or whole-device/production claim.
+- Primary Flutter analyze0issues(62.9s), format125/0changed, test126 all exit0. Original SQL10,
+  Edge15 and six entrypoint checks independently rerun deny-net/cached/frozen/synthetic env, all exit0.
+- UI final aggregate FAIL8pass2nullable-chip fixture fails and external analyzer FAIL296package-
+  context issues retained; not production defects or all-green evidence. QA corrected weak disabled
+  counter qualification; extra source-diff BLOCKED(permission), not retried/bypassed. No QA runtime.
+- Exact A6 reconciliation/triage/remediation-planning prompt persisted; final artifact/context/QA
+  gate and closure checkpoint next. No A6 execution/remediation or unauthorized product/config edits.
+- Primary phase8 retained executable extraction/Node ->A5_ARTIFACT_CHECK json35/md35/oldIDs30/
+  unchangedClasses25/unchangedObjects24/exactHistories6/newIDs5/fields22/coverage26-0-0-1/allowedPaths11/
+  unchangedInputs65/errors0; A5_VALIDATION_EXIT node=0 diff=0, PASS before final reviewers. Two initial
+  metadata-shape validator FAILs corrected only in validator (supplemental a5_review object), no
+  finding data/allowlist/permission change; full failed results and corrected output retained.
+
 ## 2026-10-28 — A5 first PARTIAL evidence checkpoint
 
 - Real Flutter and Supabase sequential delegations completed; source/output/setup failures/hashes

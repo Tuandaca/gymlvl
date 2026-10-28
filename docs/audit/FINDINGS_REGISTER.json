@@ -2,8 +2,21 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A4 (CLOSED; scoped business-logic audit acceptance PASS; explicit deferred gaps, not production certification)",
-  "history_note": "a3_closure and closure retain historical A3 and A2 metadata, not current A4 closure claims. A4 changes only DATA001/ARCH001 classifications and adds four findings; all 26 earlier IDs and their historical evidence remain.",
+  "stage": "A5 (CLOSED; scoped testing/reliability audit acceptance PASS; explicit failed/blocked/unexecuted verification gaps, not production certification)",
+  "history_note": "a4_closure/a4_review, a3_closure and closure retain complete A4/A3/A2 history, not current A5 closure claims. Six amended findings preserve exact entire pre-A5 objects in historical_pre_a5, including older nested histories/reviews. All other24 prior finding objects remain JSON-deep-equivalent; all30 prior IDs survive. Five narrow confidence/status promotions and five new IDs do not imply product fixes or production certification.",
+  "a5_closure": {
+    "date": "2026-10-28",
+    "entry_commit": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+    "partial_commit": "614ee7cb6f99846b00fd71eec43637cb296268be",
+    "validation_result": "PASS",
+    "operational_status": "CLOSED",
+    "scope": "A5.1-A5.7/C23/C24 reviewed, findings/evidence persisted, finite owner-trigger-wave gaps and independent material/acceptance inspection; audit only, no remediation or exhaustive runtime/production proof",
+    "artifact_verification": "A5_TEST_RELIABILITY section8 retains full executable source/output:35 mirrored records/30 prior IDs/25 unchanged classifications/24 unchanged objects/six exact histories/five new IDs/22 required fields/coverage26-0-0-1/11 allowed docs/65 unchanged inputs; node0/diff0",
+    "test_boundary": "Current126 Flutter/analyze/format, SQL10, Edge15/six checks pass; synthetic Flutter18 and backend bounded controls pass. UI aggregate FAIL8pass2fixturefail; external analyzer FAIL296 package-context issues, not production defects. Independent sessions/JWT stack BLOCKED; device/network/performance/host telemetry NOT RUN",
+    "independent_review": "context-keeper and qa-reviewer real material/final artifact follow-ups completed; small stale documentary wording corrected. QA/keeper runtime validators NOT RUN; denied extra Git/exit-wrapper commands not retried or bypassed",
+    "deferred_work_reference": "A5_TEST_RELIABILITY section6 and exact A6 prompt in audit SESSION_HANDOFF; A6 triages owner waves, not automatic execution of all remaining probes or remediation",
+    "git_note": "Normal docs-only checkpoint authorized; exact closure payload/outcome and remote equality recorded in audit/planning handoffs after execution"
+  },
   "a4_closure": {
     "date": "2026-10-28",
     "entry_commit": "c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3",
@@ -22,8 +35,16 @@
     "evidence_reference": "docs/audit/phases/A4_SQL_EVIDENCE.md groups1-8; full executed source, commands, hashes and output retained",
     "runtime_evidence": "Bounded probe exit0: 8 groups, 15 independent sequential in-memory DBs, 108 assertions including fixture/source guards, zero fetch attempts. Orchestrator reports an independent current rerun of the same108 assertions, exit0. No probe rerun in this documentation-only write turn.",
     "independent_qa": "qa-reviewer ses_e7d23c0d4ffe9IA6MkbszmpEvl read source/evidence; supports conditional DATA001, three Confirmed synthetic findings, High-only timed quest integration scope, and rejects ARCH001's unsupported every-write claim",
-    "classification_changes": ["FND-DATA-001: P1/Medium/Needs Verification -> P1/Confirmed/Accepted for the specified synthetic tuple only", "FND-ARCH-001: P2/High/Accepted -> P2/High/False Positive; no fix or governance change"],
-    "new_findings": ["FND-DATA-002", "FND-INTG-005", "FND-INTG-006", "FND-INTG-007"],
+    "classification_changes": [
+      "FND-DATA-001: P1/Medium/Needs Verification -> P1/Confirmed/Accepted for the specified synthetic tuple only",
+      "FND-ARCH-001: P2/High/Accepted -> P2/High/False Positive; no fix or governance change"
+    ],
+    "new_findings": [
+      "FND-DATA-002",
+      "FND-INTG-005",
+      "FND-INTG-006",
+      "FND-INTG-007"
+    ],
     "limits": "No production cohort, ordinary-retry duplication, historical class/quest duplication, real Dart quest journey or real two-connection concurrency established; A5 transport/concurrency assertions remain deferred"
   },
   "a3_closure": {
@@ -32,7 +53,10 @@
     "validation_result": "PASS",
     "operational_status": "CLOSED",
     "scope": "C17-C21 security/schema/Edge review, isolated test evidence, explicit gaps and independent review; not production certification or A4 reward semantics",
-    "new_findings": ["FND-SEC-003", "FND-SEC-004"],
+    "new_findings": [
+      "FND-SEC-003",
+      "FND-SEC-004"
+    ],
     "evidence_reference": "docs/audit/phases/A3_SUPABASE_SECURITY.md; docs/audit/phases/A3_SQL_EVIDENCE.md",
     "deferred_work_reference": "A3_SUPABASE_SECURITY.md section9; A4 reward/legacy/concurrency and A5 gateway/resource/full role-matrix checks",
     "test_boundary": "SQL10 units and Edge15 tests/six typechecks pass; original custom named-role survival assertion FAIL retained; conditional PUBLIC14 assertions and named-denial4 assertions pass; no live/production access",
@@ -57,44 +81,138 @@
   },
   "baseline": {
     "branch": "main",
-    "head": "c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3",
-    "head_short": "c95cb48",
-    "remote_head": "c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3",
-    "working_tree": "clean and remote-equal at A4 entry; nine authorized documentation paths dirty at final reconciliation; no product changes, normal documentation commit/push pending"
+    "head": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+    "head_short": "1763ab5",
+    "remote_head": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+    "working_tree": "Clean and remote-equal at A5 entry as recorded in A5 phase2. This bounded writer enters main614ee7c with only new UI evidence untracked and changes only the two registers; no product changes or closure claim."
   },
-  "historical_baselines": [{ "stage": "A3 entry", "branch": "main", "head": "f877e40987423f3804fe0d2887c44d19f3423aff", "head_short": "f877e40", "remote_head": "f877e40987423f3804fe0d2887c44d19f3423aff", "working_tree": "clean at A3 entry; documentation-only A3 edits pending" }],
+  "historical_baselines": [
+    {
+      "stage": "A3 entry",
+      "branch": "main",
+      "head": "f877e40987423f3804fe0d2887c44d19f3423aff",
+      "head_short": "f877e40",
+      "remote_head": "f877e40987423f3804fe0d2887c44d19f3423aff",
+      "working_tree": "clean at A3 entry; documentation-only A3 edits pending"
+    },
+    {
+      "stage": "A4 entry",
+      "branch": "main",
+      "head": "c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3",
+      "head_short": "c95cb48",
+      "remote_head": "c95cb4873455b39f3ab2b6c0f929b43d87f4d8d3",
+      "working_tree": "clean and remote-equal at A4 entry; nine authorized documentation paths dirty at final reconciliation; no product changes, normal documentation commit/push pending"
+    }
+  ],
   "counts": {
-    "total": 30,
-    "by_severity": { "P0": 0, "P1": 3, "P2": 20, "P3": 5, "P4": 2 },
-    "by_confidence": { "Confirmed": 9, "High": 20, "Medium": 1, "Low": 0 },
-    "by_status": { "Open": 0, "Needs Verification": 3, "Accepted": 24, "Fixed": 1, "Deferred": 0, "False Positive": 2 }
+    "total": 35,
+    "by_severity": {
+      "P0": 0,
+      "P1": 3,
+      "P2": 24,
+      "P3": 6,
+      "P4": 2
+    },
+    "by_confidence": {
+      "Confirmed": 16,
+      "High": 18,
+      "Medium": 1,
+      "Low": 0
+    },
+    "by_status": {
+      "Open": 0,
+      "Needs Verification": 3,
+      "Accepted": 29,
+      "Fixed": 1,
+      "Deferred": 0,
+      "False Positive": 2
+    }
   },
   "findings": [
     {
       "id": "FND-CONC-001",
-      "title": "Re-entrant discard queue cycle stalls active workout recovery",
+      "title": "Discard queue cycle and post-backup-await identity race disrupt active workout state",
       "category": "CONC",
       "component": "Active workout controller (client)",
       "paths": [
         "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
       ],
-      "line_ranges": ["125-145", "207-215", "691-700", "workout_screen.dart:295-322"],
-      "origin": "S3_VALIDATION_REPORT.md#L4 (historically carried, unverified); A2 final reconciliation of retained reproduction",
-      "root_cause": "discardLocalBackup awaits cancelWorkout from inside _enqueue; cancelWorkout re-enqueues behind the outer pending operation, creating a wait cycle before repository cancellation. Current accepted scope excludes the separate post-await race.",
-      "evidence": "Historical S3/A2 recovery classification: P1 / Medium / Needs Verification, combined title 'Potential re-entrant deadlock and post-await null dereference in the active workout controller'. Static read reported by flutter-specialist in S3 TEST C, not reproduced in A0. Recovery QA traced 125-145,207-215,691-700 and workout_screen.dart:295-322. Deleted historical temporary test reported discardResolved=false cancelCalls=0 isLoading=true and completionResolved=false finishCalls=0 isCompleting=true; no-active control resolved, not a current PASS. Current reconciliation uses retained evidence from the last A2 continuation on 2026-10-28 at 7eb40f1, not a documentation-task rerun: in C:\\Users\\tuand\\AppData\\Local\\Temp\\opencode\\gymlvl-a2-minimal-20261028\\app, flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart -> +7: All tests passed!, exit 0. Output DISCARD direct_cancel=1 inactive_discard=completed active_timeout=true cancel_calls=1 active=true. Prompt fake cancellation and inactive discard controls complete; active discard times out at 300ms without another repository cancel. Source proves the queue cycle; timeout alone does not measure infinite duration. Exact harness/output: phases/A2_PROBES.md:50-189,229-266. Green reproduces the defect, not a fix. DEFERRED A5, owner flutter-specialist, no new ID: post-await identity-reset hypothesis at 659-664 remains NOT RUN; catch 678-682 means an uncaught crash is not established.",
-      "expected_behavior": "Discard-backup completes and the active-workout state settles.",
-      "actual_behavior": "Retained probe observes active discard still pending after 300ms, active state retained and no additional repository cancellation; direct cancel and inactive discard complete. Source identifies the re-entrant wait cycle.",
-      "impact": "Stalled active-workout recovery and blocked serialized operations. P2 for degraded recovery; irreversible workout loss, infinite duration measured solely by timeout, and server corruption were not demonstrated.",
+      "line_ranges": [
+        "controller:125-145,207-215,659-682,691-700",
+        "workout_screen.dart:295-322",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:G2; retained output669-676"
+      ],
+      "origin": "S3/A2 queue-cycle history retained; A5 actual-controller post-storage-await schedules and independent QA",
+      "root_cause": "Two distinct mechanisms share this ID: discardLocalBackup re-enqueues cancel behind its own serialized action; completion/cancel check generation before backup removal but do not re-check identity/generation after its await before clearing state.",
+      "evidence": "A2 retained queue-cycle probe (+7, exit0 at7eb40f1) observes active discard pending300ms with direct/no-active controls; full previous finding retained in historical_pre_a5. A5 Flutter G2, product1763ab5, retained18-test run exit0: same-identity completion succeeds; reset-only returns null/no error and remains empty because null-state failure is caught; if B starts while A backup removal waits, A completion returns A result and clears B controller state, and A cancel also clears B. No accepted queue-cycle or SEC002 snapshot-adoption repro was repeated. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Discard settles; an operation from identity A must not clear identity B workout state after a storage await.",
+      "actual_behavior": "Original bounded queue-cycle stall remains accepted. New synthetic completion and cancel schedules erase B controller state after A backup removal resolves; reset-only null-state failure is caught, not an uncaught crash.",
+      "impact": "P2 client recovery/state-continuity defect under the reproduced schedules. No uncaught process crash, B database mutation, real-account disclosure, irreversible DB loss or infinitely measured timeout is established.",
       "severity": "P2",
       "confidence": "Confirmed",
       "status": "Accepted",
-      "proposed_remediation": "Avoid calling the public enqueuing cancellation method inside the serialized discard action; preserve cancellation order and direct/no-active behavior. Investigate the distinct post-await race separately in A5 before prescribing its fix.",
-      "regression_risk": "Workout discard, cancel, backup restore, and session-resume paths.",
-      "related_tests": ["app/test/workout_controller_test.dart"],
-      "missing_tests": ["permanent regression: active discard settles and reaches repository cancellation once", "direct-cancel/no-active controls remain valid", "DEFERRED A5 flutter-specialist: identity reset during backup-removal await must not dereference cleared state or alter the new identity's state; no new ID"],
-      "depends_on": [],
+      "proposed_remediation": "Owner flutter-specialist with qa-reviewer: after approval remove nested public re-enqueue and revalidate captured workout/identity/generation after storage awaits before state mutation; preserve same-identity, direct-cancel and no-active controls.",
+      "regression_risk": "Discard queue ordering, completion/cancel, local backup removal, signout/reset/new-user start and restored workout state.",
+      "related_tests": [
+        "app/test/workout_controller_test.dart",
+        "docs/audit/phases/A2_PROBES.md",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G2"
+      ],
+      "missing_tests": [
+        "After fix approval: active discard settles with one repository cancel and valid direct/no-active controls.",
+        "After fix approval: gate backup removal for completion and cancel, reset A or start B before releasing; B state must survive, reset-only stays empty with no uncaught async error."
+      ],
+      "depends_on": [
+        "Client-only synthetic schedule; no server/RLS/disclosure inference. Separate from SEC002 unchecked snapshot ownership."
+      ],
       "wave": "W1",
-      "verification_method": "Retained audit-only harness imports the real controller and uses promptly completing fake cancellation with direct/no-active controls; last A2 continuation ran flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart -> +7: All tests passed!, exit 0 (defect-observing assertions). NOT rerun in this documentation checkpoint. After fix authorization, invert the active-discard assertion to require settlement and one cancel call. Separately gate backup removal between 659 and 664 and reset identity: DEFERRED A5, owner flutter-specialist, NOT RUN, no new ID."
+      "verification_method": "Retained A2 queue-cycle evidence plus A5 actual notifier/Auth-rebuild and SharedPreferences removal barrier, G2 source/output in docs/audit/phases/A5_FLUTTER_EVIDENCE.md. Independent QA supports distinct mechanisms; no runtime rerun here. After authorized fix invert B-erased observations while retaining controls.",
+      "historical_pre_a5": {
+        "id": "FND-CONC-001",
+        "title": "Re-entrant discard queue cycle stalls active workout recovery",
+        "category": "CONC",
+        "component": "Active workout controller (client)",
+        "paths": [
+          "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
+        ],
+        "line_ranges": [
+          "125-145",
+          "207-215",
+          "691-700",
+          "workout_screen.dart:295-322"
+        ],
+        "origin": "S3_VALIDATION_REPORT.md#L4 (historically carried, unverified); A2 final reconciliation of retained reproduction",
+        "root_cause": "discardLocalBackup awaits cancelWorkout from inside _enqueue; cancelWorkout re-enqueues behind the outer pending operation, creating a wait cycle before repository cancellation. Current accepted scope excludes the separate post-await race.",
+        "evidence": "Historical S3/A2 recovery classification: P1 / Medium / Needs Verification, combined title 'Potential re-entrant deadlock and post-await null dereference in the active workout controller'. Static read reported by flutter-specialist in S3 TEST C, not reproduced in A0. Recovery QA traced 125-145,207-215,691-700 and workout_screen.dart:295-322. Deleted historical temporary test reported discardResolved=false cancelCalls=0 isLoading=true and completionResolved=false finishCalls=0 isCompleting=true; no-active control resolved, not a current PASS. Current reconciliation uses retained evidence from the last A2 continuation on 2026-10-28 at 7eb40f1, not a documentation-task rerun: in C:\\Users\\tuand\\AppData\\Local\\Temp\\opencode\\gymlvl-a2-minimal-20261028\\app, flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart -> +7: All tests passed!, exit 0. Output DISCARD direct_cancel=1 inactive_discard=completed active_timeout=true cancel_calls=1 active=true. Prompt fake cancellation and inactive discard controls complete; active discard times out at 300ms without another repository cancel. Source proves the queue cycle; timeout alone does not measure infinite duration. Exact harness/output: phases/A2_PROBES.md:50-189,229-266. Green reproduces the defect, not a fix. DEFERRED A5, owner flutter-specialist, no new ID: post-await identity-reset hypothesis at 659-664 remains NOT RUN; catch 678-682 means an uncaught crash is not established.",
+        "expected_behavior": "Discard-backup completes and the active-workout state settles.",
+        "actual_behavior": "Retained probe observes active discard still pending after 300ms, active state retained and no additional repository cancellation; direct cancel and inactive discard complete. Source identifies the re-entrant wait cycle.",
+        "impact": "Stalled active-workout recovery and blocked serialized operations. P2 for degraded recovery; irreversible workout loss, infinite duration measured solely by timeout, and server corruption were not demonstrated.",
+        "severity": "P2",
+        "confidence": "Confirmed",
+        "status": "Accepted",
+        "proposed_remediation": "Avoid calling the public enqueuing cancellation method inside the serialized discard action; preserve cancellation order and direct/no-active behavior. Investigate the distinct post-await race separately in A5 before prescribing its fix.",
+        "regression_risk": "Workout discard, cancel, backup restore, and session-resume paths.",
+        "related_tests": [
+          "app/test/workout_controller_test.dart"
+        ],
+        "missing_tests": [
+          "permanent regression: active discard settles and reaches repository cancellation once",
+          "direct-cancel/no-active controls remain valid",
+          "DEFERRED A5 flutter-specialist: identity reset during backup-removal await must not dereference cleared state or alter the new identity's state; no new ID"
+        ],
+        "depends_on": [],
+        "wave": "W1",
+        "verification_method": "Retained audit-only harness imports the real controller and uses promptly completing fake cancellation with direct/no-active controls; last A2 continuation ran flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart -> +7: All tests passed!, exit 0 (defect-observing assertions). NOT rerun in this documentation checkpoint. After fix authorization, invert the active-discard assertion to require settlement and one cancel call. Separately gate backup removal between 659 and 664 and reset identity: DEFERRED A5, owner flutter-specialist, NOT RUN, no new ID."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     },
     {
       "id": "FND-DATA-001",
@@ -621,27 +739,98 @@
     },
     {
       "id": "FND-BUG-004",
-      "title": "Profile and onboarding use white foregrounds on white Candy panels",
+      "title": "Profile identity and edit text resolve white-on-white under Candy light",
       "category": "BUG",
-      "component": "Profile/onboarding light-theme readability",
-      "paths": ["app/lib/app.dart", "app/lib/core/theme/app_theme.dart", "app/lib/core/theme/candy_colors.dart", "app/lib/features/profile/presentation/screens/profile_screen.dart", "app/lib/features/onboarding/presentation/screens/onboarding_screen.dart"],
-      "line_ranges": ["app.dart:22-24", "app_theme.dart:7-15", "candy_colors.dart:8-9", "profile_screen.dart:619-622,663-685", "onboarding_screen.dart:896-898,915-926"],
-      "origin": "A2 final reconciliation; independent UI/UX review and bounded source reread",
+      "component": "Profile light-theme readability; onboarding source-only extension",
+      "paths": [
+        "app/lib/app.dart",
+        "app/lib/core/theme/app_theme.dart",
+        "app/lib/core/theme/candy_colors.dart",
+        "app/lib/features/profile/presentation/screens/profile_screen.dart",
+        "app/lib/features/onboarding/presentation/screens/onboarding_screen.dart"
+      ],
+      "line_ranges": [
+        "app.dart:22-24",
+        "app_theme.dart:7-15",
+        "candy_colors.dart:8-9",
+        "profile_screen.dart:619-622,663-685",
+        "onboarding_screen.dart:896-898,915-926"
+      ],
+      "origin": "A2 static profile/onboarding finding; A5 actual ProfileScreen resolved-style fixtures and independent QA",
       "root_cause": "Legacy explicit white/white54 foregrounds remain after panel tokens map to the white Candy card in forced light mode.",
-      "evidence": "Inspection only: profile header panel uses AppTheme.panelBackground, while display name and edit text explicitly use Colors.white; unselected onboarding gender icon/label use Colors.white54 on the same white panel. No rendered contrast/device probe was run.",
-      "expected_behavior": "Profile identity and unselected onboarding choices remain readable on the active Candy surfaces.",
-      "actual_behavior": "Source resolves the cited foregrounds and panel background to white, including translucent white over white for unselected choices.",
-      "impact": "Users can miss identity text and onboarding options; no data corruption, exploit or P0 impact is asserted.",
+      "evidence": "A5 UI results section2 at614ee7c (unchanged product baseline1763ab5): actual ProfileScreen with fake profile/class/user data at390x844/100%, Candy light, both VI/EN, resolves display-name and first edit TextField white-on-white1.0:1; ink-on-card positive control18.883060964594996:1, errors=[]. Aggregate UI command FAIL(+8 -2): two onboarding tests fail on null chip background; they do not verify chip colors or a whole onboarding journey. Onboarding white/white54 source evidence remains static. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Actual profile identity/edit text is readable on production light surfaces; onboarding choices require their own resolved paint verification.",
+      "actual_behavior": "Both localized actual profile fixtures resolve the cited identity/edit foreground/background pairs to1.0:1. Onboarding contrast extension is source-only; failed chip extraction cannot establish chip colors.",
+      "impact": "P2 confirmed unreadable profile identity/edit style mechanism in the bounded VI/EN fixtures; no full profile/onboarding flow, all-state contrast, device or data-integrity certification.",
       "severity": "P2",
-      "confidence": "High",
+      "confidence": "Confirmed",
       "status": "Accepted",
-      "proposed_remediation": "After fix authorization, use existing Candy ink/charcoal tokens for text and icons on light panels; retain selected-state distinction.",
-      "regression_risk": "Profile viewing/editing, gender selection, VI/EN text and disabled/selected states.",
-      "related_tests": ["app/test/ui_regression_test.dart"],
-      "missing_tests": ["Render the actual profile header/edit state and unselected onboarding choices under the production light theme; assert readable foreground/background pairings."],
-      "depends_on": ["A5 UI/UX rendering/contrast verification; no new palette or dependency."],
+      "proposed_remediation": "Owner ui-ux-specialist with flutter-specialist and qa-reviewer: after approval use existing Candy ink/charcoal tokens on light panels and preserve selected-state distinction; verify actual profile pairs and independently resolve onboarding composited paints before extending runtime claims.",
+      "regression_risk": "Profile view/edit, selected/disabled states, VI/EN, large text and actual onboarding foreground/background combinations.",
+      "related_tests": [
+        "app/test/ui_regression_test.dart",
+        "docs/audit/phases/A5_UI_EVIDENCE.md section2 Profile VI/EN results"
+      ],
+      "missing_tests": [
+        "After fix approval: actual profile identity/edit pairs in VI/EN at normal and200% text meet the approved contrast criterion with ink positive control.",
+        "Authorized UI follow-up: finish actual unselected/selected onboarding chip paint extraction without null/guessed background; test interaction separately. Existing two fixture tests remain FAIL."
+      ],
+      "depends_on": [
+        "No palette/dependency change approved; Confirmed scope is actual Profile resolved styles only."
+      ],
       "wave": "W2",
-      "verification_method": "A5 ui-ux-specialist: render cited states at normal/large text in VI/EN and measure foreground/background contrast. NOT RUN in this documentation checkpoint; static-only confidence is not Confirmed."
+      "verification_method": "Retained docs/audit/phases/A5_UI_EVIDENCE.md section2 and full sources/logs section6: eight cases passed within an aggregate failing run; only Profile pair/control observations support this promotion. QA read evidence; no UI rerun in writer. Onboarding full journey/chip colors NOT verified.",
+      "historical_pre_a5": {
+        "id": "FND-BUG-004",
+        "title": "Profile and onboarding use white foregrounds on white Candy panels",
+        "category": "BUG",
+        "component": "Profile/onboarding light-theme readability",
+        "paths": [
+          "app/lib/app.dart",
+          "app/lib/core/theme/app_theme.dart",
+          "app/lib/core/theme/candy_colors.dart",
+          "app/lib/features/profile/presentation/screens/profile_screen.dart",
+          "app/lib/features/onboarding/presentation/screens/onboarding_screen.dart"
+        ],
+        "line_ranges": [
+          "app.dart:22-24",
+          "app_theme.dart:7-15",
+          "candy_colors.dart:8-9",
+          "profile_screen.dart:619-622,663-685",
+          "onboarding_screen.dart:896-898,915-926"
+        ],
+        "origin": "A2 final reconciliation; independent UI/UX review and bounded source reread",
+        "root_cause": "Legacy explicit white/white54 foregrounds remain after panel tokens map to the white Candy card in forced light mode.",
+        "evidence": "Inspection only: profile header panel uses AppTheme.panelBackground, while display name and edit text explicitly use Colors.white; unselected onboarding gender icon/label use Colors.white54 on the same white panel. No rendered contrast/device probe was run.",
+        "expected_behavior": "Profile identity and unselected onboarding choices remain readable on the active Candy surfaces.",
+        "actual_behavior": "Source resolves the cited foregrounds and panel background to white, including translucent white over white for unselected choices.",
+        "impact": "Users can miss identity text and onboarding options; no data corruption, exploit or P0 impact is asserted.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Accepted",
+        "proposed_remediation": "After fix authorization, use existing Candy ink/charcoal tokens for text and icons on light panels; retain selected-state distinction.",
+        "regression_risk": "Profile viewing/editing, gender selection, VI/EN text and disabled/selected states.",
+        "related_tests": [
+          "app/test/ui_regression_test.dart"
+        ],
+        "missing_tests": [
+          "Render the actual profile header/edit state and unselected onboarding choices under the production light theme; assert readable foreground/background pairings."
+        ],
+        "depends_on": [
+          "A5 UI/UX rendering/contrast verification; no new palette or dependency."
+        ],
+        "wave": "W2",
+        "verification_method": "A5 ui-ux-specialist: render cited states at normal/large text in VI/EN and measure foreground/background contrast. NOT RUN in this documentation checkpoint; static-only confidence is not Confirmed."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_UI_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     },
     {
       "id": "FND-BUG-005",
@@ -721,24 +910,88 @@
       "title": "Post-award detail fetch failure is reported as failed workout completion",
       "category": "INTG",
       "component": "Workout completion client reconciliation",
-      "paths": ["app/lib/features/workout/data/supabase_workout_repository.dart", "app/lib/features/workout/presentation/controllers/active_workout_controller.dart", "app/lib/features/workout/presentation/screens/active_workout_screen.dart"],
-      "line_ranges": ["supabase_workout_repository.dart:66-76", "active_workout_controller.dart:655-682", "active_workout_screen.dart:82-83"],
-      "origin": "A2 final reconciliation; completion lead 14 separated from legacy award finding",
+      "paths": [
+        "app/lib/features/workout/data/supabase_workout_repository.dart",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart",
+        "app/lib/features/workout/presentation/screens/active_workout_screen.dart"
+      ],
+      "line_ranges": [
+        "supabase_workout_repository.dart:66-76",
+        "active_workout_controller.dart:655-682",
+        "active_workout_screen.dart:82-83"
+      ],
+      "origin": "A2 completion reconciliation; A4 snapshot observation preserved; A5 real repository/client failure mapping and independent QA",
       "root_cause": "Repository combines a successful award RPC and a separate detail lookup into one failing Future; controller cannot distinguish a committed completion from failed submission.",
-      "evidence": "Inspection only: complete_workout is awaited before getWorkoutDetail; a failed/null detail fetch throws. Controller catch sets completion_failed and returns null before clearing active state; screen returns without summary on null. No live RPC or injected failure was run.",
+      "evidence": "A5 Flutter G5 uses actual SupabaseWorkoutRepository/controller with synthetic HTTP: successful fake completion RPC followed by error or null hydration returns null/completion_failed and retains active local state. Retry hydration succeeds; modeled commitCount1/rpcAttempts2 is supplied by the fixture, not new SQL commit/idempotency proof. Success control observes hydrated duration7 versus summary local elapsed120; that field split is an observation, not a new duration defect absent approved semantics. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "Preserve successful award acknowledgement and represent subsequent detail retrieval as reconciliation, not an unqualified submission failure.",
-      "actual_behavior": "If award RPC succeeds and subsequent detail retrieval fails, the caller receives null with completion_failed and retains local active workout state.",
-      "impact": "False failure/retry confusion after potentially committed server completion. No duplicate award, data corruption or server idempotency defect is established.",
+      "actual_behavior": "Actual client reports completion_failed/null and retains local active session after the fixture acknowledges completion then fails/nulls detail hydration; successful-hydration/retry controls consume the supplied response.",
+      "impact": "P2 confirmed client acknowledgement/hydration error conflation under synthetic transport; no newly proven SQL commit, duplicate award, corruption or duration/XP defect.",
       "severity": "P2",
-      "confidence": "High",
+      "confidence": "Confirmed",
       "status": "Accepted",
-      "proposed_remediation": "Separate award acknowledgement from detail hydration; preserve committed results and provide a recoverable reconciliation state using the existing workout ID.",
-      "regression_risk": "Completion success, transport failures before/after award, detail not found, retries and auth changes.",
-      "related_tests": ["app/test/workout_controller_test.dart"],
-      "missing_tests": ["Successful award response followed by failing/null detail fetch; distinguish pre-award failure from committed completion pending hydration."],
-      "depends_on": ["FND-DATA-001 remains separate P1 / Medium / Needs Verification; A4 owns authoritative idempotency."],
+      "proposed_remediation": "Owner flutter-specialist with supabase-specialist and qa-reviewer: after approval separate acknowledged completion from subsequent detail hydration, preserve reward acknowledgement/workout ID and expose recoverable reconciliation rather than unqualified submission failure.",
+      "regression_risk": "Pre-award transport rejection, post-ack hydration error/null, replay/retry, pending edits, summary policy and auth reset.",
+      "related_tests": [
+        "app/test/workout_controller_test.dart",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G5"
+      ],
+      "missing_tests": [
+        "After fix approval: fake RPC acknowledgement followed by hydration error/null preserves acknowledgement and a recoverable reconciliation state; compare pre-RPC failure and successful hydration controls.",
+        "Approved isolated SQL/gateway: independently verify commit/replay plus lost hydration, exactly one award and coherent local recovery. Confirm summary duration policy before asserting120-versus7 is wrong."
+      ],
+      "depends_on": [
+        "DATA001 is separately P1/Confirmed/Accepted only for its conditional historical tuple; authoritative SQL retry/idempotency is not established by this fake commit fixture."
+      ],
       "wave": "W1",
-      "verification_method": "A5 flutter-specialist: use a controlled repository/transport fixture that acknowledges award then fails detail retrieval; assert preserved acknowledgement and recovery behavior. NOT RUN; no backend commit was exercised here."
+      "verification_method": "Retained actual client/repository HTTP G5 source/output, docs/audit/phases/A5_FLUTTER_EVIDENCE.md:140-149,584-601,691-696;18-test observation run exit0. QA supports narrow client promotion; writer did not rerun runtime tests or establish a new SQL commit.",
+      "historical_pre_a5": {
+        "id": "FND-INTG-002",
+        "a4_review": "Classification remains P2/High/Accepted. A4 source inspection extends the same completion-reconciliation contract, not a new award finding: active_workout_screen.dart:75-80 captures local duration/exercises/counts before awaiting completeWorkout at82;91-100 passes that snapshot into summary, while controller:655-677 returns result.workout/result.rewards plus local fields and repository:70-76 separately hydrates after award. Thus summary duration/exercises can describe the pre-await local snapshot alongside the authoritative awarded result. No divergent rendered summary or injected transport outcome was executed. A5 flutter-specialist with qa-reviewer: gate pending edits/award/detail response, assert displayed duration/exercises reconcile with the committed workout and acknowledged rewards, and distinguish pre-award failure from post-award hydration failure. DATA001 is now Confirmed only for the conditional prior-award tuple; the former P1/Medium/Needs Verification dependency wording below is historical A2 context, not current classification.",
+        "title": "Post-award detail fetch failure is reported as failed workout completion",
+        "category": "INTG",
+        "component": "Workout completion client reconciliation",
+        "paths": [
+          "app/lib/features/workout/data/supabase_workout_repository.dart",
+          "app/lib/features/workout/presentation/controllers/active_workout_controller.dart",
+          "app/lib/features/workout/presentation/screens/active_workout_screen.dart"
+        ],
+        "line_ranges": [
+          "supabase_workout_repository.dart:66-76",
+          "active_workout_controller.dart:655-682",
+          "active_workout_screen.dart:82-83"
+        ],
+        "origin": "A2 final reconciliation; completion lead 14 separated from legacy award finding",
+        "root_cause": "Repository combines a successful award RPC and a separate detail lookup into one failing Future; controller cannot distinguish a committed completion from failed submission.",
+        "evidence": "Inspection only: complete_workout is awaited before getWorkoutDetail; a failed/null detail fetch throws. Controller catch sets completion_failed and returns null before clearing active state; screen returns without summary on null. No live RPC or injected failure was run.",
+        "expected_behavior": "Preserve successful award acknowledgement and represent subsequent detail retrieval as reconciliation, not an unqualified submission failure.",
+        "actual_behavior": "If award RPC succeeds and subsequent detail retrieval fails, the caller receives null with completion_failed and retains local active workout state.",
+        "impact": "False failure/retry confusion after potentially committed server completion. No duplicate award, data corruption or server idempotency defect is established.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Accepted",
+        "proposed_remediation": "Separate award acknowledgement from detail hydration; preserve committed results and provide a recoverable reconciliation state using the existing workout ID.",
+        "regression_risk": "Completion success, transport failures before/after award, detail not found, retries and auth changes.",
+        "related_tests": [
+          "app/test/workout_controller_test.dart"
+        ],
+        "missing_tests": [
+          "Successful award response followed by failing/null detail fetch; distinguish pre-award failure from committed completion pending hydration."
+        ],
+        "depends_on": [
+          "FND-DATA-001 remains separate P1 / Medium / Needs Verification; A4 owns authoritative idempotency."
+        ],
+        "wave": "W1",
+        "verification_method": "A5 flutter-specialist: use a controlled repository/transport fixture that acknowledges award then fails detail retrieval; assert preserved acknowledgement and recovery behavior. NOT RUN; no backend commit was exercised here."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     },
     {
       "id": "FND-INTG-003",
@@ -767,27 +1020,97 @@
     {
       "id": "FND-INTG-004",
       "a4_review": "Classification remains P2/High/Accepted for added timed sets carrying hidden positive reps/zero visible duration; actual Flutter callbacks were not executed. The former A4 SQL deferral below is now resolved separately as FND-INTG-005: A4_SQL_EVIDENCE group3 persists valid0reps/30sec then completion rejects22023 without award/state change; this does not confirm the hidden-rep client mechanism. FND-INTG-007 owns generated timed quest prescription/default compatibility with High-only integration confidence. A5 flutter-specialist with qa-reviewer must execute the actual Add Set/complete callbacks and assert modality-consistent visible measurement/defaults, retaining rep controls; do not duplicate the backend or quest findings here.",
-      "title": "Adding a timed set defaults to hidden reps and zero displayed duration",
+      "title": "Timed Add Set method uses hidden positive reps and zero duration",
       "category": "INTG",
       "component": "Timed workout set UI/controller contract",
-      "paths": ["app/lib/features/workout/presentation/screens/active_workout_screen.dart", "app/lib/features/workout/presentation/widgets/workout_exercise_tile.dart", "app/lib/features/workout/presentation/widgets/set_row_widget.dart", "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"],
-      "line_ranges": ["active_workout_screen.dart:531,542-550", "workout_exercise_tile.dart:60-61,269-294", "set_row_widget.dart:180-207,219-222", "active_workout_controller.dart:298-318,436-450,474-479"],
-      "origin": "A2 final reconciliation; timed-set lead 18, client-only registered scope",
+      "paths": [
+        "app/lib/features/workout/presentation/screens/active_workout_screen.dart",
+        "app/lib/features/workout/presentation/widgets/workout_exercise_tile.dart",
+        "app/lib/features/workout/presentation/widgets/set_row_widget.dart",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
+      ],
+      "line_ranges": [
+        "active_workout_screen.dart:531,542-550",
+        "workout_exercise_tile.dart:60-61,269-294",
+        "set_row_widget.dart:180-207,219-222",
+        "active_workout_controller.dart:298-318,436-450,474-479"
+      ],
+      "origin": "A2 timed Add Set inspection; A4 distinct SQL finding preserved; A5 actual Dart method/payload observations and QA",
       "root_cause": "Add Set omits modality-specific defaults and calls controller defaults reps=10/duration=0; timed row hides reps while completion validation accepts either positive reps or duration.",
-      "evidence": "Inspection only: initial timed exercise sets use reps=0/duration=30, but training Add Set passes only exercise ID. Timed row renders duration; completion passes only isCompleted, so hidden positive reps satisfy the client guard with visible zero seconds.",
+      "evidence": "A5 Flutter G6 actual Dart controller/repository Add Set method used by active-screen531 creates timed set4 with reps10/duration0; marking complete is accepted by the actual client guard and recording transport. Initial timed0/30 and normal rep10/0 controls are distinct. This is a direct method invocation, not an actual UI tap/render or SQL completion. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "Added timed sets follow the duration-based contract; completing a visible zero-duration timed set must not rely on hidden reps.",
-      "actual_behavior": "Added timed set shows zero seconds, carries hidden reps=10, and passes the client's positive-reps-or-duration completion guard. Persistence and final server completion were not executed.",
-      "impact": "Misleading timed measurements and client completion state; no confirmed backend award or validation bypass is asserted.",
+      "actual_behavior": "The actual Add Set method sends hidden reps10 with duration0 for a timed-classified exercise, and client completion marking accepts it. Timed row visibility is source-inspected; no rendered Add Set interaction or server award is claimed.",
+      "impact": "P2 confirmed Dart default/validation mismatch for added timed sets; potentially misleading visible measurement is source-backed, not a confirmed full UI journey or backend validation/award bypass.",
       "severity": "P2",
-      "confidence": "High",
+      "confidence": "Confirmed",
       "status": "Accepted",
-      "proposed_remediation": "Initialize additional sets using exercise modality and validate completion against the visible measurement type; retain normal rep-based behavior.",
-      "regression_risk": "Initial/additional timed sets, rep-based sets, zero duration, completed-set edits and restoration.",
-      "related_tests": ["app/test/workout_controller_test.dart", "app/test/workout_widgets_test.dart"],
-      "missing_tests": ["Add a timed set through the actual training callback, assert reps/duration defaults, and reject zero visible duration without hidden-rep completion."],
-      "depends_on": ["DEFERRED A4, owner supabase-specialist: inspect/test the distinct SQL duration-versus-reps mismatch at supabase/migrations/20261026000200_authoritative_progression.sql:238 against 20261027000100_exercise_catalog_metadata.sql:362-366; assert reps=0/duration>0 valid timed completion is consistently handled. Not part of Confirmed backend evidence."],
+      "proposed_remediation": "Owner flutter-specialist with exercise-catalog and qa-reviewer: after approval initialize additional sets by supported modality and validate against that measurement contract; retain normal rep defaults and do not bypass INTG005 final validation.",
+      "regression_risk": "Initial versus additional timed/rep sets, zero duration, completed edits, visible fields, restoration and mixed exercise sessions.",
+      "related_tests": [
+        "app/test/workout_controller_test.dart",
+        "app/test/workout_widgets_test.dart",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G6/AddSet"
+      ],
+      "missing_tests": [
+        "After fix approval: actual rendered training Add Set tap and complete callback use modality-consistent visible defaults; zero visible timed duration cannot pass solely via hidden reps, with rep controls.",
+        "Approved isolated backend: verify agreed timed completion contract with INTG005; do not infer it from client completion marking."
+      ],
+      "depends_on": [
+        "INTG005 retains separate A4 SQL0-rep timed completion rejection; INTG007 owns initial generated-prescription/default mismatch. Neither is newly proved by this direct Add Set method."
+      ],
       "wave": "W2",
-      "verification_method": "A5 flutter-specialist: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4."
+      "verification_method": "Retained docs/audit/phases/A5_FLUTTER_EVIDENCE.md G6 source602-635/output697-702: actual method and request payload plus client mark-complete observed,18-test run exit0. No UI tap/render or live SQL/E2E in this promotion; QA inspected full source.",
+      "historical_pre_a5": {
+        "id": "FND-INTG-004",
+        "a4_review": "Classification remains P2/High/Accepted for added timed sets carrying hidden positive reps/zero visible duration; actual Flutter callbacks were not executed. The former A4 SQL deferral below is now resolved separately as FND-INTG-005: A4_SQL_EVIDENCE group3 persists valid0reps/30sec then completion rejects22023 without award/state change; this does not confirm the hidden-rep client mechanism. FND-INTG-007 owns generated timed quest prescription/default compatibility with High-only integration confidence. A5 flutter-specialist with qa-reviewer must execute the actual Add Set/complete callbacks and assert modality-consistent visible measurement/defaults, retaining rep controls; do not duplicate the backend or quest findings here.",
+        "title": "Adding a timed set defaults to hidden reps and zero displayed duration",
+        "category": "INTG",
+        "component": "Timed workout set UI/controller contract",
+        "paths": [
+          "app/lib/features/workout/presentation/screens/active_workout_screen.dart",
+          "app/lib/features/workout/presentation/widgets/workout_exercise_tile.dart",
+          "app/lib/features/workout/presentation/widgets/set_row_widget.dart",
+          "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
+        ],
+        "line_ranges": [
+          "active_workout_screen.dart:531,542-550",
+          "workout_exercise_tile.dart:60-61,269-294",
+          "set_row_widget.dart:180-207,219-222",
+          "active_workout_controller.dart:298-318,436-450,474-479"
+        ],
+        "origin": "A2 final reconciliation; timed-set lead 18, client-only registered scope",
+        "root_cause": "Add Set omits modality-specific defaults and calls controller defaults reps=10/duration=0; timed row hides reps while completion validation accepts either positive reps or duration.",
+        "evidence": "Inspection only: initial timed exercise sets use reps=0/duration=30, but training Add Set passes only exercise ID. Timed row renders duration; completion passes only isCompleted, so hidden positive reps satisfy the client guard with visible zero seconds.",
+        "expected_behavior": "Added timed sets follow the duration-based contract; completing a visible zero-duration timed set must not rely on hidden reps.",
+        "actual_behavior": "Added timed set shows zero seconds, carries hidden reps=10, and passes the client's positive-reps-or-duration completion guard. Persistence and final server completion were not executed.",
+        "impact": "Misleading timed measurements and client completion state; no confirmed backend award or validation bypass is asserted.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Accepted",
+        "proposed_remediation": "Initialize additional sets using exercise modality and validate completion against the visible measurement type; retain normal rep-based behavior.",
+        "regression_risk": "Initial/additional timed sets, rep-based sets, zero duration, completed-set edits and restoration.",
+        "related_tests": [
+          "app/test/workout_controller_test.dart",
+          "app/test/workout_widgets_test.dart"
+        ],
+        "missing_tests": [
+          "Add a timed set through the actual training callback, assert reps/duration defaults, and reject zero visible duration without hidden-rep completion."
+        ],
+        "depends_on": [
+          "DEFERRED A4, owner supabase-specialist: inspect/test the distinct SQL duration-versus-reps mismatch at supabase/migrations/20261026000200_authoritative_progression.sql:238 against 20261027000100_exercise_catalog_metadata.sql:362-366; assert reps=0/duration>0 valid timed completion is consistently handled. Not part of Confirmed backend evidence."
+        ],
+        "wave": "W2",
+        "verification_method": "A5 flutter-specialist: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     },
     {
       "id": "FND-SEC-003",
@@ -815,27 +1138,90 @@
     },
     {
       "id": "FND-SEC-004",
-      "title": "Edge request-size checks occur after full authenticated body buffering",
+      "title": "Authenticated Edge handlers fully buffer counted request and provider bodies before checks",
       "category": "SEC",
       "component": "Authenticated Edge request and provider-response resource boundary",
-      "paths": ["supabase/functions/_shared/http.ts", "supabase/functions/ai-coach/service.ts"],
-      "line_ranges": ["http.ts:33-40", "service.ts:35-48,66-80,104-106"],
+      "paths": [
+        "supabase/functions/_shared/http.ts",
+        "supabase/functions/ai-coach/service.ts"
+      ],
+      "line_ranges": [
+        "http.ts:33-40",
+        "service.ts:35-48,66-80,104-106"
+      ],
       "origin": "A3 bounded Edge review by supabase-specialist, independent qa-reviewer and orchestrator source inspection",
       "root_cause": "Both paths await req.text() before rejecting excessive JS-string length. Limits are 16384/20000 UTF-16 units, not streaming byte ceilings. Coach quota follows buffering; provider JSON is also fully parsed before answer-length validation.",
-      "evidence": "Inspection only: authenticated shared handler http.ts:34-37 and Coach service.ts:36-38 fully materialize request text before 413. Existing 15 unit tests pass but exercise bounded synthetic strings, not streamed allocation or gateway limits. service.ts:104 parses upstream JSON before checking 12000-character answer. No resource exhaustion or production vulnerability reproduced.",
+      "evidence": "A5 backend G3 actual rpcHandler/handleCoachRequest Request streams:32768 bytes consumed before413 with no Content-Length or truthful header; under-limit controls200. Multibyte30029 UTF-8 bytes/10029 UTF-16 units accepted200 by both. Missing/rejected auth401 consumes0 bytes. Injected actual provider Response77053 bytes fully consumed before502 for13000-unit answer;64055-byte padding with short answer accepted200. Stream cancel callbacks0; non-ok provider502 consumes0.12 request+3 provider cases exit0, cached-only/deny-net with synthetic auth/fetch, max fixture256KiB. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "If these limits are intended as resource protection, reject/cancel oversized bodies before full materialization with defined byte semantics and a bounded upstream response policy.",
-      "actual_behavior": "Application limits constrain accepted parsed content, not bytes buffered before rejection. Deployed gateway/runtime limits and actual allocation exposure were not measured.",
-      "impact": "Provisional P2 authenticated resource-pressure risk; authentication is required and platform request limits may mitigate it. High confidence in buffering order only, not in a demonstrated denial-of-service exploit.",
+      "actual_behavior": "Bounded counted request bodies are fully materialized before application string-length rejection; larger multibyte byte counts pass unit limits, and provider JSON is consumed before answer checking. Synthetic callback counts are not network cancellation observations.",
+      "impact": "Provisional P2 authenticated resource-pressure risk; Confirmed only for bounded buffering/unit mechanisms. No DoS, memory exhaustion, real transport cancellation, production allocation, gateway ceiling or latency claim; platform limits may mitigate impact.",
       "severity": "P2",
-      "confidence": "High",
-      "status": "Needs Verification",
-      "proposed_remediation": "After approval, define byte-based request/response budgets and use bounded streaming reads/cancellation or verified platform-enforced ceilings; retain semantic validation and sanitized errors.",
-      "regression_risk": "Multibyte VI/EN text, chunked/missing-length requests, malformed JSON, authenticated rejection paths and provider response handling.",
-      "related_tests": ["supabase/functions/tests/http_handler_test.ts", "supabase/functions/ai-coach/service_test.ts"],
-      "missing_tests": ["Synthetic counted ReadableStream proves early cancel before consuming excess input", "Multibyte byte-versus-string-unit boundary and bounded provider response fixtures", "Approved non-production gateway request-limit evidence; NOT RUN"],
-      "depends_on": ["A5 transport/resource verification; distinct from INTG003 accepted-answer/history schema mismatch"],
+      "confidence": "Confirmed",
+      "status": "Accepted",
+      "proposed_remediation": "Owner supabase-specialist with qa-reviewer: after approval define byte-based request/response budgets and bounded streaming reads/cancellation or verify platform-enforced ceilings; preserve auth-before-body, semantic validation, VI/EN and sanitized errors.",
+      "regression_risk": "Multibyte units/bytes, missing/truthful/misleading length headers, malformed JSON, auth rejection, quota/context failure, provider body limits and abort/error mapping.",
+      "related_tests": [
+        "supabase/functions/tests/http_handler_test.ts",
+        "supabase/functions/ai-coach/service_test.ts",
+        "docs/audit/phases/A5_BACKEND_EVIDENCE.md G3/section8 full edge.ts and logs"
+      ],
+      "missing_tests": [
+        "After approved byte-budget fix: counted streams stop/cancel at the agreed bound while under-limit/multibyte/auth-negative controls preserve semantics; provider oversized/padded response reads are bounded.",
+        "Approved isolated gateway/transport: verify actual JWT/byte ceilings, request disconnect and slow response-body timeout/cancellation; current callbacks do not prove network abort. No traffic flood or production latency test authorized."
+      ],
+      "depends_on": [
+        "Gateway/resource impact remains unverified; distinct from INTG003 answer/history schema mismatch. No deployment or material budget decision approved."
+      ],
       "wave": "W2",
-      "verification_method": "Owner supabase-specialist with qa-reviewer, target A5: bounded synthetic stream/response fixtures, no real traffic flood; assert consumption stops at byte budget, errors remain sanitized, and quota/auth order remains correct. Separately document gateway ceilings only under approved non-production access. NOT RUN in A3."
+      "verification_method": "Retained docs/audit/phases/A5_BACKEND_EVIDENCE.md sections1/4/7/8 G3: real handler/service synthetic counted streams,12+3 cases exit0. QA read full sources; promotion confirms measured mechanisms only, P2 impact stays provisional. No runtime rerun by writer.",
+      "historical_pre_a5": {
+        "id": "FND-SEC-004",
+        "title": "Edge request-size checks occur after full authenticated body buffering",
+        "category": "SEC",
+        "component": "Authenticated Edge request and provider-response resource boundary",
+        "paths": [
+          "supabase/functions/_shared/http.ts",
+          "supabase/functions/ai-coach/service.ts"
+        ],
+        "line_ranges": [
+          "http.ts:33-40",
+          "service.ts:35-48,66-80,104-106"
+        ],
+        "origin": "A3 bounded Edge review by supabase-specialist, independent qa-reviewer and orchestrator source inspection",
+        "root_cause": "Both paths await req.text() before rejecting excessive JS-string length. Limits are 16384/20000 UTF-16 units, not streaming byte ceilings. Coach quota follows buffering; provider JSON is also fully parsed before answer-length validation.",
+        "evidence": "Inspection only: authenticated shared handler http.ts:34-37 and Coach service.ts:36-38 fully materialize request text before 413. Existing 15 unit tests pass but exercise bounded synthetic strings, not streamed allocation or gateway limits. service.ts:104 parses upstream JSON before checking 12000-character answer. No resource exhaustion or production vulnerability reproduced.",
+        "expected_behavior": "If these limits are intended as resource protection, reject/cancel oversized bodies before full materialization with defined byte semantics and a bounded upstream response policy.",
+        "actual_behavior": "Application limits constrain accepted parsed content, not bytes buffered before rejection. Deployed gateway/runtime limits and actual allocation exposure were not measured.",
+        "impact": "Provisional P2 authenticated resource-pressure risk; authentication is required and platform request limits may mitigate it. High confidence in buffering order only, not in a demonstrated denial-of-service exploit.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Needs Verification",
+        "proposed_remediation": "After approval, define byte-based request/response budgets and use bounded streaming reads/cancellation or verified platform-enforced ceilings; retain semantic validation and sanitized errors.",
+        "regression_risk": "Multibyte VI/EN text, chunked/missing-length requests, malformed JSON, authenticated rejection paths and provider response handling.",
+        "related_tests": [
+          "supabase/functions/tests/http_handler_test.ts",
+          "supabase/functions/ai-coach/service_test.ts"
+        ],
+        "missing_tests": [
+          "Synthetic counted ReadableStream proves early cancel before consuming excess input",
+          "Multibyte byte-versus-string-unit boundary and bounded provider response fixtures",
+          "Approved non-production gateway request-limit evidence; NOT RUN"
+        ],
+        "depends_on": [
+          "A5 transport/resource verification; distinct from INTG003 accepted-answer/history schema mismatch"
+        ],
+        "wave": "W2",
+        "verification_method": "Owner supabase-specialist with qa-reviewer, target A5: bounded synthetic stream/response fixtures, no real traffic flood; assert consumption stops at byte budget, errors remain sanitized, and quota/auth order remains correct. Separately document gateway ceilings only under approved non-production access. NOT RUN in A3."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_BACKEND_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     },
     {
       "id": "FND-DATA-002",
@@ -911,27 +1297,377 @@
     },
     {
       "id": "FND-INTG-007",
-      "title": "Generated timed quest rep targets conflict with client timed defaults",
+      "title": "Generated quest JSON initializes timed Dart sets as zero reps against rep targets",
       "category": "INTG",
-      "component": "Daily quest prescription versus timed exercise initialization and matching",
-      "paths": ["supabase/migrations/20261026000200_authoritative_progression.sql", "app/lib/features/workout/presentation/controllers/active_workout_controller.dart", "supabase/seed_exercises.sql", "docs/audit/phases/A4_SQL_EVIDENCE.md"],
-      "line_ranges": ["authoritative_progression.sql:205-212,238,245-251", "active_workout_controller.dart:298-317", "seed_exercises.sql:1220-1221", "A4_SQL_EVIDENCE.md:group6; sections3-4 exact output/source"],
-      "origin": "A4 catalog/Flutter/Supabase contract review and SQL group6; independent qa-reviewer ses_e7d23c0d4ffe9IA6MkbszmpEvl requires High-only integration scope",
-      "root_cause": "sync_daily_data prescribes3x12 reps for every selected exercise and matching counts reps, while client initialization forces timed-classified exercises to0reps/30sec even with a rep prescription. There is no duration target in the generated config.",
-      "evidence": "A4_SQL_EVIDENCE group6 restricts only other seeded quest template types in the disposable fixture so actual sync_daily_data deterministically chooses full_body; exercise metadata/RPCs are unchanged. It generates Ab Wheel Rollout (seed carry)3x12. A source-guarded JS mirror of client defaults persists0reps/30sec; SQL matching finds0 required qualifying sets versus3, while other two targets match3. Completion first rejects22023 under INTG005; changing timed set reps to12 yields a450-XP quest control. Probe exit0; primary reports independent108-assertion rerun exit0. Dart/UI and an end-to-end quest journey were not executed.",
-      "expected_behavior": "Generated prescriptions and client initialization/matching use a compatible measurement contract for each exercise, or exclude unsupported timed targets explicitly.",
-      "actual_behavior": "Actual generated rep target and mirrored timed defaults disagree; matching predicate gives0/3 for the timed-classified target. Final completion rejects earlier, so failed quest eligibility as an independently reached Dart/server journey is NOT established.",
-      "impact": "P2 likely incompatible generated timed quest experience and misleading targets. High confidence in the cross-layer source contract with bounded SQL evidence, not Confirmed Flutter quest failure; seed movement classification is not independently validated exercise science.",
+      "component": "Actual generated prescription JSON versus Dart initialization/payload contract",
+      "paths": [
+        "supabase/migrations/20261026000200_authoritative_progression.sql",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart",
+        "supabase/seed_exercises.sql",
+        "docs/audit/phases/A4_SQL_EVIDENCE.md",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md"
+      ],
+      "line_ranges": [
+        "authoritative_progression.sql:205-212,238,245-251",
+        "active_workout_controller.dart:298-317",
+        "seed_exercises.sql:1220-1221",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:G6; source602-635/output697-702",
+        "A4_SQL_EVIDENCE.md:group6 (historical separate SQL evidence)"
+      ],
+      "origin": "A4 generated-quest contract/JS-mirror history; A5 actual seed-generated JSON -> real Dart model/controller/repository and independent QA",
+      "root_cause": "Actual sync_daily_data emits rep prescriptions for selected exercises, while real Dart initialization forces timed-classified targets to0reps/30sec despite prescribed12; there is no duration-prescription field in that Dart target model.",
+      "evidence": "A5 fresh seeded catalog150 and actual sync_daily_data, deterministically selecting full_body in disposable fixture, emit Ab Wheel Rollout(carry), Arnold Press, Back Extension3x12 with real existing catalog IDs. QuestInstance.fromJson/startQuest execute in Dart; actual timed INSERTs are3x(reps0,duration30), other targets3x12. Former mirrored-Dart gap is closed for this initialization/payload mechanism. All9 can be client-marked complete. Local qualifier count0 versus required12 is only a local predicate, NOT a SQL result. The22023 completion rejection and positive-rep success response are explicit fake transport controls, NOT live SQL/E2E. A4 SQL group6 remains separate retained history. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Generated prescription JSON and Dart initialization/payloads honor one approved measurement contract per supported exercise; final server eligibility must be verified separately.",
+      "actual_behavior": "Actual generated12-rep target decodes/initializes into actual Dart timed0/30 requests. This confirmed mismatch does not establish independently reached SQL quest eligibility or a rendered end-to-end quest failure.",
+      "impact": "P2 confirmed generated-JSON/Dart-default incompatibility in the bounded seeded fixture. No full UI/SQL quest journey, live award result or exercise-science validation of seed carry classification is claimed.",
+      "severity": "P2",
+      "confidence": "Confirmed",
+      "status": "Accepted",
+      "proposed_remediation": "Owner flutter-specialist with supabase-specialist, exercise-catalog and qa-reviewer: after approval define mode-aware generation/defaults/matching together or explicitly exclude unsupported modes; preserve stable exercise IDs and complete_workout award ownership, coordinating INTG005 rather than weakening validation.",
+      "regression_risk": "Quest rotation/catalog selection, timed/rep/mixed targets, target decoding, load/duration, Add Set versus initial sets, expiry, restoration and transactional retry awards.",
+      "related_tests": [
+        "supabase/tests/security_regression.sql:92-111",
+        "app/test/workout_controller_test.dart",
+        "docs/audit/phases/A4_SQL_EVIDENCE.md group6",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G6/extractor"
+      ],
+      "missing_tests": [
+        "After approved measurement contract/fix: render actual generated targets and assert mode-compatible Dart initial/save payloads with non-timed controls; preserve existing IDs.",
+        "Approved isolated SQL/gateway: exercise same actual Dart payloads through completion/quest matching, assert agreed eligibility and exactly one retry award without bypassing INTG005.",
+        "Catalog owner separately validates supported modality; seed carry classification alone is not exercise-science evidence."
+      ],
+      "depends_on": [
+        "INTG005 currently rejects completed0-rep timed sets; INTG004 is additional-set hidden reps, not initial prescription. Actual-Dart initialization gap closed, full SQL/gateway eligibility remains deferred."
+      ],
+      "wave": "W2",
+      "verification_method": "Retained docs/audit/phases/A5_FLUTTER_EVIDENCE.md G6 executes actual seeded generator JSON then real Dart model/controller/repository,18-test run exit0. Local qualifier and fake22023 are explicitly not SQL results; A4 SQL evidence stays separate. QA supports only narrowed Confirmed initialization/payload claim.",
+      "historical_pre_a5": {
+        "id": "FND-INTG-007",
+        "title": "Generated timed quest rep targets conflict with client timed defaults",
+        "category": "INTG",
+        "component": "Daily quest prescription versus timed exercise initialization and matching",
+        "paths": [
+          "supabase/migrations/20261026000200_authoritative_progression.sql",
+          "app/lib/features/workout/presentation/controllers/active_workout_controller.dart",
+          "supabase/seed_exercises.sql",
+          "docs/audit/phases/A4_SQL_EVIDENCE.md"
+        ],
+        "line_ranges": [
+          "authoritative_progression.sql:205-212,238,245-251",
+          "active_workout_controller.dart:298-317",
+          "seed_exercises.sql:1220-1221",
+          "A4_SQL_EVIDENCE.md:group6; sections3-4 exact output/source"
+        ],
+        "origin": "A4 catalog/Flutter/Supabase contract review and SQL group6; independent qa-reviewer ses_e7d23c0d4ffe9IA6MkbszmpEvl requires High-only integration scope",
+        "root_cause": "sync_daily_data prescribes3x12 reps for every selected exercise and matching counts reps, while client initialization forces timed-classified exercises to0reps/30sec even with a rep prescription. There is no duration target in the generated config.",
+        "evidence": "A4_SQL_EVIDENCE group6 restricts only other seeded quest template types in the disposable fixture so actual sync_daily_data deterministically chooses full_body; exercise metadata/RPCs are unchanged. It generates Ab Wheel Rollout (seed carry)3x12. A source-guarded JS mirror of client defaults persists0reps/30sec; SQL matching finds0 required qualifying sets versus3, while other two targets match3. Completion first rejects22023 under INTG005; changing timed set reps to12 yields a450-XP quest control. Probe exit0; primary reports independent108-assertion rerun exit0. Dart/UI and an end-to-end quest journey were not executed.",
+        "expected_behavior": "Generated prescriptions and client initialization/matching use a compatible measurement contract for each exercise, or exclude unsupported timed targets explicitly.",
+        "actual_behavior": "Actual generated rep target and mirrored timed defaults disagree; matching predicate gives0/3 for the timed-classified target. Final completion rejects earlier, so failed quest eligibility as an independently reached Dart/server journey is NOT established.",
+        "impact": "P2 likely incompatible generated timed quest experience and misleading targets. High confidence in the cross-layer source contract with bounded SQL evidence, not Confirmed Flutter quest failure; seed movement classification is not independently validated exercise science.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Needs Verification",
+        "proposed_remediation": "After explicit approval and real integration verification, define mode-aware quest targets/defaults/matching together, or explicitly exclude unsupported modes. Coordinate with INTG005 rather than weakening final validation or hiding reps; preserve stable catalog IDs and sole transactional award ownership.",
+        "regression_risk": "Quest rotation, generated catalog selection, timed/rep/mixed prescriptions, duration and load targets, expiry, client restoration and quest reward replacement.",
+        "related_tests": [
+          "supabase/tests/security_regression.sql:92-111",
+          "app/test/workout_controller_test.dart",
+          "docs/audit/phases/A4_SQL_EVIDENCE.md group6"
+        ],
+        "missing_tests": [
+          "A5 flutter-specialist with supabase-specialist and independent qa-reviewer: execute actual generated-quest start/addExercise/save/finish using controlled transport; assert mode-compatible displayed targets/defaults and observed eligibility, with non-timed control",
+          "Do not bypass INTG005 to claim current eligibility; after separately approved timed contract fix, assert correct duration matching and one quest award under retry",
+          "Catalog reviewer verifies supported modality separately from merely copying seed carry classification"
+        ],
+        "depends_on": [
+          "FND-INTG-005 currently rejects completed0-rep timed sets before quest matching; FND-INTG-004 owns additional-set hidden reps, not initial prescribed targets",
+          "A5 controlled Flutter/SQL integration verification; no live provider, production data or new dependency required"
+        ],
+        "wave": "W2",
+        "verification_method": "Retained A4 group6 proves SQL generation/persistence/matching counts and positive-rep quest control, with client defaults inspected/mirrored, not executed Dart. Owner flutter-specialist with supabase-specialist, independent qa-reviewer, target A5. Actual UI journey and independently reached timed eligibility remain NOT RUN; retain P2/High/Needs Verification."
+      },
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
+    },
+    {
+      "id": "FND-BUG-008",
+      "title": "Stale sign-in error contaminates password recovery before submission",
+      "category": "BUG",
+      "component": "Operation-scoped AuthController/form state",
+      "paths": [
+        "app/lib/features/auth/presentation/providers/auth_providers.dart",
+        "app/lib/features/auth/presentation/screens/reset_password_screen.dart",
+        "app/lib/core/router/app_router.dart"
+      ],
+      "line_ranges": [
+        "auth_providers.dart:65-115",
+        "reset_password_screen.dart:29,84-94",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:G1; source470-510/output661-668"
+      ],
+      "origin": "A2 Lead10 deferred assertion; A5 actual forms/controller/router fixture and independent QA",
+      "root_cause": "Shared AuthController AsyncError from failed sign-in remains visible to recovery screen as a password-update error without an update submission.",
+      "evidence": "A5 Flutter G1 real login rejects synthetic sign-in, synthetic passwordRecovery event drives actual router/reset screen; premature update error=true with updateCalls0. Pristine recovery false/updateCalls0. Actual Save password rejected-submit shows error/keeps recovery; success clears action error/recovery and leaves reset route. Retained18-test run exit0 and strengthened G1 button controls+2 exit0. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Recovery entry must not report a failed password update before that operation is submitted; preserve valid rejected/successful submit feedback.",
+      "actual_behavior": "Synthetic failed-signin -> recovery renders Could not update your password before any update call; pristine entry and subsequent submit controls distinguish contamination.",
+      "impact": "P2 confirmed misleading pre-submit recovery feedback in actual Dart/router/form fixture; no live link, callback delivery, credential disclosure or backend auth defect established.",
+      "severity": "P2",
+      "confidence": "Confirmed",
+      "status": "Accepted",
+      "proposed_remediation": "Owner flutter-specialist/Auth with qa-reviewer: after approval scope action errors by operation or reset stale sign-in state at recovery entry, preserving true update failures and successful recovery cleanup.",
+      "regression_risk": "Failed sign-in, recovery navigation, validation, rejected/successful password update, retries and auth events.",
+      "related_tests": [
+        "app/test/auth_controller_test.dart",
+        "app/test/ui_regression_test.dart",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G1"
+      ],
+      "missing_tests": [
+        "After fix approval: rejected sign-in then actual recovery route shows no update error before submit; pristine entry, rejected Save and successful Save controls still work.",
+        "Approved isolated Auth/callback follow-up: distinguish actual recovery URI/session transitions from synthetic events; no live Auth evidence claimed."
+      ],
+      "depends_on": [
+        "Distinct from INTG001 callback/allowlist contract; no backend/config change approved."
+      ],
+      "wave": "W2",
+      "verification_method": "Retained docs/audit/phases/A5_FLUTTER_EVIDENCE.md G1 source/output and commands; actual widgets/router with synthetic repository/Auth event. QA read full probe; no runtime rerun in writer.",
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
+    },
+    {
+      "id": "FND-BUG-009",
+      "title": "CandyButton primitive is not keyboard reachable or activatable",
+      "category": "BUG",
+      "component": "Production CandyButton focus/keyboard semantics",
+      "paths": [
+        "app/lib/ui/candy/candy_button.dart",
+        "app/lib/core/router/persistent_active_workout_banner.dart",
+        "app/lib/features/progression/presentation/widgets/level_up_overlay.dart"
+      ],
+      "line_ranges": [
+        "candy_button.dart:189-207",
+        "persistent_active_workout_banner.dart:147",
+        "level_up_overlay.dart:143",
+        "docs/audit/phases/A5_UI_EVIDENCE.md:section2 keyboard fixture"
+      ],
+      "origin": "A5 actual production CandyButton/SystemButton control fixture and independent QA",
+      "root_cause": "CandyButton wraps pointer GestureDetector/Semantics without a Focus/Actions keyboard activation path.",
+      "evidence": "A5 UI fixture at614ee7c: candyFocusNodes0; Tab reaches actual SystemButton; Enter and Space increment System1 then2 while CandyKeys0; pointerCandy1. Existing production call sites are source-inspected, not route-traversed. These observations passed within UI aggregate FAIL(+8 -2 onboarding fixture failures). The disabled counter fixture is tautological (null callback); it does not establish comprehensive disabled/loading behavior. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Enabled Candy action can receive keyboard focus and activate once with Enter/Space with a visible focus state, while pointer behavior remains valid.",
+      "actual_behavior": "Actual enabled CandyButton primitive is skipped in focus traversal and not key-activated; actual SystemButton positive control and Candy pointer activation work.",
+      "impact": "P2 confirmed keyboard inoperability of the tested primitive. Integrated route impact is source-backed, not executed whole-screen accessibility certification; no blanket claim about all Candy widgets.",
+      "severity": "P2",
+      "confidence": "Confirmed",
+      "status": "Accepted",
+      "proposed_remediation": "Owner ui-ux-specialist with flutter-specialist and qa-reviewer: after approval add keyboard/focus/Actions semantics using existing design-system affordances; preserve pointer and native SystemButton behavior.",
+      "regression_risk": "Focus order/visibility, Enter/Space single activation, pointer press state, disabled/loading/key-repeat behavior and banner/overlay call sites.",
+      "related_tests": [
+        "app/test/navigation_integration_test.dart",
+        "app/test/ui_regression_test.dart",
+        "docs/audit/phases/A5_UI_EVIDENCE.md keyboard fixture"
+      ],
+      "missing_tests": [
+        "After fix approval: Tab reaches real CandyButton with visible focus; Enter/Space fire exactly once, pointer still fires, and enabled SystemButton remains positive control.",
+        "Authorized UI follow-up: non-tautological disabled/loading callbacks and key-repeat assertions plus banner/overlay route traversal; do not count current null-callback counter as comprehensive coverage."
+      ],
+      "depends_on": [
+        "No new theme/dependency approved; distinct from BUG004 contrast and ARCH002 localization."
+      ],
+      "wave": "W2",
+      "verification_method": "Retained docs/audit/phases/A5_UI_EVIDENCE.md section2/full sources and logs section6; actual primitive versus actual SystemButton and pointer controls. QA supports primitive-only Confirmed; full integrated/device keyboard journey NOT RUN.",
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_UI_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
+    },
+    {
+      "id": "FND-INTG-008",
+      "title": "Lost add-set acknowledgement permits repeated identical insert requests",
+      "category": "INTG",
+      "component": "Workout set retry/reconciliation transport contract",
+      "paths": [
+        "app/lib/features/workout/data/supabase_workout_repository.dart",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart",
+        "supabase/migrations/20261026000100_baseline.sql"
+      ],
+      "line_ranges": [
+        "repository addSet/controller addSet and retry paths",
+        "baseline.sql:210-219",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:G3; source538-558/output677-682"
+      ],
+      "origin": "A5 actual Dart controller/repository HTTP with modeled commit/lost-response fixture; independent QA",
+      "root_cause": "Failed acknowledgement leaves local row/number state unreconciled; retry derives set_number from that stale local state and issues another insert without an acknowledged stable row identity.",
+      "evidence": "G3 actual repository emits two identical INSERT payloads set_number2. Deliberately permissive fake server commits first then loses response: modeled rows1,2,2/local1,2 and distinct IDs s1,s100,s101/local s1,s101. Rejected-before-commit control rows1,2; reload-before-retry sends3 and reconciles rows1,2,3. Failed first save blocks completion/no finish RPC. SQL constraints absence inspected, not runtime duplicate proof. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "A retry after uncertain write outcome reconciles the committed row or uses stable idempotent identity without duplicating a logical set; rejected-write/reload controls remain valid.",
+      "actual_behavior": "Repeated real client requests are confirmed, but duplicate modeled server rows and local divergence depend on the synthetic commit/lost-ACK fixture; actual gateway/SQL persistence remains unverified.",
+      "impact": "P2 possible duplicate/missing-local set reconciliation under lost acknowledgement. High/Needs Verification because server commit/duplication is modeled; no authoritative SQL duplicate or XP inflation proved.",
       "severity": "P2",
       "confidence": "High",
       "status": "Needs Verification",
-      "proposed_remediation": "After explicit approval and real integration verification, define mode-aware quest targets/defaults/matching together, or explicitly exclude unsupported modes. Coordinate with INTG005 rather than weakening final validation or hiding reps; preserve stable catalog IDs and sole transactional award ownership.",
-      "regression_risk": "Quest rotation, generated catalog selection, timed/rep/mixed prescriptions, duration and load targets, expiry, client restoration and quest reward replacement.",
-      "related_tests": ["supabase/tests/security_regression.sql:92-111", "app/test/workout_controller_test.dart", "docs/audit/phases/A4_SQL_EVIDENCE.md group6"],
-      "missing_tests": ["A5 flutter-specialist with supabase-specialist and independent qa-reviewer: execute actual generated-quest start/addExercise/save/finish using controlled transport; assert mode-compatible displayed targets/defaults and observed eligibility, with non-timed control", "Do not bypass INTG005 to claim current eligibility; after separately approved timed contract fix, assert correct duration matching and one quest award under retry", "Catalog reviewer verifies supported modality separately from merely copying seed carry classification"],
-      "depends_on": ["FND-INTG-005 currently rejects completed0-rep timed sets before quest matching; FND-INTG-004 owns additional-set hidden reps, not initial prescribed targets", "A5 controlled Flutter/SQL integration verification; no live provider, production data or new dependency required"],
-      "wave": "W2",
-      "verification_method": "Retained A4 group6 proves SQL generation/persistence/matching counts and positive-rep quest control, with client defaults inspected/mirrored, not executed Dart. Owner flutter-specialist with supabase-specialist, independent qa-reviewer, target A5. Actual UI journey and independently reached timed eligibility remain NOT RUN; retain P2/High/Needs Verification."
+      "proposed_remediation": "Owner flutter-specialist with supabase-specialist and qa-reviewer: after approved transport contract and isolated verification, reconcile uncertain insert outcomes using stable mutation/row identity before retry; preserve rejected-write and reload semantics.",
+      "regression_risk": "Set numbering/IDs, concurrent edits, uncertain delivery, reload/retry, validation, completion gate and existing history.",
+      "related_tests": [
+        "app/test/workout_controller_test.dart",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G3"
+      ],
+      "missing_tests": [
+        "Approved isolated stack: commit actual add-set insert then lose response, retry same actual client operation, assert one logical set and consistent local/server IDs/numbers.",
+        "After fix approval: pre-commit rejection and reload-before-retry controls stay correct; completion stays gated until uncertainty is reconciled."
+      ],
+      "depends_on": [
+        "Supported isolated SQL/gateway scheduling and separately approved retry identity contract; not DATA001 legacy awards."
+      ],
+      "wave": "W1",
+      "verification_method": "Retained docs/audit/phases/A5_FLUTTER_EVIDENCE.md G3 actual HTTP payloads with explicit modeled server;18-test run exit0. QA supports High transport candidate only. Independent SQL/gateway lost-ACK assertion deferred; no live/SQL duplication claim.",
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
+    },
+    {
+      "id": "FND-INTG-009",
+      "title": "Sequential exercise reorder can leave optimistic and modeled persisted orders divergent",
+      "category": "INTG",
+      "component": "Exercise reorder partial-write reconciliation",
+      "paths": [
+        "app/lib/features/workout/data/supabase_workout_repository.dart",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
+      ],
+      "line_ranges": [
+        "repository reorderExercises sequential update path/controller optimistic reorder",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:G4; source559-583/output683-690"
+      ],
+      "origin": "A5 actual Dart reorder requests with modeled partial persistence and independent QA",
+      "root_cause": "Optimistic local reorder is followed by sequential independent row updates; later failure does not atomically restore the modeled earlier update or reconcile local ordering.",
+      "evidence": "G4 move e3 to0 yields optimistic e3,e1,e2. Actual first HTTP update succeeds, second400; modeled persistence e1=0/e2=1/e3=0 while local stays optimistic/save_failed. Reload fixture observes e1,e3,e2, not a guaranteed tie order. All-success control sends3 updates and reload matches intended order. Legitimate absent-row delete204 succeeds;403 retains local row/save_failed, not a bypass finding. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Failed reorder leaves a coherent acknowledged order or explicit reconciled state; partial transport failure must not silently preserve a divergent optimistic order.",
+      "actual_behavior": "Actual sequential request/error/local-state behavior observed; partial committed server mapping is modeled. Duplicate order indices and observed reload order do not establish guaranteed production tie ordering.",
+      "impact": "P2 possible persistent/local order divergence and user confusion after partial write. High/Needs Verification for actual SQL/gateway partial persistence; no reward consequence or authorization bypass shown.",
+      "severity": "P2",
+      "confidence": "High",
+      "status": "Needs Verification",
+      "proposed_remediation": "Owner flutter-specialist with supabase-specialist and qa-reviewer: after approval and isolated verification define atomic or explicit reconciliation behavior for multi-row reorder, preserving ownership guards and legitimate idempotent zero-row deletion.",
+      "regression_risk": "Optimistic order, partial failure/reload, ties, concurrent edits, save failure feedback, ownership and absent versus forbidden deletes.",
+      "related_tests": [
+        "app/test/workout_controller_test.dart",
+        "app/test/workout_widgets_test.dart",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G4"
+      ],
+      "missing_tests": [
+        "Approved isolated stack: commit first actual reorder update and reject next, then compare acknowledged local and persisted order; no assertion of arbitrary tie order.",
+        "After fix approval: all-success3-update control, rollback/reconcile failure control, already-absent owned delete204 and explicit forbidden403 remain distinct; RLS-hidden rows require real role controls."
+      ],
+      "depends_on": [
+        "Supported isolated SQL/gateway partial-write scheduling and approved reorder contract; no transaction/schema fix authorized in A5."
+      ],
+      "wave": "W1",
+      "verification_method": "Retained docs/audit/phases/A5_FLUTTER_EVIDENCE.md G4 actual request sequence/controller state plus explicitly modeled persistence,18-test run exit0. QA supports High/NV only; no actual multi-request SQL transaction test or guaranteed tie ordering.",
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
+    },
+    {
+      "id": "FND-TEST-002",
+      "title": "Candy specification-replica tests do not protect corresponding production primitives",
+      "category": "TEST",
+      "component": "Flutter production-component regression coverage",
+      "paths": [
+        "app/test/candy_ui_test.dart",
+        "app/lib/ui/candy/candy_button.dart",
+        "app/lib/ui/candy/candy_card.dart"
+      ],
+      "line_ranges": [
+        "candy_ui_test.dart:1-619 (imports/local definitions/expectations)",
+        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md:section2 test inventory",
+        "docs/audit/phases/A5_UI_EVIDENCE.md:section1 test inventory"
+      ],
+      "origin": "A5 complete bounded Flutter test inventory and independent UI/QA inspection",
+      "root_cause": "619-line candy_ui_test.dart imports no production app widgets and defines local palette/TactileCandyButton/CandyCardWidget replicas, then asserts those same local implementations.",
+      "evidence": "Flutter and UI reviewers independently read all619 lines/imports/local definitions. Contrast, press/loading and320/1.5x assertions exercise reference fixtures, so corresponding production implementation changes are not exercised by those tests. Other test files render actual UI; this is not zero production-widget coverage. No mutation test, golden or coverage percentage was measured. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+      "expected_behavior": "Tests presented as production Candy regressions exercise the actual corresponding app primitives; reference-specification fixtures may remain explicitly labeled.",
+      "actual_behavior": "This file protects its own local specification/replicas, not actual CandyButton/Card implementations; real UI coverage in other files remains meaningful.",
+      "impact": "P3 High test-quality gap: misleading protection can let production primitive regressions escape this suite. It does not itself prove a product defect or invalidate all UI tests.",
+      "severity": "P3",
+      "confidence": "High",
+      "status": "Accepted",
+      "proposed_remediation": "Owner flutter-specialist with ui-ux-specialist and qa-reviewer: after approval add or replace production-component regressions using actual Candy imports, retaining clearly labeled specification tests where useful.",
+      "regression_risk": "Accidentally discarding useful specification behavior, hiding real production import differences, pointer/loading/focus/layout expectations and genuine UI tests elsewhere.",
+      "related_tests": [
+        "app/test/candy_ui_test.dart",
+        "app/test/ui_regression_test.dart",
+        "app/test/navigation_integration_test.dart"
+      ],
+      "missing_tests": [
+        "After test-edit approval: demonstrate the corresponding test renders real CandyButton/Card and a bounded intentional production behavior change fails that regression, then restore it safely; preserve useful specification controls.",
+        "Define targeted assertions before adding a coverage/golden gate; missing golden/coverage percentage alone is not a finding."
+      ],
+      "depends_on": [
+        "Distinct from TEST001 CI/platform/format/codegen gates; no dependency or CI policy change authorized."
+      ],
+      "wave": "W3",
+      "verification_method": "Static import/definition/assertion trace in docs/audit/phases/A5_FLUTTER_EVIDENCE.md section2 and docs/audit/phases/A5_UI_EVIDENCE.md section1, independently QA-read. High, not runtime mutation-test Confirmed; no production source/test edits in A5.",
+      "a5_review": {
+        "date": "2026-10-28",
+        "product_baseline": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+        "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+        "evidence_reference": "docs/audit/phases/A5_FLUTTER_EVIDENCE.md; docs/audit/phases/A5_UI_EVIDENCE.md",
+        "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
+        "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+        "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      }
     }
-  ]
+  ],
+  "a5_review": {
+    "date": "2026-10-28",
+    "entry_commit": "1763ab55e8da994bc1d854ad8fd2cd2299678b45",
+    "documentation_entry": "614ee7cb6f99846b00fd71eec43637cb296268be",
+    "scope": "A5 bounded findings reconciliation only; stage in progress, not closure or remediation",
+    "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
+    "evidence_reference": [
+      "docs/audit/phases/A5_FLUTTER_EVIDENCE.md",
+      "docs/audit/phases/A5_BACKEND_EVIDENCE.md",
+      "docs/audit/phases/A5_UI_EVIDENCE.md"
+    ],
+    "classification_changes": [
+      "BUG004, INTG002, INTG004: P2/High/Accepted -> P2/Confirmed/Accepted for narrowed actual-client/style mechanisms",
+      "INTG007, SEC004: P2/High/Needs Verification -> P2/Confirmed/Accepted for narrowed initialization/buffering mechanisms",
+      "CONC001 P2/Confirmed/Accepted unchanged; distinct post-storage-await identity race added without replacing queue-cycle history"
+    ],
+    "new_findings": [
+      "FND-BUG-008",
+      "FND-BUG-009",
+      "FND-INTG-008",
+      "FND-INTG-009",
+      "FND-TEST-002"
+    ],
+    "limits": "No new runtime rerun here; synthetic modeled commits/persistence are not SQL proofs; UI aggregate retains two onboarding fixture failures; no DoS/gateway/device/production latency certification. QA extra source Git command BLOCKED and not retried."
+  }
 }

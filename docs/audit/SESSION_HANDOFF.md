@@ -1,5 +1,92 @@
 # Audit — Session Handoff
 
+## Current — A5 PASS/CLOSED; A6 NOT STARTED (2026-10-28)
+
+- **Task/status:** A5 ONLY; PASS/CLOSED against scoped review/evidence/owned gaps/independent QA/
+  consistency criteria, not product/production certification. A4 remains closed, A6 not started.
+- **Commit:** main614ee7cb6f99846b00fd71eec43637cb296268be, authorized PARTIAL docs checkpoint
+  from entry1763ab55e8da994bc1d854ad8fd2cd2299678b45; normal push1763ab5..614ee7c exit0,
+  local/remote equal and clean after that checkpoint. Current expected docs dirty for reconciliation.
+- **Changed files since entry:** docs/audit/phases/A5_TEST_RELIABILITY.md,
+  docs/audit/phases/A5_FLUTTER_EVIDENCE.md, docs/audit/phases/A5_BACKEND_EVIDENCE.md,
+  docs/audit/phases/A5_UI_EVIDENCE.md, docs/audit/MASTER_FINDINGS.md,
+  docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md, docs/audit/SESSION_HANDOFF.md,
+  docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md, docs/planning/CHANGELOG_AI.md.
+  Eleven docs only; no product/permanent tests/migrations/CI/dependencies/config/permissions changed.
+- **Delegation/QA:** all five required named agents actually invoked sequentially; sessions/scopes/
+  commands/results in A5phase2. Independent material inspection completed, supports bounded claims;
+  final artifact-only and context reviews completed, no material closure blocker. Minor stale coverage/
+  pending-validator/output sentence corrections applied. QA extra source-diff BLOCKED(permission),
+  keeper numeric-exit wrappers permission.rejected, none retried/bypassed. UI disabled counter
+  qualification applied; no false independent runtime QA PASS. Final precommit artifact gate follows.
+- **Findings/coverage:**35; severity0/3/24/6/2, confidence16/18/1, Accepted29/NV3/Fixed1/FP2.
+  All30 old IDs/history retained, six exact pre-A5 objects, five narrow promotions/five new IDs;
+ 24 other objects untouched. Coverage26Reviewed(static)/0InReview/0NotReviewed/1OutOfScope. No
+  component-wide runtime promotion. CONC001 post-await identity is separate from old queue cycle;
+  INTG007 confirms generated JSON->actual Dart mismatch, not SQL/gateway quest award. INTG008/009
+  remain High/NV because modeled persistence is not confirmed PostgreSQL duplicate/reorder result.
+- **Current verification:** primary Flutter analyze ->No issues(62.9s), format125files/0changed,
+  tests126passed; original SQL10units/PostgreSQL17.5, Edge15passed0failed/six entrypoint checks,
+  all exit0. Direct cached/frozen/deny-net Deno with explicit synthetic env; phase7 exact command.
+  Specialist Flutter18 observation tests PASS; backend12request/3providerstreams/expiry-only/
+ 150UUIDpairs/plans pass. UI aggregate FAIL8pass2nullable-chip fixture failures; external-file analyzer
+  FAIL296 package-context issues, not296 production defects. Raw sources/outputs/failures retained.
+- **Decisions/blockers:** no material decision. Independent sessions and fullJWT/role/gateway require
+  an approved isolated stack; bounded executable inventory found no docker/supabase/psql/postgres/
+  pg_ctl PATH target. No actual concurrency, live provider, DoS/exhaustion/network cancellation,
+  device frame budget or hosted telemetry claim. Remaining assertions/owners/triggers/waves in
+  A5phase6; incomplete probes are explicit gaps, not exhaustive mandatory closure gates.
+- **Artifact verification:** A5phase8 retained executable extraction/Node command ->
+  `A5_ARTIFACT_CHECK json=35 md=35 old_ids=30 old_classes_unchanged=25 old_objects_unchanged=24 exact_histories=6 new_ids=5 required_fields=22 md_json_classes=35 coverage=26/0/0/1 allowed_paths=11 unchanged_inputs=65 errors=0`;
+  `A5_VALIDATION_EXIT node=0 diff=0`, PASS. Initial two overstrict metadata-shape validator FAILs
+  corrected only in validator, fully retained. No schema/allowlist/finding change to satisfy it.
+- **Next action:** complete authorized A5 docs checkpoint/remote verification, then stop and await
+  explicit A6 authorization using the exact prompt below. No A6/remediation/migration automatically.
+
+## A6 entry prompt — authorization required; NOT started by A5
+
+> Execute **A6 ONLY — Cross-domain reconciliation, independent verification, triage and remediation
+> planning** after explicit user go-ahead. Use gymlvl-orchestrator. Verify active agent/main/HEAD/tree/
+> remote; expected baseline is the completed A5 docs checkpoint (resolve actual latest main; outcome
+> child commits may follow payload SHA). Read AGENTS and canonical planning order, then current audit
+> handoff/coverage/registers, A1-A5 acceptance summaries and A5 phase5/6/8-9 plus retained evidence only
+> as needed. Do not reopen whole-repository scans or repeat probes without a concrete disputed claim.
+>
+> Create docs/audit/phases/A6_RECONCILIATION.md. Reconcile stable finding IDs/classifications/history,
+> severity versus confidence, scope-qualified evidence, duplicates/dependencies and coverage gaps.
+> Update docs/audit/REMEDIATION_PLAN.md from its historical skeleton to approval-gated owner waves
+> with entry/exit assertions, dependency order, regression/rollback risks and explicit non-goals.
+> Assign unresolved A5 assertions to the correct owner/trigger/wave; do not make all unavailable
+> runtime environments mandatory A6 gates. Review material/P0/P1 prioritization independently.
+> Use bounded sequential context-keeper and qa-reviewer plus Flutter/Supabase/UI/catalogue specialists
+> only for actual disputed domain claims; record real invocation/scope/commands, one writer per file.
+>
+> Preserve current35 IDs and exact pre-A5/pre-A4 histories; five new A5 IDs are BUG008/009,
+> INTG008/009, TEST002. Keep INTG008/009 High/NV until actual persistence evidence; BUG005 remains
+> policy/window NV. INTG007 confirms only generated-prescription->actual-Dart mismatch, not a complete
+> rendered quest award journey. SEC004 confirms bounded buffering/unit mechanism, not production DoS.
+> CONC001 post-await clearing of B controller state is not B DB mutation/crash/disclosure. BUG004
+> confirmed Profile contrast does not make failed onboarding chip fixtures PASS. A5 UI aggregate
+> remains FAIL8pass2fixturefail and external analyzer FAIL is package-context, not296 app defects.
+> DATA001 is conditional synthetic legacy double-global-credit, not ordinary replay or production
+> cohort; ARCH001 stays FalsePositive, not Fixed. Green observation probes are not remediation.
+>
+> Independent-session/realJWT/gateway prerequisites were unavailable, not replaced with PGlite
+> Promise.all. Device/frame/hosted telemetry/actual network abort and full-role matrix remain explicit
+> owner-wave gaps. Do not require production, secrets, new infrastructure or exhaustive execution to
+> close this reconciliation audit. If a material claim is challenged, request a bounded authorized
+> isolated check or retain uncertainty; no implementation or permanent-test changes.
+>
+> Write audit/planning documentation only; update mirrors/coverage/handoffs/three planning records
+> and plan, validate counts/history/allowed scope and obtain independent final QA. No product,
+> migrations/RLS/Edge/permanent tests/dependencies/CI/agent permissions/config edits, deploys,
+> live/provider/production/private data, media/AGPL reuse, installs, full-app Temp copies or deletion
+> of prior directories. A6 is not remediation authorization. Normal A6 commit/push requires actual
+> user approval, not A5's Git grant. Report Vietnamese final audit/triage/plan status and the exact
+> next approval request; stop before any remediation, migration or new product milestone.
+
+## Historical A5 start and PARTIAL state (preserved)
+
 ## Current — A5 authorized / in progress (2026-10-28)
 
 - **Task/status:** A5 ONLY, operational PARTIAL checkpoint; scoped acceptance NOT RUN pending UI/
