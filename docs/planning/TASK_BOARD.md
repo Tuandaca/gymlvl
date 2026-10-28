@@ -2,6 +2,10 @@
 
 ## Current — A6 DONE/CLOSED; remediation NOT STARTED (2026-10-29)
 
+**Checkpoint:** payload main4246b12238e4a904f87c0b843e861b637403d00c, nine docs +761/-3;
+normal push6d8e89b..4246b12 exit0; local/remote equal and clean, A6_PAYLOAD_EQUAL_CLEAN=PASS.
+This four-doc outcome child advances HEAD; verify actual latest main/remote on resume.
+
 **Task/status:** A6 ONLY; scoped reconciliation/roadmap acceptance PASS/CLOSED, independent final QA
 and consistency checks complete. A1-A5 remain closed, no remediation begun; migration NOT READY.
 **Entry:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal, primary API verified;
@@ -11,8 +15,8 @@ dependency, corrected.35 findings unchanged; roadmap29 tasks. Brand naming requi
 **Artifact gate:** A6phase6 retained primary validator ->35 unchanged objects/4 historical closures/
 35 matched MD and roadmap rows/29 tasks/DAG acyclic/old plan exact/coverage26-0-0-1/9paths/errors0;
 A6_VALIDATION_EXIT node=0 diff=0, PASS. Earlier validator failures/corrections retained honestly.
-**Next action:** authorized documentation checkpoint, then await explicit R0-01 safety gate approval
-and subsequent R1-01 SEC002 snapshot ownership authorization; one task at a time. No automatic work.
+**Next action:** await explicit R0-01 safety gate approval and subsequent separate R1-01 SEC002
+snapshot ownership authorization; verify latest main/remote first. One task at a time; no automatic work.
 
 ## Historical A5 state (preserved)
 

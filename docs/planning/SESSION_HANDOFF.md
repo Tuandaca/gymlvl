@@ -2,9 +2,16 @@
 
 ## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
 
+**Checkpoint:** payload main4246b12238e4a904f87c0b843e861b637403d00c, nine docs +761/-3;
+normal push6d8e89b..4246b12 exit0; local/remote fullSHA equal and status empty,
+A6_PAYLOAD_EQUAL_CLEAN=PASS. This four-doc outcome-only child advances documentation HEAD;
+verify actual latest main/remote on resume.
+
 - **Task/status:** A6 only; PASS/CLOSED for scoped35-ID reconciliation/roadmap/independent QA,
   not remediation or production certification. A1-A5 closed; migration readiness NOT READY.
-- **Commit:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal at entry; actual
+- **Commit:** entry main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal; payload
+  main4246b12 above normally pushed/verified. This outcome child edits only four handoff/planning
+  docs. At entry actual
   gymlvl-orchestrator API verified. D-013 external bundle/bare/archive backup verified559files,
   hashes in A6phase2. No product/permanent-test/CI/config/permission/dependency change.
 - **Owned files:** docs/audit/phases/A6_RECONCILIATION.md, docs/audit/REMEDIATION_PLAN.md,
@@ -22,8 +29,8 @@
   MD35/roadmap35/tasks29/DAG acyclic/oldplan exact/coverage26-0-0-1/paths9/errors0;
   A6_VALIDATION_EXIT node=0 diff=0, PASS. Initial five setup/label failures and corrections retained.
   Roadmap writer checked category29/order29/historyidentical/errors0, exit0. No runtime suite rerun.
-- **Next action:** complete authorized docs checkpoint/remote check, then await explicit user approval
-  for R0-01 safety gate followed by R1-01 SEC002 snapshot ownership, one task at a time. Stop before
+- **Next action:** await explicit user approval for R0-01 safety gate followed by separately authorized
+  R1-01 SEC002 snapshot ownership, one task at a time. Verify latest main/remote first. Stop before
   any W0/W1/remediation/migration execution.
 
 ## Historical A5 closure (preserved)

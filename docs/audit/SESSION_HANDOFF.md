@@ -2,10 +2,17 @@
 
 ## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
 
+**Checkpoint:** payload main `4246b12238e4a904f87c0b843e861b637403d00c`, nine docs +761/-3;
+normal push `6d8e89b..4246b12 main -> main`, exit0. `git ls-remote origin refs/heads/main` equals
+local fullSHA; `git status --porcelain=v1` empty, `A6_PAYLOAD_EQUAL_CLEAN=PASS`. This four-doc
+outcome-only child advances documentation HEAD; verify actual latest main/remote on resume.
+
 - **Task/status:** A6 only; scoped reconciliation/roadmap acceptance PASS/CLOSED after material and
   final independent QA inspection and current artifact validation. Migration readiness NOT READY.
   A1-A5 remain closed. No remediation, W0/W1 implementation or migration started.
-- **Commit:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean and remote-equal at entry;
+- **Commit:** entry main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal; payload
+  main4246b12 above normally pushed and verified clean/equal. This outcome child changes only
+  audit handoff and three planning records. At entry
   API gymlvl-orchestrator verified. D-013 bundle/bare/archive backup verified559files, A6phase2.
 - **Owned files:** docs/audit/phases/A6_RECONCILIATION.md, docs/audit/REMEDIATION_PLAN.md,
   docs/audit/MASTER_FINDINGS.md, docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md,
@@ -26,8 +33,8 @@
   dag=acyclic old_plan=exact coverage=26/0/0/1 allowed_paths=9 errors=0`, `A6_VALIDATION_EXIT node=0
   diff=0`. Initial five validator failures/corrections retained, no product/data change. Specialist
   roadmap validator ->categories29/order29/historyidentical/errors0 exit0; initial failures retained.
-- **Next action:** complete authorized A6 docs checkpoint/remote check, then await explicit approval
-  for R0-01 safety checklist and subsequent R1-01 SEC002 snapshot ownership, one task at a time.
+- **Next action:** await explicit approval for R0-01 safety checklist, then separately authorize
+  R1-01 SEC002 snapshot ownership, one task at a time; confirm latest main/remote before work.
   No runtime suites rerun solely for A6; stop before W0/W1/remediation/migration execution.
 
 ## Historical A5 closure and A6 entry prompt (preserved)
