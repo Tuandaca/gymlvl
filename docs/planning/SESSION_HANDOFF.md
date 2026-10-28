@@ -1,5 +1,83 @@
 # GymLvl — Session Handoff
 
+## Current — A2 reconciled PARTIAL checkpoint (2026-10-28)
+
+- **Task/status:** A2 only, PARTIAL. Whole-stage acceptance `NOT RUN`; A3/remediation not started.
+- **Commit/base:** `main` @ `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`; remote same at entry.
+  Latest user authorizes normal PARTIAL documentation commit/push after consistency review; no rewrite.
+- **Changed files:** audit findings/register/coverage/handoff, phases A2_FLUTTER/A2_PROBES; planning
+  TASK_BOARD/SESSION_HANDOFF/CHANGELOG_AI (nine paths). Original dirty work backed up with nine
+  SHA256 matches, bundle clone HEAD and archive 549/549 at
+  `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-final-backup-20261028-174845`.
+- **State:** 22/22 leads dispositioned in phase section 8.2; seven new IDs. 24 findings:
+  P0 0/P1 3/P2 14/P3 5/P4 2; Confirmed 4/High 18/Medium 2; Needs Verification 2/Accepted 20/
+  Fixed 1/False Positive 1. CONC001 scope narrowed; post-await hypothesis deferred A5. SEC002
+  controller-only synthetic adoption, not real account disclosure. DATA001 server claim unverified.
+- **Coverage:** 13 static-reviewed, 5 mixed-stage in review, 8 not reviewed, 1 excluded. No whole-row
+  runtime promotion. Deferred A4/A5 tests carry owners and exact assertions.
+- **Current verification:** analyzer `No issues found! (ran in 8.5s)`; format `125 files (0 changed)`;
+  Flutter `+126: All tests passed!`; all exit 0 at base 7eb40f1. Successful retained probes not rerun.
+- **Consistency/QA:** orchestrator Node -> `MD=24 JSON=24 fields=22 old IDs=17 dispositions=22
+  errors=0`, coverage13/5/8/1, nine allowed paths; exit 0, diff whitespace exit 0. Read-only QA found
+  no documentation blocker, no omitted disposition or missing new field; whole-stage `NOT RUN`.
+- **Temp:** full-copy inventory 1,351 files / 1,369,316,592 bytes, no reparse points. Exclusivity and
+  disposal safety not proved; contents not read, nothing removed. User review and explicit exact-path
+  approval required for `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-probe-20261028`.
+- **Decisions:** none affecting product/architecture/permissions/dependencies. Git authorization only.
+- **Remaining work:** A2 lead10 focused synthetic recovery-widget assertion and independent QA;
+  exact executable A3 handoff follows only after A2 closure. No external blocker claimed.
+- **Next action (A2):** retain isolated widget probe: failed sign-in followed by recovery navigation
+  must not show password-update failure before submission. Do not repeat whole-module reviews.
+
+## Historical checkpoint records (superseded current-state statements)
+
+## Current recovery checkpoint — A2 incomplete (2026-10-28)
+
+**Continuation:** Retained synthetic probes in `docs/audit/phases/A2_PROBES.md` rerun by orchestrator:
+`flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart` -> `+7: All tests passed!`,
+exit 0. Defect-observing tests show active-discard timeout and cross-owner local state adoption with
+fake null/error remote; controls pass. QA independently inspected narrow scope. Post-await race,
+real-user UI/RLS and 22-lead triage remain unverified. Additional changed file: `A2_PROBES.md`.
+Current continuation checks: analyzer `No issues found! (ran in 5.3s)`; formatting `125 files (0
+changed)`; Flutter `+126: All tests passed!`; Node register `MD=17 JSON=17 mismatches=0`; each exit 0.
+The first temporary copy of the entire app could contain secret files; do not inspect or share it and
+ask user before cleanup: `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-probe-20261028`.
+External backup of the original eight dirty artifacts was verified (bundle SHA, 549/549 archive count,
+eight matching file hashes) at `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-backup-20261028-171019`.
+Next: reconcile 22 A2 leads, update both registers/coverage and obtain final QA; no A3.
+
+- **Task/status:** A2 Flutter deep audit, PARTIAL. Complete-stage acceptance `NOT RUN`.
+- **Commit:** `main` @ `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`; remote equal at recovery entry;
+  tree clean then, eight authorized documentation files pending now. No A2 commit/push yet.
+- **Agent:** server session `ses_e7e81bc84ffeWkbb0tV5jo0jwp` reports `gymlvl-orchestrator`.
+- **Progress:** recovered three historical specialist reports; sequential QA, workout-presentation
+  and context reviews now complete. No active child tasks. Phase artifact preserves all leads.
+- **Findings:** 17; P0 0/P1 4/P2 6/P3 5/P4 2. New FND-SEC-002 is P1/High/Needs Verification.
+  CONC-001/DATA-001 addenda preserve confidence/history. Controller does reset memory/timers on auth
+  identity change; unchecked backup owner is a separate issue. No server-side XP duplication confirmed.
+- **Changed files:** `docs/audit/{MASTER_FINDINGS.md,FINDINGS_REGISTER.json,AUDIT_COVERAGE.md,
+  SESSION_HANDOFF.md,phases/A2_FLUTTER.md}` and
+  `docs/planning/{TASK_BOARD.md,SESSION_HANDOFF.md,CHANGELOG_AI.md}`.
+- **Verification (7eb40f1):** `flutter analyze --no-pub` -> `No issues found! (ran in 4.2s)`;
+  `dart format --output=none --set-exit-if-changed lib test` -> `Formatted 125 files (0 changed)`;
+  `flutter test --no-pub --reporter expanded` -> `+126: All tests passed!`; each exit 0 (`PASS`).
+- **NOT RUN:** retained focused controller/account-switch probes, rendered contrast/keyboard checks,
+  complete candidate reconciliation and final A2 QA. Historical temporary test was deleted; do not
+  turn its carried output into current PASS.
+- **Artifact verification:** orchestrator Node check -> MD 17 / JSON 17, 22 required fields,
+  classifications/counts synchronized; `git diff --check` -> no whitespace errors, status only eight
+  authorized docs (`PASS`). Independent artifact QA Node check `BLOCKED` by shell permission denial;
+  no permissions changed. It independently verified Git scope/HEAD/whitespace.
+- **Decisions:** none. Current user allows A2 normal commit/push after complete, superseding the old
+  audit prompt's prohibition; no rewrite. Lower A1 baseline/"run A1" entries are historical/stale,
+  not executable next actions.
+- **Blockers:** no external prerequisite missing; unfinished verification/triage prevents closure.
+- **Next action:** A2 retained audit-only real-controller probe for discard enqueue cycle and
+  cross-owner snapshot adoption (completing-cancel and same-owner controls), then reconcile phase
+  section 5 leads. Do not begin A3 or remediation; final A3 execution prompt is not drafted yet.
+
+## Historical A1 handoff (preserved; not current A2 status)
+
 **Updated:** 2026-10-28 (A1 audit complete — 16 findings)
 **Last agent:** **`gymlvl-orchestrator`** — proven from the server, not from configuration: session
 `ses_e7e81bc84ffeWkbb0tV5jo0jwp` reports `"agent":"gymlvl-orchestrator"` via

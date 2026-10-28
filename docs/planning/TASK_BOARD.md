@@ -1,6 +1,35 @@
 # GymLvl — Task Board
 
-**Last updated:** 2026-10-28 (A1 complete — 16 findings)
+## Current A2 reconciliation checkpoint — PARTIAL (2026-10-28)
+
+**Current task:** A2 only; all 22 leads now have dispositions in A2_FLUTTER section 8.2.
+**Findings:** 24 total, P1 3/P2 14/P3 5/P4 2; Confirmed 4/High 18/Medium 2. Seven new IDs,
+narrowed CONC001 and SEC002 confirmed scopes; DATA001 still unverified server-side.
+**Coverage:** 13 static-reviewed / 5 in review / 8 not reviewed / 1 excluded.
+**Evidence:** current analyzer clean, format 125 unchanged, Flutter +126 pass at 7eb40f1.
+**Git:** latest user authorizes clearly labeled PARTIAL docs-only normal commit/push. Preserve all
+nine artifacts; verified backup ...gymlvl-a2-final-backup-20261028-174845. No history rewrite.
+**Remaining task / next action:** A2 lead10 synthetic auth/recovery widget probe, QA, final closure
+assessment and exact A3 handoff. A3-A6 and remediation remain unauthorized to start.
+
+## Historical task-board checkpoint records (superseded status lines below)
+
+**Last updated:** 2026-10-28 (A2 partial recovery)
+**Current task:** A2 — Flutter deep audit, incomplete/PARTIAL; full acceptance `NOT RUN`.
+**Continuation:** retained synthetic controller probes reproduced bounded discard timeout and
+cross-owner backup adoption in direct and UI-used controller paths; `+7: All tests passed!`, exit 0,
+independently rerun by orchestrator. QA inspected the probe read-only. See `docs/audit/phases/A2_PROBES.md`;
+post-await race, 22-lead triage and final QA remain open. Current next action is lead reconciliation,
+not starting A3. There are now nine authorized audit/planning paths including the new probe document.
+**Current commit:** `main` @ `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c` = `origin/main` at
+recovery entry. Tree clean at entry; eight authorized audit/planning files now pending, no commit/push.
+**Next action:** A2 retained real-controller probes for discard cycle and cross-owner recovery,
+then candidate reconciliation and final QA. See `docs/audit/phases/A2_FLUTTER.md` sections 5-7.
+**Evidence:** analyzer `No issues found!`; format `125 files (0 changed)`; Flutter `+126: All tests
+passed!`, all exit 0 in recovery. 17 registered findings; new FND-SEC-002 is High/Needs Verification.
+**Blockers:** unfinished verification/triage, no external blocker. A3-A6 and remediation not started.
+
+The following A1 baseline lines are historical; the current recovery state above takes precedence.
 **Baseline:** branch `main` @ `c9cc764` = `origin/main` after the A1 checkpoint push. A1 was measured
 at `e8c7c8e`, the parent of that commit. `main` is the only development branch. Confirm with
 `git rev-parse main`; the SHA moves.
@@ -72,7 +101,7 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A0 | Bootstrap, baseline, inventory, execution plan | `DONE` | `docs/audit/phases/A0_BOOTSTRAP.md`; 6 findings; coverage matrix for 27 components |
 | A0.1 | Governance fix (`FND-GOV-001`) + A0 checkpoint | `DONE` — push `BLOCKED` | `docs/audit/phases/A0_1_GOVERNANCE.md`; 1 permission rule; commit local, push denied by `git push *` |
 | A1 | Architecture, dependencies, configuration, infrastructure, CI | `DONE` | `docs/audit/phases/A1_ARCHITECTURE.md`; 10 new findings (16 total); coverage C-22/C-25/C-26 closed; 2 A0 inventory figures corrected |
-| A2 | Flutter app, state, lifecycle, concurrency, navigation | `READY` | Prompt in `docs/audit/SESSION_HANDOFF.md` §6; requires explicit go-ahead |
+| A2 | Flutter app, state, lifecycle, concurrency, navigation | In progress (partial) | Authorized; recovered inspections, current checks, pending retained probes/triage/QA; current handoff recovery section |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` | — |
 | A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` | — |
 | A5 | Tests, performance, reliability, observability | `PLANNED` | — |

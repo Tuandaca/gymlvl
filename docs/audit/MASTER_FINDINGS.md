@@ -1,12 +1,18 @@
 # Master Findings
 
-**Stage:** A1 (register opened at A0)
-**Baseline:** `main` @ `e8c7c8e`
-**Counts:** 16 findings — P0: 0, P1: 3, P2: 6, P3: 5, P4: 2. Confirmed: 2, High: 12, Medium: 2, Low: 0.
-**Status:** 2 `Needs Verification`, 12 `Accepted`, 1 `Fixed`, 1 `False Positive`.
+**Stage:** A2 (partial final-reconciliation checkpoint; register opened at A0)
+**Baseline:** `main` @ `7eb40f1`
+**Counts:** 24 findings — P0: 0, P1: 3, P2: 14, P3: 5, P4: 2. Confirmed: 4, High: 18, Medium: 2, Low: 0.
+**Status:** 2 `Needs Verification`, 20 `Accepted`, 1 `Fixed`, 1 `False Positive`.
 
 Scales, ID scheme and status vocabulary are defined in `README.md` §§4–7. The machine-readable
 mirror is `FINDINGS_REGISTER.json`; the two must always agree.
+
+A2 recovery originally added `FND-SEC-002` without confidence promotion. Final reconciliation adds
+`FND-BUG-004…007` and `FND-INTG-002…004`, and accepts narrowly reproduced controller mechanisms in
+`FND-CONC-001` / `FND-SEC-002`. Their original classifications are retained as historical records.
+`FND-DATA-001` remains P1 / Medium / `Needs Verification`. Remaining leads and deferred assertions
+belong to the phase record, not register totals. A2 remains partial; this is not whole-stage acceptance.
 
 Findings inherited from `docs/agent-system/S3_VALIDATION_REPORT.md` §10 keep their origin and are
 explicitly **unverified** until a stage re-checks them.
@@ -19,19 +25,49 @@ read, and the runtime step that would promote it is recorded as `NOT RUN` with i
 
 ---
 
-## FND-CONC-001 — Potential re-entrant deadlock and post-await null dereference in the active workout controller
+## FND-CONC-001 — Re-entrant discard queue cycle stalls active workout recovery
 
 | Field | Value |
 |---|---|
 | Category | `CONC` |
 | Component | Active workout controller (client) |
 | Path | `app/lib/features/workout/presentation/controllers/active_workout_controller.dart` |
-| Lines | 207-215, 659-670, 691 |
+| Lines | 125-145, 207-215, 691-700; UI entry `workout_screen.dart:295-322` |
 | Origin | S3 L4 — `qa-reviewer`/`flutter-specialist` delegation TEST C (carried, **not re-verified** in A0) |
-| Severity | **P1** |
-| Confidence | **Medium** |
-| Status | `Needs Verification` |
+| Severity | **P2** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
 | Wave | W1 |
+
+**Current scope (A2 final reconciliation, 2026-10-28).** This stable ID covers only the nested
+discard/cancel queue cycle. The outer `_enqueue` awaits a cancellation queued behind itself. A retained
+audit-only probe uses promptly completing fake cancellation; direct cancel and inactive discard finish,
+but active discard times out at 300 ms without reaching another repository cancellation. This bounded
+observation plus the source cycle supports the mechanism, not independently measured infinite duration.
+Expected: discard settles; actual: active discard remains pending and retains active state. P2 reflects
+degraded recovery; irreversible workout loss or server corruption was not demonstrated.
+
+**Retained evidence, not rerun in this documentation checkpoint.** Last A2 continuation, baseline
+`7eb40f1`, working directory
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-minimal-20261028\app`:
+`flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart` ->
+`+7: All tests passed!`, exit 0; defect-observing output:
+`DISCARD direct_cancel=1 inactive_discard=completed active_timeout=true cancel_calls=1 active=true`.
+Exact retained harness and limitations: `phases/A2_PROBES.md:50-189,229-266`. Green means reproduction,
+not a fix. No product test or application code changed.
+
+**Current remediation / verification.** Avoid re-enqueuing the public cancellation method inside the
+serialized action; preserve cancellation order and direct/no-active behavior. After fix authorization,
+invert the retained assertion: active discard must settle and reach repository cancellation once.
+Regression scope: discard, cancel, restore and session resume; related test:
+`app/test/workout_controller_test.dart`. No backend dependency is needed for this client reproduction.
+
+**Separate investigation — DEFERRED A5, owner `flutter-specialist`, no new ID.** Gate local-backup
+removal between 659 and 664, reset auth identity, and assert completion neither dereferences cleared
+state nor modifies the new identity's state. This post-await race is **NOT RUN**, not part of the
+Confirmed mechanism; catch at 678-682 means an uncaught crash is not established.
+
+### Historical S3 / A2 recovery record (superseded classification: P1 / Medium / Needs Verification)
 
 **Suspected mechanism.** `discardLocalBackup` (L207-215) awaits `cancelWorkout()` from inside
 `_enqueue`. `cancelWorkout` (L691) itself enqueues onto the same serialized `_pending` future, so the
@@ -61,6 +97,24 @@ afterwards.
 covers "discard while a request is pending". Missing coverage is the reason the defect survived.
 
 **Dependencies.** None. A4 re-examines the same file from the business-logic angle; sequence A2 first.
+
+**A2 recovery addendum (history above retained).** Independent QA inspection traced the cycle at
+125-145, 207-215, 691-700 and the reachable UI at `workout_screen.dart:295-322`. The repository cancel
+need not be slow: it is never reached in the cycle. Prior interrupted A2 output was
+`discardResolved=false cancelCalls=0 isLoading=true`, followed by
+`completionResolved=false finishCalls=0 isCompleting=true`; no-active control resolved. That temporary
+test was deleted before recovery, so these are **carried observations, not a current runtime PASS**.
+Keep P1 / Medium / `Needs Verification`; QA proposed P2, while the orchestrator retains the existing
+P1 pending reproduction because an active session becomes unusable and the backup is cleared first.
+The separate post-await race at 659-664 remains unverified; the catch handles a thrown null assertion,
+so an uncaught process crash has not been established. Some interleavings set `isCompleting` early
+enough for line 126 to skip the inner enqueue; do not claim every overlap deadlocks.
+
+**Updated verification method.** Retain an audit-only probe outside permanent application tests,
+import the real controller, use promptly completing fake cancellation, observe timeout **and** zero
+cancel calls, and include direct-cancel/no-active controls. A fake cancel that itself never completes
+does not isolate the enqueue bug. Separately change identity while local-backup removal is awaiting
+to test the post-await race. See `phases/A2_FLUTTER.md`.
 
 ---
 
@@ -107,6 +161,16 @@ covers the legacy branch is **unverified** — A5 confirms.
 **Dependencies.** Needs a live database or a fixture that reproduces the legacy row shape; therefore
 it also depends on the harness limitation recorded as G-05.
 
+**A2 client-only addendum.** `active_workout_screen.dart:82` calls controller `completeWorkout`;
+controller:622-631 memoizes one completion future; 628-650 waits for pending edits and checks active
+state; 655-658 calls `finishWorkout`. `supabase_workout_repository.dart:70-76` sends
+`complete_workout(p_workout_id,p_notes)`, then separately fetches detail. Its `calculateXP` wrapper
+(84-91) also invokes the award RPC but has no current production caller. No client retry loop or
+independent request UUID was observed; explicit retry reuses workout ID. Recovery-session
+`flutter test --no-pub --reporter expanded` reports `+126: All tests passed!`, including existing
+concurrent-completion coverage. None of this confirms server-side XP duplication or transactional
+idempotency. P1 / Medium / `Needs Verification` unchanged; A3/A4 own legacy-row and reward checks.
+
 ---
 
 ## FND-ARCH-001 — The stated XP write invariant is narrower than the implementation
@@ -146,6 +210,12 @@ because it edits the operating contract.
 **Tests.** Not applicable — the guard is review discipline.
 
 **Dependencies.** A4 must confirm no fourth writer exists before the wording is finalized.
+
+**A2 final-reconciliation client evidence (inspection only).**
+`app/lib/features/quests/presentation/providers/quest_providers.dart:11-24` invokes `sync_daily_data`
+from provider build after checking authenticated identity. This extends the existing contract finding;
+an intentional idempotent refresh RPC is not itself client-owned progression or a new award path.
+Server writer semantics remain A4 verification.
 
 ---
 
@@ -567,6 +637,14 @@ reset and confirmation flows together.
 
 **Tests.** None. No test exercises a redirect target.
 
+**A2 investigation addendum (lead 12; no new confirmed callback claim).**
+`app/lib/features/auth/data/supabase_auth_repository.dart:21-22` omits `emailRedirectTo`, whereas
+30-34 supplies the configured recovery redirect. Omission alone is not failure because server defaults
+apply. Recovery fragment/hash handling and sign-up confirmation delivery remain **DEFERRED A5**, owner
+`flutter-specialist` with auth integration support: approved local callback fixtures must establish the
+correct auth event/session and route exactly once. Runtime verification is **NOT RUN**; do not infer
+callback failure from the separate allowlist mismatch.
+
 **Dependencies.** None.
 
 ---
@@ -602,7 +680,8 @@ is the literal `'GymLevel'` (`app.dart:21`).
 **Expected / actual.** Expected: one localization mechanism, so that translators, tooling and the
 runtime all see the same source of truth. Actual: two, one of which is maintained but unused.
 
-**Impact.** No user-visible defect today — parity is exact. The cost is structural: translators and
+**Historical A1 impact assessment.** Dictionary parity was exact in the A1 census. The structural cost:
+translators and
 `flutter gen-l10n` see 1 string of 104; no ARB placeholders, plurals or ICU number/date formatting are
 available; adding a locale requires editing Dart source and shipping code; generated-file churn is
 unrelated to product text; and a future contributor will reasonably add strings to the ARB and wonder
@@ -626,6 +705,26 @@ strings — those must stay (`GlobalMaterialLocalizations` etc.), so only the ap
 cheap and is the natural companion to either option.
 
 **Dependencies.** A2 (C-05) verifies VI/EN rendering and parity; sequence the decision after that.
+
+**A2 final-reconciliation evidence extension (leads 7 and 22; inspection only).** Dictionary parity
+does not establish localization of all rendered text. Additional paths:
+
+- `app/lib/core/localization/localization_engine.dart:274,283`: unknown keys render verbatim and
+  bilingual mode inserts a newline. Truncation at large text remains **DEFERRED A5**, UI/UX owner;
+  assert both language strings remain available without claiming a reproduced layout failure.
+- `app/lib/ui/candy/candy_quest_card.dart:116,158,184,199`: fixed Vietnamese product labels bypass
+  language selection. `app/lib/features/progression/presentation/widgets/level_up_overlay.dart:70-71,84,134,144`
+  always supplies bilingual copy, independently of selected mode.
+- `app/lib/features/workout/presentation/widgets/workout_exercise_tile.dart:224,236,248` uses fixed
+  English headers; `exercise_card.dart:68-81` renders raw exercise name/category/equipment.
+- `app/lib/features/workout/presentation/screens/workout_summary_screen.dart:251-252,367-378` uses
+  fixed English fallback/count text and calls `localizedName()` without selected language;
+  `workout_screen.dart:137-140` interpolates a raw error. `app/lib/features/workout/workout_copy.dart:138-142`
+  renders missing keys verbatim; controller `:203` emits `restore_failed`, absent from that copy map.
+
+These observations extend this ID, not a duplicate architecture finding. Selected-language behavior,
+unknown-key coverage, Vietnamese diacritics and screen-reader/device rendering need focused A5 tests;
+no device or accessibility execution is claimed here. P3 / High / `Accepted` remains unchanged.
 
 ---
 
@@ -858,3 +957,283 @@ Recorded so they are not re-derived, and so their status is explicit.
 | `update_modified_column` defined three times | Harmless redefinition; A3 owns schema review (A1 §11 O-6) |
 | `bilingual` language mode maps to `Locale('vi')` | Behaviour question owned by A2/C-05 (A1 §11 O-8) |
 | A0 recorded `verify.yml` as 58 lines and the migrations as 1,222 lines | Audit-internal measurement corrections (52 and 1,219 non-blank respectively), fixed in `AUDIT_COVERAGE.md` §2. Not a codebase defect (A1 §11 O-2, O-3) |
+
+---
+
+## FND-SEC-002 — Global workout backup is adopted under a different synthetic controller identity
+
+| Field | Value |
+|---|---|
+| Category | `SEC` |
+| Component | Client workout snapshot recovery and session isolation |
+| Paths | `app/lib/features/workout/presentation/controllers/active_workout_controller.dart`; `app/lib/features/workout/presentation/screens/workout_screen.dart` |
+| Lines | controller:72,85-94,150-180,184-201,217-249; screen:25-31,278-338 |
+| Origin | A2 interrupted Flutter review; independent recovery inspection by `qa-reviewer` (`ses_e7e1bf63bffevgwQCjbB0LURN0`) and orchestrator |
+| Severity | **P1** |
+| Confidence | **Confirmed** |
+| Status | `Accepted` |
+| Wave | W1 |
+
+**Current scope (A2 final reconciliation, 2026-10-28).** Confirmed scope is synthetic controller-state
+adoption, not real-account disclosure or RLS bypass. The last A2 continuation ran the retained probe
+against the real controller in
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-minimal-20261028\app` at `7eb40f1`:
+`flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart` ->
+`+7: All tests passed!`, exit 0. Output includes
+`CHECK B backup=A remote=null observed_owner=A expected_owner=null` and
+`CHECK B backup=A remote=error observed_owner=A expected_owner=null`; same-owner control:
+`CHECK A backup=A remote=null observed_owner=A expected_owner=A`. Both explicit restore and UI-used
+`checkForActiveWorkout` are covered. Source and output: `phases/A2_PROBES.md:50-189,229-266`.
+This is retained evidence, **not a current documentation-task rerun**; green tests reproduce defects.
+
+**Expected / observed.** Reject owner mismatch before adoption. Under synthetic B identity, A's
+snapshot is adopted with remote null/error; same-owner A recovery remains available. Source
+`workout_screen.dart:36,47-51,278` consumes this state for rendering, but no real-account UI was tested.
+P1 is the assessed potential shared-device disclosure impact, not demonstrated actual disclosure.
+Live RLS, backend writes, real-device storage and sign-out cleanup are **NOT RUN**. Build at 85-94
+does reset memory and timers; this finding does not assert otherwise.
+
+**Current remediation / verification.** Namespace storage by authenticated owner and validate owner
+before adoption. After fix authorization, mismatched snapshots must never enter either recovery path's
+state, while same-owner offline recovery still works. Permanent regression coverage remains missing;
+the retained audit harness is not a product fix or a permanent regression test.
+
+### Historical recovery record (superseded classification: P1 / High / Needs Verification)
+
+**Root cause.** One `shared_preferences` key survives identity changes. Controller build resets memory
+and timers but does not clear or namespace the backup. Both restore paths decode `workout.userId`
+without comparing it to current auth identity; `checkForActiveWorkout` adopts local first and keeps it
+if remote returns null or throws.
+
+**Evidence (inspection, `7eb40f1`).** Key `gymlvl_active_workout_backup` at 72; save/read at 150-180;
+`_adopt(workout,generation)` at 192 and 226 without owner check; remote null clears only when
+`backup==null` at 238. QA independently validated this path and rejected the distinct claim that
+signout cannot reset memory/timers: 85-94 does reset them. Cross-account runtime reproduction
+`NOT RUN`; no assertion about RLS bypass or server-side writes.
+
+**Expected / actual.** An account must not see another account's locally cached workout; owner
+validation must precede adoption and rendering. Actual recovery accepts any parseable active snapshot
+under the global key even if its `userId` differs from the authenticated user. Display exposure after
+account switch is source-supported but not yet exercised.
+
+**Impact.** Potential disclosure of prior user's exercises, logged loads and session data to a
+subsequent user on the same install. P1 for plausible cross-account local disclosure, not evidence of
+server corruption or authorization bypass.
+
+**Proposed remediation.** After audit authorization, scope storage by authenticated identity and
+reject owner mismatch before adoption; preserve same-owner recovery and define logout/cache policy.
+
+**Regression risk.** Offline recovery, shared-device account changes, old unscoped snapshots, and auth
+refresh while storage is awaiting.
+
+**Tests.** Related: `app/test/session_isolation_test.dart`, `app/test/workout_controller_test.dart`.
+Missing: A snapshot / B identity with remote null and remote error; same-owner offline control.
+
+**Dependencies.** `FND-CONC-001` affects safe discard after recovery; server authorization stays A3/A4.
+
+**Verification method.** Non-production audit probe with mocked preferences containing A's snapshot,
+auth stream for B, fake repository returning null/error; assert no adoption of A, with same-owner
+control. Retain outside permanent application tests. `NOT RUN` at this recovery checkpoint.
+
+---
+
+## FND-BUG-004 — Profile and onboarding use white foregrounds on white Candy panels
+
+| Field | Value |
+|---|---|
+| ID | `FND-BUG-004` |
+| Title | Profile and onboarding use white foregrounds on white Candy panels |
+| Category | `BUG` |
+| Component | Profile/onboarding light-theme readability |
+| Paths | `app/lib/app.dart`; `app/lib/core/theme/app_theme.dart`; `app/lib/core/theme/candy_colors.dart`; `app/lib/features/profile/presentation/screens/profile_screen.dart`; `app/lib/features/onboarding/presentation/screens/onboarding_screen.dart` |
+| Lines | `app.dart:22-24`; `app_theme.dart:7-15`; `candy_colors.dart:8-9`; `profile_screen.dart:619-622,663-685`; `onboarding_screen.dart:896-898,915-926` |
+| Origin | A2 final reconciliation; independent UI/UX review and bounded source reread |
+| Root cause | Legacy explicit white/white54 foregrounds remain after panel tokens map to the white Candy card in forced light mode. |
+| Evidence | Inspection only: profile header panel uses `AppTheme.panelBackground`, while display name and edit text explicitly use `Colors.white`; unselected onboarding gender icon/label use `Colors.white54` on the same white panel. No rendered contrast/device probe was run. |
+| Expected behavior | Profile identity and unselected onboarding choices remain readable on the active Candy surfaces. |
+| Actual behavior | Source resolves the cited foregrounds and panel background to white, including translucent white over white for unselected choices. |
+| Impact | Users can miss identity text and onboarding options; no data corruption, exploit or P0 impact is asserted. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | After fix authorization, use existing Candy ink/charcoal tokens for text and icons on light panels; retain selected-state distinction. |
+| Regression risk | Profile viewing/editing, gender selection, VI/EN text and disabled/selected states. |
+| Related tests | `app/test/ui_regression_test.dart` |
+| Missing tests | Render the actual profile header/edit state and unselected onboarding choices under the production light theme; assert readable foreground/background pairings. |
+| Depends on | A5 UI/UX rendering/contrast verification; no new palette or dependency. |
+| Wave | W2 |
+| Verification method | A5 `ui-ux-specialist`: render cited states at normal/large text in VI/EN and measure foreground/background contrast. NOT RUN in this documentation checkpoint; static-only confidence is not Confirmed. |
+
+---
+
+## FND-BUG-005 — Dashboard workout and set KPIs omit their last-three-workout scope
+
+| Field | Value |
+|---|---|
+| ID | `FND-BUG-005` |
+| Title | Dashboard workout and set KPIs omit their last-three-workout scope |
+| Category | `BUG` |
+| Component | Dashboard KPI data window and labeling |
+| Paths | `app/lib/features/dashboard/presentation/screens/dashboard_screen.dart`; `app/lib/features/dashboard/presentation/widgets/kpi_tiles_grid.dart`; `app/lib/features/workout/presentation/controllers/workout_history_controller.dart` |
+| Lines | `dashboard_screen.dart:126-140`; `kpi_tiles_grid.dart:41-46,62-75`; `workout_history_controller.dart:12-14,26-29` |
+| Origin | A2 final reconciliation; independent UI/UX review and bounded source reread |
+| Root cause | Dashboard derives workout count and set count from the recent-workout list limited to three, without qualifying those KPI labels with that window. |
+| Evidence | Inspection only: `totalWorkouts = recentWorkouts.length`; sets accumulate from the same list; repository call requests limit 3. Labels are WORKOUTS/BUỔI TẬP and TOTAL SETS/TỔNG SỐ HIỆP, not last-three labels. A separate completed-count provider exists, but intended KPI timeframe is not specified. |
+| Expected behavior | State the aggregation window or use the product-approved window consistently. No lifetime-total requirement is invented. |
+| Actual behavior | The two cited KPI values are restricted to at most three recent workouts without that qualification in their labels. |
+| Impact | Users can misunderstand the scope of dashboard counts; intended semantics require clarification, hence Medium confidence. |
+| Severity | **P2** |
+| Confidence | **Medium** |
+| Status | `Needs Verification` |
+| Proposed remediation | Confirm the intended window with the product owner, then label last-three values explicitly or query the approved aggregate. |
+| Regression risk | Dashboard counts, empty history, pagination, and VI/EN KPI wording. |
+| Related tests | `app/test/ui_regression_test.dart` |
+| Missing tests | More than three completed workouts with distinct set counts; verify values and labels against an explicitly approved window. |
+| Depends on | Product clarification of KPI window; A5 Flutter fixture test. |
+| Wave | W2 |
+| Verification method | A5 `flutter-specialist`: supply five completed workouts, inspect the last-three values and visible labels, and assert the agreed window. NOT RUN; intended semantics are unresolved. |
+
+---
+
+## FND-BUG-006 — Quest cards display fixed progress and inconsistent fallback rewards
+
+| Field | Value |
+|---|---|
+| ID | `FND-BUG-006` |
+| Title | Quest cards display fixed progress and inconsistent fallback rewards |
+| Category | `BUG` |
+| Component | Quest and dashboard quest presentation |
+| Paths | `app/lib/features/quests/presentation/widgets/daily_quest_card.dart`; `app/lib/features/dashboard/presentation/screens/dashboard_screen.dart` |
+| Lines | `daily_quest_card.dart:50-54,73`; `dashboard_screen.dart:325-328,349-355` |
+| Origin | A2 final reconciliation; independent UI/UX review and bounded source reread |
+| Root cause | Status-based constants substitute for measured progress, and two views use different constants when earned XP is absent. |
+| Evidence | Inspection only: active daily quest displays 0.35 progress and `earnedXp ?? 350`; dashboard displays zero progress until completed and `earnedXp ?? 100` for the same quest shape. |
+| Expected behavior | Progress reflects known completion or is explicitly unknown; missing server rewards do not appear as conflicting earned amounts. |
+| Actual behavior | An active quest receives fixed 35% in one view and zero in another; null earned XP becomes 350 versus 100. |
+| Impact | Misleading progress/reward expectations. These are display-only substitutions, not persisted XP or client award forgery. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | Render authoritative values when available; otherwise use an explicitly labeled preview/unknown state shared across both views. |
+| Regression risk | Active, expired and completed quest cards; null versus zero rewards; VI/EN presentation. |
+| Related tests | `app/test/ui_regression_test.dart` |
+| Missing tests | Render the same active quest with null earned XP in both views; assert consistent truthful progress/reward copy. |
+| Depends on | A4 quest progress/reward contract clarification; FND-ARCH-002 owns localization, not these numerical substitutions. |
+| Wave | W2 |
+| Verification method | A5 `flutter-specialist`: compare both views using the same active/completed/null-reward fixtures and verify no invented earned amount. NOT RUN; source inspection only. |
+
+---
+
+## FND-BUG-007 — Summary fallback fabricates a completed workout and 500 earned XP
+
+| Field | Value |
+|---|---|
+| ID | `FND-BUG-007` |
+| Title | Summary fallback fabricates a completed workout and 500 earned XP |
+| Category | `BUG` |
+| Component | Workout summary routing and reward display |
+| Paths | `app/lib/core/router/app_router.dart`; `app/lib/features/workout/presentation/screens/workout_summary_screen.dart`; `app/lib/features/workout/presentation/screens/active_workout_screen.dart`; `app/lib/features/workout/presentation/controllers/active_workout_controller.dart` |
+| Lines | `app_router.dart:127-174`; `workout_summary_screen.dart:69-74`; `active_workout_screen.dart:82-100`; `active_workout_controller.dart:672-675` |
+| Origin | A2 final reconciliation; navigation lead 11 and summary lead 19 merged |
+| Root cause | Missing route payload is replaced by a synthetic completed workout, and absent earnedXP is replaced by 500 rather than unknown. |
+| Evidence | Inspection only: no-extra summary route returns `summary-default` with completed status; map payload without workout uses `summary-preview`. Summary uses `xpResult?['earnedXP'] ?? 500`. Normal controller completion supplies rewards; the fallback is not proof that normal RPC responses omit earnedXP. |
+| Expected behavior | Missing summary context produces an unavailable/redirect state; missing earned XP is not presented as a real reward. |
+| Actual behavior | An authenticated, onboarded summary deep link without extra can construct a synthetic completed summary displaying 500 earned XP. |
+| Impact | Misleading completion/reward display; no completed-workout database record, persisted XP or award-authority bypass is created by this route. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | Require validated summary context or redirect to history; display unknown reward data explicitly instead of inventing 500. |
+| Regression risk | Successful completion, summary deep links/reloads, null/zero rewards, modal summary dismissal. |
+| Related tests | `app/test/navigation_integration_test.dart`; `app/test/workout_widgets_test.dart` |
+| Missing tests | Authenticated summary navigation without extra, absent earnedXP, and zero earnedXP; assert no fabricated completion/reward. |
+| Depends on | Auth/onboarding gate permits the route only for eligible sessions; unrelated to FND-DATA-001 award idempotency. |
+| Wave | W2 |
+| Verification method | A5 `flutter-specialist`: navigate to summary under eligible auth with no extra and with missing/zero earnedXP fixtures. NOT RUN; source-supported reachability only. |
+
+---
+
+## FND-INTG-002 — Post-award detail fetch failure is reported as failed workout completion
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-002` |
+| Title | Post-award detail fetch failure is reported as failed workout completion |
+| Category | `INTG` |
+| Component | Workout completion client reconciliation |
+| Paths | `app/lib/features/workout/data/supabase_workout_repository.dart`; `app/lib/features/workout/presentation/controllers/active_workout_controller.dart`; `app/lib/features/workout/presentation/screens/active_workout_screen.dart` |
+| Lines | `supabase_workout_repository.dart:66-76`; `active_workout_controller.dart:655-682`; `active_workout_screen.dart:82-83` |
+| Origin | A2 final reconciliation; completion lead 14 separated from legacy award finding |
+| Root cause | Repository combines a successful award RPC and a separate detail lookup into one failing Future; controller cannot distinguish a committed completion from failed submission. |
+| Evidence | Inspection only: `complete_workout` is awaited before `getWorkoutDetail`; a failed/null detail fetch throws. Controller catch sets `completion_failed` and returns null before clearing active state; screen returns without summary on null. No live RPC or injected failure was run. |
+| Expected behavior | Preserve successful award acknowledgement and represent subsequent detail retrieval as reconciliation, not an unqualified submission failure. |
+| Actual behavior | If award RPC succeeds and subsequent detail retrieval fails, the caller receives null with completion_failed and retains local active workout state. |
+| Impact | False failure/retry confusion after potentially committed server completion. No duplicate award, data corruption or server idempotency defect is established. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | Separate award acknowledgement from detail hydration; preserve committed results and provide a recoverable reconciliation state using the existing workout ID. |
+| Regression risk | Completion success, transport failures before/after award, detail not found, retries and auth changes. |
+| Related tests | `app/test/workout_controller_test.dart` |
+| Missing tests | Successful award response followed by failing/null detail fetch; distinguish pre-award failure from committed completion pending hydration. |
+| Depends on | FND-DATA-001 remains separate P1 / Medium / Needs Verification; A4 owns authoritative idempotency. |
+| Wave | W1 |
+| Verification method | A5 `flutter-specialist`: use a controlled repository/transport fixture that acknowledges award then fails detail retrieval; assert preserved acknowledgement and recovery behavior. NOT RUN; no backend commit was exercised here. |
+
+---
+
+## FND-INTG-003 — Coach accepts answers that its next history request rejects
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-003` |
+| Title | Coach accepts answers that its next history request rejects |
+| Category | `INTG` |
+| Component | Coach answer/history length contract |
+| Paths | `app/lib/features/coach/data/coach_repository.dart`; `supabase/functions/ai-coach/service.ts` |
+| Lines | `coach_repository.dart:98-109`; `service.ts:37-48,104-112` |
+| Origin | A2 final reconciliation; Coach lead 16 |
+| Root cause | Server accepts assistant answers up to 12000 characters but history entries only up to 4000; client resubmits accepted answers unchanged. |
+| Evidence | Inspection only: controller selects the last eight prior messages and passes their full content; service rejects history content longer than 4000 while returning answer strings through 12000. The upstream max_tokens setting may reduce frequency but does not align the accepted contracts. |
+| Expected behavior | Every accepted assistant answer remains valid input to a subsequent supported conversation request. |
+| Actual behavior | An accepted answer of 4001-12000 characters is retained and resubmitted, then rejected as invalid_history on the next request (or rejected by the separate body-size cap for larger combined history). |
+| Impact | Conversation cannot continue with that retained answer; failed requests preserve previous messages, so retries retain the incompatibility. No live provider response of this size was observed. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | Align accepted answer and history limits or apply an explicitly defined history compaction policy before resubmission. |
+| Regression risk | Multi-turn conversation, multilingual/long answers, eight-message truncation, request body-size limits and typed errors. |
+| Related tests | `app/test/session_isolation_test.dart` |
+| Missing tests | Accept a synthetic 4001-character answer then send another message with short remaining history; validate continuation without invalid_history. |
+| Depends on | A5 Flutter/Edge contract fixtures; no live AI provider or credentials required. |
+| Wave | W2 |
+| Verification method | A5 `flutter-specialist` with Edge support: fixture a 4001-character successful answer and inspect the next payload against service validation. NOT RUN; static-only, not Confirmed. |
+
+---
+
+## FND-INTG-004 — Adding a timed set defaults to hidden reps and zero displayed duration
+
+| Field | Value |
+|---|---|
+| ID | `FND-INTG-004` |
+| Title | Adding a timed set defaults to hidden reps and zero displayed duration |
+| Category | `INTG` |
+| Component | Timed workout set UI/controller contract |
+| Paths | `app/lib/features/workout/presentation/screens/active_workout_screen.dart`; `app/lib/features/workout/presentation/widgets/workout_exercise_tile.dart`; `app/lib/features/workout/presentation/widgets/set_row_widget.dart`; `app/lib/features/workout/presentation/controllers/active_workout_controller.dart` |
+| Lines | `active_workout_screen.dart:531,542-550`; `workout_exercise_tile.dart:60-61,269-294`; `set_row_widget.dart:180-207,219-222`; `active_workout_controller.dart:298-318,436-450,474-479` |
+| Origin | A2 final reconciliation; timed-set lead 18, client-only registered scope |
+| Root cause | Add Set omits modality-specific defaults and calls controller defaults reps=10/duration=0; timed row hides reps while completion validation accepts either positive reps or duration. |
+| Evidence | Inspection only: initial timed exercise sets use reps=0/duration=30, but training Add Set passes only exercise ID. Timed row renders duration; completion passes only isCompleted, so hidden positive reps satisfy the client guard with visible zero seconds. |
+| Expected behavior | Added timed sets follow the duration-based contract; completing a visible zero-duration timed set must not rely on hidden reps. |
+| Actual behavior | Added timed set shows zero seconds, carries hidden reps=10, and passes the client's positive-reps-or-duration completion guard. Persistence and final server completion were not executed. |
+| Impact | Misleading timed measurements and client completion state; no confirmed backend award or validation bypass is asserted. |
+| Severity | **P2** |
+| Confidence | **High** |
+| Status | `Accepted` |
+| Proposed remediation | Initialize additional sets using exercise modality and validate completion against the visible measurement type; retain normal rep-based behavior. |
+| Regression risk | Initial/additional timed sets, rep-based sets, zero duration, completed-set edits and restoration. |
+| Related tests | `app/test/workout_controller_test.dart`; `app/test/workout_widgets_test.dart` |
+| Missing tests | Add a timed set through the actual training callback, assert reps/duration defaults, and reject zero visible duration without hidden-rep completion. |
+| Depends on | DEFERRED A4, owner supabase-specialist: inspect/test the distinct SQL duration-versus-reps mismatch at `supabase/migrations/20261026000200_authoritative_progression.sql:238` against `20261027000100_exercise_catalog_metadata.sql:362-366`; assert reps=0/duration>0 valid timed completion is consistently handled. Not part of Confirmed backend evidence. |
+| Wave | W2 |
+| Verification method | A5 `flutter-specialist`: exercise timed Add Set and complete callbacks using a recording fake repository; compare with rep-based controls. NOT RUN; client source inspection only, SQL hypothesis deferred to A4. |

@@ -1,7 +1,7 @@
 # Audit Coverage
 
-**Stage:** A1 (matrix opened at A0)
-**Baseline:** `main` @ `e8c7c8e`
+**Stage:** A2 (reconciled documentation-only PARTIAL checkpoint; matrix opened at A0)
+**Baseline:** `main` @ `7eb40f1`
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.
 
@@ -53,22 +53,22 @@ Feature inventory: `workout` 33, `dashboard` 15, `auth` 8, `quests` 7, `onboardi
 
 | ID | Component | Paths | Stage | Status | Reviewer | Evidence source | Known limitation |
 |---|---|---|---|---|---|---|---|
-| C-01 | App bootstrap & DI | `app/lib/main.dart`, `core/config` | A2 | `In Review` | build (A0) | A0 read `core/config/supabase_config.dart` only; `main.dart` not read | Not executed on device |
-| C-02 | Router & shell | `core/router/**` | A2 | `Not Reviewed` | — | — | Deep-link behaviour unverified |
-| C-03 | Theme & design tokens | `core/theme/**`, `ui/candy/**` | A2 | `Not Reviewed` | — | — | Visual fidelity needs screenshots |
-| C-04 | Shared widgets | `ui/widgets/**` | A2 | `Not Reviewed` | — | — | — |
-| C-05 | Localization | `core/localization/**`, `app/lib/l10n/**`, `app/l10n.yaml` | A2 | `Not Reviewed` | — | — | VI/EN parity not machine-checked |
-| C-06 | Auth feature | `features/auth/**` | A2 | `Not Reviewed` | — | — | No live Auth server |
-| C-07 | Onboarding | `features/onboarding/**` | A2 | `Not Reviewed` | — | — | 1,284-line screen, splits needed |
-| C-08 | Dashboard | `features/dashboard/**` | A2 | `Not Reviewed` | — | — | Stats math duplicated server-side |
+| C-01 | App bootstrap & DI | `app/lib/main.dart`, `core/config` | A2 | `Reviewed (static)` | flutter-specialist (A2 original + reconciliation) | A2 sections 2.1,8.2 lead13: initialization failure gate inspected | No device bootstrap execution; absence of retry alone not defect |
+| C-02 | Router & shell | `core/router/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 reconciliation) | Four files; A2 section 8.2 leads8,11-13; summary BUG007 | Live auth callbacks/lifecycle/performance deferred A5; lead10 recovery widget probe remains A2 |
+| C-03 | Theme & design tokens | `core/theme/**`, `ui/candy/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | A2 section 8.2 leads1,2,5,6; BUG004 | Keyboard, hit regions, text-scale/device checks deferred A5 |
+| C-04 | Shared widgets | `ui/widgets/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Four system/status widgets inspected; phase 2.1/8.2 | Not all interaction/semantics paths executed |
+| C-05 | Localization | `core/localization/**`, `app/lib/l10n/**`, `app/l10n.yaml` | A2 | `Reviewed (static)` | ui-ux-specialist, flutter-specialist (A2) | ARCH002 extended; phase 8.2 leads7,22 | Bilingual clipping/device diacritics and screen-reader behavior deferred A5 |
+| C-06 | Auth feature | `features/auth/**` | A2 | `Reviewed (static)` | flutter-specialist, supabase-specialist; qa-reviewer (A2) | Auth forms/providers/repository inspected; phase 8.2 leads9,10,12,13 | Lead10 remains A2 runtime follow-up; no live Auth server |
+| C-07 | Onboarding | `features/onboarding/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Screen/controller inspected; unselected gender label BUG004 | Runtime chip background/large text deferred A5; domain semantics not claimed |
+| C-08 | Dashboard | `features/dashboard/**` | A2 | `Reviewed (static)` | ui-ux-specialist, supabase-specialist (A2) | Unlabeled recent-three KPI BUG005 and quest BUG006 | KPI intended time-window still Needs Verification; domain stats math not executed |
 | C-09 | Workout domain | `features/workout/domain/**` | A4 | `Not Reviewed` | — | — | — |
-| C-10 | Workout controllers | `features/workout/presentation/controllers/**` | A2, A4 | `Not Reviewed` | — | S3 TEST C read | S3 flags carried: `FND-CONC-001` |
-| C-11 | Workout screens/widgets | `features/workout/presentation/{screens,widgets}/**` | A2 | `Not Reviewed` | — | — | — |
-| C-12 | Repositories (client data layer) | `features/*/data/**` | A2, A4 | `Not Reviewed` | — | — | RPC contract verified only statically |
-| C-13 | Quests | `features/quests/**` | A4 | `Not Reviewed` | — | — | Day-boundary logic untested |
-| C-14 | Progression engine | `features/progression/**` | A4 | `Not Reviewed` | — | S3 baseline tests exist | Client preview vs server truth |
-| C-15 | Coach (AI client) | `features/coach/**` | A4 | `Not Reviewed` | — | — | No provider configured |
-| C-16 | Profile | `features/profile/**` | A2 | `Not Reviewed` | — | — | 1,201-line screen |
+| C-10 | Workout controllers | `features/workout/presentation/controllers/**` | A2, A4 | `In Review` | qa-reviewer, flutter-specialist, orchestrator (A2) | A2 client half read; retained seven synthetic probes in A2_PROBES; CONC001/SEC002 narrowed Confirmed | Mixed-stage row: A4 semantics pending, post-await race deferred A5; no whole-row runtime claim |
+| C-11 | Workout screens/widgets | `features/workout/presentation/{screens,widgets}/**` | A2 | `Reviewed (static)` | flutter-specialist (A2 recovery + reconciliation) | Exact manifest phase 2.2, all leads dispositioned in 8.2; INTG004/BUG007 | Timed backend semantics A4, numeric/locale/lifecycle UI runtime A5 |
+| C-12 | Repositories (client data layer) | `features/*/data/**` | A2, A4 | `In Review` | supabase-specialist, flutter-specialist (A2) | A2 client contracts read; INTG002/003/004; phase 8.2 | Live RPC/RLS and A4 semantics not verified; partial reorder/add retry deferred A4 |
+| C-13 | Quests | `features/quests/**` | A2 presentation, A4 domain | `In Review` | ui-ux-specialist, supabase-specialist (A2) | Presentation/provider static review complete; BUG006, ARCH001 client evidence | Domain/day-boundary logic remains A4 |
+| C-14 | Progression engine | `features/progression/**` | A2 display, A4 domain | `In Review` | ui-ux-specialist (A2) | Display half read; ARCH002 copy evidence extended | Engine/reward authority remains A4 |
+| C-15 | Coach (AI client) | `features/coach/**` | A2 client, A4 semantics | `In Review` | ui-ux-specialist, supabase-specialist, flutter-specialist (A2) | Screen/repository static review; INTG003; blanket error-flattening rejected | A4 semantics pending; 4001-character continuation contract test A5 |
+| C-16 | Profile | `features/profile/**` | A2 | `Reviewed (static)` | ui-ux-specialist (A2 original + reconciliation) | Explicit white-on-white BUG004; whole screen previously read | Device rendering/large text and screen-reader behavior A5 |
 | C-17 | SQL: baseline schema | `20261026000100_baseline.sql` | A3 | `Not Reviewed` | — | — | Legacy schema; additive-only |
 | C-18 | SQL: progression | `20261026000200_authoritative_progression.sql` | A3, A4 | `Not Reviewed` | — | S3 TEST D read | `FND-DATA-001`, `FND-ARCH-001` carried |
 | C-19 | SQL: catalog metadata | `20261027000100_exercise_catalog_metadata.sql` | A3 | `Not Reviewed` | — | — | 150 curated rows |
@@ -96,9 +96,10 @@ These are **observations about test infrastructure**, not yet findings. A5 forma
 
 ## 5. Remaining work
 
-All 27 components are inventoried. At A1 close, 3 are `Reviewed (static)` (C-22, C-25, C-26), 1 is
-`In Review` (C-01), 22 are `Not Reviewed`, and 1 is `Out of Scope`. **No component may be described as
-"audited" until its stage closes.**
+All 27 components are inventoried. Historical A1 close: 3 reviewed, 1 in review, 22 not reviewed,
+1 out of scope. At this reconciled PARTIAL A2 checkpoint: **13 `Reviewed (static)`, 5 `In Review`,
+8 `Not Reviewed`, 1 `Out of Scope`**. No whole component is promoted to runtime-verified merely
+because existing widget tests passed. **No component may be described as "audited" until its stage closes.**
 
 Stage-by-stage target: A1 closed C-22, C-25 and C-26; A2 closes C-01…C-05, C-07, C-08, C-16 and the
 presentation half of C-10/C-11/C-12; A3 closes C-17…C-21; A4 closes C-09, C-13…C-15 and re-verifies
@@ -106,3 +107,8 @@ the inherited candidates; A5 closes C-23, C-24 and the G-series gaps; A6 reconci
 
 A1 added no new G-series gap: the missing CI gates it found are recorded as `FND-TEST-001` instead,
 because they are a defect in an existing gate rather than an unmeasured area.
+
+A2 remains PARTIAL despite completed static reconciliation: lead10's focused auth/recovery widget
+assertion remains in A2, and a final executable A3 handoff has not been issued. Mixed A2/A4 rows
+explicitly retain the unreviewed domain half. All deferred runtime investigations have owners and
+target stages in A2_FLUTTER section 8.2; no device/runtime coverage percentage is claimed.

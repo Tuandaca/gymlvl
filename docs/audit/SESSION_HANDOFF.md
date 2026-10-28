@@ -1,6 +1,146 @@
 # Audit — Session Handoff
 
-**Updated:** 2026-10-28 (A1 complete)
+## Current — A2 reconciled PARTIAL documentation checkpoint (2026-10-28)
+
+- **Task/status:** A2 final reconciliation; **PARTIAL**, not stage PASS. Complete-stage acceptance
+  `NOT RUN` pending focused lead10 follow-up and executable A3 handoff. No A3/remediation started.
+- **Agent/base:** server API -> `gymlvl-orchestrator`; `main` @
+  `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`, same remote at entry. User-authorized PARTIAL
+  documentation commit/normal push will follow consistency/QA checks; no history rewrite.
+- **Preservation:** all nine original dirty artifacts backed up and hash-verified at
+  `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-final-backup-20261028-174845`;
+  bundle clone = HEAD, archive/Git counts 549/549. Do not remove backup.
+- **Changed files:** `docs/audit/{MASTER_FINDINGS.md,FINDINGS_REGISTER.json,AUDIT_COVERAGE.md,
+  SESSION_HANDOFF.md,phases/A2_FLUTTER.md,phases/A2_PROBES.md}` and
+  `docs/planning/{TASK_BOARD.md,SESSION_HANDOFF.md,CHANGELOG_AI.md}`. No product/permanent-test edits.
+- **Dispositions:** all 22 original leads explicitly dispositioned with subclaims/owners/targets in
+  A2_FLUTTER section 8.2. Seven new IDs: BUG004-007 and INTG002-004. Lead10 remains A2 follow-up;
+  other deferred assertions target A4/A5, not unrecorded or completed runtime checks.
+- **Findings:** 24 total, P0 0/P1 3/P2 14/P3 5/P4 2; Confirmed 4/High 18/Medium 2.
+  Accepted 20/Needs Verification 2/Fixed 1/False Positive 1. CONC001 narrowed to queue cycle,
+  P2/Confirmed/Accepted; post-await race separately deferred A5, not Confirmed. SEC002
+  P1/Confirmed/Accepted only for synthetic cross-owner controller adoption. DATA001 remains
+  P1/Medium/Needs Verification; no server XP duplication confirmation. BUG005 is the other
+  Needs Verification finding (unlabeled recent-three KPI, intended window still unclear).
+- **Coverage:** 13 Reviewed (static), 5 In Review (mixed A2/A4 scope), 8 Not Reviewed, 1 excluded.
+  No whole component runtime-verified. UI/keyboard/hit regions/device/live callbacks have explicit
+  deferred checks; static reading is not runtime PASS.
+- **Current validation at 7eb40f1:** `flutter analyze --no-pub` -> `No issues found! (ran in 8.5s)`;
+  `dart format --output=none --set-exit-if-changed lib test` -> `Formatted 125 files (0 changed) in
+  1.28 seconds.`; `flutter test --no-pub --reporter expanded` -> `+126: All tests passed!`; all exit 0.
+  Retained successful seven controller probes not rerun; source/control evidence independently
+  re-read. Prior command/output preserved in A2_PROBES, not a current-session runtime PASS.
+- **Checkpoint QA/consistency:** qa-reviewer `ses_e7dca47b2ffeJhwQNOqAQJbgY0` found no blocking
+  documentation contradiction by read/grep inspection, confirmed 22 dispositions and classification
+  limits; whole-stage `NOT RUN`. Its Git scope/whitespace commands passed, no denied Node retried.
+  Orchestrator Node check -> `MD=24 JSON=24 fields=22 old IDs=17 dispositions=22 errors=0`, correct
+  13/5/8/1 coverage and nine allowed paths, exit 0; `git diff --check` exit 0 (`PASS`).
+- **Temp disposal:** metadata-only inventory: 1,351 files / 1,369,316,592 bytes, zero observed reparse
+  points in `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-probe-20261028`. Task attribution
+  supported, exclusivity/disposal safety not established. No content read or directory deleted.
+  User must review exact directory/inventory and explicitly authorize exact-path removal; no broad
+  cleanup. Metadata CSV lives in the verified backup directory. See A2_PROBES disposal section.
+- **Decisions:** no architecture, schema, licensing, dependency or permission change. Latest user
+  explicitly authorizes a normal PARTIAL documentation commit/push, superseding earlier prohibition.
+- **Remaining prerequisite:** retained focused synthetic widget assertion for stale shared auth-action
+  error on entry to password recovery (lead10), independent QA of that assertion, then final A2
+  completion assessment and exact A3 handoff. This is unfinished work, not an external credential block.
+
+**One next action — A2:** delegate flutter-specialist to retain an isolated synthetic widget probe
+for failed sign-in then recovery navigation: password-update failure copy must not appear before
+submission. No real account or product edit. QA reviews result via supported read-only capabilities;
+then decide stage completion. Do not restart reviewed modules or rerun successful controller probes
+without a concrete reason. Do not start A3 or remediation.
+
+## Historical partial handoffs (superseded current-state/authorization lines below)
+
+**Updated:** 2026-10-28 (A2 partial recovery checkpoint)
+**Current task:** A2 — Flutter deep audit, **PARTIAL**, not stage PASS.
+**Current verification status:** `NOT RUN` for complete A2 acceptance; individual checks below.
+**Current commit:** `main` @ `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`, equal to `origin/main`
+at recovery entry; tree clean then, documentation changes now uncommitted.
+**Active agent:** API session `ses_e7e81bc84ffeWkbb0tV5jo0jwp` -> `gymlvl-orchestrator`.
+**Current next action:** A2 retained controller probes (see recovery section immediately below).
+
+## A2 recovery — authoritative current state
+
+**Continuation, 2026-10-28:** User authorized A2 completion and preservation of eight prior dirty
+artifacts. Verified external backup at
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-backup-20261028-171019`: bundle clone
+equals HEAD, archive/Git counts 549/549, eight changed-file hashes match. `A2_PROBES.md` is now an
+additional untracked audit artifact (nine authorized paths total).
+
+Current continuation checks at `7eb40f1`: `flutter analyze --no-pub` -> `No issues found! (ran in
+5.3s)`; `dart format --output=none --set-exit-if-changed lib test` -> `Formatted 125 files (0 changed)`;
+`flutter test --no-pub --reporter expanded` -> `+126: All tests passed!`; inline Node register check
+-> `MD=17 JSON=17 mismatches=0`; `git diff --check` -> no whitespace errors. All exit 0 (`PASS`).
+
+Synthetic retained controller probe, independently rerun by orchestrator in minimal temp app:
+`flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart` -> `+7: All tests
+passed!`, exit 0. Assertions reproduce bounded active discard timeout with no additional cancel,
+and B adopting A's backup for both direct restore and `checkForActiveWorkout` under null/error
+remote; direct-cancel, inactive-discard, and same-owner controls pass. Read-only QA independently
+reviewed source/probe and supports these narrow observations; real UI/account/RLS and post-await
+race remain untested. Finding classifications intentionally unchanged pending full triage.
+
+**Safety:** first temporary test copied entire `app` to
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-probe-20261028` and may include secret
+files. Do not inspect or share its contents; removing that task-created copy requires explicit user
+approval. Minimal copy is separate. No real user data was used in the synthetic tests.
+
+**Current next action (A2):** sequentially triage phase section 5's 22 leads, incorporate probe
+evidence and narrow confidence updates consistently in both registers, resolve or explicitly defer
+each lead, complete named coverage and final QA. Post-await identity race still needs deterministic
+probe or explicit deferral. Then run current analyzer/tests/format/synchronization and assess seven
+acceptance criteria. Do not begin A3 or remediation.
+
+No A2 artifacts survived on disk from the interruption. Historical reports were recovered, not
+restarted. `phases/A2_FLUTTER.md` now preserves reviewer/session provenance, exact newly read workout
+paths, 22 untriaged leads, concurrency subclaims, current checks and remaining acceptance gaps.
+
+- **Registered findings:** 17 (P0 0, P1 4, P2 6, P3 5, P4 2; Confirmed 2, High 13, Medium 2).
+  Status: Needs Verification 3, Accepted 12, Fixed 1, False Positive 1. Added FND-SEC-002 (unchecked
+  cross-owner local backup, independently inspected by QA); CONC-001/DATA-001 evidence appended,
+  confidence unchanged. Prior 16-finding table below is A1 history, not current totals.
+- **New work:** sequential QA concurrency/isolation review, Flutter workout presentation review,
+  context/coverage consistency review; no child task remains in flight.
+- **Rejected assumption:** signout does not reset controller memory/timers. Auth-ID watch at
+  controller:85-94 resets both. Backup replay is a distinct unchecked-owner path.
+- **Concurrency:** historical deleted test reported stuck discard and queued completion, with
+  repository cancelCalls=0. No retained probe rerun; keep Medium/Needs Verification. Post-await null
+  race is separate and not confirmed; independent QA suggested reconsidering severity after repro.
+- **Client completion:** concurrent calls coalesce; retry uses workout ID. Post-RPC detail fetch may
+  fail separately. No authoritative XP duplication or server idempotency verification was performed.
+- **Coverage:** 3 reviewed / 15 in review / 8 not reviewed / 1 out of scope. All A2-target rows name
+  reviewers, but stage closure is pending candidate reconciliation and focused verification.
+- **Current verification at 7eb40f1:** `flutter analyze --no-pub` -> `No issues found! (ran in 4.2s)`;
+  formatting -> `Formatted 125 files (0 changed) in 0.73 seconds.`; `flutter test --no-pub --reporter
+  expanded` -> `+126: All tests passed!`; all exit 0 (`PASS`). These do not prove missing probes.
+- **Artifact checks:** orchestrator inline Node JSON/MD validator -> `findings MD=17 JSON=17;
+  required fields=22`, zero mismatches, counts 3/15/8/1; `git diff --check` -> no whitespace errors;
+  status -> eight authorized docs only (`PASS`). Independent artifact QA's Node command was
+  `BLOCKED` by `Permission denied: shell`; no permission change/bypass. Its Git checks ran.
+- **Changed files:** `docs/audit/phases/A2_PROBES.md`, `docs/audit/phases/A2_FLUTTER.md`, `docs/audit/MASTER_FINDINGS.md`,
+  `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/AUDIT_COVERAGE.md`, this file;
+  `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`.
+- **Authorization:** current user supersedes section 6's historical no-commit/no-push clause only
+  after A2 completion; no rewrite. No Git checkpoint commit or push made while incomplete.
+- **Decisions:** no architecture/schema/dependency/permission decision. Top current A2 state takes
+  precedence over historical A1 baseline/next-action blocks retained below.
+- **Blockers:** no external blocker established. Unfinished focused reproduction, candidate triage,
+  UI runtime gaps, register reconciliation and final independent QA prevent completion. Exact final
+  A3 prompt is still outstanding; **do not begin A3**.
+
+**Exact next action (A2):** Sequentially delegate a retained audit-only probe outside permanent app
+tests, importing the real controller. Use promptly completing cancellation with call counters to
+isolate the discard enqueue cycle; include no-active/direct-cancel controls. Add account-B restoration
+of account-A snapshot with remote null/error and same-owner controls. Run with `--no-pub`, quote
+results, and preserve harness/instructions. Then reconcile the 22 leads in A2 phase section 5, close
+only genuinely covered components, obtain QA, draft exact A3 handoff, check all seven acceptance
+criteria, and only then commit/push normally on main. No product change or remediation.
+
+## Historical A1 close (preserved)
+
 **Stage:** A0 `PASS`; A0.1 `PASS`; **A1 `PASS`** (10 new findings, 2 inventory corrections)
 **Baseline:** `main` @ `c9cc764` = `origin/main` after the A1 checkpoint push; A1 was measured at
 `e8c7c8e`, which is still the parent commit
@@ -16,7 +156,7 @@ not authorized until the instruction in §6 is given)
 | A0 | Bootstrap, baseline, inventory, plan | `PASS` — `phases/A0_BOOTSTRAP.md` |
 | A0.1 | Governance fix + A0 checkpoint | `PASS` — `phases/A0_1_GOVERNANCE.md` |
 | A1 | Architecture, dependencies, configuration, infrastructure, CI | `PASS` — `phases/A1_ARCHITECTURE.md` |
-| A2 | Flutter app, state, lifecycle, concurrency, navigation | `READY` — not started |
+| A2 | Flutter app, state, lifecycle, concurrency, navigation | In progress — partial recovery; see current section above |
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `PLANNED` |
 | A4 | Workout lifecycle, XP, progression, rewards | `PLANNED` |
 | A5 | Tests, performance, reliability, observability | `PLANNED` |
