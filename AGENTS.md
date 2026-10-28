@@ -3,8 +3,9 @@
 **Status:** Active
 **Established:** 2026-10-28
 **Applies to:** Every AI agent and human contributor working in this repository.
-**Baseline:** branch `main` — the only development branch — consolidation checkpoint
-`17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`, 2026-10-28).
+**Baseline:** branch `main` — the only development branch. Consolidation checkpoint
+`17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`, 2026-10-28); current `main` HEAD is
+`b4063c6` — confirm with `git rev-parse main` rather than trusting this line.
 
 This file is an operating contract, not product documentation. Product context lives in
 `docs/planning/PROJECT_CONTEXT.md`; current work state lives in
@@ -28,6 +29,45 @@ This file is an operating contract, not product documentation. Product context l
 7. **No AGPL code reuse.** OpenGym repositories are behavioral references only. Do not copy,
    translate, port, or paraphrase AGPL source, prompts, catalogue text, or assets. Clean-room
    implementation from a written specification requires an approved licensing decision.
+8. **Language policy.** Communicate with the user in Vietnamese; keep code, configuration, and
+   technical records in English. See §0.1. This rule is permanent and applies to every session.
+
+### 0.1 Language policy (permanent)
+
+Established 2026-10-28. It applies to every agent, every session, and every handoff.
+
+**A. User-facing communication — Vietnamese.**
+
+- Answer the user in Vietnamese by default: final reports, progress summaries, explanations,
+  recommendations, warnings, blockers, and next steps.
+- Keep technical terminology in place where translation would reduce precision (for example
+  `migration`, `RLS`, `idempotent`, `PASS`/`FAIL`).
+- If the user writes in, or explicitly requests, another language, follow that request for that
+  conversation.
+
+**B. Technical artifacts — English.**
+
+- Source code, identifiers, comments, configuration, agent definitions, rules, skills, workflows, and
+  technical documentation stay in English.
+- Architecture documents, API specifications, test documentation, task boards, changelogs, decision
+  logs, and session handoffs stay in English.
+- Do not translate existing technical files, and do not rewrite an English document into Vietnamese
+  as a side effect of an unrelated task.
+
+**C. Human action guides — Vietnamese.**
+
+- A document whose purpose is to make a human perform a manual operation is written in Vietnamese:
+  setup guides, account and credential entry, manual deployment, environment setup, troubleshooting
+  that needs the user to act, and device or build instructions.
+- Inside such a guide, commands, file paths, API names, and identifiers remain unchanged.
+- Create one only when the user actually needs to act; do not produce speculative guides.
+
+**D. Enforcement.**
+
+- The orchestrator applies A when reporting and C when writing a guide; subagents return technical
+  content in English for the orchestrator to present.
+- The full policy lives only here. Agents reference this section instead of restating it, and skills
+  must not duplicate it.
 
 ## 1. Mandatory read order before implementation
 

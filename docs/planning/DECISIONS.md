@@ -194,6 +194,103 @@ is the canonical remote ref, and local and remote `main` must match after every 
 (Flutter 126/126, SQL 10/10, Edge 15/15, analyze clean, format clean); `origin/main` verified at the
 pushed commit. Full record in `SESSION_HANDOFF.md`.
 
+## D-015 — Project-local OpenCode agent system in `.opencode/`
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28, S2)
+**Context:** S1 selected 20 skills and designed seven agents, but the repository had no
+`opencode.json` and no `.opencode/` directory. The configuration surface had to be confirmed against
+the running OpenCode V2 application rather than assumed.
+**Decision:** Install the agent system project-locally at `.opencode/`: `agents/<name>.md`,
+`skills/<id>/SKILL.md`, `commands/<name>.md`, and `opencode.jsonc` (`$schema`, `default_agent:
+gymlvl-orchestrator`, global permission floor). Agents specify no `model` and inherit the session
+model. Wave 1 installs six skills only.
+**Consequences:** New sessions default to `gymlvl-orchestrator`; existing sessions keep their stored
+agent. The system is versioned with the repository and visible for review. No dependency, CI, or
+application change is implied.
+**Evidence:** `.opencode/` files; V1–V8 in `docs/agent-system/WAVE1_IMPLEMENTATION.md`.
+
+## D-016 — `qa-reviewer` and `context-keeper` are read-only
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28, S2)
+**Context:** `AGENT_SKILL_MATRIX.md` gave `qa-reviewer` write access to `app/test/**` and
+`context-keeper` write access to `docs/planning/**`. The S2 instruction classified both as read-only.
+Two agents able to write tests and the task board creates a self-approval path and a multi-writer risk.
+**Decision:** Deny the `edit` action on every path for both agents. `qa-reviewer` may run tests and
+read anything but changes nothing. `context-keeper` drafts handoff text and the orchestrator writes it.
+`gymlvl-orchestrator` is the sole writer of `docs/planning/**` and `docs/agent-system/**`.
+**Consequences:** Tests are authored by implementers and verified by an agent that cannot alter them,
+which makes the gate meaningful. Handoff content has one author. The orchestrator's write scope grows.
+**Evidence:** Agent permission blocks; `qa-reviewer` reported no write capability.
+
+## D-017 — Wave 1 skills are rewritten, not vendored
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28, S2)
+**Context:** The upstream library is MIT at repository level but records mixed per-skill provenance
+(`obra/superpowers`, `vibeship-spawner-skills` Apache-2.0, `affaan-m`), and several skills assume a
+different stack. Verbatim copying would import wrong-stack instructions, script invocations, and
+attribution gaps.
+**Decision:** Each imported skill is a project-native document that keeps the upstream method, removes
+inapplicable stack assumptions and every executable instruction, and credits source path and
+provenance in a footer. `docs/agent-system/THIRD_PARTY_NOTICES.md` is the ledger and is written before
+import. Sub-skill trees are not vendored.
+**Consequences:** Skill text diverges from upstream and must be maintained here. Provenance is
+traceable per file. The Apache-2.0 item remains an open release blocker (O-10).
+**Evidence:** Six `SKILL.md` files; `THIRD_PARTY_NOTICES.md` §3.
+
+## D-018 — Existing `.agent/` and `.agents/teamwork/` are preserved untouched
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28, S2)
+**Context:** A gitignored `.agent/` directory (1,043 files, an older edition of the same library) and
+the tracked `.agents/teamwork/` (120 files) already existed. Installing a third copy silently would
+leave three competing instruction sets.
+**Decision:** Leave both untouched. Do not modify, delete, migrate, or re-import from them. The active
+system lives only in `.opencode/`. `.agent/` stays gitignored.
+**Consequences:** No destructive action on user work. Dead instruction sets remain on disk and must not
+be consulted; `.opencode/` is authoritative.
+**Evidence:** No `.agent/` or `.agents/` file appears in `git status`.
+
+## D-019 — Git write protection is configuration, not prose
+
+**Status:** ACCEPTED (2026-10-28, S2)
+**Context:** `AGENTS.md` §8 forbids automatic commits, pushes, resets, and rebases, but the rule was
+only an instruction to the model.
+**Decision:** Encode it in `opencode.jsonc` as a global permission floor applying to every agent,
+including built-in ones: `deny` for `git push`, `git reset --hard`, `git clean -fd[x]`, and
+`git filter-branch`; `ask` for `git commit`, `git tag`, `git rebase`, `git checkout`, `git switch`, and
+`git stash`.
+**Consequences:** A push cannot be issued by any agent. A commit requires an explicit approval
+decision, which is the "explicit approval" the contract requires. A human who wants to commit directly
+from a shell is unaffected; an agent that needs a history operation must ask.
+**Evidence:** `opencode.jsonc` top-level `permissions`; V2 and V3.
+
+## D-020 — Permanent language policy
+
+**Status:** ACCEPTED (explicit user instruction, 2026-10-28, S3)
+**Context:** The project is Vietnamese-owned but its code, schemas, and planning memory are English.
+Mixing the two per session caused inconsistent reports and risked translating technical records.
+**Decision:** `AGENTS.md` §0.1 is binding and permanent. User-facing communication, progress reports,
+blockers and next steps are Vietnamese. Code, identifiers, configuration, agent definitions, skills,
+workflows, architecture, task board, changelog, decisions and handoff are English. A document whose
+purpose is a manual human operation is Vietnamese, with commands and identifiers unchanged. The full
+policy lives only in `AGENTS.md`; agents reference it instead of restating it.
+**Consequences:** The orchestrator is the translation boundary; subagents return technical English.
+Existing English documents are not retranslated. Changing this policy requires a new decision.
+**Evidence:** `AGENTS.md` §0.1; `.opencode/agents/gymlvl-orchestrator.md` `## Language`; a subagent
+cited "§0.1.D" in S3.
+
+## D-021 — Shell-dependent subagents run sequentially
+
+**Status:** ACCEPTED (2026-10-28, S3)
+**Context:** During S3, four subagents were launched concurrently; the one that needed a shell was
+denied (`"Permission denied: shell"`, its catalog exposed no terminal tool). The same agent, invoked
+alone, executed `git rev-parse` and `git status` successfully. A similar one-off denial occurred in S2
+immediately after an agent file was rewritten.
+**Decision:** Launch shell-dependent subagents one at a time, and retry once sequentially if a
+permission denial appears. Parallelism is reserved for read-only delegations that do not need a shell.
+**Consequences:** Some latency is traded for reliable verification. A recurring denial should be
+reported as a harness defect rather than worked around by widening permissions.
+**Evidence:** `docs/agent-system/S3_VALIDATION_REPORT.md` §4 TEST B and §10 L1.
+
 ---
 
 ## Open decisions
@@ -211,3 +308,5 @@ These remain unresolved and block later milestones:
 | O-07 | Live Supabase project and credential ownership | M2+ verification | Project owner |
 | O-08 | Provenance of the 150 curated exercise texts | Catalog trust / M2 | Project owner |
 | O-09 | Checkpoint tag name and creation approval | M1-01 | Project owner |
+| O-10 | Full Apache-2.0 notice text for the `context-window-management` adaptation, or replacement with an original document | Public release | Project owner |
+| O-11 | Whether `.opencode/` and `docs/agent-system/` are committed together or separately | Next authorized commit | Project owner |

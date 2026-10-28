@@ -7,6 +7,124 @@ test that was not run; distinguish prior-session evidence from current-session e
 
 ---
 
+## 2026-10-28 — S3 validation, language policy, and first infrastructure checkpoint
+
+**Task:** S3 — Multi-agent validation and optimization.
+**Status:** `PASS`
+**Baseline:** `main` @ `b4063c6` at start; checkpoint commit at close.
+**Scope:** Validation, documentation, agent configuration, and an authorized Git checkpoint. No
+application code, SQL, Edge Function, CI, dependency, UI, or media change.
+
+### Added
+
+- `docs/agent-system/S3_VALIDATION_REPORT.md` — agent matrix, skill matrix, five delegation tests,
+  context measurements, regression results, risks, Wave 2 recommendations.
+- `AGENTS.md` §0.1 — permanent language policy (Vietnamese user-facing, English artifacts, Vietnamese
+  human action guides), plus item 8 in §0.
+
+### Changed
+
+- `.opencode/agents/gymlvl-orchestrator.md` — `## Language` block referencing §0.1.
+- `AGENTS.md` — baseline line now names both `17ca562` and the current HEAD, and says to confirm with
+  `git rev-parse main`.
+- `docs/planning/DECISIONS.md` — D-020 language policy, D-021 sequential shell-dependent subagents.
+- `docs/planning/TASK_BOARD.md` — S3 `DONE`, S4 `PLANNED`; M1 unchanged.
+- `docs/planning/SESSION_HANDOFF.md` — current state reset to S3 close.
+
+### Verification
+
+| Command | Result | Status |
+|---|---|---|
+| `flutter analyze` | `No issues found!` exit 0 | `PASS` |
+| `flutter test` | `All tests passed!` 126/126 exit 0 | `PASS` |
+| `dart format --set-exit-if-changed lib test` | `125 files (0 changed)` exit 0 | `PASS` |
+| `npm.cmd test` (SQL) | `PASS 10 SQL verification units against PostgreSQL 17.5` exit 0 | `PASS` |
+| `npm.cmd run test:edge` | `ok | 15 passed | 0 failed` exit 0 | `PASS` |
+| Config JSONC parse | valid, 11 global rules | `PASS` |
+| Agent discovery | 6 subagents invoked/enumerated; primary rejected as a subagent | `PASS` |
+| Read-only enforcement | `qa-reviewer` and `context-keeper` have no edit rule; neither wrote | `PASS` |
+| Delegation TEST A | Invalid XP fixture → `FAIL`, severity Critical | `PASS` |
+| Delegation TEST B | State restored; git commands ran; no writes | `PASS` |
+| Delegation TEST C | Module assessed; Riverpod 3 compatible; 2 risks flagged | `PASS` |
+| Delegation TEST D | `complete_workout` idempotency reviewed; legacy path risk flagged | `PASS` |
+| Delegation TEST E | Routing exercised | `PASS`; new-session `default_agent` binding `NOT RUN` |
+| Deliberate failing test | `No tests ran` → reported `FAIL` | `PASS` |
+
+### Not verified
+
+- `default_agent` binding for a **new** session. This session predates the configuration. `NOT RUN`.
+- Runtime application of the reviewed migration. No database change was made. `NOT RUN`.
+- Wave 2 skills. Not imported by design. `NOT RUN`.
+
+### Findings recorded, not fixed (out of scope)
+
+- `active_workout_controller.dart` L207-215 potential deadlock; L659-670 null dereference after await.
+- `complete_workout` L230 legacy path could double-award a pre-existing row.
+- The invariant "only `complete_workout` writes XP" is imprecise: `initialize_user`, `sync_daily_data`,
+  and `switch_class` also write progression state.
+
+---
+
+## 2026-10-28 — S2 Wave 1: agent system installed (uncommitted)
+
+**Task:** S2 — Multi-agent configuration and skill integration, Wave 1.
+**Status:** `PASS`
+**Baseline:** `main` @ `b4063c6`. Source library pinned at `c4a059bb…`.
+**Scope:** Tooling configuration only. No application code, SQL, Edge Function, CI, dependency, UI, or
+media change. No commit, push, tag, or branch change.
+
+### Created
+
+- `.opencode/opencode.jsonc` — schema, `default_agent: gymlvl-orchestrator`, global Git permission floor.
+- `.opencode/agents/` — 7 agents: `gymlvl-orchestrator` (primary), `flutter-specialist`,
+  `supabase-specialist`, `exercise-catalog`, `ui-ux-specialist`, `qa-reviewer`, `context-keeper`.
+- `.opencode/skills/` — 6 adapted skills: `flutter-expert`, `postgres-best-practices`, `postgresql`,
+  `test-driven-development`, `systematic-debugging`, `context-window-management`.
+- `.opencode/commands/` — 6 commands: `plan`, `orchestrate`, `test`, `audit`, `debug`, `mobile`.
+- `docs/agent-system/THIRD_PARTY_NOTICES.md` — attribution ledger, written before import.
+- `docs/agent-system/WAVE1_IMPLEMENTATION.md` — implementation record and rule mapping.
+
+### Changed
+
+- `docs/planning/DECISIONS.md` — D-015 … D-019 accepted; O-10, O-11 added.
+- `docs/planning/TASK_BOARD.md` — tooling track added; tree-state claim corrected.
+- `docs/planning/SESSION_HANDOFF.md` — current state section added; prior record marked historical.
+
+### Verification (this session)
+
+| Command | Result | Status |
+|---|---|---|
+| `flutter analyze` | `No issues found!` exit 0 | `PASS` |
+| `flutter test` | `All tests passed!` 126/126 exit 0 | `PASS` |
+| Structure | 7 agents, 6 skills with `SKILL.md`, 6 commands | `PASS` |
+| JSONC parse | valid; `default_agent=gymlvl-orchestrator` | `PASS` |
+| Hygiene grep | only the intentional `git push`/`git commit` deny rules matched | `PASS` |
+| Reference integrity | every referenced skill ID and command `agent:` target resolves | `PASS` |
+| `qa-reviewer` deliberate FAIL | `flutter test --plain-name …` → exit 1, `No tests ran` | `PASS` |
+| `context-keeper` restore | read-only state block, no writes | `PASS` |
+| `git status --porcelain=v1` | `?? .opencode/`, `?? docs/agent-system/` only | `PASS` |
+
+### Not verified
+
+- OpenCode `--version` command: the `opencode` binary is not on `PATH`. Version was read from the
+  installed application instead — Desktop ProductVersion `2.2.0`, `opencode-cli.version` `2.2.0`,
+  `opencode-cli.exe` metadata `1.4.4` (inconsistent; noted, not resolved). `NOT RUN` as a command.
+- Wave 2 skills: not imported. `NOT RUN` by design.
+- Migration/policy execution: no database change was made. `NOT RUN`.
+
+### Decisions
+
+D-015 project-local `.opencode/`; D-016 read-only `qa-reviewer` and `context-keeper`; D-017 skills
+rewritten not vendored; D-018 existing `.agent/` and `.agents/teamwork/` preserved; D-019 Git
+protection enforced by permissions.
+
+### Backup
+
+`C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-s2-backup-20261028\` — `main.bundle` verified
+("records a complete history"), plus the four S1 documents.
+
+---
+
 ## 2026-10-28 — Main consolidation and main-only workflow
 
 **Task:** Consolidate `codex/supabase-product-audit` into `main`, commit the nine memory files, and

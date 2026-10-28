@@ -1,12 +1,14 @@
 # GymLvl — Task Board
 
-**Last updated:** 2026-10-28
-**Baseline:** branch `main`, consolidation checkpoint `17ca562` (2026-10-28). `main` is the only
-development branch; the tree is clean and matches `origin/main`.
-**Current milestone:** M1 — NOT STARTED
-**Next proposed task:** **M1-01 — Baseline stabilization and evidence lock**
-**Rule:** Only the task marked `NEXT` may be started, and only after explicit user go-ahead. Do not
-bundle tasks.
+**Last updated:** 2026-10-28 (S3 validation and checkpoint)
+**Baseline:** branch `main` @ `b4063c6` at the start of S3. `main` is the only development branch.
+**Working tree:** clean after the S3 checkpoint commit, which carries the S1/S2/S3 infrastructure.
+**Current milestone:** M1 — NOT STARTED (unchanged)
+**Next task (tooling track):** **S4 — Wave 2 skill import** (`PLANNED`, requires explicit approval)
+**Next product task:** **M1-01 — Baseline stabilization and evidence lock** (`NEXT`, unchanged; not
+authorized yet)
+**Rule:** Only a task marked `NEXT` may be started, and only after explicit user go-ahead. The two
+tracks are independent: S3 does not authorize M1, and M1-01 does not authorize S3. Do not bundle tasks.
 
 ## Status legend
 
@@ -33,6 +35,26 @@ bundle tasks.
 | M7 | Licensed media | `NOT AUTHORIZED` |
 | M8 | iOS/Android release hardening | `PLANNED` |
 | M9 | Optional expansion | `NOT AUTHORIZED` |
+
+## Agent system bootstrap (tooling track, parallel to M1)
+
+Not a product milestone. It configures development tooling only and changes no application code,
+schema, dependency, or design. Full record in `docs/agent-system/WAVE1_IMPLEMENTATION.md`.
+
+| ID | Task | Status | Evidence |
+|---|---|---|---|
+| S1 | Skill library discovery and selection | `DONE` | `SOURCE_AUDIT.md`, `SKILL_SELECTION.md`, `AGENT_SKILL_MATRIX.md`, `S2_IMPLEMENTATION_PLAN.md` |
+| S2 | Wave 1 configuration and skill integration | `DONE` | 7 agents, 6 skills, 6 commands, `.opencode/opencode.jsonc`; V1–V8 recorded |
+| S3 | Validation and optimization on one real task | `DONE` | `S3_VALIDATION_REPORT.md` — 7 agents, 6 skills validated; 5 delegation tests; regression 126/10/15 |
+| S4 | Wave 2 import (remaining 14 skills) | `PLANNED` | Requires approval; ordered list in `S3_VALIDATION_REPORT.md` §9 |
+
+**S3 notes.** Agent discovery, permissions, read-only enforcement, skills, commands and delegation
+were verified at runtime. Two product findings were documented, not patched: a potential deadlock in
+`active_workout_controller.dart` (L4) and the legacy award path in `complete_workout` (L5). Operational
+rule recorded: run shell-dependent subagents sequentially (D-021).
+
+**S4 next action.** Not authorized. When approved, start with `context-management-context-save`, after
+mapping its storage model onto the nine memory files.
 
 ## M1 task table
 

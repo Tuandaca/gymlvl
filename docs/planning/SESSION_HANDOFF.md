@@ -1,15 +1,68 @@
 # GymLvl — Session Handoff
 
-**Updated:** 2026-10-28
-**Last agent:** Git consolidation session
-**Mode:** GIT CONSOLIDATION + documentation. No application, SQL, UI, schema, dependency, or media change.
-**Baseline:** branch `main` — the sole development branch — consolidation checkpoint
-`17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`). The workflow-doc commit containing this file
-is the current `main` HEAD; confirm with `git rev-parse main`.
-**Next proposed task:** **M1-01 — Baseline stabilization and evidence lock** (requires explicit user
-go-ahead)
+**Updated:** 2026-10-28 (S3 validation and checkpoint)
+**Last agent:** OpenCode S3 validation (same session as S1 and S2)
+**Mode:** Validation, optimization, documentation, and an authorized Git checkpoint. No application,
+SQL, UI, schema, dependency, CI, or media change.
+**Baseline:** branch `main`; S3 started at `b4063c6` and ends at the S3 checkpoint commit.
+**Next task:** **S4 — Wave 2 skill import** (`PLANNED`, requires approval). **M1-01** remains the next
+product task and is still not authorized.
 
 ---
+
+## 0. Current state — agent system complete through S3 (newest)
+
+| Item | Value |
+|---|---|
+| S1 discovery | `DONE` — four planning documents under `docs/agent-system/` |
+| S2 Wave 1 install | `DONE` — `.opencode/` with 7 agents, 6 skills, 6 commands, config |
+| S3 validation | `DONE` — `docs/agent-system/S3_VALIDATION_REPORT.md` |
+| Language policy | `AGENTS.md` §0.1, permanent (D-020) |
+| Git | Committed and pushed at the S3 checkpoint; tree expected clean |
+| Backup | `…\Temp\opencode\gymlvl-s2-backup-20261028\` — bundle verified |
+
+**Read first on resume:** `AGENTS.md` §0.1, this section, then `TASK_BOARD.md`.
+
+### Verification at S3 close
+
+| Command | Result | Status |
+|---|---|---|
+| `flutter analyze` | `No issues found!` (exit 0) | `PASS` |
+| `flutter test` | `All tests passed!` 126/126 (exit 0) | `PASS` |
+| `dart format --set-exit-if-changed` | `125 files (0 changed)` (exit 0) | `PASS` |
+| SQL regression (`npm.cmd test`) | `PASS 10 SQL verification units` (exit 0) | `PASS` |
+| Edge tests (`npm.cmd run test:edge`) | `15 passed | 0 failed` (exit 0) | `PASS` |
+| Agent discovery and permissions | 7 agents; QA and context-keeper read-only | `PASS` |
+| Delegation tests A–D | Domain-correct output; no file written | `PASS` |
+| Deliberate FAIL | `No tests ran` → reported `FAIL` | `PASS` |
+
+### Operational rules learned
+
+- **Run shell-dependent subagents sequentially** (D-021). Concurrent launches can lose shell access.
+- Do not trust the S2 note that a new session binds to `gymlvl-orchestrator`; that was **not verified**.
+  Check the active agent at the start of the next session.
+- `context-keeper` and `qa-reviewer` cannot write. The orchestrator applies all planning-document edits.
+
+### Known open items
+
+- L4: potential deadlock in `active_workout_controller.dart` L207-215 and a null dereference at
+  L659-670. Product defect, proposed for an M1/M3 task.
+- L5: legacy `is_xp_calculated=false` path in `complete_workout` L230 may double-award old rows.
+- L6: the invariant "only `complete_workout` writes XP" is imprecise — `initialize_user`,
+  `sync_daily_data`, and `switch_class` also write progression state.
+- O-10: Apache-2.0 notice for the `context-window-management` adaptation. Release blocker only.
+- S4 (Wave 2, 14 skills) is `PLANNED` and requires explicit approval.
+
+### Exact next action
+
+Resume at the next session start by confirming the active agent and a clean tree, then take **M1-01 —
+Baseline stabilization and evidence lock** if the product track is authorized, or **S4** if skill
+import is authorized. Do not start either without explicit go-ahead.
+
+---
+
+> Sections 1–9 below are the **prior** consolidation-session record, preserved as evidence at
+> `17ca562`. They describe history, not the current state.
 
 ## 1. What this session did
 
