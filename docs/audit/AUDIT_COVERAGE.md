@@ -1,6 +1,6 @@
 # Audit Coverage
 
-**Stage:** A5 CLOSED (scoped testing/reliability audit acceptance PASS; explicit failed/blocked/unexecuted gaps)
+**Stage:** A6 CLOSED (scoped reconciliation/roadmap PASS; explicit A5 failed/blocked/unexecuted gaps retained)
 **Baseline:** `main` @ `1763ab5` for A5; PARTIAL614ee7c advances docs only; earlier inventory retains provenance.
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a
 directory is `Not Reviewed`. Coverage measures attention, not correctness.

@@ -1,5 +1,21 @@
 # GymLvl — Task Board
 
+## Current — A6 DONE/CLOSED; remediation NOT STARTED (2026-10-29)
+
+**Task/status:** A6 ONLY; scoped reconciliation/roadmap acceptance PASS/CLOSED, independent final QA
+and consistency checks complete. A1-A5 remain closed, no remediation begun; migration NOT READY.
+**Entry:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal, primary API verified;
+external bundle/bare/archive backup verified559files, A6phase2. Nine authorized docs only.
+**Progress:** all six named agents actually invoked sequentially; material QA flagged missing R0-02
+dependency, corrected.35 findings unchanged; roadmap29 tasks. Brand naming requires product decision.
+**Artifact gate:** A6phase6 retained primary validator ->35 unchanged objects/4 historical closures/
+35 matched MD and roadmap rows/29 tasks/DAG acyclic/old plan exact/coverage26-0-0-1/9paths/errors0;
+A6_VALIDATION_EXIT node=0 diff=0, PASS. Earlier validator failures/corrections retained honestly.
+**Next action:** authorized documentation checkpoint, then await explicit R0-01 safety gate approval
+and subsequent R1-01 SEC002 snapshot ownership authorization; one task at a time. No automatic work.
+
+## Historical A5 state (preserved)
+
 ## Current — A5 DONE/CLOSED; A6 NEXT / NOT STARTED (2026-10-28)
 
 **Checkpoint (2026-10-29):** closure payload mainab19e97bd7c143ee7a140a461d774a4ebfea7443,
@@ -224,7 +240,7 @@ Pre-migration evidence program. Read-only against product code. Authoritative st
 | A3 | Supabase, PostgreSQL, RLS, auth, Edge Functions | `DONE` | Scoped PASS/CLOSED; C17-C21 reviewed with deferred gaps; A3_SUPABASE_SECURITY/A3_SQL_EVIDENCE; 26 findings total, no production certification |
 | A4 | Workout lifecycle, XP, progression, rewards | `DONE` | Scoped PASS/CLOSED; A4_WORKOUT_PROGRESSION/A4_SQL_EVIDENCE;30 findings, explicit gaps; payload84462d0/outcome1763ab5 |
 | A5 | Tests, performance, reliability, observability | `DONE` | Scoped PASS/CLOSED from1763ab5; PARTIAL614ee7c, final phase/evidence/35 findings and26static+1excluded; no remediation |
-| A6 | Reconciliation, verification, triage, remediation plan | `NEXT` | Exact A6 prompt in audit handoff; requires separate authorization, NOT STARTED |
+| A6 | Reconciliation, verification, triage, remediation plan | `DONE` | Scoped PASS/CLOSED; 35 preserved findings, 29 proposed tasks, independent QA; remediation/migration not started |
 
 **A0 notes.** Baseline re-verified at `9c8e142`: analyze clean, 126/126 Flutter, 10/10 SQL, 15/15 Edge.
 Six findings recorded — `FND-CONC-001` (P1), `FND-DATA-001` (P1), `FND-ARCH-001` (P2),

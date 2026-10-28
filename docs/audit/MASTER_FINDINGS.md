@@ -1,5 +1,11 @@
 # Master Findings
 
+**A6 reconciliation (2026-10-29):** all35 finding objects/classifications/history retained; no
+promotion, fix or reclassification. Proposed per-ID owners/tasks/priority and distinct-root
+relationships are in `REMEDIATION_PLAN.md` and `phases/A6_RECONCILIATION.md`; prior wave fields are
+historical, not implementation authorization. A6 scoped acceptance PASS/CLOSED after independent
+material/final QA inspection and phase6 artifact validation; not product correctness or a fix.
+
 **Stage:** A5 CLOSED — scoped testing/reliability audit acceptance PASS; explicit failed/blocked/unexecuted gaps retained.
 **Baseline:** `main` @ `1763ab55e8da994bc1d854ad8fd2cd2299678b45` (`1763ab5`), A5 product/audit entry. Documentation writer enters `614ee7cb6f99846b00fd71eec43637cb296268be`.
 **Counts:** 35 findings — P0: 0, P1: 3, P2: 24, P3: 6, P4: 2. Confirmed: 16, High: 18, Medium: 1, Low: 0.

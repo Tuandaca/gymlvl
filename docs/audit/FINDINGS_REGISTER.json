@@ -2,7 +2,8 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A5 (CLOSED; scoped testing/reliability audit acceptance PASS; explicit failed/blocked/unexecuted verification gaps, not production certification)",
+  "stage": "A6 (CLOSED; scoped reconciliation and roadmap acceptance PASS; no fixes or migration, migration readiness NOT READY)",
+  "a6_reconciliation": {"date":"2026-10-29","entry_commit":"6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3","classification_changes":[],"new_findings":[],"plan_reference":"docs/audit/REMEDIATION_PLAN.md","history":"All prior finding objects and nested histories preserved; old wave fields remain historical. Proposed owner-task mapping does not authorize remediation.","acceptance":"PASS scoped audit reconciliation and roadmap; final QA inspection and phase6 artifact validator, not product/runtime certification","validation":"A6_ARTIFACT_CHECK findings=35 unchanged_objects=35 unchanged_closures=4 md_classes=35 roadmap_rows=35 unique_ids=35 tasks=29 dag=acyclic old_plan=exact coverage=26/0/0/1 allowed_paths=9 errors=0; node=0 diff=0","next_action":"Seek separate approval for R0-01 safety gate, then R1-01 SEC002 snapshot ownership; no automatic remediation or migration"},
   "history_note": "a4_closure/a4_review, a3_closure and closure retain complete A4/A3/A2 history, not current A5 closure claims. Six amended findings preserve exact entire pre-A5 objects in historical_pre_a5, including older nested histories/reviews. All other24 prior finding objects remain JSON-deep-equivalent; all30 prior IDs survive. Five narrow confidence/status promotions and five new IDs do not imply product fixes or production certification.",
   "a5_closure": {
     "date": "2026-10-28",

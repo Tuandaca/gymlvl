@@ -1,5 +1,37 @@
 # Audit — Session Handoff
 
+## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
+
+- **Task/status:** A6 only; scoped reconciliation/roadmap acceptance PASS/CLOSED after material and
+  final independent QA inspection and current artifact validation. Migration readiness NOT READY.
+  A1-A5 remain closed. No remediation, W0/W1 implementation or migration started.
+- **Commit:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean and remote-equal at entry;
+  API gymlvl-orchestrator verified. D-013 bundle/bare/archive backup verified559files, A6phase2.
+- **Owned files:** docs/audit/phases/A6_RECONCILIATION.md, docs/audit/REMEDIATION_PLAN.md,
+  docs/audit/MASTER_FINDINGS.md, docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md,
+  docs/audit/SESSION_HANDOFF.md, docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md,
+  docs/planning/CHANGELOG_AI.md. Nine audit/planning docs only; no application or configuration changes.
+- **Progress:** all six required agents invoked sequentially, actual sessions in A6phase2; material QA
+  found R5-01 missing R0-02 dependency, corrected and validated. Final artifact-only QA and context
+  review found no material blocker; no independent QA runtime or Node execution claimed.
+  Roadmap maps35 IDs into29 tasks; explicit migration readiness NOT READY and legal/provenance/gateway
+  conditions retained. No existing35 classifications/history changed. Historical
+  BUG003 naming proposals `GymLevel`/`gymlvl` conflict with M1-02 `GymLvl`; product decision required
+  before remediation, no A6 brand choice. Stale A0 roadmap explicitly provisional, being reconciled.
+- **Decisions/blockers:** no material architecture/plan decision or scoped audit blocker. Real
+  independent SQL sessions/fullJWT stack and actual device/network remain historical unverified gaps;
+  no production prerequisite. Prior A5 UI probe FAIL retained, not a blanket product failure.
+- **Verification:** retained A6phase6 primary Node/PowerShell validator ->`A6_ARTIFACT_CHECK findings=35
+  unchanged_objects=35 unchanged_closures=4 md_classes=35 roadmap_rows=35 unique_ids=35 tasks=29
+  dag=acyclic old_plan=exact coverage=26/0/0/1 allowed_paths=9 errors=0`, `A6_VALIDATION_EXIT node=0
+  diff=0`. Initial five validator failures/corrections retained, no product/data change. Specialist
+  roadmap validator ->categories29/order29/historyidentical/errors0 exit0; initial failures retained.
+- **Next action:** complete authorized A6 docs checkpoint/remote check, then await explicit approval
+  for R0-01 safety checklist and subsequent R1-01 SEC002 snapshot ownership, one task at a time.
+  No runtime suites rerun solely for A6; stop before W0/W1/remediation/migration execution.
+
+## Historical A5 closure and A6 entry prompt (preserved)
+
 ## Current — A5 PASS/CLOSED; A6 NOT STARTED (2026-10-28)
 
 **Checkpoint outcome (2026-10-29):** closure payload main

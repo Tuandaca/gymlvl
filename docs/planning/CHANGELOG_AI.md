@@ -2,6 +2,46 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — A6 scoped audit PASS/CLOSED
+
+- Final independent QA/context inspections found no material blocker after R0-02 readiness dependency
+  correction; stale A6 NEXT audit-track row reconciled. QA/keeper did not independently rerun Node
+  or runtime tests; inspections are not runtime PASS. Exact sessions/results in A6phase2/7.
+- 35 finding objects/classifications and all nested history unchanged; roadmap29 tasks, acyclic DAG,
+  historical plan retained exactly; primary A6phase6 validator node0/diff0. Coverage26static/0/0/1.
+- Migration NOT READY; safety/privacy/award/provenance/affected-migration verification gates and
+  explicit unresolved naming conflict retained. No material decision, product/config/schema/test edit,
+  production/secret access, remediation or migration. A5 UI FAIL and blocked runtime gaps retained.
+- Authorized docs checkpoint/remote verification follows. Recommend user separately authorize R0-01
+  safety checklist and then R1-01 SEC002 snapshot ownership, one scoped task at a time; no automatic fix.
+
+## 2026-10-29 — A6 roadmap and material QA
+
+- Sequential exclusive roadmap writer mapped35 unchanged findings to29 task IDs, W0-W5 with owners,
+  concrete acceptance/dependencies/recovery, migration readiness NOT READY and exact proposed order.
+  A0 plan retained verbatim as historical appendix. No classification or product change.
+- Independent qa-reviewer material inspection found R5-01 omitted R0-02 security-policy dependency;
+  corrected, no permission bypass. All six actual agent sessions recorded in A6phase2.
+- Retained primary Node validator ->A6_ARTIFACT_CHECK findings35/unchangedObjects35/closures4/
+  md35/roadmapRows35/unique35/tasks29/DAGacyclic/oldplanExact/coverage26-0-0-1/paths9/errors0;
+  A6_VALIDATION_EXIT node=0 diff=0. Five initial setup/label validator FAILs corrected and retained;
+  one found generic path labels, writer made exact task file targets explicit, no code changes.
+- Specialist roadmap category/order validator ->29/29/historyidentical/errors0 exit0; previous regex,
+  Recovery-label and repeated-category-token failures retained in phase6. A1-A5 tests are historical,
+  not rerun or claimed current PASS. Final context/QA and authorized docs checkpoint remain.
+
+## 2026-10-29 — A6 authorized reconciliation start
+
+- A6 only; main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean and origin/main equal; OpenCode API
+  metadata confirms gymlvl-orchestrator. D-013 bundle/bare/archive backup verified559files/tree559,
+  clone equals entrySHA, hashes in A6 phase2. No product/config/agent/dependency/permanent-test edit.
+- Context/Flutter/Supabase/catalogue/UI actual bounded read-only delegations invoked sequentially;
+  session IDs/results in A6 phase2. QA and roadmap pending; all35 findings/history unchanged.
+- Recorded BUG003 `GymLevel`/`gymlvl` versus M1-02 `GymLvl` naming conflict without choosing brand;
+  product decision required before remediation. Prior A0 roadmap skeleton contains superseded proposals.
+- Next A6 roadmap, independent QA, validator and authorized docs-only checkpoint. No W0/W1, fixes,
+  migration, secrets/production, media, installs, full-app Temp copy or prior-directory cleanup.
+
 ## 2026-10-29 — A5 closure checkpoint committed/pushed/synchronized
 
 - Closure payload mainab19e97bd7c143ee7a140a461d774a4ebfea7443, `docs(audit): close A5 testing

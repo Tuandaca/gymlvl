@@ -1,5 +1,33 @@
 # GymLvl — Session Handoff
 
+## Current — A6 PASS/CLOSED; remediation NOT STARTED (2026-10-29)
+
+- **Task/status:** A6 only; PASS/CLOSED for scoped35-ID reconciliation/roadmap/independent QA,
+  not remediation or production certification. A1-A5 closed; migration readiness NOT READY.
+- **Commit:** main6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3 clean/remote equal at entry; actual
+  gymlvl-orchestrator API verified. D-013 external bundle/bare/archive backup verified559files,
+  hashes in A6phase2. No product/permanent-test/CI/config/permission/dependency change.
+- **Owned files:** docs/audit/phases/A6_RECONCILIATION.md, docs/audit/REMEDIATION_PLAN.md,
+  docs/audit/MASTER_FINDINGS.md, docs/audit/FINDINGS_REGISTER.json, docs/audit/AUDIT_COVERAGE.md,
+  docs/audit/SESSION_HANDOFF.md, docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md,
+  docs/planning/CHANGELOG_AI.md. Nine docs only, one writer per file.
+- **Progress:** all six specialists invoked sequentially, sessions in A6phase2. QA flagged R5-01
+  missing R0-02 prerequisite; roadmap corrected. Final artifact QA/context found no material blocker.
+  Preserve35 findings
+  and nested histories. Product naming `GymLevel` versus `GymLvl`
+  proposals conflict; defer brand choice to product owner before BUG003 remediation, no silent choice.
+- **Decisions/blockers:** no material change; independent sessions/JWT gateway/device gaps retained.
+  No production requirement or A6 closure blocker established. A5 UI FAIL remains historical.
+- **Verification:** A6phase6 retained validator ->findings35/objects35 unchanged/closures4 unchanged/
+  MD35/roadmap35/tasks29/DAG acyclic/oldplan exact/coverage26-0-0-1/paths9/errors0;
+  A6_VALIDATION_EXIT node=0 diff=0, PASS. Initial five setup/label failures and corrections retained.
+  Roadmap writer checked category29/order29/historyidentical/errors0, exit0. No runtime suite rerun.
+- **Next action:** complete authorized docs checkpoint/remote check, then await explicit user approval
+  for R0-01 safety gate followed by R1-01 SEC002 snapshot ownership, one task at a time. Stop before
+  any W0/W1/remediation/migration execution.
+
+## Historical A5 closure (preserved)
+
 ## Current — A5 PASS/CLOSED; A6 NOT STARTED (2026-10-28)
 
 **Checkpoint outcome (2026-10-29):** closure payload main
