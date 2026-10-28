@@ -446,4 +446,9 @@ Orchestrator validation on base 7eb40f1 (current execution):
   timed-set defaults/guard and Coach history/answer cap. Inspection is not a runtime test.
 
 Current validation does not close the missing lead10 probe, post-await/device/A4/A5 deferrals or
-server reward verification. The planned commit is explicitly documentation-only and PARTIAL.
+server reward verification. The checkpoint is explicitly documentation-only and PARTIAL.
+
+Git result: `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` on main, nine docs, +1724/-69;
+`git push origin main` -> `7eb40f1..199bf00  main -> main`, exit 0. Remote main equals local full
+SHA via `git ls-remote origin refs/heads/main`; tree empty after push. This child record documents
+that outcome; it does not mark A2 complete. No force push or history rewrite.

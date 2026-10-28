@@ -2,11 +2,18 @@
 
 ## Current — A2 reconciled PARTIAL documentation checkpoint (2026-10-28)
 
+**Checkpoint recorded:** `main` @ `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` (`199bf00`),
+`docs(audit): checkpoint partial A2 reconciliation and retained evidence`; nine docs only.
+`git push origin main` -> `7eb40f1..199bf00  main -> main`, exit 0;
+`git ls-remote origin refs/heads/main` -> same full SHA as local; status empty after push (`PASS`).
+This follow-up documentation record is a child of that checkpoint, not A2 completion. Verify actual
+HEAD/remote on resume; no rewrite or force push used. Tree was clean before this record edit.
+
 - **Task/status:** A2 final reconciliation; **PARTIAL**, not stage PASS. Complete-stage acceptance
   `NOT RUN` pending focused lead10 follow-up and executable A3 handoff. No A3/remediation started.
 - **Agent/base:** server API -> `gymlvl-orchestrator`; `main` @
   `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`, same remote at entry. User-authorized PARTIAL
-  documentation commit/normal push will follow consistency/QA checks; no history rewrite.
+  documentation commit/normal push completed as recorded above; no history rewrite.
 - **Preservation:** all nine original dirty artifacts backed up and hash-verified at
   `C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-a2-final-backup-20261028-174845`;
   bundle clone = HEAD, archive/Git counts 549/549. Do not remove backup.

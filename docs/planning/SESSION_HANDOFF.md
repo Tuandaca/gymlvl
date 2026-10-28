@@ -2,6 +2,11 @@
 
 ## Current — A2 reconciled PARTIAL checkpoint (2026-10-28)
 
+**Git checkpoint:** `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` on main, docs-only PARTIAL;
+`git push origin main` -> `7eb40f1..199bf00  main -> main`, exit 0; `git ls-remote origin
+refs/heads/main` equals checkpoint local SHA; tree empty after push (`PASS`). This SHA records the
+audit checkpoint; this follow-up record may advance HEAD. Confirm actual HEAD/remote on resume.
+
 - **Task/status:** A2 only, PARTIAL. Whole-stage acceptance `NOT RUN`; A3/remediation not started.
 - **Commit/base:** `main` @ `7eb40f1d7e553e9f136abb13f632b8bfb189dc3c`; remote same at entry.
   Latest user authorizes normal PARTIAL documentation commit/push after consistency review; no rewrite.

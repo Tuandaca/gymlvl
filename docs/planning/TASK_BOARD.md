@@ -2,6 +2,10 @@
 
 ## Current A2 reconciliation checkpoint — PARTIAL (2026-10-28)
 
+**Recorded Git checkpoint:** `199bf00` on main (nine docs only), normal push exit 0;
+remote `199bf00271c8038c04a8f8cbdc1fc35e7538e90f` verified equal, tree clean after push.
+This recording change follows that checkpoint; A2 remains PARTIAL, not DONE.
+
 **Current task:** A2 only; all 22 leads now have dispositions in A2_FLUTTER section 8.2.
 **Findings:** 24 total, P1 3/P2 14/P3 5/P4 2; Confirmed 4/High 18/Medium 2. Seven new IDs,
 narrowed CONC001 and SEC002 confirmed scopes; DATA001 still unverified server-side.
