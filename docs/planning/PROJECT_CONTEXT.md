@@ -1,7 +1,7 @@
 # GymLvl — Project Context
 
 **Status:** Durable project memory
-**Last verified:** 2026-10-28
+**Last verified:** 2026-10-29
 **Baseline:** branch `main` (sole development branch), consolidation checkpoint `17ca562`
 (full SHA `17ca562f7d382cdd16e17a414460b8266edcf16b`)
 **Owner:** GymLvl project
@@ -35,9 +35,9 @@ trainer — **without** losing the RPG identity or the existing user history.
 | Previous `main` | `e0038038300d5bfaf3c4747094cf36a132eb8711` (`e003803`) |
 | Remote branch | `origin/main` — pushed and verified at the checkpoint (via `git ls-remote`) |
 | Retained branch | `codex/supabase-product-audit` = `17ca562` (read-only provenance) |
-| Working tree at baseline | Clean (verified 2026-10-28) |
+| Working tree at baseline | Clean at `17ca562` (verified 2026-10-28); **dirty at `b85d674`** (verified 2026-10-29, preserved owner work plus audit-remediation edits) |
 | Tags | None |
-| Tracked files at HEAD | 511 |
+| Tracked files at HEAD | 570 at `b85d674` (511 at `17ca562`) |
 
 **Important:** the M0 audit observed 166 dirty entries on top of `e003803`. Between sessions that
 work was committed as `56c1122` ("feat: add core workout features, Supabase backend functions, and
@@ -81,6 +81,24 @@ in the bootstrap session:
 Limitations: the SQL harness is a single-connection PGlite instance, not a full Supabase stack.
 Android/iOS release builds, device smoke tests, live Supabase, and live AI providers were **not run**
 in this session.
+
+### 4.1 Current session baseline (2026-10-29, `main` @ `b85d674`)
+
+Re-executed during the audit-remediation session; these supersede the counts in §4. The R2 pass
+(A-2, A-3, A-4, A-7, A-8, A-1) re-ran every gate after its changes.
+
+| Check | Command | Result |
+|---|---|---|
+| Static analysis | `cd app; flutter analyze --no-pub` | `PASS` — No issues found (exit 0) |
+| Formatting | `cd app; dart format --output=none --set-exit-if-changed lib test` | `PASS` — 134 files, 0 changed (exit 0) |
+| Flutter tests | `cd app; flutter test --no-pub` | `PASS` — 200/200 at entry; 215/215 after A8; 221/221 after R2 |
+| SQL regression + ACL | `cd tools/db-tests; node run.mjs` | `PASS` — 12 units + 365 ACL assertions (exit 0) |
+| Edge tests | `cd tools/db-tests; node edge-tests.mjs` | `PASS` — 44/44 (exit 0) |
+| Android merged manifest | `node tools/android-verify/run.mjs` | `PASS` — `INTERNET` direct child, label `GymLvl` (exit 0) |
+| Release APK / iOS / hosted / live Auth | `flutter build apk --release`, Xcode, hosted project | `NOT RUN` — signing keys, Windows host, `O-07` |
+
+This file is a durable snapshot, not a live status feed. When the numbers above disagree with a
+freshly executed command, the command wins (§7 precedence rule 1) and this section must be updated.
 
 ## 5. Backend facts
 
@@ -142,8 +160,8 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 | `PROJECT.md` milestone table says M2/M5 `IN_PROGRESS` | `docs/IMPLEMENTATION_STATUS.md` says they are complete; the milestone numbering in `PROJECT.md` is a different, older plan. |
 | Original master plan says 5,632 OpenGym exercises | Current upstream catalogue is 6,554. |
 | M0 report filename `GYMLVL_OPENGYM_MIGRATION_MASTER_PLAN.md` | Actual file is `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` (Windows is case-insensitive). |
-| Android/iOS display names | Android label is `app`; iOS display name is `App`, bundle name `app`. |
-| Android release networking | `android/app/src/main/AndroidManifest.xml` has no `INTERNET` permission; only debug/profile manifests do. |
+| Android/iOS display names | **Resolved 2026-10-29.** Android `android:label` is `GymLvl`; iOS `CFBundleDisplayName`/`CFBundleName` are `GymLvl`; `pubspec.yaml` description starts with `GymLvl:`. Earlier M0/A5 claims of `app`/`App` are stale. Merged manifest and iOS build still unverified. |
+| Android release networking | **Resolved at source 2026-10-29.** `android/app/src/main/AndroidManifest.xml` declares `android.permission.INTERNET` as a direct `<manifest>` child. Whether the merged release manifest keeps it is unverified: no manifest merger or APK inspection has run on this host. Earlier claims that only debug/profile manifests carry it are stale. |
 
 ## 9. Hard constraints
 

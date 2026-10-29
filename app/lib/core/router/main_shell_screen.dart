@@ -186,7 +186,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'GYMLEVEL',
+                        'GYMLVL',
                         style: TextStyle(
                           fontFamily: CandyFonts.display,
                           fontSize: 18,

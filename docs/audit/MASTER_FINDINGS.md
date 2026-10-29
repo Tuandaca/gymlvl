@@ -1,19 +1,22 @@
 # Master Findings
 
-**Stage:** A7 PARTIAL / IN PROGRESS; B0 complete and R1-01..03 core locally verified. R1-04/07
-actual persistence/isolated-stack verification BLOCKED; R1-05/06 source partial/runtime gates BLOCKED.
-No B2+ implementation or migration-ready claim; migration readiness remains NOT READY.
-**Baseline:** `main@57e4e73e88f7099ec29a9d075964817f4db5470d`; expected source/platform/docs changes preserved.
+**Stage:** R2 PARTIAL; A-2/A-3/A-4/A-7/A-8 complete locally; A-1 duplicate-award guard implemented
+and regression-tested, production counts/backfill BLOCKED. Release APK, iOS, hosted Edge and live
+Auth are NOT RUN.
+**Baseline:** `main@b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc`; tree dirty (owner work preserved).
 **Counts:** 35 findings — P0: 0, P1: 3, P2: 24, P3: 6, P4: 2. Confirmed: 16, High: 18, Medium: 1, Low: 0.
-**Status:** 3 `Needs Verification`, 22 `Accepted`, 8 `Fixed`, 2 `False Positive`.
+**Status:** 3 `Needs Verification`, 12 `Accepted`, 18 `Fixed`, 2 `False Positive`.
+**Authority:** `docs/audit/FINDINGS_REGISTER.json` is canonical. This Markdown keeps the A7 per-ID
+narrative as history; it is not a live status feed. R2 evidence: `docs/audits/codebase-health/REMEDIATION_EXECUTION.md` §8.
 
-SEC002/CONC001/INTG002 become `Fixed` only for repository/local verification; severity/confidence
-unchanged. BUG001/BUG002 remain `Accepted`/High: source corrections plus10 release-source tests
-do not satisfy required Gradle merged-manifest/signing/runtime acceptance. Exactly these five
-records changed; their entire previous objects, including nested history, are exact in JSON
-`historical_pre_a7`. All30 other objects/raw spans, including four committed B0 histories, remain
-unchanged. Prior closure metadata and B0 `a7_review` are historical; current `a7_b1_review` supersedes
-their stage wording. First per-ID tables are current; expandable pre-B1 text is historical.
+A7 history: SEC002/CONC001/INTG002 became `Fixed` only for repository/local verification;
+severity/confidence unchanged. BUG001/BUG002 stayed `Accepted`/High at that checkpoint. Exactly those
+five records changed; their entire previous objects, including nested history, are exact in JSON
+`historical_pre_a7`. All other objects/raw spans, including the committed B0 histories, remain
+unchanged. Prior closure metadata and the B0 `a7_review` are historical; `a7_b1_review` supersedes
+their stage wording. First per-ID tables are the A7 snapshot; expandable pre-B1 text is historical.
+R2 later moved BUG001, BUG003, BUG006-009, INTG001, GOV005 and DATA001 to `Fixed` and added an
+`r2_review` object to each changed finding (see the JSON).
 
 Implementer: `flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94`; independent QA:
 `ses_e7c4250a1ffeXk30ceIhMb3Jvk`. SEC002 real RED foreign adoption/overwrite led to31 new tests;
@@ -1052,7 +1055,7 @@ no device or accessibility execution is claimed here. P3 / High / `Accepted` rem
 | Origin | A1 |
 | Severity | **P3** |
 | Confidence | **High** |
-| Status | `Accepted` |
+| Status | `Fixed` (documentation-only) |
 | Wave | W4 |
 | Verification | Read the invariant and every `AT TIME ZONE` expression in the migrations. Static |
 
@@ -1081,6 +1084,12 @@ the invariants section is edited once.
 **Tests.** None applicable. A4 should assert the day-boundary behaviour for a non-default zone.
 
 **Dependencies.** A4 owns quest/streak correctness; sequence the wording after it.
+
+**A8 review.** Documentation-only fix (R2-06): `ARCHITECTURE.md:88` invariant 7 restated to
+match the existing per-user implementation which uses `coalesce(tz,'Asia/Ho_Chi_Minh')` at
+migration L198/L241/L310-312. No behavior change, no product decision needed (code already
+implements per-user timezone). Day-boundary SQL tests for non-default zones remain
+NOT RUN — supported isolated PostgreSQL stack absent (R1-07 BLOCKED).
 
 ---
 

@@ -31,7 +31,7 @@ class ConfigurationApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GymLevel setup',
+      title: 'GymLvl setup',
       debugShowCheckedModeBanner: false,
       theme: CandyTheme.theme,
       darkTheme: CandyTheme.darkTheme,
@@ -49,7 +49,7 @@ class ConfigurationApp extends StatelessWidget {
                     const Icon(Icons.fitness_center, size: 56),
                     const SizedBox(height: 24),
                     Text(
-                      'GYMLEVEL',
+                      'GYMLVL',
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
                     const SizedBox(height: 16),

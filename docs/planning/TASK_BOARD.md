@@ -1,6 +1,63 @@
 # GymLvl — Task Board
 
-## Current — A7 PARTIAL; verified core and blocked B1 verification (2026-10-29)
+## Current — R2 controlled remediation executed locally; release/live gates open (2026-10-29)
+
+**Scope:** owner-approved A-2, A-3, A-4, A-7, A-8 plus conditional A-1; one batch at a time,
+smallest safe change, regression test per fix.
+**Baseline:** `main` @ `b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc`, tree dirty (owner work preserved).
+**Entry gates:** analyze 0, format 129→134 files / 0 changed, full suite 200→215, SQL 11 units +
+365 ACL, Edge 36/44 then 44/44 after the runner fix, Android manifest gate absent.
+**Fixed/verified this batch:**
+- A-2 `FND-INTG-001` Fixed — `site_url`/allowlist/`config.example.json`/docs aligned to
+  `--web-port 8080`; new `auth_redirect_config_test.dart` 6/6.
+- A-3 `FND-BUG-001` Fixed — real `:app:processReleaseMainManifest` → `BUILD SUCCESSFUL`; merged
+  manifest has direct `INTERNET`, package/label correct; `tools/android-verify` 8/8 + gate exit 0;
+  CI job added (NOT RUN).
+- A-4 register synced — 12 findings gained `r2_review`; 35 IDs preserved; counts 18 Fixed / 12
+  Accepted / 3 NV / 2 FP.
+- A-7 `FND-BUG-003` Fixed — `GymLvl`/`GYMLVL` across app, l10n, docs, CI; widget + adversarial tests
+  31/31; technical identifiers unchanged.
+- A-8 `FND-GOV-005` Fixed — `app/analysis.txt` untracked, ignored, local 84,864-byte copy preserved.
+- A-1 `FND-DATA-001` Fixed in repository scope — additive migration `20261029000200` blocks a second
+  award when `xp_logs` evidence exists; RED→GREEN SQL regression (12 units + 365 ACL).
+**Final gates:** analyze 0; format 134 files 0 changed; full 221/221; SQL 12 units + 365 ACL; Edge
+44/44; Android manifest gate exit 0; workflow YAML parsed after fixing a joined `steps:` line.
+**Still blocked:** production counts/backfill for DATA-001 (`O-07` + operator approval); release
+APK/signature (`GYMLVL_RELEASE_*` absent); iOS build (Windows); hosted Edge and live Auth round trips;
+remote CI run.
+**Carried:** `FND-TEST-001` Accepted (CI job unproven), `FND-BUG-002` Accepted (signing),
+`FND-BUG-004` Accepted (partial contrast); 3 NV and 2 FP unchanged.
+**Next action:** owner approves the `REMEDIATION_EXECUTION.md` §9.4 commit manifest (Commit A 19 files,
+Commit B 39 files), then the push that triggers CI; separately approves `O-07` read-only at-risk
+counts. **CI at `b85d674` is currently red** in `database-and-edge`; the fix is in the pending batch and
+is unproven remotely. No further remediation batch starts automatically.
+
+## Historical A8 — remediation batch executed; platform gates blocked (2026-10-29)
+
+**Scope:** owner-requested verification-first remediation of the 35-finding register; one group at a
+time, smallest safe change, regression test per fix. No migration, config, permission, commit or push.
+**Baseline:** main b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc, tree dirty with preserved owner work.
+**Entry:** analyze0, format129/0 changed, full200pass; SQL11+ACL365; Edge36/44 (8x503 = missing
+SUPABASE_* env, handler fail-closed, not a product defect).
+**Fixed this session:** BUG002 Android/iOS names, BUG003 pubspec, BUG004 partial profile contrast,
+BUG006 quest fallbacks/progress, BUG007 summary deep link +500XP +level defaults, BUG008 recovery
+error scope, BUG009 CandyButton keyboard, TEST001 partial source gate, SEC004 edge-runner env. New
+tests summary5/reset1/keyboard2/quest3, +3 release config, +1 200%-text contrast.
+**Re-verified already fixed:** BUG001 source INTERNET, SEC002/CONC001/INTG002 61 focused tests,
+SEC003 SQL+ACL (5 findings).
+**Still open:** GOV005 — `app/analysis.txt` is tracked (`git ls-files app/analysis.txt`), needs A-8.
+**Final:** analyze0, format133/0 changed, full215/215pass, SQL11+ACL365, Edge44/44.
+**Reproduced, BLOCKED on approval:** DATA001 second award total_xp100->110/level1->2/rewards0->1/
+ledger1->3; INTG001 site_url 127.0.0.1:3000 vs app localhost:8080.
+**Not re-verified:** 18 findings keep canonical status. Merged manifest/APK, iOS build, live Supabase,
+hosted Edge runtime, concurrency stack NOT RUN.
+**Next action:** decide A-1..A-4, A-7 (brand spelling), A-8 (`app/analysis.txt`) in
+docs/audits/codebase-health/REMEDIATION_EXECUTION.md §7; A-2 (config-only) first. No commit, migration
+or deployment without approval.
+
+## Historical A7 state (preserved)
+
+## A7 — PARTIAL; verified core and blocked B1 verification (2026-10-29)
 
 **Scope:** owner explicitly approved R0-01..04 and R1-01..07, including separate SEC002/R1-01 gate,
 source/permanent tests/local verification and verified normal Git commits/pushes. D-025..028.

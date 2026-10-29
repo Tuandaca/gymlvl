@@ -2,8 +2,9 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A7 PARTIAL / IN PROGRESS; B0 complete and R1-01..03 core locally verified; R1-04/07 isolated-stack verification BLOCKED, R1-05/06 source partial/runtime gates BLOCKED; no B2+ implementation; migration readiness NOT READY",
+  "stage": "R2 PARTIAL: A-2/A-3/A-4/A-7/A-8 complete locally (Auth redirect allowlist, merged release-manifest gate, canonical register sync, GymLvl branding, app/analysis.txt untracked). A-1 duplicate-award guard implemented as additive migration 20261029000200 and PASS in isolated PGlite (12 units, 365 ACL assertions); production counts/backfill BLOCKED (no live project O-07). Flutter 221/221, analyze/format exit 0, Edge 44/44. Release APK, iOS, hosted Edge and live Auth NOT RUN. Migration readiness: DESIGN READY, DEPLOY NOT APPROVED.",
   "a7_b1_review": {"date":"2026-10-29","entry_commit":"57e4e73e88f7099ec29a9d075964817f4db5470d","status":"PARTIAL / IN PROGRESS; B0 complete, R1 core complete locally, release and actual persistence gates BLOCKED","changed_findings":["FND-SEC-002","FND-CONC-001","FND-INTG-002","FND-BUG-001","FND-BUG-002"],"classification_changes":"SEC002/CONC001/INTG002 Accepted -> Fixed for repository/local synthetic scope only; BUG001/BUG002 remain Accepted/High pending runtime acceptance; no severity/confidence changes","history":"All five complete pre-B1 objects retained exactly in historical_pre_a7 including nested A5/A4 history;30 other objects/raw spans unchanged, including four B0 Fixed histories. Prior a7_review is the historical B0 checkpoint, superseded for current stage by this metadata.","implementer":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"qa-reviewer ses_e7c4250a1ffeXk30ceIhMb3Jvk; reported focused31/25/18 tests including rendered VI/EN reconciliation controls; attribution is not a docs-writer runtime claim","parent_final_batch":"From app with process-local TEMP/TMP on D: flutter analyze --no-pub ->No issues found!48.5s; dart format --output=none --set-exit-if-changed lib test ->129 files0 changed; flutter test --no-pub --concurrency=2 --reporter expanded ->+200 All tests passed!; all exit0. No suite rerun in this docs-only turn.","blocked":"R1-04/07 require supported isolated actual connections; local bounded inventory found no docker/supabase/psql/postgres/pg_ctl or known Program Files PostgreSQL/Docker paths. R1-05/06 Gradle runtime gates blocked before requested tasks: prior JVM8 and wrapper9.7/AGP8.11.1 mismatch corrected via existing JBR21 and approved SHA-verified8.13; uncached dependencies, online8GiB native OOM203.5s and offline1GiB/one-worker Kotlin2.1.20/reflection/annotations cache misses remain. No merged manifest, missing/partial signing-input execution proof or APK signature.","decisions":"D-029 rewards-only acknowledgement/hydration; D-030 operator-owned fail-closed signing; D-031 Gradle8.13 compatibility; D-032 process-local cache/verification prerequisite approvals","limits":"No actual SQL commit-count, live-account/RLS/device, durable/deep-immutable receipt or release artifact proof; no keys read, new findings, B2+ implementation or migration-ready claim. Parent owns execution/handoff synchronization.","next_action":"After environment/cache readiness, run controlled local Gradle manifest and missing/partial-input gates under approved constraints; no further online attempt now. Supply supported isolated stack before actual connection-barrier/lost-ACK/reload/reorder/delete persistence controls."},
+  "a8_review": {"date":"2026-10-29","entry_commit":"b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc","status":"PARTIAL; B0 locally complete, B1 core locally verified full200 tests; R1-04/07 DB sessions BLOCKED (no Docker/PostgreSQL/Supabase), R1-05/06 Gradle runtime BLOCKED by shell tool failure, R2-06 docs Fixed","changed_findings":["FND-ARCH-003"],"classification_changes":"ARCH003 Accepted -> Fixed documentation-only; no severity/confidence","evidence_reference":"docs/audit/phases/A8_BATCH_EXECUTION.md","shell_tool":"BLOCKED repeated Invalid arguments: command Missing Key; no destructive workarounds","runtime_limits":"No Gradle/Flutter/Deno/SQL/Node runtime verification without shell. Source-only docs fix and static inspection only","decisions":"D025-032 carried from A7; D033 docs-only invariant restatement","next_action":"Resume after shell tool recovery: Gradle processReleaseMainManifest R1-05/06; PostgreSQL R1-04/07/R2-06 SQL tests"},
   "a7_review": {"date":"2026-10-29","entry_commit":"3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75","status":"PARTIAL / IN PROGRESS; B0 only, B1 not started","approvals":"R0-01 six-assertion safety gate PASS; owner approvals D-025..028","changed_findings":["FND-GOV-004","FND-SEC-001","FND-SEC-003","FND-SEC-004"],"scope":"Fixed means repository-scoped correction with local verification only; severity/confidence unchanged; 31 other finding objects/raw spans unchanged and four complete pre-A7 objects retained in historical_pre_a7, including nested histories","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; parent owns execution-ledger synchronization","parent_verification":"Parent reports independent command execution: policy32 PASS; SQL11 units plus ACL10 isolated DBs/365 assertions PASS; Edge44 tests and six handler checks PASS; all exit0/diff0. This docs-only turn does not rerun runtime suites.","independent_qa":"qa-reviewer ses_e7c4250a1ffeXk30ceIhMb3Jvk source inspection found no material code blocker; requested owner/superuser fixtures subsequently added and passed. QA npm.ps1 execution-policy BLOCKED; source-filter Git permission denied, not retried. No independent QA runtime PASS claimed.","limits":"Policy evaluator is not the live scanner/sandbox; saved approvals unknown. Additive migration applied only in disposable PGlite, not deployed. Stream callbacks do not prove network cancellation or DoS protection. No remote inventory/deploy, new IDs, B1 or W2-W5 implementation in this checkpoint."},
   "a6_reconciliation": {"date":"2026-10-29","entry_commit":"6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3","classification_changes":[],"new_findings":[],"plan_reference":"docs/audit/REMEDIATION_PLAN.md","history":"All prior finding objects and nested histories preserved; old wave fields remain historical. Proposed owner-task mapping does not authorize remediation.","acceptance":"PASS scoped audit reconciliation and roadmap; final QA inspection and phase6 artifact validator, not product/runtime certification","validation":"A6_ARTIFACT_CHECK findings=35 unchanged_objects=35 unchanged_closures=4 md_classes=35 roadmap_rows=35 unique_ids=35 tasks=29 dag=acyclic old_plan=exact coverage=26/0/0/1 allowed_paths=9 errors=0; node=0 diff=0","next_action":"Seek separate approval for R0-01 safety gate, then R1-01 SEC002 snapshot ownership; no automatic remediation or migration"},
   "history_note": "a4_closure/a4_review, a3_closure and closure retain complete A4/A3/A2 history, not current A5 closure claims. Six amended findings preserve exact entire pre-A5 objects in historical_pre_a5, including older nested histories/reviews. All other24 prior finding objects remain JSON-deep-equivalent; all30 prior IDs survive. Five narrow confidence/status promotions and five new IDs do not imply product fixes or production certification.",
@@ -125,12 +126,13 @@
     "by_status": {
       "Open": 0,
       "Needs Verification": 3,
-      "Accepted": 22,
-      "Fixed": 8,
+      "Accepted": 12,
+      "Fixed": 18,
       "Deferred": 0,
       "False Positive": 2
     }
   },
+  "r2_review": {"date":"2026-10-29","round":"R2","entry_commit":"b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc","scope":"Controlled remediation A-1..A-8 approved by the owner on 2026-10-29. Statuses below record repository-scoped fixes with the quoted local verification; runtime/artifact/hosted gates remain NOT RUN or BLOCKED as stated per finding.","changed_findings":["FND-BUG-001","FND-BUG-002","FND-BUG-004","FND-BUG-006","FND-BUG-007","FND-BUG-008","FND-BUG-009","FND-INTG-001","FND-TEST-001","FND-BUG-003","FND-GOV-005","FND-DATA-001"],"evidence_reference":"docs/audits/codebase-health/REMEDIATION_EXECUTION.md","status_vocabulary":"PASS / FAIL / BLOCKED / NOT RUN per AGENTS.md section 5","no_commit":"No commit, push, tag, deployment or production migration was performed by this batch.","final_verification":["flutter analyze --no-pub -> No issues found! (exit 0)","dart format --output=none --set-exit-if-changed lib test -> 134 files, 0 changed (exit 0)","flutter test --no-pub -> +221: All tests passed! (exit 0)","node tools/db-tests/run.mjs -> 12 SQL verification units, 365 ACL assertions (exit 0)","node tools/db-tests/edge-tests.mjs -> 44 passed | 0 failed (exit 0)","node tools/android-verify/manifest-check.test.mjs -> 8/8 (exit 0)","node tools/android-verify/run.mjs -> PASS merged release manifest ... (exit 0)","workflow YAML parse after fixing a joined `steps:` line -> 3 jobs loaded (loose check; no permanent YAML gate, FND-TEST-001)"],"remaining_blockers":["FND-DATA-001 production scope: live Supabase access (O-07), at-risk tuple counts and any backfill/reward-row repair need operator approval; only the guard is implemented.","FND-BUG-002: release signing keys absent; assembleRelease/signature proof NOT RUN.","Release APK/AAB, installed-device label/connectivity, iOS build and hosted Edge/Auth round trips NOT RUN on this Windows host.","FND-TEST-001: CI workflow changes are NOT RUN on a remote runner."],"next_action":"Operator: provide the O-07 project/credentials and approve the read-only at-risk count query before any backfill. Then run the CI workflow, produce a signed release artifact and verify the launcher label/permissions on a device."},
   "findings": [
     {
       "id":"FND-CONC-001",
@@ -249,20 +251,36 @@
         "title": "Legacy completion path can award a workout twice",
         "category": "DATA",
         "component": "public.complete_workout",
-        "paths": ["supabase/migrations/20261026000200_authoritative_progression.sql"],
-        "line_ranges": ["216", "223-230", "255", "264-278"],
+        "paths": [
+          "supabase/migrations/20261026000200_authoritative_progression.sql"
+        ],
+        "line_ranges": [
+          "216",
+          "223-230",
+          "255",
+          "264-278"
+        ],
         "origin": "S3_VALIDATION_REPORT.md#L5 (carried, unverified)",
         "root_cause": "Two independent guards: workout_rewards primary key on workout_id (L226-227) and workouts.is_xp_calculated (L229). L230 still accepts status='completed' with is_xp_calculated=false, so a legacy row already awarded before the flag existed, without a workout_rewards row, is awarded again.",
         "evidence": "Static read reported by supabase-specialist in S3 delegation TEST D. Population depends on production data, which this audit cannot read. A2 client inspection: active_workout_screen.dart:82 calls controller completeWorkout; controller:622-631 memoizes one completion future, 628-650 waits for pending edits and checks active state, 655-658 calls finishWorkout. supabase_workout_repository.dart:70-76 sends complete_workout(p_workout_id,p_notes), then separately fetches detail; 84-91 exposes another RPC wrapper calculateXP with no current production caller. No client retry loop or independent request UUID; explicit retry reuses workout ID. Historical A2 recovery/continuation suite reported +126: All tests passed!, including concurrent-completion coverage; not rerun in final documentation reconciliation. None of this verifies legacy-row population, authoritative server award or transactional idempotency; A3/A4 own those checks. Distinct post-award detail-fetch reconciliation is FND-INTG-002, not this legacy award finding.",
         "expected_behavior": "At most one award per workout id, ever.",
         "actual_behavior": "Undetermined for pre-existing rows; the guard is demonstrably permissive.",
         "impact": "Inflated XP, level, streak, and possibly duplicate quest rewards for a legacy cohort. Bounded by the 1000 XP cap at L255 but not prevented.",
-        "severity": "P1", "confidence": "Medium", "status": "Needs Verification",
+        "severity": "P1",
+        "confidence": "Medium",
+        "status": "Needs Verification",
         "proposed_remediation": "Additive migration: backfill workout_rewards for completed workouts with is_xp_calculated=true, verify counts, then tighten L230 so completion without a rewards row is accepted only when the workout produced no progression.",
         "regression_risk": "Replaying completion for legitimate legacy rows returns an error if the backfill is incomplete.",
-        "related_tests": ["supabase/tests/progression_regression.sql"],
-        "missing_tests": ["legacy row awarded without workout_rewards row", "replay after backfill"],
-        "depends_on": ["FND-DATA-001 verification requires a legacy-shaped fixture or a live database"],
+        "related_tests": [
+          "supabase/tests/progression_regression.sql"
+        ],
+        "missing_tests": [
+          "legacy row awarded without workout_rewards row",
+          "replay after backfill"
+        ],
+        "depends_on": [
+          "FND-DATA-001 verification requires a legacy-shaped fixture or a live database"
+        ],
         "wave": "W1",
         "verification_method": "Fixture row: workout status completed, is_xp_calculated=false, no workout_rewards row, non-zero prior XP. Call complete_workout twice."
       },
@@ -273,23 +291,51 @@
       "paths": [
         "supabase/migrations/20261026000200_authoritative_progression.sql"
       ],
-      "line_ranges": ["authoritative_progression.sql:223-230,264-281", "baseline.sql:361,367-374", "A4_SQL_EVIDENCE.md:groups1-2; sections3-4 exact output/source"],
+      "line_ranges": [
+        "authoritative_progression.sql:223-230,264-281",
+        "baseline.sql:361,367-374",
+        "A4_SQL_EVIDENCE.md:groups1-2; sections3-4 exact output/source"
+      ],
       "origin": "S3 L5 historical hypothesis; A4 bounded SQL reproduction, orchestrator rerun and independent QA",
       "root_cause": "complete_workout checks workout_rewards and is_xp_calculated but not reliable prior-award provenance such as an existing workout award log. A completed false-flag row with prior credit/log but no reward row enters the same branch as legitimate completed-unrewarded recovery.",
       "evidence": "A4_SQL_EVIDENCE groups1-2, probe exit0/108 assertions across8 groups: explicitly seeded total_xp=10 and one workout award log=10, status completed, false flag and zero reward rows. Invocation earns10 again: total20/logs2/rewards1/flagtrue; identical replay adds no third credit. Ordinary initial/replay, legitimate completed-false-flag recovery and true-flag prior-credit/log controls pass. Primary independently reran the current108 assertions exit0 as reported by the orchestrator; independent QA ses_e7d23c0d4ffe9IA6MkbszmpEvl read source/evidence. No production cohort, ordinary-retry duplication, prior class/quest duplication or genuine concurrent connections established.",
       "expected_behavior": "At most one award per workout id, ever.",
-      "actual_behavior": "The synthetic prior-credit/log false-flag/no-reward-row tuple receives a second global workout credit and log. Subsequent ledger replay adds nothing; legitimate unawarded recovery and true-flag controls behave correctly.",
+      "actual_behavior": "Fixed in repository scope: complete_workout treats an existing xp_logs award row (source workout or quest) as prior-award provenance. A legacy completed false-flag tuple with prior credit/log now returns alreadyAwarded and writes no ledger, reward or class row, while a genuinely unawarded completed session still takes the normal award path. Production prevalence and missing-reward-row repair remain BLOCKED.",
       "impact": "P1 conditional progression-integrity defect: duplicate global credit can inflate totals and derived level for an equivalent historical state. Actual production prevalence is unknown; this fixture does not prove historical class/quest duplication or a normal retry failure.",
       "severity": "P1",
       "confidence": "Confirmed",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "After explicit approval, classify reliable prior-award provenance separately from legitimate completed-unrewarded recovery; reconcile/backfill the affected states using an additive migration and verified counts before changing guards. True-flag-only backfill cannot classify the reproduced false-flag tuple. Do not blanket-reject completed false-flag rows or infer credit from an unrelated nonzero user total. Preserve original award evidence and document handling of ambiguous history.",
       "regression_risk": "Misclassification can deny legitimate recovery, double-award ambiguous history or alter original reward replay; current-path initial/retry and true-flag controls must remain valid.",
-      "related_tests": ["supabase/tests/progression_regression.sql", "docs/audit/phases/A4_SQL_EVIDENCE.md groups1-2"],
-      "missing_tests": ["A5 supabase-specialist with qa-reviewer: permanent conditional prior-credit/log versus legitimate-unrewarded and true-flag regression after separately authorized fix", "A5 approved isolated two-connection test: retries/different workouts grant exactly once; NOT RUN", "Future separately authorized adoption inventory: classify reliable historical provenance and ambiguous rows before any backfill; no production access in A4"],
-      "depends_on": ["Approved additive classification/backfill and rollback plan before remediation", "FND-INTG-002 is separate client acknowledgement/hydration behavior, not this conditional duplicate-credit mechanism"],
+      "related_tests": [
+        "supabase/tests/progression_regression.sql"
+      ],
+      "missing_tests": [
+        "Production cohort counts and any workout_rewards backfill need live access (O-07) and operator approval; NOT RUN",
+        "True two-connection scheduling NOT RUN (isolated single-connection PGlite)",
+        "History with no ledger evidence cannot be distinguished from a legitimate unawarded session and is still awarded; an operator decision is required before any classification"
+      ],
+      "depends_on": [
+        "Approved additive classification/backfill and rollback plan before remediation",
+        "FND-INTG-002 is separate client acknowledgement/hydration behavior, not this conditional duplicate-credit mechanism"
+      ],
       "wave": "W1",
-      "verification_method": "Retained A4_SQL_EVIDENCE full source/command/output groups1-2, exit0; conditional defect-observing assertions, normal replay and true-flag controls. Owner supabase-specialist, independent qa-reviewer. After separately approved classification/fix, require no new credit/log for proven prior awards and one award for genuinely unawarded recovery. Real two-connection scheduling and deployed provenance remain NOT RUN; no runtime rerun in this documentation turn."
+      "verification_method": "Retained A4_SQL_EVIDENCE full source/command/output groups1-2, exit0; conditional defect-observing assertions, normal replay and true-flag controls. Owner supabase-specialist, independent qa-reviewer. After separately approved classification/fix, require no new credit/log for proven prior awards and one award for genuinely unawarded recovery. Real two-connection scheduling and deployed provenance remain NOT RUN; no runtime rerun in this documentation turn.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-1",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "Additive migration 20261029000200_prevent_legacy_double_award.sql re-creates complete_workout with one evidence-based guard (three added lines; the rest of the function is byte-identical) and adds idx_xp_logs_user_source. No row is deleted, rewritten or backfilled. The guard runs after the existing status/notes validation and before any award, under the existing users FOR UPDATE lock.",
+        "verification": [
+          "RED without the migration: node tools/db-tests/run.mjs -> FAIL: ledger-only legacy workout never earns twice",
+          "GREEN with the migration: node tools/db-tests/run.mjs -> PASS 12 SQL verification units and 365 ACL assertions (exit 0)",
+          "covered cases: workout-source evidence, quest-source evidence, repeated retry, unchanged total_xp/xp_logs/user_classes, no fabricated workout_rewards row or is_xp_calculated flag, legitimate completed-unrewarded recovery still awards once"
+        ],
+        "limits": "No production counts, no backfill, no live Supabase run and no true concurrent connection. switch_class still requires is_xp_calculated for ledger-only history; that recomputation was deliberately not changed here and is recorded as a separate operator decision."
+      }
     },
     {
       "id": "FND-ARCH-001",
@@ -458,105 +504,206 @@
       "verification_method": "Resolved by documentation, not by a trial: OpenCode V2 permissions guide, section on matching and shell resource scanning."
     },
     {
-      "id":"FND-BUG-001",
-      "title":"Android release INTERNET source correction awaits merged-manifest verification",
-      "category":"BUG",
-      "component":"Android release configuration",
-      "paths":["app/android/app/src/main/AndroidManifest.xml","app/android/gradle/wrapper/gradle-wrapper.properties","app/test/release_config_test.dart"],
-      "line_ranges":["main/AndroidManifest.xml:2 direct-child INTERNET permission","gradle-wrapper.properties:4-5 approved8.13/SHA256","release_config_test.dart:52-57,164-192 source controls"],
-      "origin":"A1 historical missing main permission; R1-05 approved source correction and B1 compatibility prerequisites",
-      "root_cause":"Original defect was absent main INTERNET permission while debug/profile overlays contained it. R1-05 now declares the permission in main; acceptance remains incomplete because Gradle configuration/dependency/native-memory blockers prevented merged-release-manifest execution.",
-      "evidence":"Targeted source main/AndroidManifest.xml:2 now declares android.permission.INTERNET. Shared release_config_test.dart10 source tests pass; parent final200-test batch/analyze/format exit0. Approved D-031 pins Gradle8.13 with verified SHA256, using existing JBR21 instead of JVM8; former9.7/AGP8.11.1 incompatibility corrected. Actual attempts stopped before requested tasks: uncached dependencies, online8GiB-heap native OOM203.5s, then offline1GiB/one-worker app_links Kotlin2.1.20/reflection/annotations cache misses. No merged manifest produced; no further online attempt in this docs turn.",
-      "expected_behavior":"The merged release artifact declares INTERNET and can reach its backend; source declaration alone is not merged-artifact/runtime proof.",
-      "actual_behavior":"PARTIAL source remediation exists: main permission is present and source controls pass. R1-05 runtime/merged-manifest gate is BLOCKED before task execution; release networking remains unverified, not proven absent in current code.",
-      "impact":"Original P1 release-connectivity risk remains Accepted pending required artifact/runtime verification; High unchanged. No claim that current main lacks INTERNET or that a tested release artifact still cannot connect.",
-      "severity":"P1","confidence":"High","status":"Accepted",
-      "proposed_remediation":"Retain the declared main permission and approved Gradle8.13/SHA pin. Once the local dependency cache/environment is ready, run controlled merged-release-manifest inspection and approved connectivity verification; do not make further online attempts now or mark Fixed from source tests alone.",
-      "regression_risk":"Manifest source-set merging, dependency resolution/JVM compatibility, resource-limited Gradle configuration and release-only networking.",
-      "related_tests":["app/test/release_config_test.dart"],
-      "missing_tests":["Merged release manifest INTERNET assertion BLOCKED before Gradle requested-task execution","Release artifact/device connectivity NOT RUN"],
-      "depends_on":["R1-05 runtime acceptance requires controlled environment/cache readiness; D-031/D-032 approved B1 prerequisites, not W4 scope"],
-      "wave":"W1",
-      "verification_method":"Source10 tests PASS and parent final Flutter200/analyze/format reported exit0. Required Gradle merged-manifest/runtime gate BLOCKED; no tasks executed/artifact proof, no suite rerun in docs-only turn.",
-      "a7_review":{"date":"2026-10-29","task":"R1-05","status":"PARTIAL / BLOCKED runtime acceptance","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","decision":"D-031/D-032 approved prerequisites","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart","scope":"Accepted/High unchanged despite source correction; no merged manifest or release connectivity proof; no new online attempt"},
-      "historical_pre_a7":
-    {
       "id": "FND-BUG-001",
-      "title": "The Android release manifest declares no INTERNET permission",
+      "title": "Android release INTERNET source correction awaits merged-manifest verification",
       "category": "BUG",
       "component": "Android release configuration",
       "paths": [
         "app/android/app/src/main/AndroidManifest.xml",
-        "app/android/app/src/debug/AndroidManifest.xml",
-        "app/android/app/src/profile/AndroidManifest.xml",
-        "app/pubspec.yaml"
+        "app/android/gradle/wrapper/gradle-wrapper.properties",
+        "app/test/release_config_test.dart"
       ],
-      "line_ranges": ["main:1-45", "debug:6", "profile:6", "pubspec.yaml:47"],
-      "origin": "A1; already planned as TASK_BOARD.md section M1-02 (lines 172-182) but never registered as a finding",
-      "root_cause": "Flutter's template places android.permission.INTERNET in the debug and profile source-set manifests, not in main. Android's manifest merger combines main with the selected build type, so a release build receives main alone. No release source set exists.",
-      "evidence": "Get-ChildItem app\\android\\app\\src -Recurse -Filter AndroidManifest.xml returns exactly three files (debug, main, profile); no src/release/ directory exists. Select-String INTERNET matches only debug:6 and profile:6. main lines 1-45 contain no uses-permission element. app/pubspec.yaml:47 depends on supabase_flutter, and every data path in app/lib is a network call.",
-      "expected_behavior": "A release artifact can reach Supabase.",
-      "actual_behavior": "The release manifest declares no network permission, so every socket call fails at runtime.",
-      "impact": "A release or internal-testing build is functionally unusable once the user leaves the first screen. The failure surfaces as a network error rather than a crash, so it can be misread as a backend outage. Release blocker for the only artifact class that ships.",
+      "line_ranges": [
+        "main/AndroidManifest.xml:2 direct-child INTERNET permission",
+        "gradle-wrapper.properties:4-5 approved8.13/SHA256",
+        "release_config_test.dart:52-57,164-192 source controls"
+      ],
+      "origin": "A1 historical missing main permission; R1-05 approved source correction and B1 compatibility prerequisites",
+      "root_cause": "Original defect was absent main INTERNET permission while debug/profile overlays contained it. R1-05 now declares the permission in main; acceptance remains incomplete because Gradle configuration/dependency/native-memory blockers prevented merged-release-manifest execution.",
+      "evidence": "Targeted source main/AndroidManifest.xml:2 now declares android.permission.INTERNET. Shared release_config_test.dart10 source tests pass; parent final200-test batch/analyze/format exit0. Approved D-031 pins Gradle8.13 with verified SHA256, using existing JBR21 instead of JVM8; former9.7/AGP8.11.1 incompatibility corrected. Actual attempts stopped before requested tasks: uncached dependencies, online8GiB-heap native OOM203.5s, then offline1GiB/one-worker app_links Kotlin2.1.20/reflection/annotations cache misses. No merged manifest produced; no further online attempt in this docs turn.",
+      "expected_behavior": "The merged release artifact declares INTERNET and can reach its backend; source declaration alone is not merged-artifact/runtime proof.",
+      "actual_behavior": "Fixed in repository scope: the merged release manifest produced by the real Gradle task :app:processReleaseMainManifest declares package com.gymlvl.app, android:label GymLvl with exactly one direct <manifest> android.permission.INTERNET and no nested or duplicate declaration. APK permission dump and installed-device connectivity remain NOT RUN.",
+      "impact": "Original P1 release-connectivity risk remains Accepted pending required artifact/runtime verification; High unchanged. No claim that current main lacks INTERNET or that a tested release artifact still cannot connect.",
       "severity": "P1",
       "confidence": "High",
-      "status": "Accepted",
-      "proposed_remediation": "Add <uses-permission android:name=\"android.permission.INTERNET\"/> to app/android/app/src/main/AndroidManifest.xml. After verifying the merged release manifest, delete the now-redundant copies from debug/profile so the requirement lives in one place.",
-      "regression_risk": "Minimal: a normal permission cannot break the build. Recurrence risk is real, because a future reader sees INTERNET in debug and may remove it from main again.",
-      "related_tests": [],
-      "missing_tests": ["merged release manifest assertion", "flutter build apk --release in CI", "app/test/release_config_test.dart"],
-      "depends_on": ["FND-TEST-001"],
+      "status": "Fixed",
+      "proposed_remediation": "Retain the declared main permission and approved Gradle8.13/SHA pin. Once the local dependency cache/environment is ready, run controlled merged-release-manifest inspection and approved connectivity verification; do not make further online attempts now or mark Fixed from source tests alone.",
+      "regression_risk": "Manifest source-set merging, dependency resolution/JVM compatibility, resource-limited Gradle configuration and release-only networking.",
+      "related_tests": [
+        "app/test/release_config_test.dart",
+        "tools/android-verify/manifest-check.test.mjs",
+        "tools/android-verify/run.mjs",
+        ".github/workflows/verify.yml android-release-manifest job"
+      ],
+      "missing_tests": [
+        "APK permission dump (aapt) and installed-device backend connectivity NOT RUN",
+        "The new android-release-manifest CI job is NOT RUN on a remote runner"
+      ],
+      "depends_on": [
+        "R1-05 runtime acceptance requires controlled environment/cache readiness; D-031/D-032 approved B1 prerequisites, not W4 scope"
+      ],
       "wave": "W1",
-      "verification_method": "flutter build apk --release, then inspect app/build/app/intermediates/merged_manifests/release/AndroidManifest.xml or run aapt dump permissions. NOT RUN in A1: Android SDK availability unconfirmed and it writes build artifacts."
-    }
+      "verification_method": "Source10 tests PASS and parent final Flutter200/analyze/format reported exit0. Required Gradle merged-manifest/runtime gate BLOCKED; no tasks executed/artifact proof, no suite rerun in docs-only turn.",
+      "a7_review": {
+        "date": "2026-10-29",
+        "task": "R1-05",
+        "status": "PARTIAL / BLOCKED runtime acceptance",
+        "owner": "flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94",
+        "independent_qa": "ses_e7c4250a1ffeXk30ceIhMb3Jvk",
+        "decision": "D-031/D-032 approved prerequisites",
+        "evidence_reference": "docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart",
+        "scope": "Accepted/High unchanged despite source correction; no merged manifest or release connectivity proof; no new online attempt"
+      },
+      "historical_pre_a7": {
+        "id": "FND-BUG-001",
+        "title": "The Android release manifest declares no INTERNET permission",
+        "category": "BUG",
+        "component": "Android release configuration",
+        "paths": [
+          "app/android/app/src/main/AndroidManifest.xml",
+          "app/android/app/src/debug/AndroidManifest.xml",
+          "app/android/app/src/profile/AndroidManifest.xml",
+          "app/pubspec.yaml"
+        ],
+        "line_ranges": [
+          "main:1-45",
+          "debug:6",
+          "profile:6",
+          "pubspec.yaml:47"
+        ],
+        "origin": "A1; already planned as TASK_BOARD.md section M1-02 (lines 172-182) but never registered as a finding",
+        "root_cause": "Flutter's template places android.permission.INTERNET in the debug and profile source-set manifests, not in main. Android's manifest merger combines main with the selected build type, so a release build receives main alone. No release source set exists.",
+        "evidence": "Get-ChildItem app\\android\\app\\src -Recurse -Filter AndroidManifest.xml returns exactly three files (debug, main, profile); no src/release/ directory exists. Select-String INTERNET matches only debug:6 and profile:6. main lines 1-45 contain no uses-permission element. app/pubspec.yaml:47 depends on supabase_flutter, and every data path in app/lib is a network call.",
+        "expected_behavior": "A release artifact can reach Supabase.",
+        "actual_behavior": "The release manifest declares no network permission, so every socket call fails at runtime.",
+        "impact": "A release or internal-testing build is functionally unusable once the user leaves the first screen. The failure surfaces as a network error rather than a crash, so it can be misread as a backend outage. Release blocker for the only artifact class that ships.",
+        "severity": "P1",
+        "confidence": "High",
+        "status": "Accepted",
+        "proposed_remediation": "Add <uses-permission android:name=\"android.permission.INTERNET\"/> to app/android/app/src/main/AndroidManifest.xml. After verifying the merged release manifest, delete the now-redundant copies from debug/profile so the requirement lives in one place.",
+        "regression_risk": "Minimal: a normal permission cannot break the build. Recurrence risk is real, because a future reader sees INTERNET in debug and may remove it from main again.",
+        "related_tests": [],
+        "missing_tests": [
+          "merged release manifest assertion",
+          "flutter build apk --release in CI",
+          "app/test/release_config_test.dart"
+        ],
+        "depends_on": [
+          "FND-TEST-001"
+        ],
+        "wave": "W1",
+        "verification_method": "flutter build apk --release, then inspect app/build/app/intermediates/merged_manifests/release/AndroidManifest.xml or run aapt dump permissions. NOT RUN in A1: Android SDK availability unconfirmed and it writes build artifacts."
+      },
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-3",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "Added tools/android-verify/run.mjs + manifest-check.mjs: run the real Gradle :app:processReleaseMainManifest and assert the merged manifest. Wired into .github/workflows/verify.yml as the android-release-manifest job. Source-level assertions in release_config_test.dart are retained but are no longer the only gate.",
+        "verification": [
+          "gradlew :app:processReleaseMainManifest -> BUILD SUCCESSFUL (JDK 21, Gradle 8.13)",
+          "node manifest-check.test.mjs -> 8/8 checks pass",
+          "node run.mjs -> PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0 (exit 0)"
+        ],
+        "limits": "The merge task proves manifest content only. No release APK/AAB, no aapt permission dump, no signed artifact and no device connectivity. assembleRelease stays fail-closed without operator signing keys (D-030)."
+      }
     },
     {
-      "id":"FND-BUG-002",
-      "title":"Fail-closed release signing source correction awaits Gradle gates and artifact proof",
-      "category":"BUG",
-      "component":"Android build configuration",
-      "paths":["app/android/app/build.gradle.kts","app/android/gradle/wrapper/gradle-wrapper.properties","app/test/release_config_test.dart"],
-      "line_ranges":["build.gradle.kts:8-18 four environment input names;45-59 release config without debug fallback;63-86 execution gate","gradle-wrapper.properties:4-5 approved8.13/SHA256","release_config_test.dart:71-159 signing source controls"],
-      "origin":"A1 historical release debug-key fallback; R1-06 D-030 approved fail-closed operator-owned signing source correction",
-      "root_cause":"Original release build selected the template debug signing config. R1-06 removes that fallback, selects a release config and gates missing/partial operator environment inputs at packaging/signing execution. Gradle prerequisite failures prevent runtime acceptance of those gates and artifact signature verification.",
-      "evidence":"Targeted build.gradle.kts:9-18 defines four GYMLVL_RELEASE_* environment inputs;45-59 selects release signing only;72-86 registers a dependency gate listing missing names without logging values. Shared release_config_test.dart10 source tests pass. Approved Gradle8.13 SHA-verified pin/JBR21 resolve prior JVM8 and9.7/AGP8.11.1 mismatch, but uncached dependencies/native OOM and offline Kotlin2.1.20/reflection/annotations cache misses block before requested tasks. No key read, missing/partial-input runtime proof, release APK or signature produced.",
-      "expected_behavior":"Release packaging/signing fails closed with missing/partial inputs and never uses debug fallback; authorized artifacts use the operator-held release key without exposing credentials.",
-      "actual_behavior":"PARTIAL source remediation exists: no debug signing fallback, four operator environment inputs and execution-only missing-input dependency gate. R1-06 runtime gate/signature verification is BLOCKED before requested tasks; no claim that current source still selects the debug key or that release signing has been verified.",
-      "impact":"Original P2 signing risk remains Accepted/High pending execution and artifact acceptance. Source safeguards are present, but actual missing/partial-input behavior and non-debug artifact certificate are not proved.",
-      "severity":"P2","confidence":"High","status":"Accepted",
-      "proposed_remediation":"Retain D-030 operator-owned fail-closed signing with no debug fallback. After local cache/environment readiness, run controlled no-input and partial-input Gradle execution checks without real credentials; separately approved signing/artifact verification needs owner key custody, never read keys to make tests pass. No further online attempt now.",
-      "regression_risk":"Gradle task skipping/dependency ordering, missing/partial operator inputs, local debug/manifest tasks, configuration cache and sensitive-value handling.",
-      "related_tests":["app/test/release_config_test.dart"],
-      "missing_tests":["Actual missing and partial signing-input execution gates BLOCKED before requested tasks","Owner-authorized non-debug APK/AAB certificate verification NOT RUN; no key read"],
-      "depends_on":["D-030 signing strategy approved; D-031/D-032 controlled compatibility/cache prerequisites; R1-06 actual gate/artifact verification BLOCKED"],
-      "wave":"W1",
-      "verification_method":"Source10 tests PASS and parent final Flutter200/analyze/format reported exit0; no actual missing/partial-input Gradle execution, APK signature or key access. No runtime suite rerun by docs writer.",
-      "a7_review":{"date":"2026-10-29","task":"R1-06","status":"PARTIAL / BLOCKED runtime acceptance","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","decision":"D-030/D-031/D-032","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart","scope":"Accepted/High unchanged despite no-debug-fallback source correction; no actual missing/partial-input gate or artifact signature proof; no keys read"},
-      "historical_pre_a7":
-    {
       "id": "FND-BUG-002",
-      "title": "The release build is signed with the debug keystore",
+      "title": "Fail-closed release signing source correction awaits Gradle gates and artifact proof",
       "category": "BUG",
       "component": "Android build configuration",
-      "paths": ["app/android/app/build.gradle.kts"],
-      "line_ranges": ["34-38"],
-      "origin": "A1; already planned as TASK_BOARD.md section M1-02",
-      "root_cause": "build.gradle.kts:37 assigns signingConfigs.getByName(\"debug\") to the release build type. This is the Flutter template default, retained unchanged.",
-      "evidence": "Select-String on app/android/app/build.gradle.kts: 'signingConfig = signingConfigs.getByName(\"debug\")' at line 37, inside the release build type block.",
-      "expected_behavior": "Release artifacts are signed with a project-held release key.",
-      "actual_behavior": "Release artifacts are signed with the well-known public debug key.",
-      "impact": "Google Play rejects an artifact signed with the debug key, so the app cannot be distributed. A side-loaded build is trivially re-signable by anyone, breaking update authenticity and permitting impersonation.",
+      "paths": [
+        "app/android/app/build.gradle.kts",
+        "app/android/gradle/wrapper/gradle-wrapper.properties",
+        "app/test/release_config_test.dart"
+      ],
+      "line_ranges": [
+        "build.gradle.kts:8-18 four environment input names;45-59 release config without debug fallback;63-86 execution gate",
+        "gradle-wrapper.properties:4-5 approved8.13/SHA256",
+        "release_config_test.dart:71-159 signing source controls"
+      ],
+      "origin": "A1 historical release debug-key fallback; R1-06 D-030 approved fail-closed operator-owned signing source correction",
+      "root_cause": "Original release build selected the template debug signing config. R1-06 removes that fallback, selects a release config and gates missing/partial operator environment inputs at packaging/signing execution. Gradle prerequisite failures prevent runtime acceptance of those gates and artifact signature verification.",
+      "evidence": "Targeted build.gradle.kts:9-18 defines four GYMLVL_RELEASE_* environment inputs;45-59 selects release signing only;72-86 registers a dependency gate listing missing names without logging values. Shared release_config_test.dart10 source tests pass. Approved Gradle8.13 SHA-verified pin/JBR21 resolve prior JVM8 and9.7/AGP8.11.1 mismatch, but uncached dependencies/native OOM and offline Kotlin2.1.20/reflection/annotations cache misses block before requested tasks. No key read, missing/partial-input runtime proof, release APK or signature produced.",
+      "expected_behavior": "Release packaging/signing fails closed with missing/partial inputs and never uses debug fallback; authorized artifacts use the operator-held release key without exposing credentials.",
+      "actual_behavior": "PARTIAL source remediation exists: no debug signing fallback, four operator environment inputs and execution-only missing-input dependency gate. R1-06 runtime gate/signature verification is BLOCKED before requested tasks; no claim that current source still selects the debug key or that release signing has been verified.",
+      "impact": "Original P2 signing risk remains Accepted/High pending execution and artifact acceptance. Source safeguards are present, but actual missing/partial-input behavior and non-debug artifact certificate are not proved.",
       "severity": "P2",
       "confidence": "High",
       "status": "Accepted",
-      "proposed_remediation": "Add a key.properties-driven signingConfigs.create(\"release\") with a gitignored keystore path, falling back to the debug config only when the properties file is absent so local debug builds keep working. Setup steps require user-held credentials and belong in a Vietnamese guide (AGENTS.md section 0.1C).",
-      "regression_risk": "A misconfigured key.properties breaks local release builds; the fallback keeps the failure scoped to release builds.",
-      "related_tests": [],
-      "missing_tests": ["release artifact signature assertion"],
-      "depends_on": ["FND-TEST-001"],
+      "proposed_remediation": "Retain D-030 operator-owned fail-closed signing with no debug fallback. After local cache/environment readiness, run controlled no-input and partial-input Gradle execution checks without real credentials; separately approved signing/artifact verification needs owner key custody, never read keys to make tests pass. No further online attempt now.",
+      "regression_risk": "Gradle task skipping/dependency ordering, missing/partial operator inputs, local debug/manifest tasks, configuration cache and sensitive-value handling.",
+      "related_tests": [
+        "app/test/release_config_test.dart"
+      ],
+      "missing_tests": [
+        "Actual missing and partial signing-input execution gates BLOCKED before requested tasks",
+        "Owner-authorized non-debug APK/AAB certificate verification NOT RUN; no key read"
+      ],
+      "depends_on": [
+        "D-030 signing strategy approved; D-031/D-032 controlled compatibility/cache prerequisites; R1-06 actual gate/artifact verification BLOCKED"
+      ],
       "wave": "W1",
-      "verification_method": "flutter build appbundle --release, then keytool -printcert -jarfile on the artifact; the certificate must not read CN=Android Debug. NOT RUN in A1."
-    }
+      "verification_method": "Source10 tests PASS and parent final Flutter200/analyze/format reported exit0; no actual missing/partial-input Gradle execution, APK signature or key access. No runtime suite rerun by docs writer.",
+      "a7_review": {
+        "date": "2026-10-29",
+        "task": "R1-06",
+        "status": "PARTIAL / BLOCKED runtime acceptance",
+        "owner": "flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94",
+        "independent_qa": "ses_e7c4250a1ffeXk30ceIhMb3Jvk",
+        "decision": "D-030/D-031/D-032",
+        "evidence_reference": "docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart",
+        "scope": "Accepted/High unchanged despite no-debug-fallback source correction; no actual missing/partial-input gate or artifact signature proof; no keys read"
+      },
+      "historical_pre_a7": {
+        "id": "FND-BUG-002",
+        "title": "The release build is signed with the debug keystore",
+        "category": "BUG",
+        "component": "Android build configuration",
+        "paths": [
+          "app/android/app/build.gradle.kts"
+        ],
+        "line_ranges": [
+          "34-38"
+        ],
+        "origin": "A1; already planned as TASK_BOARD.md section M1-02",
+        "root_cause": "build.gradle.kts:37 assigns signingConfigs.getByName(\"debug\") to the release build type. This is the Flutter template default, retained unchanged.",
+        "evidence": "Select-String on app/android/app/build.gradle.kts: 'signingConfig = signingConfigs.getByName(\"debug\")' at line 37, inside the release build type block.",
+        "expected_behavior": "Release artifacts are signed with a project-held release key.",
+        "actual_behavior": "Release artifacts are signed with the well-known public debug key.",
+        "impact": "Google Play rejects an artifact signed with the debug key, so the app cannot be distributed. A side-loaded build is trivially re-signable by anyone, breaking update authenticity and permitting impersonation.",
+        "severity": "P2",
+        "confidence": "High",
+        "status": "Accepted",
+        "proposed_remediation": "Add a key.properties-driven signingConfigs.create(\"release\") with a gitignored keystore path, falling back to the debug config only when the properties file is absent so local debug builds keep working. Setup steps require user-held credentials and belong in a Vietnamese guide (AGENTS.md section 0.1C).",
+        "regression_risk": "A misconfigured key.properties breaks local release builds; the fallback keeps the failure scoped to release builds.",
+        "related_tests": [],
+        "missing_tests": [
+          "release artifact signature assertion"
+        ],
+        "depends_on": [
+          "FND-TEST-001"
+        ],
+        "wave": "W1",
+        "verification_method": "flutter build appbundle --release, then keytool -printcert -jarfile on the artifact; the certificate must not read CN=Android Debug. NOT RUN in A1."
+      },
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-3 (adjacent)",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Accepted",
+        "change": "No signing change. The new merge gate runs :app:processReleaseMainManifest, which does not require signing inputs, so the fail-closed release configuration remains untouched.",
+        "verification": [
+          ":app:processReleaseMainManifest -> BUILD SUCCESSFUL with no GYMLVL_RELEASE_* variables set",
+          "app/android/app/build.gradle.kts still rejects a release build when any signing input is absent"
+        ],
+        "limits": "assembleRelease, APK/AAB signing and signature verification remain BLOCKED on operator signing keys; no artifact proof exists in this session."
+      }
     },
     {
       "id": "FND-BUG-003",
@@ -569,31 +716,63 @@
         "app/lib/app.dart",
         "app/lib/l10n/app_en.arb"
       ],
-      "line_ranges": ["AndroidManifest.xml:3", "Info.plist:7-8", "Info.plist:15-16", "app.dart:21"],
+      "line_ranges": [
+        "AndroidManifest.xml:3",
+        "Info.plist:7-8",
+        "Info.plist:15-16",
+        "app.dart:21"
+      ],
       "origin": "A1; already planned as TASK_BOARD.md section M1-02",
       "root_cause": "Both platform manifests still carry the values Flutter's template generates: android:label=\"app\", CFBundleDisplayName=App, CFBundleName=app. The in-app brand is 'GymLevel' (app.dart:21, app_en.arb appTitle).",
       "evidence": "Direct read of both files; MaterialApp title is the literal 'GymLevel' at app/lib/app.dart:21 and appTitle is 'GymLevel' in app_en.arb.",
       "expected_behavior": "The app appears as GymLevel on the launcher and in OS settings.",
-      "actual_behavior": "It appears as 'app' on Android and 'App' on iOS.",
+      "actual_behavior": "Fixed in repository scope: the Android launcher label and the iOS display/name are GymLvl (observed as android:label=\"GymLvl\" in the merged release manifest), and the in-app title, GYMLVL wordmarks, l10n appTitle and onboarding copy use the same spelling. Package, schema and auth identifiers are unchanged.",
       "impact": "Cosmetic and branding only. Listed because it lives in the same two files as the two release-blocking defects and would otherwise be re-found after they are fixed.",
       "severity": "P4",
       "confidence": "High",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Set android:label=\"GymLevel\", CFBundleDisplayName=\"GymLevel\", CFBundleName=\"gymlvl\" (iOS CFBundleName is limited to 15 characters; 'gymlvl' is safe).",
       "regression_risk": "None.",
-      "related_tests": ["app/test/release_config_test.dart (planned by TASK_BOARD.md section M1-05)"],
-      "missing_tests": ["label assertion in a release config test"],
+      "related_tests": [
+        "app/test/release_config_test.dart",
+        "app/test/widget_test.dart",
+        "app/test/adversarial_edge_test.dart",
+        "tools/android-verify/run.mjs"
+      ],
+      "missing_tests": [
+        "Launcher label and OS settings name on installed Android/iOS builds NOT RUN",
+        "iOS build NOT RUN (Windows host)"
+      ],
       "depends_on": [],
       "wave": "W1",
-      "verification_method": "Install a build and read the launcher label, or assert it in app/test/release_config_test.dart. NOT RUN in A1."
+      "verification_method": "Install a build and read the launcher label, or assert it in app/test/release_config_test.dart. NOT RUN in A1.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-7",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "Standardized every user-facing occurrence to GymLvl / GYMLVL: app.dart MaterialApp title, main.dart setup title and wordmark, main_shell_screen and auth_form wordmarks, l10n appTitle (arb + generated localizations), localization_engine new-player copy, README/DEVELOPMENT headings and the CI workflow name. Technical identifiers (com.gymlvl.app, Supabase project id gymlvl, schema objects, env var names) were not renamed.",
+        "verification": [
+          "Merged release manifest: android:label=\"GymLvl\"",
+          "flutter test test/widget_test.dart test/adversarial_edge_test.dart -> 31/31 PASS after the string change",
+          "grep for GymLevel|GYMLEVEL across app/lib, app/test and .github -> no hits"
+        ],
+        "limits": "The original finding expected the spelling GymLevel; the owner-approved A-7 scope supersedes it with GymLvl, and this register keeps that historical expectation. No installed-build or iOS verification. Web <title> comes from MaterialApp at runtime."
+      }
     },
     {
       "id": "FND-TEST-001",
       "title": "CI cannot detect platform, formatting, or generated-code regressions",
       "category": "TEST",
       "component": "Continuous integration",
-      "paths": [".github/workflows/verify.yml"],
-      "line_ranges": ["1-52"],
+      "paths": [
+        ".github/workflows/verify.yml"
+      ],
+      "line_ranges": [
+        "1-52"
+      ],
       "origin": "A1",
       "root_cause": "The workflow gates analyze, Flutter tests, a web compile, and the SQL/Edge harness. It has no formatting gate, no coverage measurement, no generated-file drift check, no Android or iOS build, no lock-file assertion, no action SHA pinning, and no concurrency or timeout bounds. on.push has no branch filter.",
       "evidence": "verify.yml read end to end (52 lines, 48 non-blank, unchanged since 56c1122). Jobs are database-and-edge (npm ci, npm test, npm run check:edge, npm run test:edge on Node 22) and flutter (flutter pub get, flutter analyze, flutter test --reporter expanded, flutter build web --release with placeholder dart-defines, artifact upload). permissions: contents: read is present and correct. Measured consequence: FND-BUG-001 and FND-BUG-002 are both invisible to this pipeline.",
@@ -605,11 +784,35 @@
       "status": "Accepted",
       "proposed_remediation": "In one reviewed CI change: add dart format --output=none --set-exit-if-changed lib test; add a build_runner drift check followed by git diff --exit-code; add flutter build apk --debug (release needs signing); pin actions by SHA; add concurrency keyed on the ref and timeout-minutes; restrict push to main. TASK_BOARD.md section M1-05 already plans the Android static build and config regression test.",
       "regression_risk": "A drift check will fail the first time if generated files are currently stale. That was NOT MEASURED in A1 because running build_runner writes files; measure it before enabling the gate.",
-      "related_tests": [],
-      "missing_tests": ["a deliberately broken manifest must fail CI", "generated-file drift assertion", "format gate"],
-      "depends_on": ["Land after FND-BUG-001 and FND-BUG-002 so the new gate starts green"],
+      "related_tests": [
+        "app/test/release_config_test.dart",
+        ".github/workflows/verify.yml android-release-manifest job",
+        "tools/android-verify/manifest-check.test.mjs"
+      ],
+      "missing_tests": [
+        "The new CI jobs are NOT RUN on a remote runner in this session",
+        "Generated-file drift assertion",
+        "Format gate is defined but was not added to the workflow in this batch"
+      ],
+      "depends_on": [
+        "Land after FND-BUG-001 and FND-BUG-002 so the new gate starts green"
+      ],
       "wave": "W3",
-      "verification_method": "Introduce a deliberate platform regression and confirm CI fails. NOT RUN in A1."
+      "verification_method": "Introduce a deliberate platform regression and confirm CI fails. NOT RUN in A1.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-3 (partial)",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Accepted",
+        "change": "release_config_test.dart source gate extended (label, plist, pubspec, INTERNET) and an android-release-manifest CI job now performs the real merge plus inspection.",
+        "verification": [
+          "flutter test test/release_config_test.dart -> 13/13 PASS",
+          "node manifest-check.test.mjs -> 8/8 PASS locally"
+        ],
+        "limits": "No workflow execution in this session, so the CI gate is unproven end to end. Format and generated-code drift checks remain absent from the workflow."
+      }
     },
     {
       "id": "FND-INTG-001",
@@ -622,23 +825,45 @@
         "app/lib/main.dart",
         "app/lib/features/auth/data/supabase_auth_repository.dart"
       ],
-      "line_ranges": ["config.toml:150-156", "config.example.json:4", "main.dart:64", "supabase_auth_repository.dart:30-34"],
+      "line_ranges": [
+        "config.toml:150-156",
+        "config.example.json:4",
+        "main.dart:64",
+        "supabase_auth_repository.dart:30-34"
+      ],
       "origin": "A1",
       "root_cause": "supabase/config.toml sets site_url = http://127.0.0.1:3000 and additional_redirect_urls = [https://127.0.0.1:3000], while the app passes AUTH_REDIRECT_URL (http://localhost:8080/ from config.example.json, documented as --web-port 8080 in main.dart:64) as redirectTo in resetPasswordForEmail. Neither allowlisted URL matches the app's redirect target or the port the dev server serves.",
       "evidence": "Direct read of all four files. supabase_auth_repository.dart:30-34: const redirect = String.fromEnvironment('AUTH_REDIRECT_URL'); resetPasswordForEmail(..., redirectTo: redirect.isEmpty ? null : redirect). A2 lead 12 investigation: repository:21-22 omits emailRedirectTo for signUp; this alone does not prove failure because server defaults apply. Recovery fragment/hash interaction and confirmation delivery are DEFERRED A5, owner flutter-specialist with auth integration support; approved local fixtures must establish the correct auth event/session and route exactly once. Runtime NOT RUN; no new confirmed callback failure is claimed.",
       "expected_behavior": "The password-reset email is sent and its link returns to the running app.",
-      "actual_behavior": "Inferred from GoTrue's documented allowlist check: the recovery request is rejected because the redirect target is not allowlisted.",
+      "actual_behavior": "Fixed in repository scope: supabase/config.toml site_url is http://localhost:8080, with localhost, 127.0.0.1 and [::1] on port 8080 plus /** globs for the recovery query, and the legacy 127.0.0.1:3000 entries preserved. app/config.example.json and the documented run commands use --web-port 8080 and match the allowlist.",
       "impact": "Password recovery is broken out of the box for local development and for any environment that copies config.example.json unchanged. No production impact is claimed; a production deployment would supply its own values, which this audit cannot see.",
       "severity": "P3",
       "confidence": "High",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Align the three values. Either set site_url = http://localhost:8080 and additional_redirect_urls = [http://localhost:8080, http://127.0.0.1:8080], or change config.example.json to the allowlisted origin. Changing supabase/config.toml is a configuration change and needs approval.",
       "regression_risk": "A wrong site_url affects every emailed link, including confirmation; verify reset and confirmation flows together.",
-      "related_tests": [],
-      "missing_tests": ["a test asserting the configured redirect target is allowlisted", "DEFERRED A5 flutter-specialist: recovery fragment/hash and confirmation callbacks establish the correct session/event and route exactly once"],
+      "related_tests": [
+        "app/test/auth_redirect_config_test.dart"
+      ],
+      "missing_tests": [
+        "Live Supabase Auth recovery request with redirect_to=http://localhost:8080 and delivery of the returned email link NOT RUN (no local stack / O-07)"
+      ],
       "depends_on": [],
       "wave": "W4",
-      "verification_method": "supabase start, then POST /auth/v1/recover with redirect_to=http://localhost:8080/ and observe the rejection. NOT RUN in A1: would start a local stack and mutate local state."
+      "verification_method": "supabase start, then POST /auth/v1/recover with redirect_to=http://localhost:8080/ and observe the rejection. NOT RUN in A1: would start a local stack and mutate local state.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-2",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "site_url/additional_redirect_urls realigned to the real Flutter web dev origin; config.example.json AUTH_REDIRECT_URL set to http://localhost:8080; README.md and docs/DEVELOPMENT.md run commands document --web-port 8080. No production values were invented.",
+        "verification": [
+          "flutter test test/auth_redirect_config_test.dart -> 6/6 PASS (site_url, allowlist match, loopback origins, legacy :3000 preservation, /** globs, documented run commands)"
+        ],
+        "limits": "Configuration contract only. No live Auth request, no email delivery, no production allowlist read. Native deep-link recovery remains unconfigured and is out of scope."
+      }
     },
     {
       "id": "FND-ARCH-002",
@@ -698,14 +923,16 @@
       "impact": "No runtime defect. A reviewer applying the invariant literally would hardcode Asia/Ho_Chi_Minh and silently shift quest and streak day boundaries for every user outside Vietnam. Same class as FND-ARCH-001, smaller blast radius because no award path is involved.",
       "severity": "P3",
       "confidence": "High",
-      "status": "Accepted",
-      "proposed_remediation": "Restate as: store UTC; compute streaks, quests and daily aggregates in the user's profiles.timezone, which defaults to Asia/Ho_Chi_Minh. Apply together with FND-ARCH-001 so the invariants section is edited once.",
+      "status": "Fixed",
+      "proposed_remediation": "Restate as: store UTC; compute streaks, quests and daily aggregates in the user's profiles.timezone, which defaults to Asia/Ho_Chi_Minh. Apply together with FND-ARCH-001 so the invariants section is edited once. A8 R2-06: ARCHITECTURE.md:88 invariant restated to match existing per-user implementation.",
       "regression_risk": "None at runtime; documentation only.",
       "related_tests": [],
-      "missing_tests": ["day-boundary assertion for a non-default profile timezone"],
+      "missing_tests": ["day-boundary assertion for a non-default profile timezone; NOT RUN - supported isolated PostgreSQL stack absent (R1-07)"],
       "depends_on": ["A4 owns quest and streak correctness; sequence the wording after it"],
       "wave": "W4",
-      "verification_method": "Read the invariant against every AT TIME ZONE expression. Static; nothing to execute."
+      "verification_method": "Read the invariant against every AT TIME ZONE expression. Static; nothing to execute. A8: documentation alignment with source; no runtime verification.",
+      "historical_pre_a8": {"id":"FND-ARCH-003","title":"The stated timezone invariant is narrower than the per-user implementation","category":"ARCH","component":"Architecture invariant vs progression functions","paths":["docs/planning/ARCHITECTURE.md","supabase/migrations/20261026000200_authoritative_progression.sql"],"line_ranges":["ARCHITECTURE.md:88","migration:3","migration:198","migration:241","migration:310-312"],"origin":"A1","root_cause":"The invariant states streaks and quests are computed explicitly in Asia/Ho_Chi_Minh, but the implementation adds profiles.timezone (default Asia/Ho_Chi_Minh) and computes day boundaries from coalesce(tz,Asia/Ho_Chi_Minh). The zone is per-user, not fixed.","evidence":"docs/planning/ARCHITECTURE.md:88 invariant 7 read against every AT TIME ZONE expression in the migrations: progression:3 (column), :198 (quest day), :241 (completion day), :310-312 (stats).","expected_behavior":"An invariant sentence that is true of the code.","actual_behavior":"The code is more general than the sentence, so the sentence is false for any user whose profile timezone differs.","impact":"No runtime defect. A reviewer applying the invariant literally would hardcode Asia/Ho_Chi_Minh and silently shift quest and streak day boundaries for every user outside Vietnam. Same class as FND-ARCH-001, smaller blast radius because no award path is involved.","severity":"P3","confidence":"High","status":"Accepted","proposed_remediation":"Restate as: store UTC; compute streaks, quests and daily aggregates in the user's profiles.timezone, which defaults to Asia/Ho_Chi_Minh. Apply together with FND-ARCH-001 so the invariants section is edited once.","regression_risk":"None at runtime; documentation only.","related_tests":[],"missing_tests":["day-boundary assertion for a non-default profile timezone"],"depends_on":["A4 owns quest and streak correctness; sequence the wording after it"],"wave":"W4","verification_method":"Read the invariant against every AT TIME ZONE expression. Static; nothing to execute."},
+      "a8_review": {"date":"2026-10-29","owner":"orchestrator","task":"R2-06","decision":"Docs-only invariant restatement aligns with existing per-user implementation; code already uses coalesce(tz,Asia/Ho_Chi_Minh) at migration L198/241/310-312. No product decision needed for documentation accuracy fix.","scope":"Fixed documentation scope only; ARCHITECTURE.md:88 restated to per-user timezone invariant. Day-boundary SQL tests remain BLOCKED (R1-07 supported isolated DB stack absent).","evidence_reference":"docs/audit/phases/A8_BATCH_EXECUTION.md","runtime_attribution":"No runtime verification; documentation alignment with static source AT TIME ZONE expressions only.","limits":"Not a runtime policy certification; R2-06 full acceptance pending supported PostgreSQL stack for day-boundary/lock-wait/transactional-rollback tests. Per-user timezone policy is existing implemented behavior, documented not changed."}
     },
     {
       "id": "FND-GOV-004",
@@ -772,24 +999,44 @@
       "title": "A stale analyzer transcript is tracked as app/analysis.txt",
       "category": "GOV",
       "component": "Repository hygiene",
-      "paths": ["app/analysis.txt"],
-      "line_ranges": ["whole file (84,864 bytes)"],
+      "paths": [
+        "app/analysis.txt"
+      ],
+      "line_ranges": [
+        "whole file (84,864 bytes)"
+      ],
       "origin": "A1",
       "root_cause": "A redirected flutter analyze run was committed and never removed. It records 221 issues from a toolchain state that no longer exists and is referenced by nothing.",
       "evidence": "git ls-files app/analysis.txt -> tracked; git log --oneline -- app/analysis.txt -> 29f2029; tail -> '221 issues found. (ran in 12.1s)'; current flutter analyze -> 'No issues found! (ran in 2.5s)'; grep for analysis.txt across *.md, *.yml and *.json returns no hits.",
       "expected_behavior": "Analyzer output is either not committed, or is regenerated and referenced.",
-      "actual_behavior": "A stale 85 KB snapshot is committed, referenced by nothing, and contradicts the current gate.",
+      "actual_behavior": "Fixed in repository scope: app/analysis.txt is untracked (git ls-files returns nothing), matched by app/.gitignore:48, and the 84,864-byte local copy is preserved on disk. No source, test, CI or script references it.",
       "impact": "A reader who finds it concludes the app has 221 analyzer findings, including unused_import warnings that no longer exist. It also embeds absolute local paths from the machine that produced it. No runtime effect.",
       "severity": "P4",
       "confidence": "High",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "git rm app/analysis.txt. If a redirect target is still wanted locally, add analysis.txt to app/.gitignore. Deleting a tracked file needs approval.",
       "regression_risk": "None.",
       "related_tests": [],
       "missing_tests": [],
       "depends_on": [],
       "wave": "W4",
-      "verification_method": "git ls-files app/analysis.txt is empty after the fix, and flutter analyze still exits 0."
+      "verification_method": "git ls-files app/analysis.txt is empty after the fix, and flutter analyze still exits 0.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "A-8",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "git rm --cached app/analysis.txt (index only) plus an analysis.txt entry in app/.gitignore. The working-tree file is kept, so the stale transcript remains available locally.",
+        "verification": [
+          "git ls-files app/analysis.txt -> empty",
+          "Test-Path app/analysis.txt -> True, 84,864 bytes preserved",
+          "git check-ignore -v app/analysis.txt -> app/.gitignore:48:analysis.txt",
+          "grep analysis.txt across code/test/CI -> only audit and planning documents"
+        ],
+        "limits": "The removal is staged in the index but not committed; publishing it requires an approved commit. Historical audit documents still describe the pre-fix state by design."
+      }
     },
     {
       "id":"FND-SEC-002",
@@ -863,7 +1110,7 @@
       "root_cause": "Legacy explicit white/white54 foregrounds remain after panel tokens map to the white Candy card in forced light mode.",
       "evidence": "A5 UI results section2 at614ee7c (unchanged product baseline1763ab5): actual ProfileScreen with fake profile/class/user data at390x844/100%, Candy light, both VI/EN, resolves display-name and first edit TextField white-on-white1.0:1; ink-on-card positive control18.883060964594996:1, errors=[]. Aggregate UI command FAIL(+8 -2): two onboarding tests fail on null chip background; they do not verify chip colors or a whole onboarding journey. Onboarding white/white54 source evidence remains static. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "Actual profile identity/edit text is readable on production light surfaces; onboarding choices require their own resolved paint verification.",
-      "actual_behavior": "Both localized actual profile fixtures resolve the cited identity/edit foreground/background pairs to1.0:1. Onboarding contrast extension is source-only; failed chip extraction cannot establish chip colors.",
+      "actual_behavior": "Partially fixed: the profile identity and first edit field now resolve to readable ink-on-card contrast and a 200%-text assertion covers that pair. Seven other text nodes on the same screen still paint white or amber on a light card, and onboarding chip paints are still source-only, so the finding stays Accepted.",
       "impact": "P2 confirmed unreadable profile identity/edit style mechanism in the bounded VI/EN fixtures; no full profile/onboarding flow, all-state contrast, device or data-integrity certification.",
       "severity": "P2",
       "confidence": "Confirmed",
@@ -871,8 +1118,7 @@
       "proposed_remediation": "Owner ui-ux-specialist with flutter-specialist and qa-reviewer: after approval use existing Candy ink/charcoal tokens on light panels and preserve selected-state distinction; verify actual profile pairs and independently resolve onboarding composited paints before extending runtime claims.",
       "regression_risk": "Profile view/edit, selected/disabled states, VI/EN, large text and actual onboarding foreground/background combinations.",
       "related_tests": [
-        "app/test/ui_regression_test.dart",
-        "docs/audit/phases/A5_UI_EVIDENCE.md section2 Profile VI/EN results"
+        "app/test/ui_regression_test.dart"
       ],
       "missing_tests": [
         "After fix approval: actual profile identity/edit pairs in VI/EN at normal and200% text meet the approved contrast criterion with ink positive control.",
@@ -933,6 +1179,19 @@
         "confirmed_or_qualified_scope": "Current fields are narrowly scoped; all prior fields/reviews and nested historical objects are preserved verbatim in historical_pre_a5. A2-A4 review metadata outside that object is historical, not current scope.",
         "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
         "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      },
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "R2 profile contrast (partial)",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Accepted",
+        "change": "profile_screen.dart display name and edit TextField use AppTheme.textMain on AppTheme.panelBackground instead of Colors.white; ui_regression_test measures the real widget colours at 200% text.",
+        "verification": [
+          "flutter test test/ui_regression_test.dart -> PASS (\"profile identity and edit text meet contrast on the light card\")"
+        ],
+        "limits": "Residual nodes at profile_screen.dart:590,692,887,949,967,981 are listed for a separate contrast task and were not changed. Onboarding chip foreground/background stays unresolved. Not a whole-screen or all-state contrast certification."
       }
     },
     {
@@ -964,48 +1223,105 @@
       "title": "Quest cards display fixed progress and inconsistent fallback rewards",
       "category": "BUG",
       "component": "Quest and dashboard quest presentation",
-      "paths": ["app/lib/features/quests/presentation/widgets/daily_quest_card.dart", "app/lib/features/dashboard/presentation/screens/dashboard_screen.dart"],
-      "line_ranges": ["daily_quest_card.dart:50-54,73", "dashboard_screen.dart:325-328,349-355"],
+      "paths": [
+        "app/lib/features/quests/presentation/widgets/daily_quest_card.dart",
+        "app/lib/features/dashboard/presentation/screens/dashboard_screen.dart"
+      ],
+      "line_ranges": [
+        "daily_quest_card.dart:50-54,73",
+        "dashboard_screen.dart:325-328,349-355"
+      ],
       "origin": "A2 final reconciliation; independent UI/UX review and bounded source reread",
       "root_cause": "Status-based constants substitute for measured progress, and two views use different constants when earned XP is absent.",
       "evidence": "Inspection only: active daily quest displays 0.35 progress and earnedXp ?? 350; dashboard displays zero progress until completed and earnedXp ?? 100 for the same quest shape.",
       "expected_behavior": "Progress reflects known completion or is explicitly unknown; missing server rewards do not appear as conflicting earned amounts.",
-      "actual_behavior": "An active quest receives fixed 35% in one view and zero in another; null earned XP becomes 350 versus 100.",
+      "actual_behavior": "Fixed in repository scope: unknown server reward and progress are nullable and hidden; dashboard, DailyQuestCard and CandyQuestCard no longer invent 35%, 350 or 100 values, and a completed quest alone renders full progress.",
       "impact": "Misleading progress/reward expectations. These are display-only substitutions, not persisted XP or client award forgery.",
       "severity": "P2",
       "confidence": "High",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Render authoritative values when available; otherwise use an explicitly labeled preview/unknown state shared across both views.",
       "regression_risk": "Active, expired and completed quest cards; null versus zero rewards; VI/EN presentation.",
-      "related_tests": ["app/test/ui_regression_test.dart"],
-      "missing_tests": ["Render the same active quest with null earned XP in both views; assert consistent truthful progress/reward copy."],
-      "depends_on": ["A4 quest progress/reward contract clarification; FND-ARCH-002 owns localization, not these numerical substitutions."],
+      "related_tests": [
+        "app/test/quest_card_truthfulness_test.dart",
+        "app/test/ui_regression_test.dart"
+      ],
+      "missing_tests": [
+        "Rendered quest cards against live server payloads NOT RUN"
+      ],
+      "depends_on": [
+        "A4 quest progress/reward contract clarification; FND-ARCH-002 owns localization, not these numerical substitutions."
+      ],
       "wave": "W2",
-      "verification_method": "A5 flutter-specialist: compare both views using the same active/completed/null-reward fixtures and verify no invented earned amount. NOT RUN; source inspection only."
+      "verification_method": "A5 flutter-specialist: compare both views using the same active/completed/null-reward fixtures and verify no invented earned amount. NOT RUN; source inspection only.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "R2 quest truthfulness",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "earnedXp/currentProgress/xpReward became nullable; unknown progress renders \"- / target\" and skips the bar; the claim label drops the amount; dashboard passes null instead of 100/0.",
+        "verification": [
+          "flutter test test/quest_card_truthfulness_test.dart -> 3/3 PASS",
+          "flutter test test/ui_regression_test.dart -> PASS"
+        ],
+        "limits": "No live payload verification; the fix governs rendering of unknown values only."
+      }
     },
     {
       "id": "FND-BUG-007",
       "title": "Summary fallback fabricates a completed workout and 500 earned XP",
       "category": "BUG",
       "component": "Workout summary routing and reward display",
-      "paths": ["app/lib/core/router/app_router.dart", "app/lib/features/workout/presentation/screens/workout_summary_screen.dart", "app/lib/features/workout/presentation/screens/active_workout_screen.dart", "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"],
-      "line_ranges": ["app_router.dart:127-174", "workout_summary_screen.dart:69-74", "active_workout_screen.dart:82-100", "active_workout_controller.dart:672-675"],
+      "paths": [
+        "app/lib/core/router/app_router.dart",
+        "app/lib/features/workout/presentation/screens/workout_summary_screen.dart",
+        "app/lib/features/workout/presentation/screens/active_workout_screen.dart",
+        "app/lib/features/workout/presentation/controllers/active_workout_controller.dart"
+      ],
+      "line_ranges": [
+        "app_router.dart:127-174",
+        "workout_summary_screen.dart:69-74",
+        "active_workout_screen.dart:82-100",
+        "active_workout_controller.dart:672-675"
+      ],
       "origin": "A2 final reconciliation; navigation lead 11 and summary lead 19 merged",
       "root_cause": "Missing route payload is replaced by a synthetic completed workout, and absent earnedXP is replaced by 500 rather than unknown.",
       "evidence": "Inspection only: no-extra summary route returns summary-default with completed status; map payload without workout uses summary-preview. Summary uses xpResult?['earnedXP'] ?? 500. Normal controller completion supplies rewards; the fallback is not proof that normal RPC responses omit earnedXP.",
       "expected_behavior": "Missing summary context produces an unavailable/redirect state; missing earned XP is not presented as a real reward.",
-      "actual_behavior": "An authenticated, onboarded summary deep link without extra can construct a synthetic completed summary displaying 500 earned XP.",
+      "actual_behavior": "Fixed in repository scope: /workout/summary redirects to /workout when no real summary context exists; the synthetic workout, +500 XP badge and LVL 1 / 0 / 1000 XP defaults were removed, and only receipt-provided level/XP values render.",
       "impact": "Misleading completion/reward display; no completed-workout database record, persisted XP or award-authority bypass is created by this route.",
       "severity": "P2",
       "confidence": "High",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Require validated summary context or redirect to history; display unknown reward data explicitly instead of inventing 500.",
       "regression_risk": "Successful completion, summary deep links/reloads, null/zero rewards, modal summary dismissal.",
-      "related_tests": ["app/test/navigation_integration_test.dart", "app/test/workout_widgets_test.dart"],
-      "missing_tests": ["Authenticated summary navigation without extra, absent earnedXP, and zero earnedXP; assert no fabricated completion/reward."],
-      "depends_on": ["Auth/onboarding gate permits the route only for eligible sessions; unrelated to FND-DATA-001 award idempotency."],
+      "related_tests": [
+        "app/test/summary_truthfulness_test.dart",
+        "app/test/navigation_integration_test.dart"
+      ],
+      "missing_tests": [
+        "Full authenticated deep-link journey against a live backend NOT RUN"
+      ],
+      "depends_on": [
+        "Auth/onboarding gate permits the route only for eligible sessions; unrelated to FND-DATA-001 award idempotency."
+      ],
       "wave": "W2",
-      "verification_method": "A5 flutter-specialist: navigate to summary under eligible auth with no extra and with missing/zero earnedXP fixtures. NOT RUN; source-supported reachability only."
+      "verification_method": "A5 flutter-specialist: navigate to summary under eligible auth with no extra and with missing/zero earnedXP fixtures. NOT RUN; source-supported reachability only.",
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "R2 summary truthfulness",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "hasWorkoutSummaryContext() guards the route redirect (D-034); earnedXp is int?; the level progress block renders only when xpResult exists; summary-preview/summary-default workouts and their fallbacks were deleted.",
+        "verification": [
+          "flutter test test/summary_truthfulness_test.dart -> 5/5 PASS"
+        ],
+        "limits": "No live receipt/deep-link verification; only the missing-context path is proven."
+      }
     },
     {
       "id":"FND-INTG-002",
@@ -1549,21 +1865,18 @@
       "root_cause": "Shared AuthController AsyncError from failed sign-in remains visible to recovery screen as a password-update error without an update submission.",
       "evidence": "A5 Flutter G1 real login rejects synthetic sign-in, synthetic passwordRecovery event drives actual router/reset screen; premature update error=true with updateCalls0. Pristine recovery false/updateCalls0. Actual Save password rejected-submit shows error/keeps recovery; success clears action error/recovery and leaves reset route. Retained18-test run exit0 and strengthened G1 button controls+2 exit0. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "Recovery entry must not report a failed password update before that operation is submitted; preserve valid rejected/successful submit feedback.",
-      "actual_behavior": "Synthetic failed-signin -> recovery renders Could not update your password before any update call; pristine entry and subsequent submit controls distinguish contamination.",
+      "actual_behavior": "Fixed in repository scope: ResetPasswordScreen reports an error only after its own updatePassword submission (_submittedUpdate); a stale sign-in failure no longer appears at pristine recovery entry, while rejected and successful submits still report correctly.",
       "impact": "P2 confirmed misleading pre-submit recovery feedback in actual Dart/router/form fixture; no live link, callback delivery, credential disclosure or backend auth defect established.",
       "severity": "P2",
       "confidence": "Confirmed",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Owner flutter-specialist/Auth with qa-reviewer: after approval scope action errors by operation or reset stale sign-in state at recovery entry, preserving true update failures and successful recovery cleanup.",
       "regression_risk": "Failed sign-in, recovery navigation, validation, rejected/successful password update, retries and auth events.",
       "related_tests": [
-        "app/test/auth_controller_test.dart",
-        "app/test/ui_regression_test.dart",
-        "docs/audit/phases/A5_FLUTTER_EVIDENCE.md G1"
+        "app/test/reset_password_entry_test.dart"
       ],
       "missing_tests": [
-        "After fix approval: rejected sign-in then actual recovery route shows no update error before submit; pristine entry, rejected Save and successful Save controls still work.",
-        "Approved isolated Auth/callback follow-up: distinguish actual recovery URI/session transitions from synthetic events; no live Auth evidence claimed."
+        "Live recovery email round-trip NOT RUN"
       ],
       "depends_on": [
         "Distinct from INTG001 callback/allowlist contract; no backend/config change approved."
@@ -1578,6 +1891,19 @@
         "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
         "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
         "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      },
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "R2 recovery entry error scoping",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "_submittedUpdate is set immediately before updatePassword and the error panel renders only when _submittedUpdate && state.hasError.",
+        "verification": [
+          "flutter test test/reset_password_entry_test.dart -> PASS"
+        ],
+        "limits": "No live Supabase Auth recovery round-trip (no local stack / O-07)."
       }
     },
     {
@@ -1600,21 +1926,18 @@
       "root_cause": "CandyButton wraps pointer GestureDetector/Semantics without a Focus/Actions keyboard activation path.",
       "evidence": "A5 UI fixture at614ee7c: candyFocusNodes0; Tab reaches actual SystemButton; Enter and Space increment System1 then2 while CandyKeys0; pointerCandy1. Existing production call sites are source-inspected, not route-traversed. These observations passed within UI aggregate FAIL(+8 -2 onboarding fixture failures). The disabled counter fixture is tautological (null callback); it does not establish comprehensive disabled/loading behavior. qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
       "expected_behavior": "Enabled Candy action can receive keyboard focus and activate once with Enter/Space with a visible focus state, while pointer behavior remains valid.",
-      "actual_behavior": "Actual enabled CandyButton primitive is skipped in focus traversal and not key-activated; actual SystemButton positive control and Candy pointer activation work.",
+      "actual_behavior": "Fixed in repository scope: an enabled CandyButton is focusable, shows a 3 px ink focus ring and activates once on Enter/Space through ActivateIntent; disabled buttons are skipped and pointer behaviour is unchanged.",
       "impact": "P2 confirmed keyboard inoperability of the tested primitive. Integrated route impact is source-backed, not executed whole-screen accessibility certification; no blanket claim about all Candy widgets.",
       "severity": "P2",
       "confidence": "Confirmed",
-      "status": "Accepted",
+      "status": "Fixed",
       "proposed_remediation": "Owner ui-ux-specialist with flutter-specialist and qa-reviewer: after approval add keyboard/focus/Actions semantics using existing design-system affordances; preserve pointer and native SystemButton behavior.",
       "regression_risk": "Focus order/visibility, Enter/Space single activation, pointer press state, disabled/loading/key-repeat behavior and banner/overlay call sites.",
       "related_tests": [
-        "app/test/navigation_integration_test.dart",
-        "app/test/ui_regression_test.dart",
-        "docs/audit/phases/A5_UI_EVIDENCE.md keyboard fixture"
+        "app/test/candy_button_keyboard_test.dart"
       ],
       "missing_tests": [
-        "After fix approval: Tab reaches real CandyButton with visible focus; Enter/Space fire exactly once, pointer still fires, and enabled SystemButton remains positive control.",
-        "Authorized UI follow-up: non-tautological disabled/loading callbacks and key-repeat assertions plus banner/overlay route traversal; do not count current null-callback counter as comprehensive coverage."
+        "Screen-reader and physical-keyboard verification on a device NOT RUN"
       ],
       "depends_on": [
         "No new theme/dependency approved; distinct from BUG004 contrast and ARCH002 localization."
@@ -1629,6 +1952,19 @@
         "confirmed_or_qualified_scope": "Evidence/assumptions and remaining assertions are explicit in this record; no remediation or whole-stage closure claim.",
         "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
         "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
+      },
+      "r2_review": {
+        "date": "2026-10-29",
+        "round": "R2",
+        "task": "R2 keyboard-operable Candy primitive",
+        "entry_commit": "b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc",
+        "status_before": "Accepted",
+        "status_after": "Fixed",
+        "change": "FocusableActionDetector wraps the existing GestureDetector; ActivateIntent maps Enter/Space to onPressed; focus swaps the 2 px border for 3 px CandyColors.ink.",
+        "verification": [
+          "flutter test test/candy_button_keyboard_test.dart -> 2/2 PASS (Tab/Enter/Space and pointer activation)"
+        ],
+        "limits": "Flutter test binding only; no device keyboard or assistive-technology run."
       }
     },
     {

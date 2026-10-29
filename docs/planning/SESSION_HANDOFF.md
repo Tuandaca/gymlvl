@@ -1,6 +1,106 @@
 # GymLvl — Session Handoff
 
-## Current — A7 PARTIAL; B0/B1 core verified, four required gates BLOCKED (2026-10-29)
+## Current — R2 controlled remediation A-1..A-8 executed locally (2026-10-29)
+
+- **Task:** R2 batch — A-2 Auth redirect allowlist, A-3 Android merged-manifest gate, A-4 canonical
+  findings sync, A-7 `GymLvl` branding, A-8 `app/analysis.txt` untracking, conditional A-1
+  duplicate-XP guard.
+- **Status:** `PASS` for the approved repository scope; final release/live gates `NOT RUN`/`BLOCKED`.
+  Register after R2: Fixed 18 · Accepted 12 · Needs Verification 3 · False Positive 2 = 35
+  (severity 0/3/24/6/2 and confidence 16/18/1/0 unchanged).
+- **Commit:** branch `main`, HEAD `b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc`; tree dirty by design
+  (owner work + this batch; `app/analysis.txt` staged as deleted in the index only). No commit, push,
+  tag, deployment or production migration was performed.
+- **Changed files (source/config/tests):** `supabase/config.toml`, `app/config.example.json`,
+  `README.md`, `docs/DEVELOPMENT.md`, `.github/workflows/verify.yml`, `app/.gitignore`,
+  `app/lib/app.dart`, `app/lib/main.dart`, `app/lib/core/router/main_shell_screen.dart`,
+  `app/lib/features/auth/presentation/screens/auth_form_screen.dart`,
+  `app/lib/core/localization/localization_engine.dart`, `app/lib/l10n/{app_en.arb,app_vi.arb,
+  app_localizations.dart,app_localizations_en.dart,app_localizations_vi.dart}`,
+  `app/test/{widget_test.dart,adversarial_edge_test.dart}`, `supabase/tests/progression_regression.sql`.
+  **Added:** `app/test/auth_redirect_config_test.dart`,
+  `tools/android-verify/{manifest-check.mjs,run.mjs,manifest-check.test.mjs,package.json}`,
+  `tools/audit-sync/sync-findings-r2.mjs`,
+  `supabase/migrations/20261029000200_prevent_legacy_double_award.sql`.
+  **Records:** `docs/audit/FINDINGS_REGISTER.json`, `docs/audit/MASTER_FINDINGS.md`,
+  `docs/audits/codebase-health/{REMEDIATION_EXECUTION.md,FINDINGS_REGISTER.md,CODEBASE_HEALTH_REPORT.md,
+  REMEDIATION_PRIORITY.md}`, `docs/planning/{DECISIONS.md,PROJECT_CONTEXT.md,TASK_BOARD.md,
+  SESSION_HANDOFF.md,CHANGELOG_AI.md}`.
+- **Verification (all executed in this session at `b85d674` + this batch):**
+  `flutter analyze --no-pub` → exit 0, `No issues found!`;
+  `dart format --output=none --set-exit-if-changed lib test` → 134 files, 0 changed;
+  `flutter test --no-pub` → `+221: All tests passed!`;
+  `node tools/db-tests/run.mjs` → 12 SQL units + 365 ACL assertions, exit 0;
+  `node tools/db-tests/edge-tests.mjs` → 44/44, exit 0;
+  `node tools/android-verify/manifest-check.test.mjs` → 8/8;
+  `node tools/android-verify/run.mjs` → `PASS merged release manifest: package=com.gymlvl.app
+  label=GymLvl internet=1 nested=0 duplicates=0`, exit 0.
+  A-1 RED→GREEN: without the migration the new case fails
+  (`FAIL: ledger-only legacy workout never earns twice`); with it, the suite passes.
+- **Per-finding:** INTG-001 Fixed (config contract 6/6), BUG-001 Fixed (merged manifest),
+  BUG-003 Fixed (`GymLvl` everywhere user-facing), GOV-005 Fixed (untracked + ignored, 84,864-byte
+  local copy preserved), DATA-001 Fixed in repository scope. BUG-002 and TEST-001 stay Accepted
+  (signing keys absent; CI unproven remotely); BUG-004 stays Accepted (partial contrast fix only).
+- **Decisions:** D-035 Auth origin/allowlist, D-036 single brand spelling `GymLvl`, D-037 ledger
+  evidence as prior-award provenance. D-034 carried.
+- **Blockers:** A-1 production portion — live Supabase access (`O-07`), at-risk counts and any
+  `workout_rewards` repair need operator approval; release APK/signature (`GYMLVL_RELEASE_*`), iOS
+  build (Windows host), hosted Edge, live Auth round trip, remote CI and true two-connection
+  concurrency are `NOT RUN`.
+- **Finalization (2026-10-29):** `READY_FOR_APPROVAL`. Commit manifest and CI evidence are in
+  `REMEDIATION_EXECUTION.md` §9: Commit A = 19 prior A-8 files, Commit B = 39 R2 files, 5 owner or
+  ambiguous paths excluded (`app/android/gradle.properties`, `run_gradle.bat`, `gradle_check.ps1`,
+  `run_gradle_check.bat`, `docs/audit/phases/A8_BATCH_EXECUTION.md`). Local gates re-run `PASS`
+  (analyze 0, format 134/0, 221/221, SQL 12 units + 365 ACL, Edge 44/44, manifest 8/8 + gate exit 0,
+  workflow YAML 3 jobs, register 35/18/12/3/2). Remote CI at `b85d674` is **red** in
+  `database-and-edge` (`Expected 413, got 503` ×8 — missing hosted `SUPABASE_*` in that job); the
+  pending `edge-tests.mjs` change targets exactly that failure but is unobserved remotely. `gh` is
+  authenticated (repo scope); nothing was committed or pushed.
+- **Next action:** owner approves the §9.4 manifest, then the push that triggers CI; separately
+  approves `O-07` read-only counts. No further batch starts automatically.
+
+## Historical A8 batch — UI/config fixes, platform gates blocked (2026-10-29)
+
+- **Task/status:** verification-first remediation of `docs/audit/FINDINGS_REGISTER.json` (35). 9
+  findings fixed or partially fixed with regression tests, 5 re-verified as already fixed, 18 not
+  re-verified, 2 reproduced and BLOCKED on approval, 1 checked and still open (GOV005). Overall
+  PARTIAL; readiness NOT READY.
+- **Commit:** `main` @ b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc, tree dirty (owner work preserved).
+  No commit, push, tag, migration, config, permission or deployment in this session.
+- **Changed source/test:** app/android/app/src/main/AndroidManifest.xml, app/ios/Runner/Info.plist,
+  app/pubspec.yaml, app/lib/core/router/app_router.dart,
+  app/lib/features/auth/presentation/screens/reset_password_screen.dart,
+  app/lib/features/dashboard/presentation/screens/dashboard_screen.dart,
+  app/lib/features/profile/presentation/screens/profile_screen.dart,
+  app/lib/features/quests/presentation/widgets/daily_quest_card.dart,
+  app/lib/features/workout/presentation/screens/workout_summary_screen.dart,
+  app/lib/ui/candy/candy_button.dart, app/lib/ui/candy/candy_quest_card.dart,
+  app/test/release_config_test.dart, app/test/ui_regression_test.dart, tools/db-tests/edge-tests.mjs;
+  new app/test/summary_truthfulness_test.dart, reset_password_entry_test.dart,
+  candy_button_keyboard_test.dart, quest_card_truthfulness_test.dart.
+- **Changed records:** docs/audits/codebase-health/{FINDINGS_REGISTER.md,REMEDIATION_EXECUTION.md},
+  docs/planning/{PROJECT_CONTEXT.md,DECISIONS.md,TASK_BOARD.md,SESSION_HANDOFF.md,CHANGELOG_AI.md}.
+- **Verification:** analyze0issues; format133files0changed; full215/215pass (200 at entry);
+  SQL11units+ACL365; Edge44/44 (runner injects synthetic SUPABASE_* when absent). Merged manifest/APK,
+  iOS build, hosted Edge, live Supabase Auth/RLS/concurrency NOT RUN.
+- **Fixed:** BUG002/003 names+description, BUG004 partial contrast, BUG006 quest fallbacks,
+  BUG007 summary deep link/500XP/level defaults, BUG008 recovery error scope, BUG009 keyboard
+  CandyButton, TEST001 partial source gate, SEC004 runner env.
+- **Still open:** GOV005 — the stale transcript is `app/analysis.txt` and `git ls-files app/analysis.txt`
+  still lists it; removal needs A-8. An earlier root-path check was mis-read as a resolution.
+- **Reproduced BLOCKED:** DATA001 second award total_xp100->110/level1->2/rewards0->1/ledger1->3;
+  INTG001 site_url127.0.0.1:3000 vs app localhost:8080.
+- **Decisions:** D-034 derived from D-029 (unknown reward/progress hidden, summary deep link redirects).
+- **Blockers/approvals:** A-1 DATA001 migration+backfill, A-2 Auth allowlist config, A-3
+  permission-gate hardening, A-4 canonical JSON status sync, A-5 isolated stack + Android device,
+  A-6 live Supabase, A-7 brand spelling (launcher `GymLvl` vs in-app `GymLevel`), A-8 removal of the
+  tracked `app/analysis.txt`. Details in docs/audits/codebase-health/REMEDIATION_EXECUTION.md §7.
+- **Next action:** owner decides A-1..A-4, A-7, A-8; execute A-2 first (config-only), then A-1 with a
+  read-only live count before any backfill.
+
+## Historical A8 state (preserved)
+
+## Previous — A8 PARTIAL; shell tool BLOCKED, docs-only fix for R2-06/ARCH-003 (2026-10-29)
 
 - **Task/status:** A7 PARTIAL; completed local R0-01..04/R1-01..03 with independent QA. R1-04/07
   supported-stack verification BLOCKED; R1-05/06 source10checks pass but required Gradle tasks/signature

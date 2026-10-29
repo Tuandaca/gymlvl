@@ -7,7 +7,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(const ConfigurationApp());
-    expect(find.text('GYMLEVEL'), findsOneWidget);
+    expect(find.text('GYMLVL'), findsOneWidget);
     expect(find.textContaining('Configure Supabase to begin.'), findsOneWidget);
     expect(
       find.byWidgetPredicate(

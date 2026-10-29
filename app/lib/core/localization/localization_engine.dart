@@ -100,7 +100,7 @@ const Map<String, Map<String, String>> _dictionary = {
     'en':
         'If this email is registered, you will receive a password reset link.',
   },
-  'new_player': {'vi': 'Lần đầu đến GymLevel?', 'en': 'New to GymLevel?'},
+  'new_player': {'vi': 'Lần đầu đến GymLvl?', 'en': 'New to GymLvl?'},
   'already_registered': {
     'vi': 'Đã có tài khoản?',
     'en': 'Already have an account?',

@@ -1,6 +1,6 @@
-﻿# GymLevel
+# GymLvl
 
-GymLevel is a Flutter fitness app with an RPG-style dashboard, workout logging, class progression, daily quests, and Vietnamese/English interfaces. Supabase Auth and PostgreSQL are the source of truth; authenticated Edge Functions and database transactions own progression and rewards.
+GymLvl is a Flutter fitness app with an RPG-style dashboard, workout logging, class progression, daily quests, and Vietnamese/English interfaces. Supabase Auth and PostgreSQL are the source of truth; authenticated Edge Functions and database transactions own progression and rewards.
 
 The project is undergoing a product and security verification pass. See [implementation status and test evidence](docs/IMPLEMENTATION_STATUS.md) for the current release gate. Features in older design documents are not necessarily implemented.
 
@@ -18,7 +18,7 @@ Install Flutter with Dart compatible with `app/pubspec.yaml` (`^3.10.4`), then s
 
 ```powershell
 flutter pub get
-flutter run -d chrome --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
+flutter run -d chrome --web-port 8080 --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
 ```
 
 Use a publishable key or supported legacy anon key. Never put a secret/service-role key or AI-provider key in Flutter configuration. Missing configuration opens an actionable setup screen.

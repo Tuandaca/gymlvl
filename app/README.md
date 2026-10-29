@@ -1,4 +1,4 @@
-﻿# GymLevel Flutter client
+# GymLvl Flutter client
 
 Run from this directory after configuring the Supabase backend:
 

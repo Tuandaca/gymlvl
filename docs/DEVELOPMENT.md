@@ -1,4 +1,4 @@
-﻿# Run, test, and release GymLevel
+# Run, test, and release GymLvl
 
 Updated: 2026-10-26. Commands below describe the workflow; they are not execution evidence. See [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) for actual results and blockers.
 
@@ -47,12 +47,12 @@ Obtain the local publishable key from your private CLI/Studio output. From `app/
 
 ```powershell
 flutter pub get
-flutter run -d chrome --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
+flutter run -d chrome --web-port 8080 --dart-define=SUPABASE_URL=http://127.0.0.1:54321 --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_LOCAL_PUBLISHABLE_KEY
 ```
 
 `SUPABASE_ANON_KEY` is accepted as a legacy fallback. Use only client-safe keys. Missing configuration opens setup instructions; no hosted target is silently selected. Compile-time configuration changes require restarting the run/build.
 
-Alternatively copy `app/config.example.json` to an ignored local JSON file, replace its key placeholder, and run `flutter run -d chrome --web-port 8080 --dart-define-from-file=config.local.json`. Set `AUTH_REDIRECT_URL` to the browser URL used for password recovery, and include that URL in Supabase Auth's site URL/redirect allowlist. Keep local configuration out of commits.
+Alternatively copy `app/config.example.json` to an ignored local JSON file, replace its key placeholder, and run `flutter run -d chrome --web-port 8080 --dart-define-from-file=config.local.json`. The checked-in `supabase/config.toml` already allowlists `http://localhost:8080` and `http://127.0.0.1:8080` (plus `/**` globs for the recovery `?code=` query), so the documented flow works without hand-editing the allowlist. If you serve the client from a different origin, set `AUTH_REDIRECT_URL` to that origin and add it to `additional_redirect_urls`; `app/test/auth_redirect_config_test.dart` fails when the configured redirect is not allowlisted. Keep local configuration out of commits.
 
 For a hosted project, use its URL/key only after the reviewed schema/functions are deployed. For an Android emulator, use `http://10.0.2.2:54321` to reach the host. For a phone, use a reachable development host address and firewall access; loopback on the phone points to the phone itself. Configure auth redirects for the actual client address. Production requires HTTPS.
 

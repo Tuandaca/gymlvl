@@ -18,7 +18,7 @@ class MainApp extends ConsumerWidget {
     final mode = ref.watch(localizationModeProvider);
 
     return MaterialApp.router(
-      title: 'GymLevel',
+      title: 'GymLvl',
       theme: CandyTheme.theme,
       darkTheme: CandyTheme.darkTheme,
       themeMode: ThemeMode.light,

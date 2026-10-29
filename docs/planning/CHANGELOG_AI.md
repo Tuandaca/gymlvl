@@ -2,6 +2,66 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — R2 controlled remediation: A-2, A-3, A-4, A-7, A-8 done; A-1 guard done, data repair blocked
+
+- Entry `main` @ `b85d674` with a dirty tree preserved (owner work + A8 batch). No commit, push, tag,
+  deployment or production migration.
+- **A-2 / FND-INTG-001 → Fixed:** `supabase/config.toml` `site_url=http://localhost:8080` and an
+  allowlist covering `localhost`, `127.0.0.1`, `[::1]` on 8080 (exact + `/**`) with the legacy `:3000`
+  entries kept; `app/config.example.json` `AUTH_REDIRECT_URL`; README/DEVELOPMENT use
+  `--web-port 8080`. New `app/test/auth_redirect_config_test.dart` 6/6 PASS. Live recovery NOT RUN.
+- **A-3 / FND-BUG-001 → Fixed:** real `gradlew :app:processReleaseMainManifest` →
+  `BUILD SUCCESSFUL`; merged manifest has `package=com.gymlvl.app`, `label=GymLvl`, one direct
+  `INTERNET`. New `tools/android-verify` gate (8/8 fixture tests, exit 0) plus an
+  `android-release-manifest` CI job (NOT RUN remotely). No APK, no signature, no device check.
+- **A-4:** `tools/audit-sync/sync-findings-r2.mjs` surgically synced `docs/audit/FINDINGS_REGISTER.json`:
+  12 findings gained an `r2_review`, 35 IDs and all history preserved, counts recomputed to
+  Fixed 18 · Accepted 12 · NV 3 · FP 2.
+- **A-7 / FND-BUG-003 → Fixed:** `GymLvl`/`GYMLVL` in app title, wordmarks, l10n `appTitle`, onboarding
+  copy, docs headings and CI workflow name; technical identifiers unchanged. Tests 31/31 PASS.
+- **A-8 / FND-GOV-005 → Fixed:** `git rm --cached app/analysis.txt` + `app/.gitignore:48`; the
+  84,864-byte local file is preserved and no source/CI references it.
+- **A-1 / FND-DATA-001 → Fixed (repository scope):** additive migration
+  `20261029000200_prevent_legacy_double_award.sql` adds one evidence-based guard (3 added lines, rest
+  byte-identical) plus `idx_xp_logs_user_source`; an existing `xp_logs` award row now yields
+  `alreadyAwarded` with no writes. Regression added to `supabase/tests/progression_regression.sql`;
+  RED without the migration → GREEN with it. No backfill, no row mutation.
+- Final gates: analyze exit 0; format 134 files / 0 changed; Flutter 221/221; SQL 12 units + 365 ACL
+  assertions; Edge 44/44; Android manifest gate exit 0.
+- Final consistency check caught a broken line in `.github/workflows/verify.yml` (the flutter job's
+  `steps:` key had been joined with its first entry by the rename), fixed it and re-validated the YAML
+  by parsing it (3 jobs, 7/6/6 steps). No permanent YAML gate added — still part of FND-TEST-001.
+- **Blocked:** production counts/backfill (`O-07` + operator approval), release signing, iOS build,
+  hosted Edge, live Auth, remote CI, true two-connection concurrency — all NOT RUN.
+- Docs updated: `REMEDIATION_EXECUTION.md` §3.1/§4/§7/§8, `FINDINGS_REGISTER.md`,
+  `CODEBASE_HEALTH_REPORT.md`, `REMEDIATION_PRIORITY.md`, `MASTER_FINDINGS.md`, `PROJECT_CONTEXT.md`
+  §4.1, `DECISIONS.md` (D-035–D-037), `TASK_BOARD.md`, this handoff and changelog.
+- Finalization pass (§9): repository safety, re-run gates, YAML parse, register integrity, and the
+  read-only cohort queries syntax-checked locally. Commit manifest prepared (Commit A 19 files,
+  Commit B 39 files, 5 owner/ambiguous paths excluded) — **not committed**. Remote CI at `b85d674`
+  observed **red** in `database-and-edge` (`Expected 413, got 503` ×8); fixing change is pending.
+
+## 2026-10-29 — A8 audit remediation batch: 9 findings fixed/partial, 2 blocked on approval
+
+- Verification-first pass over the 35-finding canonical register at main b85d674 (dirty tree
+  preserved). Entry analyze0/format129-0/full200pass, SQL11+ACL365, Edge36/44. Count reconciliation
+  written into FINDINGS_REGISTER.md: 35 findings, not 37 (37 = bounded-body Edge tests); the earlier
+  draft enumerated 23 IDs and summed confidence+status to 70. FND-INTG-001 re-scoped to the Auth
+  redirect allowlist, not `/coach`.
+- Fixed with tests: BUG002 Android label/iOS names, BUG003 pubspec description, BUG004 partial profile
+  contrast, BUG006 fabricated quest progress+350/100XP, BUG007 summary deep link/synthetic workout
+  +500XP/level defaults, BUG008 recovery error scoping, BUG009 keyboard-focusable CandyButton; TEST001
+  partial source gate; SEC004 edge-runner synthetic env. New tests: summary5, reset1, keyboard2,
+  quest3, +3 release, +1 200%-text contrast.
+- Reproduced and BLOCKED: DATA001 second award (total_xp100->110, level1->2, rewards0->1, ledger1->3)
+  needs additive migration+live count approval; INTG001 site_url127.0.0.1:3000 vs app localhost:8080
+  needs config approval. GOV005 is still open: the stale transcript is app/analysis.txt and
+  `git ls-files app/analysis.txt` lists it; a root-path check had been mis-read as a resolution.
+  18 findings not re-verified.
+- Final: analyze0, format133-0, full215/215, SQL11+ACL365, Edge44/44. D-034 recorded (derived from
+  D-029). No commit/push/tag/migration/config/deploy. Merged manifest, iOS build, hosted Edge, live
+  Supabase NOT RUN; approval items A-1..A-4, A-7, A-8 in REMEDIATION_EXECUTION.md §7.
+
 ## 2026-10-29 — A7 B1 regression PASS; platform tasks remain PARTIAL/BLOCKED
 
 - Parent D process TEMP/TMP final analyze0issues48.5s/format129files0changed/fullFlutter200pass

@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appTitle": "GymLevel",
+  "appTitle": "GymLvl",
   "@appTitle": {
     "description": "The title of the application"
   }

@@ -1,0 +1,10 @@
+{
+  "name": "gymlvl-android-verify",
+  "private": true,
+  "type": "module",
+  "description": "Release merged-manifest gate for FND-BUG-001 (no dependencies)",
+  "scripts": {
+    "test": "node manifest-check.test.mjs",
+    "verify": "node run.mjs"
+  }
+}

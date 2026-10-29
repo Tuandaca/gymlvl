@@ -113,7 +113,7 @@ class _AuthFormScreenState extends ConsumerState<AuthFormScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'GYMLEVEL',
+                    'GYMLVL',
                     textAlign: TextAlign.center,
                     style: Theme.of(
                       context,

@@ -1,4 +1,4 @@
-name: Verify GymLevel
+name: Verify GymLvl
 
 on:
   push:
@@ -50,3 +50,29 @@ jobs:
           name: web-test-build
           path: app/build/web
           retention-days: 7
+
+  android-release-manifest:
+    # Source checks alone cannot prove the merged release manifest keeps the
+    # INTERNET permission (FND-BUG-001). This job merges it and inspects the
+    # artifact. No signing keys are needed for a manifest merge.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.5'
+          channel: stable
+          cache: true
+      - name: Unit-test the manifest gate
+        run: node tools/android-verify/manifest-check.test.mjs
+      - name: Prepare the Android Gradle project
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter build apk --debug
+      - name: Merge and verify the release manifest
+        run: node tools/android-verify/run.mjs

@@ -489,6 +489,78 @@ C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-D031-gradle-8.13-bin-544ea6b1-
 after rechecking official SHA256. Do not remove any backup, prior task directory, unrelated cache,
 user data or Git history. This is not blanket cleanup approval.
 
+## D-033 — A8 timezone invariant documentation correction
+
+**Status:** ACCEPTED, implicit in A8 R2-06 scope, 2026-10-29.
+**Decision:** Fix ARCH-003 documentation-only invariant 7 in `ARCHITECTURE.md` to match the
+existing per-user timezone implementation. The code already computes day boundaries from
+`coalesce(tz, 'Asia/Ho_Chi_Minh')` at migration L198/241/310-312 and stores
+`profiles.timezone` with default `Asia/Ho_Chi_Minh`. No runtime behavior change, no new
+product decision, no SQL API change.
+**Scope:** `ARCHITECTURE.md` invariant 7 restatement only. Day-boundary SQL tests for
+non-default zones remain BLOCKED (R1-07 isolated PostgreSQL stack absent).
+**Consequences:** Documentation accuracy improved; no deployed policy certification.
+**Recovery:** Revert the single-line invariant change; no data impact.
+
+## D-034 — UI truthfulness: unknown rewards and progress are hidden, not estimated
+
+**Status:** DERIVED, 2026-10-29. Applies D-029 (already ACCEPTED) and the accepted findings
+FND-BUG-006/FND-BUG-007; no new architecture, schema, scope, or product direction is introduced.
+**Decision:** Client surfaces must not invent numeric rewards or progress the backend has not
+reported. Quest cards and the workout summary render an XP badge, claim amount, level progress, or
+progress bar only when the value is present; otherwise the element is omitted and, where a state is
+needed, it is shown as completed/unknown. A `/workout/summary` deep link with no real summary context
+redirects to `/workout` instead of constructing a synthetic completed workout.
+**Scope:** `daily_quest_card.dart`, `candy_quest_card.dart`, `dashboard_screen.dart`,
+`workout_summary_screen.dart`, `app_router.dart`, plus their regression tests. No SQL, grants, or
+client write path changed; PostgreSQL remains the only award authority.
+**Consequences:** Verified UI states can show fewer numbers than before. Any future screen that needs
+a reward must read it from an authoritative receipt rather than a literal default.
+
+## D-035 — Auth redirect allowlist aligned to the real Flutter web dev origin
+
+**Status:** APPROVED, direct A-2 scope, 2026-10-29.
+**Decision:** `supabase/config.toml` `site_url` is `http://localhost:8080`; `additional_redirect_urls`
+contains `localhost`, `127.0.0.1` and `[::1]` on port 8080 (exact entries plus `/**` globs for the
+recovery `?code=` query) and keeps the legacy `127.0.0.1:3000` entries. `app/config.example.json`
+`AUTH_REDIRECT_URL` and the documented run commands use `--web-port 8080`.
+**Scope:** local development configuration only. No production/hosted value, member, schema or auth
+identifier changed.
+**Consequences:** the documented recovery/confirmation flow is allowlisted. Serving the client from a
+different origin requires an explicit config + allowlist update; `app/test/auth_redirect_config_test.dart`
+fails when the configured redirect is not allowlisted.
+**Recovery:** revert `config.toml`, `config.example.json` and the two documentation lines; no data impact.
+
+## D-036 — Single user-facing brand spelling: GymLvl
+
+**Status:** APPROVED, direct A-7 scope, 2026-10-29.
+**Decision:** `GymLvl` / `GYMLVL` is the only user-facing spelling: launcher label, iOS display/name,
+in-app title, wordmarks, l10n `appTitle`, onboarding copy, documentation headings and CI workflow name.
+Technical identifiers are unchanged: `com.gymlvl.app`, Supabase project id `gymlvl`, schema objects and
+environment variable names.
+**Scope:** display strings only. No package rename, no schema change, no auth identifier change.
+**Consequences:** canonical FND-BUG-003 originally expected `GymLevel`; A-7 supersedes that spelling and
+the register keeps the old expectation as history. Installed apps keep their application id.
+**Recovery:** revert the string change; no migration or identifier rename.
+
+## D-037 — Ledger evidence is prior-award provenance for `complete_workout`
+
+**Status:** APPROVED for design and additive implementation under the A-1 conditional scope,
+2026-10-29. Production backfill is NOT approved.
+**Decision:** `complete_workout` treats an existing `xp_logs` row for the workout (`source` `workout` or
+`quest`, `source_id` = workout id) as proof the session was already awarded, even when the
+`workout_rewards` row and `workouts.is_xp_calculated` flag are missing. It returns the existing
+`alreadyAwarded` payload and writes nothing. It does not backfill, does not fabricate a reward row and
+never infers an award from `users.total_xp`.
+**Scope:** additive migration `supabase/migrations/20261029000200_prevent_legacy_double_award.sql`
+(`CREATE OR REPLACE FUNCTION` plus one index); no row mutation.
+**Consequences:** retries and concurrent calls for the same user serialize under the existing `users`
+row lock and cannot double-award a ledger-backed session. A session with no ledger evidence remains
+indistinguishable from a legitimate unawarded session and is still awarded. Production counts,
+ambiguous-row classification and any `workout_rewards` repair require `O-07` access and operator
+approval. `switch_class`'s ledger branch still requires `is_xp_calculated` and was not changed.
+**Recovery:** revert the migration; no data rollback is needed because it writes no historical rows.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:

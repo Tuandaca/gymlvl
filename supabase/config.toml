@@ -151,9 +151,25 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
-# A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# The Flutter web client is served from this origin: see `--web-port 8080` in README.md /
+# docs/DEVELOPMENT.md and `app/lib/main.dart`. Keep this in sync with `AUTH_REDIRECT_URL` in
+# `app/config.example.json`; `app/test/auth_redirect_config_test.dart` enforces the match.
+site_url = "http://localhost:8080"
+# A list of URLs that auth providers are permitted to redirect to post authentication.
+# Exact origins cover the documented dev flow; the `/**` globs cover the `?code=...` query that
+# Supabase appends to the recovery/confirmation link. 127.0.0.1 and ::1 are included because the
+# Flutter dev server can be opened from any of those hosts. The legacy :3000 entries are kept so an
+# existing local static-server workflow keeps working.
+additional_redirect_urls = [
+  "http://localhost:8080",
+  "http://localhost:8080/**",
+  "http://127.0.0.1:8080",
+  "http://127.0.0.1:8080/**",
+  "http://[::1]:8080",
+  "http://[::1]:8080/**",
+  "http://127.0.0.1:3000",
+  "https://127.0.0.1:3000",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).

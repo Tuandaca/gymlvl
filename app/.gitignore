@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local analyzer transcript (stale; regenerated on demand, never committed)
+analysis.txt

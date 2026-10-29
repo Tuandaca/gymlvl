@@ -432,9 +432,9 @@ void main() {
             expect(tester.takeException(), isNull);
 
             if (width >= 960) {
-              expect(find.text('GYMLEVEL'), findsOneWidget);
+              expect(find.text('GYMLVL'), findsOneWidget);
             } else {
-              expect(find.text('GYMLEVEL'), findsNothing);
+              expect(find.text('GYMLVL'), findsNothing);
             }
           },
         );
