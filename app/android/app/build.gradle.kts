@@ -5,6 +5,18 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Operator-owned release signing. Never commit credentials or fall back to debug signing.
+val releaseSigningInputs = listOf(
+    "GYMLVL_RELEASE_STORE_FILE",
+    "GYMLVL_RELEASE_STORE_PASSWORD",
+    "GYMLVL_RELEASE_KEY_ALIAS",
+    "GYMLVL_RELEASE_KEY_PASSWORD",
+)
+val releaseSigningValues = releaseSigningInputs.associateWith {
+    providers.environmentVariable(it).orNull?.takeIf { value -> value.isNotBlank() }
+}
+val missingReleaseSigning = releaseSigningInputs.filter { releaseSigningValues[it] == null }
+
 android {
     namespace = "com.gymlvl.app"
     compileSdk = flutter.compileSdkVersion
@@ -30,12 +42,47 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (missingReleaseSigning.isEmpty()) {
+                storeFile = file(releaseSigningValues.getValue("GYMLVL_RELEASE_STORE_FILE")!!)
+                storePassword = releaseSigningValues.getValue("GYMLVL_RELEASE_STORE_PASSWORD")!!
+                keyAlias = releaseSigningValues.getValue("GYMLVL_RELEASE_KEY_ALIAS")!!
+                keyPassword = releaseSigningValues.getValue("GYMLVL_RELEASE_KEY_PASSWORD")!!
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
+    }
+}
+
+// Gate execution, not configuration: help, debug and manifest inspection need no keys.
+val releasePackagingTasks = setOf(
+    "validateSigningRelease",
+    "packageRelease",
+    "packageReleaseBundle",
+    "signReleaseBundle",
+    "bundleRelease",
+    "assembleRelease",
+)
+val validateReleaseSigningInputs = tasks.register("validateReleaseSigningInputs") {
+    doLast {
+        if (missingReleaseSigning.isNotEmpty()) {
+            throw GradleException(
+                "Release signing configuration is incomplete. Missing inputs: " +
+                    "${missingReleaseSigning.joinToString(", ")}. Supply all four GYMLVL_RELEASE_* inputs; values are never logged."
+            )
+        }
+    }
+}
+tasks.configureEach {
+    if (name in releasePackagingTasks) {
+        // A separate dependency cannot be skipped by AGP's signing-task onlyIf predicate.
+        dependsOn(validateReleaseSigningInputs)
     }
 }
 
