@@ -125,31 +125,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/workout/summary',
+        // A direct deep link has no real workout context. Redirect instead of
+        // fabricating a completed workout and reward.
+        redirect: (context, state) =>
+            hasWorkoutSummaryContext(state.extra) ? null : '/workout',
         builder: (context, state) {
           final extra = state.extra;
           if (extra is WorkoutSummaryScreen) {
             return extra;
-          }
-          if (extra is Map<String, dynamic>) {
-            return WorkoutSummaryScreen(
-              workout:
-                  extra['workout'] as Workout? ??
-                  Workout(
-                    id: 'summary-preview',
-                    userId: 'user',
-                    status: WorkoutStatus.completed,
-                    startedAt: DateTime.now(),
-                  ),
-              xpResult: extra['xpResult'] as Map<String, dynamic>?,
-              totalVolumeKg:
-                  (extra['totalVolumeKg'] as num?)?.toDouble() ?? 0.0,
-              durationSeconds: (extra['durationSeconds'] as num?)?.toInt() ?? 0,
-              completedSetsCount:
-                  (extra['completedSetsCount'] as num?)?.toInt() ?? 0,
-              totalSetsCount: (extra['totalSetsCount'] as num?)?.toInt() ?? 0,
-              exercises:
-                  (extra['exercises'] as List<WorkoutExercise>?) ?? const [],
-            );
           }
           if (extra is Workout) {
             return WorkoutSummaryScreen(
@@ -160,17 +143,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               totalSetsCount: 0,
             );
           }
+          final summary = extra as Map<String, dynamic>;
           return WorkoutSummaryScreen(
-            workout: Workout(
-              id: 'summary-default',
-              userId: 'user',
-              status: WorkoutStatus.completed,
-              startedAt: DateTime.now(),
-            ),
-            totalVolumeKg: 0,
-            durationSeconds: 0,
-            completedSetsCount: 0,
-            totalSetsCount: 0,
+            workout: summary['workout'] as Workout,
+            xpResult: summary['xpResult'] as Map<String, dynamic>?,
+            totalVolumeKg:
+                (summary['totalVolumeKg'] as num?)?.toDouble() ?? 0.0,
+            durationSeconds: (summary['durationSeconds'] as num?)?.toInt() ?? 0,
+            completedSetsCount:
+                (summary['completedSetsCount'] as num?)?.toInt() ?? 0,
+            totalSetsCount: (summary['totalSetsCount'] as num?)?.toInt() ?? 0,
+            exercises:
+                (summary['exercises'] as List<WorkoutExercise>?) ?? const [],
           );
         },
       ),

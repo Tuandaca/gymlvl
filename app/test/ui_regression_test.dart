@@ -412,4 +412,36 @@ void main() {
       await capture(tester, 'dashboard_stats_en_320_large_text');
     },
   );
+
+  testWidgets(
+    'profile identity and edit text meet contrast on the light card',
+    (tester) async {
+      await pumpFixture(tester, const ProfileScreen(), textScale: 2);
+
+      double contrast(Color a, Color b) {
+        final first = a.computeLuminance();
+        final second = b.computeLuminance();
+        final lighter = first > second ? first : second;
+        final darker = first > second ? second : first;
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+
+      final name = tester.widget<Text>(find.text('Alex Nguyen'));
+      expect(name.style?.color, AppTheme.textMain);
+      expect(
+        contrast(name.style!.color!, AppTheme.panelBackground),
+        greaterThanOrEqualTo(4.5),
+      );
+
+      await tester.tap(find.byIcon(Icons.edit_rounded));
+      await tester.pumpAndSettle();
+      final field = tester.widget<TextField>(find.byType(TextField).first);
+      expect(field.style?.color, AppTheme.textMain);
+      expect(
+        contrast(field.style!.color!, AppTheme.panelBackground),
+        greaterThanOrEqualTo(4.5),
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

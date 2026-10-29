@@ -17,6 +17,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
 
+  /// The shared auth controller also carries failures from other screens
+  /// (for example a rejected sign-in). Recovery must only report an error from
+  /// a submit attempt made here.
+  bool _submittedUpdate = false;
+
   @override
   void dispose() {
     _password.dispose();
@@ -81,7 +86,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           )
                         : null,
                   ),
-                  if (state.hasError)
+                  if (_submittedUpdate && state.hasError)
                     Padding(
                       padding: const EdgeInsets.only(top: 16),
                       child: Text(
@@ -96,12 +101,12 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   FilledButton(
                     onPressed: state.isLoading
                         ? null
-                        : () {
-                            if (_form.currentState!.validate()) {
-                              ref
-                                  .read(authControllerProvider.notifier)
-                                  .updatePassword(_password.text);
-                            }
+                        : () async {
+                            if (!_form.currentState!.validate()) return;
+                            setState(() => _submittedUpdate = true);
+                            await ref
+                                .read(authControllerProvider.notifier)
+                                .updatePassword(_password.text);
                           },
                     child: Text(
                       translateText(

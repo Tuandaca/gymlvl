@@ -12,10 +12,21 @@ const targets = check
       .filter(entry => entry.isDirectory() && !entry.name.startsWith('_') && entry.name !== 'tests')
       .map(entry => path.join(functions, entry.name, 'index.ts'))
   : [functions];
+// The RPC handler resolves hosted-project configuration from the environment
+// and fails closed with 503 when it is absent. The bounded-body suite mocks
+// fetch, so synthetic configuration keeps it self-contained while still
+// allowing a real environment to override these values.
+const syntheticSupabaseEnv = {
+  SUPABASE_URL: process.env.SUPABASE_URL ?? 'https://project.test',
+  SUPABASE_ANON_KEY:
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.SUPABASE_PUBLISHABLE_KEY ??
+    'synthetic-anon-key',
+};
 const result = spawnSync(binary, [...(check ? ['check'] : ['test', '--allow-env', '--allow-net']), '--frozen', '--lock', path.join(functions, 'deno.lock'), ...targets], {
   cwd: root,
   stdio: 'inherit',
-  env: { ...process.env, DENO_DIR: path.join(root, 'tmp/deno-cache') },
+  env: { ...process.env, ...syntheticSupabaseEnv, DENO_DIR: path.join(root, 'tmp/deno-cache') },
 });
 if (result.error) console.error(result.error.message);
 process.exitCode = result.status ?? 1;

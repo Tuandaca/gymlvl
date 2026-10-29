@@ -664,7 +664,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   TextField(
                     controller: _nameController,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppTheme.textMain,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -682,7 +682,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppTheme.textMain,
                     ),
                   ),
                 const SizedBox(height: 4),

@@ -12,9 +12,9 @@ enum CandyQuestStatus { notStarted, inProgress, completedUnclaimed, claimed }
 class CandyQuestCard extends StatelessWidget {
   final String title;
   final String description;
-  final int currentProgress;
+  final int? currentProgress;
   final int targetProgress;
-  final int xpReward;
+  final int? xpReward;
   final CandyQuestStatus status;
   final IconData icon;
   final Color iconColor;
@@ -38,7 +38,7 @@ class CandyQuestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double progressFraction = targetProgress > 0
-        ? (currentProgress / targetProgress).clamp(0.0, 1.0)
+        ? ((currentProgress ?? 0) / targetProgress).clamp(0.0, 1.0)
         : 0.0;
 
     return CandyCard(
@@ -97,13 +97,15 @@ class CandyQuestCard extends StatelessWidget {
               ),
 
               // XP Reward Badge
-              const SizedBox(width: 8),
-              CandyBadge(
-                label: '+$xpReward XP',
-                variant: CandyBadgeVariant.mint,
-                fontSize: 11,
-                hasShadow: true,
-              ),
+              if (xpReward != null) ...[
+                const SizedBox(width: 8),
+                CandyBadge(
+                  label: '+$xpReward XP',
+                  variant: CandyBadgeVariant.mint,
+                  fontSize: 11,
+                  hasShadow: true,
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 14),
@@ -122,7 +124,9 @@ class CandyQuestCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '$currentProgress / $targetProgress',
+                currentProgress == null
+                    ? '- / $targetProgress'
+                    : '$currentProgress / $targetProgress',
                 style: const TextStyle(
                   fontFamily: CandyFonts.mono,
                   fontSize: 12,
@@ -133,15 +137,16 @@ class CandyQuestCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          CandyProgressBar(
-            progress: progressFraction,
-            height: 12,
-            fillColor:
-                status == CandyQuestStatus.completedUnclaimed ||
-                    status == CandyQuestStatus.claimed
-                ? CandyColors.mintGreen
-                : CandyColors.canaryYellow,
-          ),
+          if (currentProgress != null)
+            CandyProgressBar(
+              progress: progressFraction,
+              height: 12,
+              fillColor:
+                  status == CandyQuestStatus.completedUnclaimed ||
+                      status == CandyQuestStatus.claimed
+                  ? CandyColors.mintGreen
+                  : CandyColors.canaryYellow,
+            ),
           const SizedBox(height: 12),
 
           // Action CTA
@@ -155,7 +160,7 @@ class CandyQuestCard extends StatelessWidget {
     switch (status) {
       case CandyQuestStatus.completedUnclaimed:
         return CandyButton(
-          label: 'NHẬN THƯỞNG (+$xpReward XP)',
+          label: 'NHẬN THƯỞNG${xpReward == null ? '' : ' (+$xpReward XP)'}',
           variant: CandyButtonVariant.mint,
           size: CandyButtonSize.small,
           icon: Icons.card_giftcard_rounded,

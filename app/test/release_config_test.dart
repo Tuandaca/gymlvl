@@ -185,6 +185,34 @@ void main() {
     });
   }
 
+  test('Android release label is the product name', () {
+    final source = File(
+      'android/app/src/main/AndroidManifest.xml',
+    ).readAsStringSync();
+    final label = RegExp(
+      r'android:label\s*=\s*"([^"]+)"',
+    ).firstMatch(source)?.group(1);
+    expect(label, 'GymLvl');
+  });
+
+  test('iOS display and bundle names are the product name', () {
+    final source = File('ios/Runner/Info.plist').readAsStringSync();
+    String? value(String key) => RegExp(
+      '<key>$key</key>\\s*<string>([^<]*)</string>',
+    ).firstMatch(source)?.group(1);
+    expect(value('CFBundleDisplayName'), 'GymLvl');
+    expect(value('CFBundleName'), 'GymLvl');
+  });
+
+  test('package description names the product', () {
+    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final description = RegExp(
+      r'^description:\s*"([^"]+)"',
+      multiLine: true,
+    ).firstMatch(pubspec)?.group(1);
+    expect(description, startsWith('GymLvl:'));
+  });
+
   test(
     'source check detects duplicate and application-nested permission mistakes',
     () {

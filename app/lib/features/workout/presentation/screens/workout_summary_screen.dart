@@ -7,6 +7,16 @@ import '../../workout_copy.dart';
 import '../../domain/workout.dart';
 import '../../domain/workout_exercise.dart';
 
+/// Whether [extra] carries a real workout summary context.
+///
+/// A summary is only legitimate when it is backed by an actual workout or an
+/// already constructed summary screen. Missing context must never be replaced
+/// with a synthetic completed workout.
+bool hasWorkoutSummaryContext(Object? extra) =>
+    extra is WorkoutSummaryScreen ||
+    extra is Workout ||
+    (extra is Map<String, dynamic> && extra['workout'] is Workout);
+
 class WorkoutSummaryScreen extends ConsumerWidget {
   final Workout workout;
   final Map<String, dynamic>? xpResult;
@@ -66,17 +76,25 @@ class WorkoutSummaryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final earnedXp = (xpResult?['earnedXP'] as num?)?.toInt() ?? 500;
-    final totalXp = (xpResult?['totalXP'] as num?)?.toInt() ?? 0;
-    final newLevel = (xpResult?['newLevel'] as num?)?.toInt() ?? 1;
+    final earnedXp = (xpResult?['earnedXP'] as num?)?.toInt();
+    final totalXp = (xpResult?['totalXP'] as num?)?.toInt();
+    final newLevel = (xpResult?['newLevel'] as num?)?.toInt();
     final leveledUp = xpResult?['leveledUp'] as bool? ?? false;
     final newTitle = xpResult?['newTitle'] as String?;
-    final nextLevelXp = (xpResult?['nextLevelXp'] as num?)?.toInt() ?? 1000;
+    final nextLevelXp = (xpResult?['nextLevelXp'] as num?)?.toInt();
+
+    // A receipt may carry only part of the progression data. Show a value only
+    // when the receipt actually contains it; never substitute a default level,
+    // XP total, or progress fraction.
+    final hasLevelProgress =
+        totalXp != null && nextLevelXp != null && nextLevelXp > 0;
+    final hasLevelReceipt = newLevel != null || hasLevelProgress;
 
     // Calculate level progress
-    final double levelProgress = nextLevelXp > 0
+    final double levelProgress =
+        (totalXp != null && nextLevelXp != null && nextLevelXp > 0)
         ? ((totalXp % nextLevelXp) / nextLevelXp).clamp(0.0, 1.0)
-        : 0.5;
+        : 0;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -165,128 +183,135 @@ class WorkoutSummaryScreen extends ConsumerWidget {
                         color: AppTheme.textMain,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.successGreen.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppTheme.successGreen.withValues(alpha: 0.6),
+                    if (earnedXp != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.successGreen.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: AppTheme.successGreen.withValues(alpha: 0.6),
+                          ),
+                        ),
+                        child: Text(
+                          '+$earnedXp XP',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.successGreen,
+                            fontFamily: 'Space Mono',
+                          ),
                         ),
                       ),
-                      child: Text(
-                        '+$earnedXp XP',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.successGreen,
-                          fontFamily: 'Space Mono',
-                        ),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(height: 20),
 
               // Level Progress Bar
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.panelBackground.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: leveledUp
-                        ? AppTheme.goldWarning
-                        : AppTheme.textDim.withValues(alpha: 0.2),
-                    width: leveledUp ? 2 : 1,
+              if (hasLevelReceipt) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.panelBackground.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: leveledUp
+                          ? AppTheme.goldWarning
+                          : AppTheme.textDim.withValues(alpha: 0.2),
+                      width: leveledUp ? 2 : 1,
+                    ),
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'LVL $newLevel',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.cyanNeon,
-                                fontFamily: 'Space Mono',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              if (newLevel != null)
+                                Text(
+                                  'LVL $newLevel',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.cyanNeon,
+                                    fontFamily: 'Space Mono',
+                                  ),
+                                ),
+                              if (newTitle != null) ...[
+                                const SizedBox(width: 8),
+                                Text(
+                                  newTitle,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textDim,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          if (leveledUp)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
                               ),
-                            ),
-                            if (newTitle != null) ...[
-                              const SizedBox(width: 8),
-                              Text(
-                                newTitle,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppTheme.textDim,
-                                  fontWeight: FontWeight.w600,
+                              decoration: BoxDecoration(
+                                color: AppTheme.goldWarning.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Text(
+                                'LEVEL UP!',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.goldWarning,
                                 ),
                               ),
-                            ],
-                          ],
-                        ),
-                        if (leveledUp)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
                             ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.goldWarning.withValues(
-                                alpha: 0.2,
-                              ),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'LEVEL UP!',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.goldWarning,
-                              ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (hasLevelProgress) ...[
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: levelProgress,
+                            minHeight: 8,
+                            backgroundColor: AppTheme.background,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              AppTheme.cyanNeon,
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '$totalXp / $nextLevelXp XP',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.textDim,
+                              fontFamily: 'Space Mono',
+                            ),
+                          ),
+                        ),
                       ],
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(6),
-                      child: LinearProgressIndicator(
-                        value: levelProgress,
-                        minHeight: 8,
-                        backgroundColor: AppTheme.background,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          AppTheme.cyanNeon,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '$totalXp / $nextLevelXp XP',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppTheme.textDim,
-                          fontFamily: 'Space Mono',
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ],
 
               // 3 KPI Metrics
               Row(

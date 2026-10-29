@@ -85,7 +85,8 @@ These are load-bearing. Do not weaken them.
 5. **Workout history is immutable after completion.** Only `notes` on an active workout is
    user-updatable at the row level.
 6. **Exercise IDs are stable.** Existing 150 UUIDs must be preserved by any import.
-7. **Time zone.** Store UTC; compute streaks/quests explicitly in `Asia/Ho_Chi_Minh`.
+7. **Time zone.** Store UTC. Compute streaks, quests and daily aggregates in the user's
+   `profiles.timezone`, which defaults to `Asia/Ho_Chi_Minh`.
 8. **Design system.** Candy tokens and primitives are the UI contract. Light mode is the product
    mode; the legacy dark theme must not become the default.
 9. **Core training works without AI.** The coach is optional and cannot block logging.

@@ -42,6 +42,7 @@ class CandyButton extends StatefulWidget {
 
 class _CandyButtonState extends State<CandyButton> {
   bool _isPressed = false;
+  bool _hasFocus = false;
 
   Color _getBackgroundColor() {
     switch (widget.variant) {
@@ -179,7 +180,9 @@ class _CandyButtonState extends State<CandyButton> {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: CandyColors.buttonBorderRadius,
-          border: CandyColors.standardBorder(),
+          border: _hasFocus && isEnabled
+              ? Border.all(color: CandyColors.ink, width: 3)
+              : CandyColors.standardBorder(),
           boxShadow: isEnabled ? currentShadow : [],
         ),
         child: Center(child: content),
@@ -190,20 +193,40 @@ class _CandyButtonState extends State<CandyButton> {
       button: true,
       enabled: isEnabled,
       label: widget.label,
-      child: GestureDetector(
-        onTapDown: isEnabled ? (_) => setState(() => _isPressed = true) : null,
-        onTapUp: isEnabled
-            ? (_) {
-                setState(() => _isPressed = false);
-                widget.onPressed?.call();
-              }
-            : null,
-        onTapCancel: isEnabled
-            ? () => setState(() => _isPressed = false)
-            : null,
-        child: widget.isFullWidth
-            ? SizedBox(width: double.infinity, child: buttonWidget)
-            : buttonWidget,
+      child: FocusableActionDetector(
+        enabled: isEnabled,
+        mouseCursor: isEnabled
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        onShowFocusHighlight: (value) {
+          if (_hasFocus == value) return;
+          setState(() => _hasFocus = value);
+        },
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              if (isEnabled) widget.onPressed?.call();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          onTapDown: isEnabled
+              ? (_) => setState(() => _isPressed = true)
+              : null,
+          onTapUp: isEnabled
+              ? (_) {
+                  setState(() => _isPressed = false);
+                  widget.onPressed?.call();
+                }
+              : null,
+          onTapCancel: isEnabled
+              ? () => setState(() => _isPressed = false)
+              : null,
+          child: widget.isFullWidth
+              ? SizedBox(width: double.infinity, child: buttonWidget)
+              : buttonWidget,
+        ),
       ),
     );
   }

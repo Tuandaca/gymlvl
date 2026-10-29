@@ -325,7 +325,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final complete = quest.status == 'completed';
     final active =
         quest.status == 'active' && quest.expiresAt.isAfter(DateTime.now());
-    final earnedXp = quest.earnedXp ?? 100;
+    final int? earnedXp = quest.earnedXp;
 
     int totalSets = 0;
     for (final ex in quest.config) {
@@ -349,7 +349,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return CandyQuestCard(
       title: questTitle,
       description: questDesc,
-      currentProgress: complete ? totalSets : 0,
+      currentProgress: complete ? totalSets : null,
       targetProgress: totalSets > 0 ? totalSets : 1,
       xpReward: earnedXp,
       status: status,

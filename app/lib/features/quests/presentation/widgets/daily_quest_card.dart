@@ -51,7 +51,7 @@ class _DailyQuestCardState extends ConsumerState<DailyQuestCard> {
     final complete = quest.status == 'completed';
     final active =
         quest.status == 'active' && quest.expiresAt.isAfter(DateTime.now());
-    final xpReward = quest.earnedXp ?? 350;
+    final xpReward = quest.earnedXp;
 
     final String statusLabel;
     final CandyBadgeVariant badgeVariant;
@@ -70,7 +70,7 @@ class _DailyQuestCardState extends ConsumerState<DailyQuestCard> {
       statusIcon = Icons.timer_off_rounded;
     }
 
-    final double progress = complete ? 1.0 : (active ? 0.35 : 0.0);
+    final double? progress = complete ? 1.0 : null;
 
     return CandyCard(
       shadow: CandyCardShadow.medium,
@@ -108,12 +108,13 @@ class _DailyQuestCardState extends ConsumerState<DailyQuestCard> {
                   ],
                 ),
               ),
-              CandyBadge(
-                label: '+$xpReward XP',
-                variant: CandyBadgeVariant.mint,
-                hasShadow: true,
-                fontSize: 12,
-              ),
+              if (xpReward != null)
+                CandyBadge(
+                  label: '+$xpReward XP',
+                  variant: CandyBadgeVariant.mint,
+                  hasShadow: true,
+                  fontSize: 12,
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -147,13 +148,12 @@ class _DailyQuestCardState extends ConsumerState<DailyQuestCard> {
             ],
           ),
           const SizedBox(height: 8),
-          CandyProgressBar(
-            progress: progress,
-            height: 12,
-            fillColor: complete
-                ? CandyColors.mintGreen
-                : CandyColors.canaryYellow,
-          ),
+          if (progress != null)
+            CandyProgressBar(
+              progress: progress,
+              height: 12,
+              fillColor: CandyColors.mintGreen,
+            ),
           const SizedBox(height: 16),
           const Divider(color: CandyColors.ink, thickness: 1.5),
           const SizedBox(height: 8),
@@ -247,7 +247,13 @@ class _DailyQuestCardState extends ConsumerState<DailyQuestCard> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'ĐÃ NHẬN +$xpReward XP',
+                    xpReward == null
+                        ? translateText(
+                            ref,
+                            vi: 'ĐÃ HOÀN THÀNH',
+                            en: 'COMPLETED',
+                          )
+                        : 'ĐÃ NHẬN +$xpReward XP',
                     style: const TextStyle(
                       fontFamily: CandyFonts.display,
                       fontSize: 13,
