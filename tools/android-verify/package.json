@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Release merged-manifest gate for FND-BUG-001 (no dependencies)",
   "scripts": {
-    "test": "node manifest-check.test.mjs",
+    "test": "node manifest-check.test.mjs && node invoke.test.mjs",
     "verify": "node run.mjs"
   }
 }
