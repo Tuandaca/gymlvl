@@ -1,6 +1,6 @@
 # GymLvl — Task Board
 
-## Current — R2 controlled remediation executed locally; release/live gates open (2026-10-29)
+## Current — R2 committed, pushed, remote CI green (2026-10-29)
 
 **Scope:** owner-approved A-2, A-3, A-4, A-7, A-8 plus conditional A-1; one batch at a time,
 smallest safe change, regression test per fix.
@@ -27,10 +27,12 @@ APK/signature (`GYMLVL_RELEASE_*` absent); iOS build (Windows); hosted Edge and 
 remote CI run.
 **Carried:** `FND-TEST-001` Accepted (CI job unproven), `FND-BUG-002` Accepted (signing),
 `FND-BUG-004` Accepted (partial contrast); 3 NV and 2 FP unchanged.
-**Next action:** owner approves the `REMEDIATION_EXECUTION.md` §9.4 commit manifest (Commit A 19 files,
-Commit B 39 files), then the push that triggers CI; separately approves `O-07` read-only at-risk
-counts. **CI at `b85d674` is currently red** in `database-and-edge`; the fix is in the pending batch and
-is unproven remotely. No further remediation batch starts automatically.
+**Next action:** no R3 work has started. Open decisions for the owner: (a) wire
+`tools/android-verify/invoke.test.mjs` into the `android-release-manifest` job (the step still runs only
+`manifest-check.test.mjs`); (b) approve `O-07` read-only at-risk counts for `FND-DATA-001`; (c) the
+unchanged release/platform blockers. **Remote CI is green**: run `40834000928` at `a018ec2` passed
+`database-and-edge`, `flutter` and `android-release-manifest`. Closure state — REPOSITORY: CLOSED ·
+CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT READY.
 
 ## Historical A8 — remediation batch executed; platform gates blocked (2026-10-29)
 

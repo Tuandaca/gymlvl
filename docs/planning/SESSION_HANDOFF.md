@@ -1,6 +1,6 @@
 # GymLvl — Session Handoff
 
-## Current — R2 controlled remediation A-1..A-8 executed locally (2026-10-29)
+## Historical — R2 controlled remediation A-1..A-8 executed locally, pre-commit (2026-10-29)
 
 - **Task:** R2 batch — A-2 Auth redirect allowlist, A-3 Android merged-manifest gate, A-4 canonical
   findings sync, A-7 `GymLvl` branding, A-8 `app/analysis.txt` untracking, conditional A-1
@@ -58,6 +58,36 @@
   authenticated (repo scope); nothing was committed or pushed.
 - **Next action:** owner approves the §9.4 manifest, then the push that triggers CI; separately
   approves `O-07` read-only counts. No further batch starts automatically.
+
+## R2 closure — commits, pushes, and remote CI (2026-10-29)
+
+- **Commits:** `7a10031` (A-8, 19 files), `74aaa22` (R2, 39 files), `a018ec2` (CI invocation fix +
+  regression tests, 4 files). All three pushed fast-forward to `origin/main`
+  (`b85d674..74aaa22`, `74aaa22..a018ec2`); remote `main` = `a018ec2`.
+- **First CI run `40832095175`** (https://github.com/Tuandaca/gymlvl/actions/runs/40832095175) at
+  `74aaa22`: **failure**. `database-and-edge` **success** (the eight `Expected 413, got 503` failures
+  are gone), `flutter` **success**, `android-release-manifest` **failure**.
+- **Root cause:** `tools/android-verify/run.mjs` ran the wrapper with `sh`, but the Flutter-generated
+  `app/android/gradlew` declares `#!/usr/bin/env bash` and uses bash array syntax at line 154 → `sh`
+  (dash) aborts with `Syntax error: "(" unexpected`; the gate exits 2 (fail-closed). Tooling
+  invocation defect, not an app or manifest defect.
+- **Fix implemented in `a018ec2`:** new `tools/android-verify/gradle-invocation.mjs` spawns `bash` with
+  the wrapper as `argv[1]` on POSIX (`shell: false`), keeps `gradlew.bat` through a shell on Windows,
+  and reports a missing wrapper / failed merge / missing artifact as `BLOCKED` (exit 2). Ten regression
+  tests in `invoke.test.mjs`; both suites wired into `package.json`.
+- **Second CI run `40834000928`** (https://github.com/Tuandaca/gymlvl/actions/runs/40834000928) at
+  `a018ec2`: **success** in all three jobs. The Android job now logs `BUILD SUCCESSFUL in 44s` and
+  `PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0`.
+- **Status:** REPOSITORY: CLOSED · CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT
+  READY.
+- **Known gap:** the job's `Unit-test the manifest gate` step still runs only `manifest-check.test.mjs`,
+  so `invoke.test.mjs` is not enforced remotely yet. Wiring it in needs its own approval.
+- **Uncommitted:** only the five excluded owner paths (`app/android/gradle.properties`,
+  `app/android/run_gradle.bat`, `gradle_check.ps1`, `run_gradle_check.bat`,
+  `docs/audit/phases/A8_BATCH_EXECUTION.md`).
+- **Next action:** no R3 work has started. Owner decides between wiring `invoke.test.mjs` into CI,
+  the `O-07` read-only counts, and the unchanged release/platform blockers (signing keys, iOS build,
+  hosted Supabase/Auth, two-connection concurrency).
 
 ## Historical A8 batch — UI/config fixes, platform gates blocked (2026-10-29)
 

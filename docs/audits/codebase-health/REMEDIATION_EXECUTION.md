@@ -522,3 +522,139 @@ Neither query classifies ambiguous history or authorizes a backfill.
 3. Provide `O-07` access/authorization for the read-only counts; any `workout_rewards` repair is a
    separate, later approval.
 
+---
+
+## 10. Commits, push, and remote CI result (2026-10-29)
+
+**Owner authorization:** create the two commits from §9.4, push to `origin/main`, observe CI, update
+this report. No production migration, database write, deployment or signing change.
+
+### 10.1 Commits and push
+
+| Item | Value |
+|---|---|
+| Pre-push state | `main` @ `b85d674`; `origin/main` @ `b85d674` (unchanged); index held only the `app/analysis.txt` deletion |
+| Commit A | `7a10031` — `fix(app): release metadata, quest/summary truthfulness, and recovery error scoping` — **19 files** |
+| Commit B | `74aaa22` — `fix(auth,ci,db): R2 redirect, manifest gate, branding, and XP ledger guard` — **39 files** (incl. `app/analysis.txt` deletion) |
+| Combined diff | `b85d674..74aaa22` → 58 files, 3,995 insertions, 413 deletions |
+| Excluded paths | `app/android/gradle.properties`, `app/android/run_gradle.bat`, `gradle_check.ps1`, `run_gradle_check.bat`, `docs/audit/phases/A8_BATCH_EXECUTION.md` — still uncommitted and untouched |
+| `app/analysis.txt` | deleted from Git tracking, still on disk (84,864 bytes), ignored by `app/.gitignore:48` |
+| Pre-push gates | `flutter test --no-pub` → `+221: All tests passed!`; `node edge-tests.mjs` → 44/44 (exit 0) |
+| Push | `git push origin main` → `b85d674..74aaa22  main -> main` (fast-forward, exit 0); remote HEAD now `74aaa22` |
+
+### 10.2 First remote CI run — run `40832095175` (red)
+
+URL: https://github.com/Tuandaca/gymlvl/actions/runs/40832095175 · head `74aaa22` · **conclusion:
+`failure`**
+
+| Job | Conclusion | Detail |
+|---|---|---|
+| `database-and-edge` | **success** | `npm ci`, `npm test`, `npm run check:edge`, `npm run test:edge` all success (~38 s) |
+| `flutter` | **success** | `flutter analyze`, `flutter test --reporter expanded`, web build, artifact upload all success (~2 m 8 s) |
+| `android-release-manifest` | **failure** | steps 1–6 success (incl. `Unit-test the manifest gate`); step 7 `Merge and verify the release manifest` failed (~4 m 20 s) |
+
+The `database-and-edge` job turning green confirms the FND-SEC-004 runner fix: the eight
+`Expected 413, got 503` failures seen at `b85d674` (run `40798076003`) no longer occur.
+
+### 10.3 Root cause of the `android-release-manifest` failure
+
+```
+app/android/gradlew: 154: Syntax error: "(" unexpected
+BLOCKED: Gradle manifest merge exited with code 2
+```
+
+Mechanism (evidence-backed):
+
+1. `app/android/gradlew` and `gradlew.bat` are **git-ignored** (`app/android/.gitignore:4-5`), so the
+   runner has no committed wrapper; the wrapper present during the run is materialized by the
+   `flutter build apk --debug` step in the same job.
+2. That script declares `#!/usr/bin/env bash` and uses the bash array form `JVM_OPTS=("$@")` at
+   line 154.
+3. `tools/android-verify/run.mjs` executes it as `sh <wrapper> :app:processReleaseMainManifest` on
+   POSIX (`process.platform !== 'win32'` → `'sh'`). Ubuntu's `/bin/sh` is `dash`, which cannot parse
+   the array syntax, so the merge never starts.
+
+Classification: a **defect in the new verification tooling's invocation**, not an application defect
+and not a manifest defect. The gate failed closed with exit 2, which is the intended behavior for an
+unavailable/unusable wrapper — CI correctly refused to claim the merged manifest was verified. The
+same gate passes on Windows because it invokes `gradlew.bat` there.
+
+### 10.4 Implemented correction — commit `a018ec2` (4 paths, +243 / −33)
+
+Owner-authorized follow-up: fix the wrapper invocation, add regression tests, commit the pending R2
+documentation, push, and observe CI. No other remediation.
+
+| Path | Change |
+|---|---|
+| `tools/android-verify/gradle-invocation.mjs` | new module: `GRADLE_TASK`, the pure planner `gradleInvocation({ platform, wrapper, task })`, and `runGradleMerge({ platform, wrapper, androidDir, spawnSync, existsSync, env })` |
+| `tools/android-verify/run.mjs` | delegates the merge to `runGradleMerge`; manifest discovery, assertions and exit codes 0 / 1 / 2 unchanged |
+| `tools/android-verify/invoke.test.mjs` | new regression suite, 10 cases |
+| `tools/android-verify/package.json` | `test` now runs `manifest-check.test.mjs` and `invoke.test.mjs` |
+
+Invocation rules:
+
+- **POSIX:** `spawnSync('bash', [wrapper, ':app:processReleaseMainManifest', '--console=plain'], { shell: false })`.
+  The wrapper is `argv[1]` of `bash`, so a path containing spaces needs no quoting and no untrusted
+  text is interpolated into a command line.
+- **Windows:** unchanged — `gradlew.bat` executed through a shell (`shell: true`), with the path
+  quoted only when it contains whitespace.
+- **Preserved:** the Gradle task and `--console=plain`, `cwd = app/android`, the inherited environment
+  (plus the existing Windows `JAVA_HOME` fallback), exit codes, no fallback to a globally installed
+  Gradle, and the requirement that the wrapper exists.
+- **Fail-closed tightened:** a non-zero child exit, a spawn error, or a "successful" merge that leaves
+  no merged release artifact is reported as `BLOCKED:` with exit 2, never as `PASS` (previously a
+  missing artifact produced FAIL/exit 1, which was ambiguous).
+
+Local verification on the Windows host at `a018ec2` (status vocabulary per `AGENTS.md` §5):
+
+| Command | Result |
+|---|---|
+| `node --check` on the three JavaScript files | `PASS` — exit 0 each |
+| `node tools/android-verify/invoke.test.mjs` | `PASS` — 10/10, `all gradle-invocation tests passed` |
+| `node tools/android-verify/manifest-check.test.mjs` | `PASS` — 8/8 |
+| `node tools/android-verify/run.mjs` (real Gradle merge) | `PASS` — exit 0, `PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0` |
+| `bash` branch of the fix | `NOT RUN` — `bash` is not installed on this Windows host; proven only by the remote run in §10.5, not by the Windows suite |
+
+Workflow YAML re-parse (no PyYAML on this host, so `package:yaml` from `app/` was used in a throwaway
+script): `YAML_OK jobs=[database-and-edge, flutter, android-release-manifest]`.
+
+Known gap (not changed): the `android-release-manifest` job's `Unit-test the manifest gate` step still
+runs only `node tools/android-verify/manifest-check.test.mjs`, so `invoke.test.mjs` is not yet
+executed remotely. Wiring it in is a one-line follow-up that needs its own approval.
+
+### 10.5 Second remote CI run — run `40834000928` (green)
+
+URL: https://github.com/Tuandaca/gymlvl/actions/runs/40834000928 · head `a018ec2` · **conclusion:
+`success`** · push `74aaa22..a018ec2` (fast-forward, no force).
+
+| Job | Conclusion | Detail |
+|---|---|---|
+| `database-and-edge` | **success** | `npm ci`, `npm test`, `check:edge`, `test:edge` (~38 s) |
+| `flutter` | **success** | `flutter analyze`, expanded tests, web build, artifact upload (~2 m 32 s) |
+| `android-release-manifest` | **success** | all seven steps green (~4 m 56 s) |
+
+Evidence from the previously failing step:
+
+```
+all manifest-check tests passed
+BUILD SUCCESSFUL in 44s
+MERGED_MANIFEST=/home/runner/work/gymlvl/gymlvl/app/build/app/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml
+PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0
+```
+
+The bash invocation therefore works on Ubuntu: Gradle ran, produced the merged release manifest, and
+the assertions passed for the first time in CI. The `✗` at `74aaa22` is closed as a tooling-invocation
+defect, fixed and verified remotely.
+
+### 10.6 Resulting status
+
+- **Repository:** CLOSED for R2 — `7a10031`, `74aaa22`, `a018ec2` are on `origin/main`; the only
+  uncommitted paths are the five excluded owner files.
+- **CI:** VERIFIED — run `40834000928` is green in all three required jobs.
+- **Production:** NOT VERIFIED — no migration, deploy, signing key, release artifact or hosted
+  Supabase/Auth check was performed.
+- **OpenGym migration:** NOT READY — no import, no catalogue merge, no licensing decision.
+- Not changed by this batch: signing keys, release artifact, iOS build, hosted Supabase/Auth/RLS, live
+  at-risk counts (`O-07`), true two-connection concurrency.
+
+

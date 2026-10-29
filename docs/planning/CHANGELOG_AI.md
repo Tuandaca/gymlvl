@@ -41,6 +41,34 @@ Dated record of agent sessions and project checkpoints. Newest first.
   Commit B 39 files, 5 owner/ambiguous paths excluded) — **not committed**. Remote CI at `b85d674`
   observed **red** in `database-and-edge` (`Expected 413, got 503` ×8); fixing change is pending.
 
+## 2026-10-29 — R2 committed, pushed, CI fixed by `a018ec2`, remote CI green (runs 40832095175 → 40834000928)
+
+- Commits created from the approved §9.4 manifest and pushed fast-forward (`b85d674..74aaa22`):
+  `7a10031` (19 files, A-8 batch) and `74aaa22` (39 files, R2 batch). Five excluded owner paths
+  untouched; `app/analysis.txt` untracked, on disk, ignored.
+- First CI run `40832095175` overall **failure**: `database-and-edge` **success** (the eight
+  `Expected 413, got 503` failures from `40798076003` are gone — the SEC-004 runner fix works),
+  `flutter` **success** (analyze, 221 tests, web build, artifact), `android-release-manifest`
+  **failure** at `Merge and verify the release manifest` with
+  `app/android/gradlew: 154: Syntax error: "(" unexpected`.
+- Root cause: `tools/android-verify/run.mjs` invoked the wrapper with `sh` on POSIX; the
+  Flutter-generated `gradlew` declares `#!/usr/bin/env bash` and uses bash arrays at line 154, so dash
+  aborted before Gradle started and the gate exited 2 (fail-closed by design). Tooling defect, not an
+  app or manifest defect.
+- Fix in `a018ec2` (4 paths, +243/−33): new `tools/android-verify/gradle-invocation.mjs` runs `bash`
+  with the wrapper as `argv[1]` on POSIX (`shell: false`, spaces safe), keeps `gradlew.bat` through a
+  shell on Windows, and treats a missing wrapper, a failed merge or a missing merged artifact as
+  `BLOCKED` (exit 2). Ten regression cases in `invoke.test.mjs`; `package.json` runs both suites.
+  Local: `node --check` ×3 exit 0, `invoke.test.mjs` 10/10, `manifest-check.test.mjs` 8/8, real gate
+  exit 0 with `PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0
+  duplicates=0`. The Linux branch is `NOT RUN` locally (no `bash` on the Windows host).
+- Second CI run `40834000928` at `a018ec2`: **success** in all three jobs; the Android job logs
+  `BUILD SUCCESSFUL in 44s` and the merged-manifest `PASS` line, closing the invocation defect.
+- `REMEDIATION_EXECUTION.md` §10 records both runs and the fix, and the same three planning files were
+  updated. Closure: REPOSITORY: CLOSED · CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION:
+  NOT READY. Known gap: the CI step still runs only `manifest-check.test.mjs`, so `invoke.test.mjs` is
+  not enforced remotely.
+
 ## 2026-10-29 — A8 audit remediation batch: 9 findings fixed/partial, 2 blocked on approval
 
 - Verification-first pass over the 35-finding canonical register at main b85d674 (dirty tree
