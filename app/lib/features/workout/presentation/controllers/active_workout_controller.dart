@@ -77,6 +77,11 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   Future<Map<String, dynamic>?>? _completion;
   int _generation = 0;
   bool _mutationFailed = false;
+  WorkoutReceipt? _pendingReceipt;
+  bool _completionUncertain = false;
+
+  bool get completionNeedsRecovery =>
+      _pendingReceipt != null || _completionUncertain;
 
   WorkoutRepository get _repository => ref.read(workoutRepositoryProvider);
 
@@ -90,6 +95,8 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _pending = Future.value();
     _completion = null;
     _mutationFailed = false;
+    _pendingReceipt = null;
+    _completionUncertain = false;
     ref.onDispose(_cleanup);
     return const ActiveWorkoutState();
   }
@@ -123,7 +130,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   // All writes retain user order, including a final completion after pending set edits.
   Future<void> _enqueue(Future<void> Function(int generation) action) {
-    if (state.isCompleting) return Future.value();
+    if (state.isCompleting || completionNeedsRecovery) return Future.value();
     final generation = _generation;
     final next = _pending.then((_) async {
       if (!ref.mounted || generation != _generation) return;
@@ -147,44 +154,108 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   // --- LOCAL INTERRUPTION RECOVERY (shared_preferences) ---
 
+  String? get _backupOwner =>
+      ref.read(authStateStreamProvider).value?.session?.user.id;
+
+  static String _ownerBackupKey(String owner) =>
+      '$backupKey:${Uri.encodeComponent(owner)}';
+
+  bool _isContextCurrent(int generation, String? owner) =>
+      _isCurrent(generation) && owner == _backupOwner;
+
+  bool _isBackupContextCurrent(int generation, String? owner) =>
+      owner != null && _isContextCurrent(generation, owner);
+
+  static Map<String, dynamic>? _ownedBackup(String? raw, String owner) {
+    if (raw == null) return null;
+    try {
+      final backup = jsonDecode(raw) as Map<String, dynamic>;
+      final workout = backup['workout'];
+      // Check ownership before interpreting any workout or recovery metadata.
+      if (workout is! Map<String, dynamic> || workout['user_id'] != owner) {
+        return null;
+      }
+      final updatedAt = backup['local_updated_at'];
+      final elapsed = backup['elapsed_seconds'];
+      if (updatedAt is! String ||
+          DateTime.tryParse(updatedAt) == null ||
+          elapsed is! int ||
+          elapsed < 0) {
+        return null;
+      }
+      final parsed = Workout.fromJson(workout);
+      return parsed.status == WorkoutStatus.active ? backup : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _saveLocalBackup() async {
     final workout = state.workout;
-    if (workout == null || !state.hasActiveWorkout) return;
+    final owner = _backupOwner;
+    final generation = _generation;
+    if (owner == null ||
+        workout == null ||
+        workout.userId != owner ||
+        !state.hasActiveWorkout) {
+      return;
+    }
+    final snapshot = <String, dynamic>{
+      'workout': workout.copyWith(exercises: state.exercises).toJson(),
+      'local_updated_at': DateTime.now().toUtc().toIso8601String(),
+      'elapsed_seconds': state.elapsedSeconds,
+    };
     try {
       final prefs = await SharedPreferences.getInstance();
-      final snapshot = <String, dynamic>{
-        'workout': workout.copyWith(exercises: state.exercises).toJson(),
-        'local_updated_at': DateTime.now().toUtc().toIso8601String(),
-        'elapsed_seconds': state.elapsedSeconds,
-      };
-      await prefs.setString(backupKey, jsonEncode(snapshot));
+      if (!_isBackupContextCurrent(generation, owner)) return;
+      final key = _ownerBackupKey(owner);
+      final existing = prefs.getString(key);
+      // Preserve unknown/corrupt data even if it occupies an owner-scoped key.
+      if (existing != null && _ownedBackup(existing, owner) == null) return;
+      // Never overwrite the shared legacy key: it may belong to another account.
+      await prefs.setString(key, jsonEncode(snapshot));
     } catch (_) {
       // Local backup failure should not crash interactive workout
     }
   }
 
   Future<void> _clearLocalBackup() async {
+    final owner = _backupOwner;
+    final generation = _generation;
+    if (owner == null) return;
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(backupKey);
+      if (!_isBackupContextCurrent(generation, owner)) return;
+      for (final key in [_ownerBackupKey(owner), backupKey]) {
+        if (!_isBackupContextCurrent(generation, owner)) return;
+        if (_ownedBackup(prefs.getString(key), owner) != null) {
+          await prefs.remove(key);
+        }
+      }
     } catch (_) {}
   }
 
-  static Future<Map<String, dynamic>?> checkLocalBackup() async {
+  Future<Map<String, dynamic>?> checkLocalBackup() async {
+    final owner = _backupOwner;
+    final generation = _generation;
+    if (owner == null) return null;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(backupKey);
-      if (raw == null || raw.isEmpty) return null;
-      return jsonDecode(raw) as Map<String, dynamic>;
+      if (!_isBackupContextCurrent(generation, owner)) return null;
+      final raw =
+          prefs.getString(_ownerBackupKey(owner)) ?? prefs.getString(backupKey);
+      return _ownedBackup(raw, owner);
     } catch (_) {
       return null;
     }
   }
 
   Future<void> restoreFromLocalBackup() => _enqueue((generation) async {
+    final owner = _backupOwner;
+    if (owner == null) return;
     try {
       final backup = await checkLocalBackup();
-      if (backup == null) return;
+      if (!_isBackupContextCurrent(generation, owner) || backup == null) return;
       final workoutMap = backup['workout'] as Map<String, dynamic>?;
       if (workoutMap == null) return;
       final workout = Workout.fromJson(workoutMap);
@@ -194,59 +265,70 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       // Verify and synchronize with remote active workout if available
       try {
         final remote = await _repository.getWorkoutDetail(workout.id);
-        if (remote != null && _isCurrent(generation)) {
+        if (remote != null &&
+            _isBackupContextCurrent(generation, owner) &&
+            remote.userId == owner) {
           // If remote is newer, adopt remote; otherwise keep local edits and save
           _adopt(remote, generation);
         }
       } catch (_) {}
     } catch (_) {
-      state = state.copyWith(errorMessage: 'restore_failed');
+      if (_isCurrent(generation)) {
+        state = state.copyWith(errorMessage: 'restore_failed');
+      }
     }
   });
 
   Future<void> discardLocalBackup() => _enqueue((generation) async {
-    await _clearLocalBackup();
+    final owner = _backupOwner;
     if (state.hasActiveWorkout) {
-      await cancelWorkout();
+      // Already inside the write queue: do not enqueue and await ourselves.
+      await _cancelWorkout(generation);
     } else {
+      await _clearLocalBackup();
+      if (!_isContextCurrent(generation, owner)) return;
       _cleanup();
       state = const ActiveWorkoutState();
     }
   });
 
-  Future<void> checkForActiveWorkout() => _enqueue((generation) async {
-    // 1. Check local backup first for instant offline resume
-    final backup = await checkLocalBackup();
-    if (backup != null && !state.hasActiveWorkout) {
-      final workoutMap = backup['workout'] as Map<String, dynamic>?;
-      if (workoutMap != null) {
-        try {
-          final localWorkout = Workout.fromJson(workoutMap);
-          _mutationFailed = false;
-          _adopt(localWorkout, generation);
-        } catch (_) {}
-      }
-    }
+  Future<void> checkForActiveWorkout() => completionNeedsRecovery
+      ? completeWorkout().then((_) {})
+      : _enqueue((generation) async {
+          final owner = _backupOwner;
+          // 1. Check local backup first for instant offline resume
+          final backup = await checkLocalBackup();
+          if (!_isCurrent(generation) || owner != _backupOwner) return;
+          if (backup != null && !state.hasActiveWorkout) {
+            final workoutMap = backup['workout'] as Map<String, dynamic>?;
+            if (workoutMap != null) {
+              try {
+                final localWorkout = Workout.fromJson(workoutMap);
+                _mutationFailed = false;
+                _adopt(localWorkout, generation);
+              } catch (_) {}
+            }
+          }
 
-    // 2. Fetch server active workout
-    try {
-      final workout = await _repository.getActiveWorkout();
-      if (!_isCurrent(generation)) return;
-      _mutationFailed = false;
-      if (workout != null) {
-        _adopt(workout, generation);
-      } else if (backup == null) {
-        _cleanup();
-        state = const ActiveWorkoutState();
-      }
-    } catch (_) {
-      // If server unreachable but local backup exists, remain on local state
-      if (backup == null && _isCurrent(generation)) {
-        _cleanup();
-        state = const ActiveWorkoutState();
-      }
-    }
-  });
+          // 2. Fetch server active workout
+          try {
+            final workout = await _repository.getActiveWorkout();
+            if (!_isCurrent(generation)) return;
+            _mutationFailed = false;
+            if (workout != null) {
+              _adopt(workout, generation);
+            } else if (backup == null) {
+              _cleanup();
+              state = const ActiveWorkoutState();
+            }
+          } catch (_) {
+            // If server unreachable but local backup exists, remain on local state
+            if (backup == null && _isCurrent(generation)) {
+              _cleanup();
+              state = const ActiveWorkoutState();
+            }
+          }
+        });
 
   Future<void> startWorkout() => _enqueue((generation) async {
     if (state.hasActiveWorkout) return;
@@ -533,6 +615,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   // --- RE-ARCHITECTED REST TIMER (1-second interval, pause/resume, +30s/-15s, background accurate) ---
 
   void startRest(int seconds) {
+    if (completionNeedsRecovery) return;
     if (seconds <= 0 || seconds > 7200) return;
     _restTimer?.cancel();
     final targetEndTime = DateTime.now().add(Duration(seconds: seconds));
@@ -571,11 +654,13 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   }
 
   void pauseRest() {
+    if (completionNeedsRecovery) return;
     if (!state.isResting || state.isRestPaused) return;
     state = state.copyWith(isRestPaused: true);
   }
 
   void resumeRest() {
+    if (completionNeedsRecovery) return;
     if (!state.isResting || !state.isRestPaused) return;
     final newTarget = DateTime.now().add(
       Duration(seconds: state.restSecondsRemaining),
@@ -584,12 +669,14 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   }
 
   void resetRest() {
+    if (completionNeedsRecovery) return;
     if (!state.isResting) return;
     final total = state.restSecondsTotal > 0 ? state.restSecondsTotal : 60;
     startRest(total);
   }
 
   void adjustRest(int deltaSeconds) {
+    if (completionNeedsRecovery) return;
     if (!state.isResting) return;
     final current = state.restSecondsRemaining;
     final updated = math.max(1, current + deltaSeconds);
@@ -607,6 +694,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   void subtractRest15() => adjustRest(-15);
 
   void skipRest() {
+    if (completionNeedsRecovery) return;
     _restTimer?.cancel();
     _restTimer = null;
     state = state.copyWith(
@@ -636,11 +724,10 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     String? notes,
   ) async {
     final generation = _generation;
+    final owner = _backupOwner;
     try {
       await pending;
-      if (!ref.mounted ||
-          generation != _generation ||
-          !state.hasActiveWorkout) {
+      if (!_isContextCurrent(generation, owner) || !state.hasActiveWorkout) {
         return null;
       }
       if (_mutationFailed) {
@@ -652,52 +739,86 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         state = state.copyWith(errorMessage: 'completed_set_required');
         return null;
       }
-      final result = await _repository.finishWorkout(
-        state.workout!.id,
-        notes: notes,
-      );
-      if (!ref.mounted || generation != _generation) return null;
+      final requested = state.workout!;
+      final receipt = _pendingReceipt;
+      final result = receipt == null
+          ? await _repository.finishWorkout(requested.id, notes: notes)
+          : await _repository.reconcileCompletion(receipt);
+      if (!_isContextCurrent(generation, owner)) return null;
+      if (result.workout.id != requested.id ||
+          result.workout.userId != requested.userId ||
+          result.workout.status != WorkoutStatus.completed ||
+          result.workout.completedAt == null) {
+        throw const WorkoutCompletionUncertain();
+      }
 
       // Clean up local interruption backup upon genuine completion
       await _clearLocalBackup();
+      if (!_isContextCurrent(generation, owner)) return null;
       _cleanup();
-      final finishedWorkout = state.workout!.copyWith(
-        exercises: state.exercises,
-        durationSeconds: state.elapsedSeconds,
-        completedAt: DateTime.now().toUtc(),
-        status: WorkoutStatus.completed,
-      );
+      final exercises = result.workout.exercises.isNotEmpty
+          ? result.workout.exercises
+          : state.exercises;
+      _pendingReceipt = null;
+      _completionUncertain = false;
       state = const ActiveWorkoutState();
       _invalidateProgress();
       return {
         'workout': result.workout,
         'xpResult': result.rewards,
-        'exercises': finishedWorkout.exercises,
-        'durationSeconds': finishedWorkout.durationSeconds,
+        'exercises': exercises,
+        'durationSeconds': result.workout.durationSeconds,
       };
+    } on WorkoutReconciliationRequired catch (error) {
+      if (_isContextCurrent(generation, owner) &&
+          error.receipt.workoutId == state.workout?.id &&
+          error.receipt.userId == state.workout?.userId) {
+        _pendingReceipt = error.receipt;
+        _completionUncertain = false;
+        _cleanup();
+        state = state.copyWith(errorMessage: 'completion_pending');
+      }
+      return null;
+    } on WorkoutCompletionUncertain {
+      if (_isContextCurrent(generation, owner)) {
+        _completionUncertain = true;
+        _cleanup();
+        state = state.copyWith(errorMessage: 'completion_uncertain');
+      }
+      return null;
+    } on WorkoutCompletionRejected {
+      if (_isContextCurrent(generation, owner)) {
+        _completionUncertain = false;
+        state = state.copyWith(errorMessage: 'completion_rejected');
+      }
+      return null;
     } catch (_) {
-      if (ref.mounted && generation == _generation) {
+      if (_isContextCurrent(generation, owner)) {
         state = state.copyWith(errorMessage: 'completion_failed');
       }
       return null;
     } finally {
-      if (ref.mounted && generation == _generation) {
+      if (_isContextCurrent(generation, owner)) {
         state = state.copyWith(isCompleting: false);
         _completion = null;
       }
     }
   }
 
-  Future<void> cancelWorkout() => _enqueue((generation) async {
+  Future<void> cancelWorkout() => _enqueue(_cancelWorkout);
+
+  Future<void> _cancelWorkout(int generation) async {
+    final owner = _backupOwner;
     if (!state.hasActiveWorkout) return;
     await _repository.cancelWorkout(state.workout!.id);
-    if (!_isCurrent(generation)) return;
+    if (!_isContextCurrent(generation, owner)) return;
     _mutationFailed = false;
     await _clearLocalBackup();
+    if (!_isContextCurrent(generation, owner)) return;
     _cleanup();
     state = const ActiveWorkoutState();
     _invalidateProgress();
-  });
+  }
 
   Future<void> pauseTimer() => _setPaused(true);
   Future<void> resumeTimer() => _setPaused(false);
@@ -765,5 +886,8 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _restTimer = null;
   }
 
-  void clearError() => state = state.copyWith(errorMessage: null);
+  void clearError() {
+    if (completionNeedsRecovery) return;
+    state = state.copyWith(errorMessage: null);
+  }
 }

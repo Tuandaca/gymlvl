@@ -16,6 +16,9 @@ abstract class WorkoutRepository {
   /// Completion and rewards commit in one database transaction. Safe to retry.
   Future<WorkoutCompletion> finishWorkout(String workoutId, {String? notes});
 
+  /// Load detail for an acknowledged receipt without another award RPC.
+  Future<WorkoutCompletion> reconcileCompletion(WorkoutReceipt receipt);
+
   /// Hoàn thành workout
   Future<Workout> completeWorkout(String workoutId, {String? notes});
 
@@ -82,4 +85,28 @@ class WorkoutCompletion {
   final Map<String, dynamic> rewards;
 
   const WorkoutCompletion(this.workout, this.rewards);
+}
+
+/// Rewards are authoritative; request identity is captured, not returned by the RPC.
+/// No completed workout is inferred from this rewards-only acknowledgement.
+class WorkoutReceipt {
+  final String workoutId;
+  final String userId;
+  final Map<String, dynamic> rewards;
+
+  WorkoutReceipt(this.workoutId, this.userId, Map<String, dynamic> rewards)
+    : rewards = Map.unmodifiable(rewards);
+}
+
+class WorkoutReconciliationRequired implements Exception {
+  final WorkoutReceipt receipt;
+  const WorkoutReconciliationRequired(this.receipt);
+}
+
+class WorkoutCompletionUncertain implements Exception {
+  const WorkoutCompletionUncertain();
+}
+
+class WorkoutCompletionRejected implements Exception {
+  const WorkoutCompletionRejected();
 }

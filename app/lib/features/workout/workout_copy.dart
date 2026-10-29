@@ -60,6 +60,19 @@ const _copy = <String, List<String>>{
     'Completion was not confirmed. Retry safely; rewards are awarded once.',
     'Chưa xác nhận hoàn thành. Hãy thử lại; phần thưởng chỉ được cộng một lần.',
   ],
+  'completion_pending': [
+    'Rewards were acknowledged. Reload completed session details before continuing.',
+    'Đã nhận xác nhận phần thưởng. Tải lại chi tiết buổi tập đã hoàn thành trước khi tiếp tục.',
+  ],
+  'completion_uncertain': [
+    'Completion could not be confirmed. Retry this same session safely to reconcile its receipt.',
+    'Chưa thể xác nhận hoàn thành. Thử lại chính buổi tập này để đối soát kết quả an toàn.',
+  ],
+  'completion_rejected': [
+    'The server rejected completion. Check the saved session before trying again.',
+    'Máy chủ từ chối hoàn thành. Kiểm tra buổi tập đã lưu trước khi thử lại.',
+  ],
+  'reload_receipt': ['Reload completion receipt', 'Tải lại kết quả hoàn thành'],
   'completed_set_required': [
     'Complete at least one set before finishing.',
     'Hoàn thành ít nhất một hiệp trước khi kết thúc.',

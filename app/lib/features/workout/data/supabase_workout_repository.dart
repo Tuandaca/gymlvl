@@ -67,13 +67,75 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
     String workoutId, {
     String? notes,
   }) async {
-    final result = await _supabase.rpc(
-      'complete_workout',
-      params: {'p_workout_id': workoutId, 'p_notes': notes},
-    );
-    final workout = await getWorkoutDetail(workoutId);
-    if (workout == null) throw StateError('workout_not_found');
-    return WorkoutCompletion(workout, Map<String, dynamic>.from(result as Map));
+    final owner = _userId;
+    Object? result;
+    try {
+      result = await _supabase.rpc(
+        'complete_workout',
+        params: {'p_workout_id': workoutId, 'p_notes': notes},
+      );
+    } on PostgrestException catch (error) {
+      // Only explicit PostgreSQL validation/permission rejections are definite.
+      if (const ['22023', '42501', 'P0001', '23514'].contains(error.code)) {
+        throw const WorkoutCompletionRejected();
+      }
+      throw const WorkoutCompletionUncertain();
+    } catch (_) {
+      throw const WorkoutCompletionUncertain();
+    }
+    if (_supabase.auth.currentUser?.id != owner ||
+        result is! Map<String, dynamic> ||
+        !validRewards(result)) {
+      throw const WorkoutCompletionUncertain();
+    }
+    return reconcileCompletion(WorkoutReceipt(workoutId, owner, result));
+  }
+
+  static bool validRewards(Map<String, dynamic> rewards) {
+    final earned = rewards['earnedXP'];
+    if (earned is! int || earned < 0) return false;
+    for (final key in ['totalXP', 'newLevel', 'nextLevelXp', 'streak']) {
+      if (rewards.containsKey(key) &&
+          (rewards[key] is! num ||
+              !(rewards[key] as num).isFinite ||
+              (rewards[key] as num) < 0)) {
+        return false;
+      }
+    }
+    for (final key in [
+      'leveledUp',
+      'alreadyAwarded',
+      'isQuest',
+      'isSuspicious',
+    ]) {
+      if (rewards.containsKey(key) && rewards[key] is! bool) return false;
+    }
+    if (rewards['newTitle'] != null && rewards['newTitle'] is! String) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<WorkoutCompletion> reconcileCompletion(WorkoutReceipt receipt) async {
+    if (_supabase.auth.currentUser?.id != receipt.userId) {
+      throw const WorkoutCompletionUncertain();
+    }
+    try {
+      final workout = await getWorkoutDetail(receipt.workoutId);
+      if (_supabase.auth.currentUser?.id != receipt.userId ||
+          workout == null ||
+          workout.id != receipt.workoutId ||
+          workout.userId != receipt.userId ||
+          workout.status != WorkoutStatus.completed ||
+          workout.completedAt == null ||
+          workout.durationSeconds < 0) {
+        throw StateError('detail_requires_reconciliation');
+      }
+      return WorkoutCompletion(workout, receipt.rewards);
+    } catch (_) {
+      throw WorkoutReconciliationRequired(receipt);
+    }
   }
 
   @override

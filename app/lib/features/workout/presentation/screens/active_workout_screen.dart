@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../ui/theme/app_theme.dart';
 import '../../domain/exercise.dart';
+import '../../domain/workout.dart';
+import '../../domain/workout_exercise.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../workout_copy.dart';
 import '../providers/exercise_providers.dart';
 import '../widgets/workout_exercise_tile.dart';
@@ -67,40 +70,62 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   Future<void> _finish() async {
     FocusScope.of(context).unfocus();
     final controller = ref.read(activeWorkoutControllerProvider.notifier);
-    if (!await _confirm(t('finish_title'), t('finish_hint'), t('finish')) ||
-        !mounted) {
+    final owner = ref.read(authStateStreamProvider).value?.session?.user.id;
+    if (!controller.completionNeedsRecovery) {
+      if (!await _confirm(t('finish_title'), t('finish_hint'), t('finish')) ||
+          !mounted) {
+        return;
+      }
+    }
+    if (!mounted ||
+        ref.read(authStateStreamProvider).value?.session?.user.id != owner) {
       return;
     }
     final currentState = ref.read(activeWorkoutControllerProvider);
     final currentWorkout = currentState.workout;
     final totalVolume = currentState.totalVolumeKg;
-    final durationSeconds = currentState.elapsedSeconds;
     final completedSets = currentState.completedSets;
     final totalSets = currentState.totalSets;
-    final exercises = currentState.exercises;
 
     final result = await controller.completeWorkout();
     if (result == null || !mounted) return;
+    if (ref.read(authStateStreamProvider).value?.session?.user.id != owner) {
+      return;
+    }
+    final completedWorkout = result['workout'] as Workout;
+    if (completedWorkout.id != currentWorkout?.id ||
+        completedWorkout.userId != currentWorkout?.userId ||
+        completedWorkout.status != WorkoutStatus.completed) {
+      return;
+    }
+    final exercises = result['exercises'] as List<WorkoutExercise>;
     HapticFeedback.mediumImpact();
 
-    final xpResult = result['xpResult'] as Map<String, dynamic>? ?? {};
+    final xpResult = result['xpResult'] as Map<String, dynamic>;
     if (xpResult['leveledUp'] == true) {
       await LevelUpOverlay.show(context, xpResult);
+      if (!mounted ||
+          ref.read(authStateStreamProvider).value?.session?.user.id != owner) {
+        return;
+      }
     }
 
     if (currentWorkout != null && mounted) {
       await WorkoutSummaryScreen.show(
         context,
-        workout: currentWorkout,
+        workout: completedWorkout,
         xpResult: xpResult,
         totalVolumeKg: totalVolume,
-        durationSeconds: durationSeconds,
+        durationSeconds: completedWorkout.durationSeconds,
         completedSetsCount: completedSets,
         totalSetsCount: totalSets,
         exercises: exercises,
       );
     }
-    if (mounted) _exit();
+    if (mounted &&
+        ref.read(authStateStreamProvider).value?.session?.user.id == owner) {
+      _exit();
+    }
   }
 
   void _exit() {
@@ -116,6 +141,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Future<void> _leave() async {
+    if (ref
+        .read(activeWorkoutControllerProvider.notifier)
+        .completionNeedsRecovery) {
+      _exit();
+      return;
+    }
     final state = ref.read(activeWorkoutControllerProvider);
     if (state.isCompleting || state.isLoading) return;
     if (!state.hasActiveWorkout || state.isSetupPhase) {
@@ -186,6 +217,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
 
     final controller = ref.read(activeWorkoutControllerProvider.notifier);
 
+    final recovery = controller.completionNeedsRecovery;
     return PopScope(
       canPop: _allowPop,
       onPopInvokedWithResult: (didPop, result) {
@@ -200,11 +232,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           ),
           title: _WorkoutTimerTitle(isSetupPhase: isSetupPhase),
           actions: [
-            if (!isSetupPhase) _WorkoutTimerPauseAction(busy: busy),
+            if (!isSetupPhase) _WorkoutTimerPauseAction(busy: busy || recovery),
             if (!isSetupPhase)
               TextButton(
                 onPressed: busy ? null : _finish,
-                child: Text(t('finish')),
+                child: Text(t(recovery ? 'reload_receipt' : 'finish')),
               ),
           ],
         ),
@@ -220,6 +252,11 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                     MaterialBanner(
                       content: Text(t(errorMessage)),
                       actions: [
+                        if (recovery)
+                          TextButton(
+                            onPressed: busy ? null : _finish,
+                            child: Text(t('reload_receipt')),
+                          ),
                         if (!hasActiveWorkout)
                           TextButton(
                             onPressed: controller.startWorkout,
@@ -234,18 +271,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
                                 : controller.checkForActiveWorkout,
                             child: Text(t('reload_saved')),
                           ),
-                        TextButton(
-                          onPressed: controller.clearError,
-                          child: Text(t('dismiss')),
-                        ),
+                        if (!recovery)
+                          TextButton(
+                            onPressed: controller.clearError,
+                            child: Text(t('dismiss')),
+                          ),
                       ],
                     ),
                   if (!isSetupPhase) const _WorkoutStatsHeader(),
-                  if (!isSetupPhase) const _ActiveRestTimerSection(),
+                  if (!isSetupPhase)
+                    IgnorePointer(
+                      ignoring: recovery,
+                      child: const _ActiveRestTimerSection(),
+                    ),
                   Expanded(
-                    child: isSetupPhase
-                        ? _setup()
-                        : _TrainingView(onConfirm: _confirm, onRest: _rest),
+                    child: IgnorePointer(
+                      ignoring: recovery,
+                      child: isSetupPhase
+                          ? _setup()
+                          : _TrainingView(onConfirm: _confirm, onRest: _rest),
+                    ),
                   ),
                   if (isSetupPhase)
                     _SetupBottomAction(
@@ -259,7 +304,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
         ),
         floatingActionButton: !isSetupPhase && hasActiveWorkout
             ? FloatingActionButton.extended(
-                onPressed: busy ? null : _addExercise,
+                onPressed: busy || recovery ? null : _addExercise,
                 label: Text(t('add_exercise')),
                 icon: const Icon(Icons.add),
               )

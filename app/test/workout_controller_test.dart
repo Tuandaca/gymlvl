@@ -38,6 +38,7 @@ class FakeRepository extends Fake implements WorkoutRepository {
   Workout active = fixture();
   int starts = 0;
   int finishes = 0;
+  int cancels = 0;
   bool failCompletion = false;
   bool failUpdate = false;
   Completer<void>? finishGate;
@@ -55,6 +56,11 @@ class FakeRepository extends Fake implements WorkoutRepository {
   Future<Workout?> getActiveWorkout() async => active;
   @override
   Future<Workout?> getWorkoutDetail(String id) async => active;
+  @override
+  Future<void> cancelWorkout(String id) async {
+    cancels++;
+  }
+
   @override
   Future<Workout> beginWorkout(String id) async {
     active = active.copyWith(trainingStartedAt: started);
@@ -75,9 +81,13 @@ class FakeRepository extends Fake implements WorkoutRepository {
     finishes++;
     await finishGate?.future;
     if (failCompletion) throw StateError('offline');
-    return WorkoutCompletion(active.copyWith(status: WorkoutStatus.completed), {
-      'earnedXP': 5,
-    });
+    return WorkoutCompletion(
+      active.copyWith(
+        status: WorkoutStatus.completed,
+        completedAt: DateTime.now().toUtc(),
+      ),
+      {'earnedXP': 5},
+    );
   }
 
   @override
@@ -115,6 +125,26 @@ void main() {
   test('concurrent start requests resume the same local session', () async {
     await Future.wait([controller.startWorkout(), controller.startWorkout()]);
     expect(repository.starts, 1);
+  });
+  test('active discard settles and cancels exactly once', () async {
+    await controller.startWorkout();
+    await expectLater(
+      controller.discardLocalBackup().timeout(const Duration(seconds: 1)),
+      completes,
+    );
+    expect(repository.cancels, 1);
+    expect(container.read(activeWorkoutControllerProvider).workout, isNull);
+  });
+  test('inactive discard settles without a cancellation', () async {
+    await controller.discardLocalBackup();
+    expect(repository.cancels, 0);
+    expect(container.read(activeWorkoutControllerProvider).workout, isNull);
+  });
+  test('direct cancellation settles and cancels exactly once', () async {
+    await controller.startWorkout();
+    await controller.cancelWorkout();
+    expect(repository.cancels, 1);
+    expect(container.read(activeWorkoutControllerProvider).workout, isNull);
   });
   test(
     'restored draft remains setup, training is explicitly persisted',
