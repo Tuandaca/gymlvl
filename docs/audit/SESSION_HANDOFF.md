@@ -1,23 +1,33 @@
 # Audit — Session Handoff
 
-## Current — A7 B0 implemented; B1 authorized next (2026-10-29)
+## Current — A7 PARTIAL; B0 and B1 core verified, four gates BLOCKED (2026-10-29)
 
-- **Task/status:** A7 W0/W1 execution; R0-01..04 PASS in repository/local scope, independent B0
-  inspection completed. No implementation beyond W0/W1; migration NOT READY.
-- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75 clean/remote equal, current
-  expected B0 source/test/policy/docs dirty. User explicitly authorizes verified commits/pushes.
+- **Task/status:** A7 PARTIAL; R0-01..04 and R1-01..03 PASS local/repository scope with independent
+  reviews. R1-04/07 actual localstack gates and R1-05/06 required platform acceptance BLOCKED.
+  Platform source corrections/10checks PASS, not completed task or Fixed finding. Migration NOT READY.
+- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75; B0 main57e4e73e88f7099ec29a9d075964817f4db5470d
+  pushed/clean/remote equal after checkpoint. Current expected B1 code/docs dirty; user approved
+  logical commits/pushes, core separate from explicitly PARTIAL platform source checkpoint.
 - **Changes:** new effective ACL migration/harness plus runner; bounded-body helper/RPC/Coach/test;
   shell-default ask and two reviewer restrictions/policy tests; D-025..028 and A7 execution/handoffs/
   roadmap overlay/finding mirrors. Exact ownership paths in A7phase4. No unrelated edits/deploy.
-- **Verification:** policy32pass; SQL11units+ACL10DB365assertions; Edge44tests+sixchecks; all exit0.
-  Parent `A7_B0_REGRESSION policy=0 sql=0 edge=0 diff=0`. RED failures and corrected failures retained.
-- **Findings:**35 unchanged IDs; GOV004/SEC001/SEC003/SEC004 Fixed repository-only, full pre-A7 objects
-  retained. Accepted25/NV3/Fixed5/FP2; severity0/3/24/6/2, confidence16/18/1. No deployed-security claim.
+- **Verification:** B0 policy32/SQL11+ACL365/Edge44/sixchecks pass; independent core QA31snapshot/
+  25async/18receipt pass; parent final analyze0issues/format129unchanged/full200pass, all exit0 on D
+  temp(concurrency2). RED/failure attempts and logs retained A7phase4-7; no old PASS reused.
+- **Findings:**35 unchanged IDs; seven A7 repository fixes plus historicalGOV001 ->Fixed8; Accepted22/
+  NV3/FP2; severity0/3/24/6/2, confidence16/18/1. All nine pre-A7 edited-object histories retained;
+  no deployed security, actual SQL commit-count or new persistence promotion claim.
 - **QA/limits:** no material code blocker by independent inspection; requested extra ACL controls
   added. QA npm.ps1/extra Git checks blocked, no bypass; ledger stale-evidence FAIL corrected before
   checkpoint. Live permission harness, actual network/DoS and deployed ACL verification NOT RUN.
-- **Next action:** checkpoint B0 then continue approved R1-01->R1-02->R1-03, independent R1-05 and
-  R1-06/R1-07 prerequisites; do not stop merely because B0 passed. No B2-B4/production/migration.
+- **Blockers/decisions:** D029 actual rewards-only in-memory receipt (not durable/deepimmutable);
+  D030 operator signing; D031 verified Gradle8.13pin; D032 D process temp/cache/dependency downloads
+  and exactlyone duplicateZIPcleanup approved/done. Supported DBstack absent; Android SDK/JBR21
+  exists but oneonline8Gheap nativeOOM and offline Kotlin2.1.20 cachemiss prevented tasks. C disk-full
+  failures retained, no further online loop/cleanup/keys. Actual merged/signing/artifacts unverified.
+- **Next action:** final artifact QA/logical core and PARTIAL platform checkpoints, then resume only
+  blocked B1 verification after owner/environment prerequisites. No other eligible task remains;
+  B2-B4/production/migration not authorized. Exact evidence/ownership in A7 execution record.
 
 ## Historical A6 closure (preserved)
 

@@ -1,6 +1,6 @@
 # GymLvl — Task Board
 
-## Current — A7 B0/B1 implementation (2026-10-29)
+## Current — A7 PARTIAL; verified core and blocked B1 verification (2026-10-29)
 
 **Scope:** owner explicitly approved R0-01..04 and R1-01..07, including separate SEC002/R1-01 gate,
 source/permanent tests/local verification and verified normal Git commits/pushes. D-025..028.
@@ -9,9 +9,14 @@ source/permanent tests/local verification and verified normal Git commits/pushes
 task; QA inspected readiness. B0 R0-02..04 implemented and locally verified; policy32/SQL11+ACL365/
 Edge44/sixchecks pass, no material code review blocker. Four repo-only Fixed,35finding history kept.
 Execution ledger docs/audit/phases/A7_BATCH_EXECUTION.md, not A6 historical matrix status.
-**Next action:** checkpoint B0 then authorized R1-01 chain and independent R1-05/environment checks;
-scoped sequential B1 specialist implementation + tests/QA; continue independent
-eligible tasks when another branch is BLOCKED. No W2-W5, migration or production deployment.
+**B0 checkpoint:** main57e4e73e88f7099ec29a9d075964817f4db5470d pushed/clean/remote equal.
+**B1:** R1-01 independent31/R1-02 independent25/R1-03 independent18 PASS; parent analyze/format129/
+full200tests PASS. R1-04/R1-07 BLOCKED localstack; R1-05/R1-06 partialsource10checks PASS but actual
+Gradle merged/signing/artifact gates BLOCKED (resource8Gheap/nativeOOM; offlineKotlin cache).
+**Findings:**35, Accepted22/NV3/Fixed8/FP2; fullnineedited histories preserved, platformpair notFixed.
+D029..032approved; Dprocess temp/cache, exactduplicateZIPcleanup done, no keys/backupdeletion.
+**Next action:** final QA and verifiedcore/PARTIALplatform logical checkpoints; next execution
+resumes blocked B1 gates only after environment prerequisites. No W2-W5, migration or deployment.
 
 ## Historical A6 state (preserved)
 

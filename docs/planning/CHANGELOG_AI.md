@@ -2,6 +2,46 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — A7 B1 regression PASS; platform tasks remain PARTIAL/BLOCKED
+
+- Parent D process TEMP/TMP final analyze0issues48.5s/format129files0changed/fullFlutter200pass
+  concurrency2, all0; independentcore31snapshot/25async/18receipt pass and no material code blocker.
+- R1-05 permission/source and R1-06 fail-closed signing/source implemented,10sourcechecks pass;
+  D031officialSHA Gradle8.13 pin verified. D032exactduplicateZIP rehashed/deleted136983045bytes,
+  no other cleanup; Dtemp/cache/process environment approved. SDK/JBR21 available, no key reads.
+- Oneonline Gradle203.5s native8Gheap mmap failure; oneoffline1G1worker112.4s reachedappconfig then
+  Kotlin2.1.20/reflection/annotations cachemiss. No actual mergedmanifest/signinggate/signature PASS,
+  no second online attempt/SDK license/dependencyversion/CI change. Logs/crash artifact preserved.
+- Registry5B1objects updated with exactpre-A7 histories,30others unchanged fromB0; SEC002/CONC001/
+  INTG002Fixed repository/local, platformBUG001/002Accepted pendingruntime.35IDs, Accepted22/NV3/
+  Fixed8/FP2; severity0/3/24/6/2 confidence16/18/1 unchanged. No new persistence/production claim.
+- OverallPARTIAL: seven scoped tasks complete, four requiredverification gates BLOCKED. Final artifact
+  QA/logical verifiedcore and explicitlyPARTIAL platform checkpoints next; next execution blocked B1
+  environment gates, no B2-B4/migration automatically. No independent eligible task silently skipped.
+
+## 2026-10-29 — A7 B1 completion reconciliation and environment disposition
+
+- Independent R1-02 QA25async/controller tests pass. R1-03 initial preflight correctly stopped when
+  SQL rewards-only contract contradicted assumed workout receipt; D029 clarified no localfabrication.
+- R1-03 implemented validated captured-identity rewards receipt, pending detail reconciliation/edit
+  block/detail-only retry and uncertain-vs-rejected response handling; actual finish uses completed
+  serverdetail/duration. RED1pass13fail ->focused76pass/analyze/format, independent18pass no blocker.
+  Harness timeouts/setup and analyzer corrections retained in A7phase5; no database commit proof.
+- Receipt is shallow/in-memory, not durableoutbox. Fresh R1-04/R1-07 inventory found no supported
+  local PostgreSQL/Supabase/Docker target, BLOCKED; no modelled-persistence finding promoted.
+- Continue independent platform/network/signing tasks then batch regression/QA; no B2+ execution.
+
+## 2026-10-29 — A7 B0 checkpoint and B1 snapshot/async progress
+
+- B0 main57e4e73e88f7099ec29a9d075964817f4db5470d,20paths+1216/-75 committed/pushed3d9dbb0..
+  57e4e73 normally; remote equal/tree clean, A7_B0_CHECKPOINT=PASS, four exact pre-A7 histories verified.
+- R1-01 privacy fix after actual REDwrongadoption/overwrite ->43focusedpass, independentQA31snapshot/
+  analyze/full157pass; foreign/ownerless data preserved, owner-scoped keys, same-owner offline retained.
+- R1-02 queue/post-storage-await fix RED18pass3fail ->focused58pass/analyze/format pass; native
+  remove-ack race controls added, QA pending. No backend/timed/business scope expansion.
+- User approved D029 authoritative RPC ack vs hydration/duration and D030 fail-closed operator
+  signing. No keys read/created; no artifact signature claim. Continue eligible B1, not stop at B0.
+
 ## 2026-10-29 — A7 B0 implemented and verified, B1 continues
 
 - R0-02 default shell ask/reviewer gate correction +32 permanent policy tests; R0-03 additive

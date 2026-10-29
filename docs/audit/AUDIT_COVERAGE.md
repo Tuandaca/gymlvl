@@ -1,5 +1,11 @@
 # Audit Coverage
 
+**A7 execution overlay:** attention counts below remain26static-reviewed+1excluded, not runtime
+certification. Local W0 policy/ACL/stream and W1 snapshot/async/receipt fixes have permanent focused
+and batch tests in A7_BATCH_EXECUTION.md (fullFlutter200, source-platform10 included). R1-04/07 actual
+DB sessions and R1-05/06 merged/signing/artifact checks remain BLOCKED; source checks do not promote
+whole components. A6 audit matrix/history below is retained, current implementation status in A7 ledger.
+
 **Stage:** A6 CLOSED (scoped reconciliation/roadmap PASS; explicit A5 failed/blocked/unexecuted gaps retained)
 **Baseline:** `main` @ `1763ab5` for A5; PARTIAL614ee7c advances docs only; earlier inventory retains provenance.
 **Rule:** a component is `Reviewed (static)` only when a named reviewer read the code path. Listing a

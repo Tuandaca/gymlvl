@@ -2,7 +2,8 @@
   "schema_version": "1.0.0",
   "program": "gymlvl-full-codebase-audit",
   "generated_at": "2026-10-28",
-  "stage": "A7 B0 PARTIAL / IN PROGRESS; R0-02..04 repository-scoped corrections Fixed, B1 not started; no W2-W5 implementation or deployed-security certification; migration readiness NOT READY",
+  "stage": "A7 PARTIAL / IN PROGRESS; B0 complete and R1-01..03 core locally verified; R1-04/07 isolated-stack verification BLOCKED, R1-05/06 source partial/runtime gates BLOCKED; no B2+ implementation; migration readiness NOT READY",
+  "a7_b1_review": {"date":"2026-10-29","entry_commit":"57e4e73e88f7099ec29a9d075964817f4db5470d","status":"PARTIAL / IN PROGRESS; B0 complete, R1 core complete locally, release and actual persistence gates BLOCKED","changed_findings":["FND-SEC-002","FND-CONC-001","FND-INTG-002","FND-BUG-001","FND-BUG-002"],"classification_changes":"SEC002/CONC001/INTG002 Accepted -> Fixed for repository/local synthetic scope only; BUG001/BUG002 remain Accepted/High pending runtime acceptance; no severity/confidence changes","history":"All five complete pre-B1 objects retained exactly in historical_pre_a7 including nested A5/A4 history;30 other objects/raw spans unchanged, including four B0 Fixed histories. Prior a7_review is the historical B0 checkpoint, superseded for current stage by this metadata.","implementer":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"qa-reviewer ses_e7c4250a1ffeXk30ceIhMb3Jvk; reported focused31/25/18 tests including rendered VI/EN reconciliation controls; attribution is not a docs-writer runtime claim","parent_final_batch":"From app with process-local TEMP/TMP on D: flutter analyze --no-pub ->No issues found!48.5s; dart format --output=none --set-exit-if-changed lib test ->129 files0 changed; flutter test --no-pub --concurrency=2 --reporter expanded ->+200 All tests passed!; all exit0. No suite rerun in this docs-only turn.","blocked":"R1-04/07 require supported isolated actual connections; local bounded inventory found no docker/supabase/psql/postgres/pg_ctl or known Program Files PostgreSQL/Docker paths. R1-05/06 Gradle runtime gates blocked before requested tasks: prior JVM8 and wrapper9.7/AGP8.11.1 mismatch corrected via existing JBR21 and approved SHA-verified8.13; uncached dependencies, online8GiB native OOM203.5s and offline1GiB/one-worker Kotlin2.1.20/reflection/annotations cache misses remain. No merged manifest, missing/partial signing-input execution proof or APK signature.","decisions":"D-029 rewards-only acknowledgement/hydration; D-030 operator-owned fail-closed signing; D-031 Gradle8.13 compatibility; D-032 process-local cache/verification prerequisite approvals","limits":"No actual SQL commit-count, live-account/RLS/device, durable/deep-immutable receipt or release artifact proof; no keys read, new findings, B2+ implementation or migration-ready claim. Parent owns execution/handoff synchronization.","next_action":"After environment/cache readiness, run controlled local Gradle manifest and missing/partial-input gates under approved constraints; no further online attempt now. Supply supported isolated stack before actual connection-barrier/lost-ACK/reload/reorder/delete persistence controls."},
   "a7_review": {"date":"2026-10-29","entry_commit":"3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75","status":"PARTIAL / IN PROGRESS; B0 only, B1 not started","approvals":"R0-01 six-assertion safety gate PASS; owner approvals D-025..028","changed_findings":["FND-GOV-004","FND-SEC-001","FND-SEC-003","FND-SEC-004"],"scope":"Fixed means repository-scoped correction with local verification only; severity/confidence unchanged; 31 other finding objects/raw spans unchanged and four complete pre-A7 objects retained in historical_pre_a7, including nested histories","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; parent owns execution-ledger synchronization","parent_verification":"Parent reports independent command execution: policy32 PASS; SQL11 units plus ACL10 isolated DBs/365 assertions PASS; Edge44 tests and six handler checks PASS; all exit0/diff0. This docs-only turn does not rerun runtime suites.","independent_qa":"qa-reviewer ses_e7c4250a1ffeXk30ceIhMb3Jvk source inspection found no material code blocker; requested owner/superuser fixtures subsequently added and passed. QA npm.ps1 execution-policy BLOCKED; source-filter Git permission denied, not retried. No independent QA runtime PASS claimed.","limits":"Policy evaluator is not the live scanner/sandbox; saved approvals unknown. Additive migration applied only in disposable PGlite, not deployed. Stream callbacks do not prove network cancellation or DoS protection. No remote inventory/deploy, new IDs, B1 or W2-W5 implementation in this checkpoint."},
   "a6_reconciliation": {"date":"2026-10-29","entry_commit":"6d8e89bf6eba7b393ef2d0e0d52e9b0d5eb4f2c3","classification_changes":[],"new_findings":[],"plan_reference":"docs/audit/REMEDIATION_PLAN.md","history":"All prior finding objects and nested histories preserved; old wave fields remain historical. Proposed owner-task mapping does not authorize remediation.","acceptance":"PASS scoped audit reconciliation and roadmap; final QA inspection and phase6 artifact validator, not product/runtime certification","validation":"A6_ARTIFACT_CHECK findings=35 unchanged_objects=35 unchanged_closures=4 md_classes=35 roadmap_rows=35 unique_ids=35 tasks=29 dag=acyclic old_plan=exact coverage=26/0/0/1 allowed_paths=9 errors=0; node=0 diff=0","next_action":"Seek separate approval for R0-01 safety gate, then R1-01 SEC002 snapshot ownership; no automatic remediation or migration"},
   "history_note": "a4_closure/a4_review, a3_closure and closure retain complete A4/A3/A2 history, not current A5 closure claims. Six amended findings preserve exact entire pre-A5 objects in historical_pre_a5, including older nested histories/reviews. All other24 prior finding objects remain JSON-deep-equivalent; all30 prior IDs survive. Five narrow confidence/status promotions and five new IDs do not imply product fixes or production certification.",
@@ -124,13 +125,36 @@
     "by_status": {
       "Open": 0,
       "Needs Verification": 3,
-      "Accepted": 25,
-      "Fixed": 5,
+      "Accepted": 22,
+      "Fixed": 8,
       "Deferred": 0,
       "False Positive": 2
     }
   },
   "findings": [
+    {
+      "id":"FND-CONC-001",
+      "title":"Discard queue cycle and post-backup-await identity race disrupt active workout state",
+      "category":"CONC",
+      "component":"Active workout controller (client)",
+      "paths":["app/lib/features/workout/presentation/controllers/active_workout_controller.dart","app/test/workout_async_identity_test.dart","app/test/workout_controller_test.dart"],
+      "line_ranges":["active_workout_controller.dart:282-289 discard/private cancellation;727 onward completion identity guards","workout_async_identity_test.dart:116-164 gated async/native-removal cases"],
+      "origin":"S3/A2 queue-cycle and A5 distinct post-storage-await race; R1-02 approved correction",
+      "root_cause":"Historical mechanisms remain distinct: discard re-enqueued public cancellation behind itself; completion/cancel failed to revalidate captured identity/generation after backup removal. R1-02 uses the private serialized cancel path and validates context after awaits before clearing state.",
+      "evidence":"Real RED reproduced active-discard timeouts and stale A operations clearing B; implementer ses_e7c46447fffe6xRQuhbJ2twX94 corrected both. Independent QA ses_e7c4250a1ffeXk30ceIhMb3Jvk reported25 focused tests PASS including native_remove_ack. Parent final flutter analyze --no-pub no issues, format129files0changed and flutter test --no-pub --concurrency=2 --reporter expanded +200 All tests passed!, all exit0. No runtime rerun by docs writer.",
+      "expected_behavior":"Discard settles; operations captured for A must not clear B after storage awaits, while direct/no-active/same-context controls work.",
+      "actual_behavior":"Fixed in repository/local scope: active discard completes without nested queue wait; stale completion/cancel cannot erase a replacement identity after acknowledged native removal. Two distinct mechanisms and their controls remain covered.",
+      "impact":"Corrected locally reproduced recovery/state-continuity defects only; no B database mutation, real-account disclosure, uncaught crash, irreversible server loss or measured infinite wait claim.",
+      "severity":"P2","confidence":"Confirmed","status":"Fixed",
+      "proposed_remediation":"Implemented R1-02 private cancel/context revalidation with permanent async/native-removal controls; preserve both mechanisms and same-context behavior. Actual backend persistence remains separately BLOCKED under R1-04/07.",
+      "regression_risk":"Serialized discard/cancel ordering, auth reset/new identity, native storage acknowledgement and completion cleanup.",
+      "related_tests":["app/test/workout_async_identity_test.dart","app/test/workout_controller_test.dart"],
+      "missing_tests":["Actual isolated backend persistence and device/native shared-preferences behavior beyond synthetic/native-ack fixtures NOT RUN"],
+      "depends_on":["R0-01 gate PASS; R1-01 ownership prerequisite implemented; actual connection verification R1-04/07 BLOCKED"],
+      "wave":"W1",
+      "verification_method":"Independent QA25 focused tests and parent final200-test batch reported PASS/exit0; source refs targeted in this docs turn, no runtime suite rerun.",
+      "a7_review":{"date":"2026-10-29","task":"R1-02","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/workout_async_identity_test.dart","scope":"Fixed repository/local synthetic mechanisms, not B database mutation or crash proof"},
+      "historical_pre_a7":
     {
       "id": "FND-CONC-001",
       "title": "Discard queue cycle and post-backup-await identity race disrupt active workout state",
@@ -215,6 +239,7 @@
         "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
         "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
       }
+    }
     },
     {
       "id": "FND-DATA-001",
@@ -433,6 +458,29 @@
       "verification_method": "Resolved by documentation, not by a trial: OpenCode V2 permissions guide, section on matching and shell resource scanning."
     },
     {
+      "id":"FND-BUG-001",
+      "title":"Android release INTERNET source correction awaits merged-manifest verification",
+      "category":"BUG",
+      "component":"Android release configuration",
+      "paths":["app/android/app/src/main/AndroidManifest.xml","app/android/gradle/wrapper/gradle-wrapper.properties","app/test/release_config_test.dart"],
+      "line_ranges":["main/AndroidManifest.xml:2 direct-child INTERNET permission","gradle-wrapper.properties:4-5 approved8.13/SHA256","release_config_test.dart:52-57,164-192 source controls"],
+      "origin":"A1 historical missing main permission; R1-05 approved source correction and B1 compatibility prerequisites",
+      "root_cause":"Original defect was absent main INTERNET permission while debug/profile overlays contained it. R1-05 now declares the permission in main; acceptance remains incomplete because Gradle configuration/dependency/native-memory blockers prevented merged-release-manifest execution.",
+      "evidence":"Targeted source main/AndroidManifest.xml:2 now declares android.permission.INTERNET. Shared release_config_test.dart10 source tests pass; parent final200-test batch/analyze/format exit0. Approved D-031 pins Gradle8.13 with verified SHA256, using existing JBR21 instead of JVM8; former9.7/AGP8.11.1 incompatibility corrected. Actual attempts stopped before requested tasks: uncached dependencies, online8GiB-heap native OOM203.5s, then offline1GiB/one-worker app_links Kotlin2.1.20/reflection/annotations cache misses. No merged manifest produced; no further online attempt in this docs turn.",
+      "expected_behavior":"The merged release artifact declares INTERNET and can reach its backend; source declaration alone is not merged-artifact/runtime proof.",
+      "actual_behavior":"PARTIAL source remediation exists: main permission is present and source controls pass. R1-05 runtime/merged-manifest gate is BLOCKED before task execution; release networking remains unverified, not proven absent in current code.",
+      "impact":"Original P1 release-connectivity risk remains Accepted pending required artifact/runtime verification; High unchanged. No claim that current main lacks INTERNET or that a tested release artifact still cannot connect.",
+      "severity":"P1","confidence":"High","status":"Accepted",
+      "proposed_remediation":"Retain the declared main permission and approved Gradle8.13/SHA pin. Once the local dependency cache/environment is ready, run controlled merged-release-manifest inspection and approved connectivity verification; do not make further online attempts now or mark Fixed from source tests alone.",
+      "regression_risk":"Manifest source-set merging, dependency resolution/JVM compatibility, resource-limited Gradle configuration and release-only networking.",
+      "related_tests":["app/test/release_config_test.dart"],
+      "missing_tests":["Merged release manifest INTERNET assertion BLOCKED before Gradle requested-task execution","Release artifact/device connectivity NOT RUN"],
+      "depends_on":["R1-05 runtime acceptance requires controlled environment/cache readiness; D-031/D-032 approved B1 prerequisites, not W4 scope"],
+      "wave":"W1",
+      "verification_method":"Source10 tests PASS and parent final Flutter200/analyze/format reported exit0. Required Gradle merged-manifest/runtime gate BLOCKED; no tasks executed/artifact proof, no suite rerun in docs-only turn.",
+      "a7_review":{"date":"2026-10-29","task":"R1-05","status":"PARTIAL / BLOCKED runtime acceptance","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","decision":"D-031/D-032 approved prerequisites","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart","scope":"Accepted/High unchanged despite source correction; no merged manifest or release connectivity proof; no new online attempt"},
+      "historical_pre_a7":
+    {
       "id": "FND-BUG-001",
       "title": "The Android release manifest declares no INTERNET permission",
       "category": "BUG",
@@ -460,7 +508,31 @@
       "depends_on": ["FND-TEST-001"],
       "wave": "W1",
       "verification_method": "flutter build apk --release, then inspect app/build/app/intermediates/merged_manifests/release/AndroidManifest.xml or run aapt dump permissions. NOT RUN in A1: Android SDK availability unconfirmed and it writes build artifacts."
+    }
     },
+    {
+      "id":"FND-BUG-002",
+      "title":"Fail-closed release signing source correction awaits Gradle gates and artifact proof",
+      "category":"BUG",
+      "component":"Android build configuration",
+      "paths":["app/android/app/build.gradle.kts","app/android/gradle/wrapper/gradle-wrapper.properties","app/test/release_config_test.dart"],
+      "line_ranges":["build.gradle.kts:8-18 four environment input names;45-59 release config without debug fallback;63-86 execution gate","gradle-wrapper.properties:4-5 approved8.13/SHA256","release_config_test.dart:71-159 signing source controls"],
+      "origin":"A1 historical release debug-key fallback; R1-06 D-030 approved fail-closed operator-owned signing source correction",
+      "root_cause":"Original release build selected the template debug signing config. R1-06 removes that fallback, selects a release config and gates missing/partial operator environment inputs at packaging/signing execution. Gradle prerequisite failures prevent runtime acceptance of those gates and artifact signature verification.",
+      "evidence":"Targeted build.gradle.kts:9-18 defines four GYMLVL_RELEASE_* environment inputs;45-59 selects release signing only;72-86 registers a dependency gate listing missing names without logging values. Shared release_config_test.dart10 source tests pass. Approved Gradle8.13 SHA-verified pin/JBR21 resolve prior JVM8 and9.7/AGP8.11.1 mismatch, but uncached dependencies/native OOM and offline Kotlin2.1.20/reflection/annotations cache misses block before requested tasks. No key read, missing/partial-input runtime proof, release APK or signature produced.",
+      "expected_behavior":"Release packaging/signing fails closed with missing/partial inputs and never uses debug fallback; authorized artifacts use the operator-held release key without exposing credentials.",
+      "actual_behavior":"PARTIAL source remediation exists: no debug signing fallback, four operator environment inputs and execution-only missing-input dependency gate. R1-06 runtime gate/signature verification is BLOCKED before requested tasks; no claim that current source still selects the debug key or that release signing has been verified.",
+      "impact":"Original P2 signing risk remains Accepted/High pending execution and artifact acceptance. Source safeguards are present, but actual missing/partial-input behavior and non-debug artifact certificate are not proved.",
+      "severity":"P2","confidence":"High","status":"Accepted",
+      "proposed_remediation":"Retain D-030 operator-owned fail-closed signing with no debug fallback. After local cache/environment readiness, run controlled no-input and partial-input Gradle execution checks without real credentials; separately approved signing/artifact verification needs owner key custody, never read keys to make tests pass. No further online attempt now.",
+      "regression_risk":"Gradle task skipping/dependency ordering, missing/partial operator inputs, local debug/manifest tasks, configuration cache and sensitive-value handling.",
+      "related_tests":["app/test/release_config_test.dart"],
+      "missing_tests":["Actual missing and partial signing-input execution gates BLOCKED before requested tasks","Owner-authorized non-debug APK/AAB certificate verification NOT RUN; no key read"],
+      "depends_on":["D-030 signing strategy approved; D-031/D-032 controlled compatibility/cache prerequisites; R1-06 actual gate/artifact verification BLOCKED"],
+      "wave":"W1",
+      "verification_method":"Source10 tests PASS and parent final Flutter200/analyze/format reported exit0; no actual missing/partial-input Gradle execution, APK signature or key access. No runtime suite rerun by docs writer.",
+      "a7_review":{"date":"2026-10-29","task":"R1-06","status":"PARTIAL / BLOCKED runtime acceptance","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","decision":"D-030/D-031/D-032","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/release_config_test.dart","scope":"Accepted/High unchanged despite no-debug-fallback source correction; no actual missing/partial-input gate or artifact signature proof; no keys read"},
+      "historical_pre_a7":
     {
       "id": "FND-BUG-002",
       "title": "The release build is signed with the debug keystore",
@@ -484,6 +556,7 @@
       "depends_on": ["FND-TEST-001"],
       "wave": "W1",
       "verification_method": "flutter build appbundle --release, then keytool -printcert -jarfile on the artifact; the certificate must not read CN=Android Debug. NOT RUN in A1."
+    }
     },
     {
       "id": "FND-BUG-003",
@@ -719,6 +792,29 @@
       "verification_method": "git ls-files app/analysis.txt is empty after the fix, and flutter analyze still exits 0."
     },
     {
+      "id":"FND-SEC-002",
+      "title":"Global workout backup is adopted under a different synthetic controller identity",
+      "category":"SEC",
+      "component":"Client workout snapshot recovery and session isolation",
+      "paths":["app/lib/features/workout/presentation/controllers/active_workout_controller.dart","app/test/workout_snapshot_ownership_test.dart"],
+      "line_ranges":["active_workout_controller.dart:160-180 owner key/validation;195-270 guarded persistence and both recovery paths","workout_snapshot_ownership_test.dart:131-284 ownership/preservation controls"],
+      "origin":"A2 synthetic cross-identity adoption, preserved A3 server distinction; R1-01 approved owner-scoped correction",
+      "root_cause":"Historical shared backup and unchecked decoded owner allowed both recovery paths to adopt another identity. R1-01 introduces owner-scoped keys and owner validation before interpretation/adoption, with context guards across storage/remote awaits and conservative preservation of foreign/ownerless bytes.",
+      "evidence":"Real RED observed foreign adoption/overwrite before correction; implementer ses_e7c46447fffe6xRQuhbJ2twX94 added31 ownership tests. Independent QA ses_e7c4250a1ffeXk30ceIhMb3Jvk reported31 focused and157 full tests plus analyze PASS at that checkpoint. Parent final analyze no issues48.5s, format129files0changed and200 Flutter tests all exit0. Both explicit restore and UI-used recovery cover remote null/error, same-owner offline recovery and preserving foreign/ownerless data. Docs writer no suite rerun.",
+      "expected_behavior":"A signed-in identity only adopts its own validated snapshot; both recovery paths preserve unknown/foreign historical data without exposing or reassigning it.",
+      "actual_behavior":"Fixed in repository/local scope: owner-scoped keys and pre-adoption owner checks reject foreign/ownerless snapshots in both paths; remote null/error cannot bypass ownership, same-owner offline recovery survives and save/discard preserve unrelated bytes.",
+      "impact":"Corrected synthetic controller-state adoption/overwrite boundary only; no real-account UI disclosure, live RLS, real-device storage or backend-corruption verification claimed.",
+      "severity":"P1","confidence":"Confirmed","status":"Fixed",
+      "proposed_remediation":"Implemented R1-01 under separate approved snapshot-ownership gate: retain owner validation before restore/render and conservative preservation, with permanent31-test regression. Live/device/server verification is a separate prerequisite, not implied by local Fixed.",
+      "regression_risk":"Shared-device signout/login, same-owner offline recovery, legacy unscoped/corrupt data and auth changes during storage/remote awaits.",
+      "related_tests":["app/test/workout_snapshot_ownership_test.dart","app/test/workout_controller_test.dart","app/test/session_isolation_test.dart"],
+      "missing_tests":["Real-account rendered UI, live RLS and real-device storage/signout behavior NOT RUN"],
+      "depends_on":["R0-01 and separately approved R1-01 ownership policy; R1-02 handles distinct async discard/race safety"],
+      "wave":"W1",
+      "verification_method":"Independent31 focused/157 full/analyze checkpoint and parent final200 tests/analyze/format reported PASS; no real-account/RLS/device assertion and no runtime rerun in docs-only turn.",
+      "a7_review":{"date":"2026-10-29","task":"R1-01","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/workout_snapshot_ownership_test.dart","scope":"Fixed repository/locally verified snapshot ownership only; preserve both recovery paths and all nested prior history"},
+      "historical_pre_a7":
+    {
       "id": "FND-SEC-002",
       "a3_review": "Backend controls remain distinct from confirmed local synthetic adoption. Real SET ROLE authenticated A/B fixtures in A3_SQL_EVIDENCE show fresh-tip foreign workout/set SELECT hidden; foreign begin/pause/cancel/complete and child inserts rejected; child reparent rejected; no change to A data or award rows. This does not repair the local backup, prove all-table/production isolation, or extend the original finding to server IDOR. User Auth/gateway and deployed ACL checks remain unverified; FND-SEC-003 separately records conditional PUBLIC ACL inheritance.",
       "title": "Global workout backup is adopted under a different synthetic controller identity",
@@ -742,6 +838,7 @@
       "depends_on": ["FND-CONC-001 affects safe discard after recovery; server authorization verification remains A3/A4"],
       "wave": "W1",
       "verification_method": "Retained non-production probe uses mocked preferences, synthetic auth and null/error fake remote with same-owner controls. Last A2 continuation: flutter test --no-pub --reporter expanded test/a2_retained_probe_test.dart -> +7: All tests passed!, exit 0, reproducing adoption in both paths. NOT rerun in this documentation checkpoint. After fix authorization invert the mismatch assertions and retain same-owner success; no live disclosure or RLS claim."
+    }
     },
     {
       "id": "FND-BUG-004",
@@ -911,6 +1008,29 @@
       "verification_method": "A5 flutter-specialist: navigate to summary under eligible auth with no extra and with missing/zero earnedXP fixtures. NOT RUN; source-supported reachability only."
     },
     {
+      "id":"FND-INTG-002",
+      "title":"Post-award detail fetch failure is reported as failed workout completion",
+      "category":"INTG",
+      "component":"Workout completion client reconciliation",
+      "paths":["app/lib/features/workout/domain/workout_repository.dart","app/lib/features/workout/data/supabase_workout_repository.dart","app/lib/features/workout/presentation/controllers/active_workout_controller.dart","app/lib/features/workout/presentation/screens/active_workout_screen.dart","app/lib/features/workout/workout_copy.dart"],
+      "line_ranges":["workout_repository.dart:19-20,83-110 receipt/reconciliation/error types","supabase_workout_repository.dart:70-133 captured-owner acknowledgement and hydration","active_workout_controller.dart:727-770 pending receipt and server duration","workout_copy.dart:64-68 pending/uncertain copy"],
+      "origin":"A2 reconciliation lead/A4 summary observation/A5 synthetic acknowledgement mechanism; R1-03 D-029 approved correction",
+      "root_cause":"Historical completion conflated acknowledged award and later detail-hydration failure. D-029/R1-03 separates a captured-caller/request-bound rewards-only receipt from detail reconciliation, without fabricating a completed Workout or inventing missing server fields.",
+      "evidence":"Implementer ses_e7c46447fffe6xRQuhbJ2twX94 reported76 focused tests. Independent QA ses_e7c4250a1ffeXk30ceIhMb3Jvk reported18 focused tests including rendered VI/EN pending/reload and hydrated server7-second duration. Parent final analyze no issues48.5s, format129files0changed and Flutter200 tests all exit0. Actual SQL RPC contract is rewards-only; synthetic transport proves client receipt handling, not actual SQL commit count. Docs writer does not rerun suites.",
+      "expected_behavior":"Preserve rewards-only acknowledgement for the captured owner/workout, represent pending hydration explicitly and retry detail without a second completion RPC; distinguish rejected submission from uncertainty and render server-hydrated summary fields.",
+      "actual_behavior":"Fixed in repository/local scope: pending receipt survives detail null/error, blocks edits and exposes detail-only reload; acknowledged reload does not issue a second award RPC. Rejected and uncertain outcomes differ; successful hydration supplies the rendered7-second server duration instead of the120-second local timer. Receipt rewards use shallow Map.unmodifiable in memory, not deep immutability or durable persistence.",
+      "impact":"Corrected locally verified client acknowledgement/hydration conflation and rendered-summary reconciliation. No new proof of SQL commit/replay count, duplicate-award prevention, durable receipt recovery or deployed persistence.",
+      "severity":"P2","confidence":"Confirmed","status":"Fixed",
+      "proposed_remediation":"Implemented R1-03/D-029 rewards-only receipt and pending/detail-only reconciliation; preserve captured caller/request ownership, error distinctions and hydrated UI fields. R1-04/07 actual connection/commit-lost-ACK/reject/reload persistence remains BLOCKED, not replaced by synthetic counters.",
+      "regression_risk":"Auth reset, pre-award rejection/uncertainty, acknowledged detail null/error, reload/retry, pending edit blocking, shallow reward snapshots and localized server-derived summary.",
+      "related_tests":["app/test/workout_completion_reconciliation_test.dart","app/test/workout_controller_test.dart","app/test/workout_async_identity_test.dart"],
+      "missing_tests":["Actual supported isolated SQL/gateway commit barrier, lost acknowledgement/retry/reload and exactly-one-award assertions BLOCKED R1-04/07; no durable/deep-immutable receipt claim"],
+      "depends_on":["D-029 approved; R1-01/R1-02 locally verified; R1-04/07 isolated-stack prerequisite absent; DATA001 conditional legacy award finding remains separate"],
+      "wave":"W1",
+      "verification_method":"Focused76 implementer/18 independent QA including rendered VI/EN/server7sec controls and parent final200-test batch reported PASS; no actual SQL commit-count proof or suite rerun in docs-only turn.",
+      "a7_review":{"date":"2026-10-29","task":"R1-03","decision":"D-029","owner":"flutter-specialist ses_e7c46447fffe6xRQuhbJ2twX94","independent_qa":"ses_e7c4250a1ffeXk30ceIhMb3Jvk","evidence_reference":"docs/audit/phases/A7_BATCH_EXECUTION.md; app/test/workout_completion_reconciliation_test.dart","scope":"Fixed repository/client synthetic and rendered scope; shallow in-memory receipt, not durable/deep-immutable; actual persistence gates BLOCKED"},
+      "historical_pre_a7":
+    {
       "id": "FND-INTG-002",
       "a4_review": "Classification remains P2/High/Accepted. A4 source inspection extends the same completion-reconciliation contract, not a new award finding: active_workout_screen.dart:75-80 captures local duration/exercises/counts before awaiting completeWorkout at82;91-100 passes that snapshot into summary, while controller:655-677 returns result.workout/result.rewards plus local fields and repository:70-76 separately hydrates after award. Thus summary duration/exercises can describe the pre-await local snapshot alongside the authoritative awarded result. No divergent rendered summary or injected transport outcome was executed. A5 flutter-specialist with qa-reviewer: gate pending edits/award/detail response, assert displayed duration/exercises reconcile with the committed workout and acknowledged rewards, and distinguish pre-award failure from post-award hydration failure. DATA001 is now Confirmed only for the conditional prior-award tuple; the former P1/Medium/Needs Verification dependency wording below is historical A2 context, not current classification.",
       "title": "Post-award detail fetch failure is reported as failed workout completion",
@@ -998,6 +1118,7 @@
         "independent_qa": "qa-reviewer ses_e7cb5a850ffeEKOCUhDgig3neH independently read product source/full retained probes and supports these bounded claims; no independent runtime rerun claimed. Extra QA source Git command BLOCKED, not retried or bypassed.",
         "runtime_note": "Retained A5 probe evidence, not rerun in this documentation-only writer turn."
       }
+    }
     },
     {
       "id": "FND-INTG-003",

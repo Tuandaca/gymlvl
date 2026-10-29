@@ -440,6 +440,55 @@ unbounded bodies first. Test multibyte/chunked/missing/misleading length and aut
 provider traffic, new dependency or deployment. A tighter byte limit intentionally replaces UTF-16
 code-unit interpretation; callers receive the existing appropriate oversize error contract.
 
+## D-029 — R1-03 authoritative acknowledgement and hydration semantics
+
+**Status:** ACCEPTED, explicit user response, 2026-10-29.
+**Decision:** Validate and retain authoritative workout/reward acknowledgement from complete_workout.
+A later detail-hydration failure requires reconciliation, not a failed award. Prefer server duration
+when available in completion summary. Never synthesize XP/completed records from an unavailable or
+invalid response; lost/rejected RPC acknowledgement is not confirmed completion. Preserve identity
+and generation guards and sole PostgreSQL award authority; test pre-ack failure and all post-ack cases.
+No client-side award, backend policy change or B2 timed/business implementation is authorized.
+
+**Implementation clarification from current source:** complete_workout progression.sql:279-282
+returns rewards only, not a workout. A valid rewards receipt is bound to captured authenticated
+caller/request workout ID; keep authoritative workout absent until matching completed detail is
+loaded. Hydration pending must be represented explicitly (typed receipt/state), never construct a
+completed workout from the active snapshot. This follows the approved no-fabrication contract;
+it does not enrich/change the SQL API. Summary duration uses server detail only when available.
+
+## D-030 — R1-06 operator-owned fail-closed release signing
+
+**Status:** ACCEPTED, explicit user response, 2026-10-29.
+**Decision:** Release signing uses operator-supplied untracked local configuration or environment
+keystore path/alias/passwords; never falls back to debug signing. Debug development remains available.
+No key creation, secret-file reads, secret printing or tracked credentials in this execution. Key
+custody belongs to the project owner. Missing SDK/approved key blocks artifact verification; static/
+fixture checks do not establish an artifact signature. No production distribution or deployment.
+
+## D-031 — B1 Gradle compatibility prerequisite
+
+**Status:** ACCEPTED, explicit user response, 2026-10-29.
+**Evidence/decision:** existing AGP8.11.1 fails with wrapper Gradle9.7.1 because InternalProblems was
+removed. Official Android AGP8.11 release compatibility lists Gradle8.13 and JDK17. Pin wrapper8.13
+with official SHA256 verification; use existing Android Studio JBR21 process-locally. Official Gradle
+distribution download is allowed only if absent from cache. Do not change AGP/Kotlin/CI, download SDK,
+accept new licenses, read/create signing keys or deploy. This is the explicitly approved R1-05/R1-06
+build-verification prerequisite, not general dependency upgrades or W4 implementation.
+
+## D-032 — Process-local verification cache and single duplicate archive cleanup
+
+**Status:** ACCEPTED, explicit user response after disk-full blocker, 2026-10-29.
+**Decision:** Create D:\gymlvl-a7-verification-20261029 for process-local TEMP/TMP/GRADLE_USER_HOME;
+allow downloads of already-declared/pinned build dependencies through existing Gradle/Google/Maven
+repositories for bounded Android configuration/merged-manifest/signing-gate checks. No version, CI,
+machine configuration, SDK/license or key change. Restore environment after commands; stop affected
+verification on persistent network/cache failures rather than expanding dependency scope.
+**Exact cleanup approval:** delete only the task-created duplicate
+C:\Users\tuand\AppData\Local\Temp\opencode\gymlvl-D031-gradle-8.13-bin-544ea6b1-f065-4c5d-a256-d840ea95f58c.zip
+after rechecking official SHA256. Do not remove any backup, prior task directory, unrelated cache,
+user data or Git history. This is not blanket cleanup approval.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:

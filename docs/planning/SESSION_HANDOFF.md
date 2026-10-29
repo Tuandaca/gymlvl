@@ -1,25 +1,46 @@
 # GymLvl — Session Handoff
 
-## Current — A7 B0/B1 remediation authorized / in progress (2026-10-29)
+## Current — A7 PARTIAL; B0/B1 core verified, four required gates BLOCKED (2026-10-29)
 
-- **Task/status:** A7 W0/W1 implementation, B0 R0-01..04 PASS local/repository scope with independent
-  source review; B1 authorized next. User separately approved R1-01; D-025..028.
-- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75 clean/remote equal; primary
+- **Task/status:** A7 PARTIAL; completed local R0-01..04/R1-01..03 with independent QA. R1-04/07
+  supported-stack verification BLOCKED; R1-05/06 source10checks pass but required Gradle tasks/signature
+  not verified, acceptance BLOCKED. No W2-W5, production or migration, readiness NOT READY.
+- **Commit:** entry main3d9dbb038a3a7e93ee4b3d4c51b10d8e066dbf75; B0 main57e4e73e88f7099ec29a9d075964817f4db5470d
+  committed/pushed normally, local/remote equal/clean after checkpoint. Current expected B1 code/docs
+  dirty; primary
   gymlvl-orchestrator verified. External bundle/bare/archive backup verified560files, hashes A7phase2.
-- **Files:** execution record docs/audit/phases/A7_BATCH_EXECUTION.md; decisions, board, handoffs,
-  changelog and finding mirrors as needed; specialists receive exact source/test/config ownership
-  per task before edits. No unexpected changes at entry; do not overwrite unowned work.
+- **Changed B1 source/test files:** app/lib/features/workout/data/supabase_workout_repository.dart,
+  app/lib/features/workout/domain/workout_repository.dart,
+  app/lib/features/workout/presentation/controllers/active_workout_controller.dart,
+  app/lib/features/workout/presentation/screens/active_workout_screen.dart,
+  app/lib/features/workout/workout_copy.dart, app/test/workout_controller_test.dart,
+  app/test/workout_snapshot_ownership_test.dart, app/test/workout_async_identity_test.dart,
+  app/test/workout_completion_reconciliation_test.dart; PARTIAL platform:
+  app/android/app/src/main/AndroidManifest.xml, app/android/app/build.gradle.kts,
+  app/android/gradle/wrapper/gradle-wrapper.properties, app/test/release_config_test.dart.
+- **Changed B1 records:** docs/audit/phases/A7_BATCH_EXECUTION.md, docs/audit/FINDINGS_REGISTER.json,
+  docs/audit/MASTER_FINDINGS.md, docs/audit/AUDIT_COVERAGE.md, docs/audit/SESSION_HANDOFF.md,
+  docs/planning/DECISIONS.md, docs/planning/TASK_BOARD.md, docs/planning/SESSION_HANDOFF.md,
+  docs/planning/CHANGELOG_AI.md. B0 exact paths/evidence in A7phase4, already checkpointed.
 - **Decisions:** default shell ask; additive ACL fail-closed; byte caps RPC16KiB/Coach20000/provider
  256KiB; owner-match snapshot with conservative preserved legacy/foreign data. No production/deploy.
-- **Verification:** parent policy32/SQL11+ACL365/Edge44/sixchecks all exit0, diff0; red/green and
+- **B0 verification:** parent policy32/SQL11+ACL365/Edge44/sixchecks all exit0, diff0; red/green and
   failed corrections A7phase4. QA npm.ps1/extra Git checks blocked, no bypass/runtime QA claim;
-  independent code review found no material blocker. Current Fixed repo-only GOV004/SEC001/003/004,
-  full history preserved,35 IDs/Accepted25/NV3/Fixed5/FP2; no deployed or sandbox/DoS claim.
-- **Blockers:** B1 environment/signing custody checks pending; live tool permission and deployed DB/
-  network verification NOT RUN. Migration NOT READY; current B0 code/doc changes expected.
-- **Next action:** checkpoint B0 then continue approved eligible B1 tasks sequentially, red/green/QA
-  and durable task
-  checkpoints. Normal A7 commit/push explicitly approved. No B2-B4/remediation outside W0/W1/migration.
+  independent code review found no material blocker. At B0 checkpoint GOV004/SEC001/003/004 Fixed,
+  full history preserved,35 IDs/Accepted25/NV3/Fixed5/FP2; final B1 counts below supersede those totals.
+  No deployed or sandbox/DoS claim; live tool permission/deployed DB/network NOT RUN.
+- **B1 progress:** R1-01 independent31snapshot, R1-02 independent25async, R1-03 independent18receipt/
+  renderedVIENcallback controls pass; parent analyze0issues/format129unchanged/full200pass on D temp,
+  all exit0. No material code blocker. In-memory/shallow receipt only, no durableoutbox guarantee.
+  SEC002/CONC001/INTG002 Fixed repo-only; platformBUG001/002 Accepted, not Fixed.35IDs/history kept,
+  final statusesAccepted22/NV3/Fixed8/FP2; severity/confidence unchanged. Exact A7phase7.
+- **Blockers:** DBstack executables absent; Android Gradle pinned8.13 verifiedSHA underD031, SDK/JBR21
+  available, oneonline nativeOOM8Gheap and offline Kotlin2.1.20 cachemiss blocked task execution.
+  D032 exact duplicateZIPdelete freed118MB on C, D temp/cache approved; no backup/oldtask cleanup,
+  keys or SDK downloads. Actual mergedmanifest/signinggate/signature unverified, no extra networkloop.
+- **Next action:** final QA and separate verified-core / explicitly PARTIAL platform checkpoints,
+  then resume blocked B1 verification after supported backend/cache/resources/operator key prerequisites.
+  No other eligible authorized branch remains; no B2-B4/migration automatically.
 
 ## Historical A6 closure (preserved)
 
