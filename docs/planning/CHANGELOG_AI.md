@@ -2,6 +2,18 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-31 — M0 OpenGym source pinning & migration foundation
+
+- **Source pinned:** `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL-3.0, behavioral reference only), cloned to `D:\Projects\opengym-reference`; remote origin verified (`fetch` + `push`), HEAD matches selected SHA. Not nested in GymLvl git tree, not a submodule, not committed into GymLvl.
+- **Manifest created:** `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` pins GymLvl baseline (`6badfef2...` @ `main`), OpenGym B SHA, ExerciseDB dataset SHA, licenses, acquisition date, permitted use.
+- **Licensing assessment:** OpenGym code = AGPL (reference only, no copy); MIT text (`textSource=exercisedb`) reusable with notice, strip media; media = Gym visual proprietary (EXCLUDED); GymLvl has no LICENSE file (O-01 open).
+- **Subagents delegated:** flutter-specialist (UI mapping), supabase-specialist (data mapping), qa-reviewer (licensing QA — BLOCKED on sandbox access to opengym-reference, but classification produced from project docs).
+- **Workstream B (feature architecture mapping):** gap analysis produced for catalog, workout sets, progression, 1RM, rest timer; no OpenGUL code copied.
+- **Migration slice implemented:** Rest Timer Duration Wheel — replaced quick-select chips (30/60/90/120s) with a minute/second wheel picker in CandyBottomSheet; VI/EN l10n keys added; narrow-screen safe (Wrap layout).
+- **Files changed:** `app/lib/features/workout/presentation/widgets/rest_timer_widget.dart`, `app/lib/features/workout/presentation/screens/active_workout_screen.dart`, `app/lib/features/workout/workout_copy.dart`, `app/test/workout_widgets_test.dart`, `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` (new).
+- **Verification:** `flutter analyze` 0 issues; `dart format` 0 changed; `flutter test` +231 All tests passed (no regression).
+- **Status:** M0 implementation slice PASS; no commit/push/tag (READY_FOR_APPROVAL).
+
 ## 2026-10-29 — R3 release-readiness hardening (local pass; remote CI pending approval)
 
 - **CI hardening (FND-TEST-001):** `.github/workflows/verify.yml` now runs `invoke.test.mjs` in the

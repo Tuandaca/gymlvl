@@ -190,7 +190,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   void _rest() {
     showModalBottomSheet<void>(
       context: context,
-      builder: (context) => RestTimerQuickSelect(
+      builder: (context) => DurationWheelPicker(
         onSelect: (seconds) => ref
             .read(activeWorkoutControllerProvider.notifier)
             .startRest(seconds),

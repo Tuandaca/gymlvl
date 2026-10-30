@@ -9,6 +9,7 @@ import 'package:app/features/workout/domain/workout_set.dart';
 import 'package:app/features/workout/presentation/widgets/workout_exercise_tile.dart';
 import 'package:app/features/workout/presentation/widgets/rest_timer_widget.dart';
 import 'package:app/features/workout/presentation/widgets/workout_summary_card.dart';
+import 'package:app/ui/candy/candy_button.dart';
 
 class FixedLanguage extends LocalizationModeNotifier {
   final AppLangMode mode;
@@ -84,13 +85,19 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          home: Scaffold(body: RestTimerQuickSelect(onSelect: (_) {})),
+          home: Scaffold(body: DurationWheelPicker(onSelect: (_) {})),
         ),
       ),
     );
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.byType(OutlinedButton), findsNWidgets(4));
+    expect(find.byType(CandyButton), findsNWidgets(2));
+    expect(find.byType(ListWheelScrollView), findsNWidgets(2));
+    expect(find.text('Đặt thời gian nghỉ'), findsOneWidget);
+    expect(find.text('Xác nhận'), findsOneWidget);
+    expect(find.text('Hủy'), findsOneWidget);
+    expect(find.text('phút'), findsOneWidget);
+    expect(find.text('giây'), findsOneWidget);
   });
   test(
     'relative workout dates follow calendar midnight, not 24-hour duration',

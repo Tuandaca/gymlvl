@@ -39,6 +39,20 @@ FND-DATA-002 / INTG-003/004/005/006/007 / TEST-002 Accepted; GOV-002 (stale doc)
 Counts: Fixed 20 · Accepted 11 · Needs Verification 2 · False Positive 2 = 35.**
 **Next action:** owner reviews the R3 commit manifest below and approves the push that triggers remote CI. (a) `invoke.test.mjs` is already wired into the R3 `verify.yml` manifest-gate step — no separate wiring needed; (b) approve `O-07` read-only at-risk counts for FND-DATA-001 (queries prepared, BLOCKED on live Supabase); (c) the unchanged release/platform blockers (signing keys, iOS, hosted Edge/Auth). R3 stops at READY_FOR_APPROVAL: no push of code/test/CI changes without approval; docs-only update may follow the approved green run. R2 remote CI run `40834000928` at `a018ec2` passed all three jobs (REPOSITORY: CLOSED · CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT READY).
 
+## Current — M0 OpenGym source pinning & migration foundation (2026-10-31)
+
+**Scope:** Pin official OpenGym reference, licensing review, UI/feature/data mapping, one safe migration slice. No production DB change, no media, no AGPL code copy, no commit/push/tag.
+**Baseline:** `main` @ `6badfef29a871a978a09daee304dc1c3f3f69a84`; 5 owner files preserved.
+**Source pinned:** `https://github.com/DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL-3.0, reference only), clone at `D:\Projects\opengym-reference`; remote origin + HEAD verified.
+**Manifest:** `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` created.
+**Licensing:** AGPL reference-only; MIT text (`textSource=exercisedb`) reusable with notice, strip media; media EXCLUDED; GymLvl no LICENSE file (O-01 open).
+**Mapping:** UI mapping (flutter-specialist), data mapping (supabase-specialist), licensing QA (qa-reviewer) completed; feature architecture mapping synthesized from subagent evidence.
+**Migration slice:** Rest Timer Duration Wheel — quick-select chips (30/60/90/120s) → minute/second wheel picker in CandyBottomSheet; VI/EN l10n keys; narrow-screen safe (Wrap layout).
+**Changed files:** `app/lib/features/workout/presentation/widgets/rest_timer_widget.dart`, `app/lib/features/workout/presentation/screens/active_workout_screen.dart`, `app/lib/features/workout/workout_copy.dart`, `app/test/workout_widgets_test.dart`, `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` (new).
+**Verification:** `flutter analyze` 0 issues; `dart format` 0 changed; `flutter test` +231 All tests passed.
+**Status:** M0 implementation slice PASS (READY_FOR_APPROVAL); no commit/push/tag.
+**Next action:** owner review; proposed next slice: exercise catalogue navigation/filter improvement (ADAPT, P1) or workout detail layout (ADAPT, P1).
+
 ## Historical A8 — remediation batch executed; platform gates blocked (2026-10-29)
 
 **Scope:** owner-requested verification-first remediation of the 35-finding register; one group at a

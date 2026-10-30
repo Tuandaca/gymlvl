@@ -1,5 +1,17 @@
 # GymLvl — Session Handoff
 
+## Current — M0 OpenGym source pinning & migration foundation (2026-10-31)
+
+**Task:** M0 — OpenGym source pinning & migration foundation (one migration slice).
+**Status:** `PASS` for the implementation slice; source pin + mapping complete.
+**Commit:** branch `main`, HEAD `6badfef29a871a978a09daee304dc1c3f3f69a84`; tree dirty by design (5 owner files preserved + 4 M0 files changed + 1 new manifest). No commit, push, tag, or deployment performed.
+**Changed files (source/config/tests):** `app/lib/features/workout/presentation/widgets/rest_timer_widget.dart`, `app/lib/features/workout/presentation/screens/active_workout_screen.dart`, `app/lib/features/workout/workout_copy.dart`, `app/test/workout_widgets_test.dart`, `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` (new).
+**Verification:** `flutter analyze --no-pub` → `No issues found!` (exit 0); `dart format --output=none --set-exit-if-changed lib test` → 0 changed; `flutter test --no-pub` → `+231: All tests passed!` (231 tests, no regression).
+**Source pin:** `https://github.com/DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2`; clone `D:\Projects\opengym-reference`; remote origin + HEAD verified. AGPL-3.0 = reference only.
+**Licensing:** AGPL code/reference only; MIT text (`textSource=exercisedb`) reusable with notice, strip media; media EXCLUDED; GymLvl no LICENSE (O-01 open).
+**Subagents used:** flutter-specialist (ses_e721c19f2ffeoi9CYIROH0cOS1), supabase-specialist (ses_e721c19f1ffeVBfgvsHL35Gicn), qa-reviewer (ses_e721c19eeffeqvSIepBiMtpcKk — BLOCKED on sandbox access to `D:\Projects\opengym-reference`, classification produced from project docs).
+**Next action:** owner review; proposed next slice: exercise catalogue navigation/filter improvement (ADAPT, P1) or workout detail layout (ADAPT, P1).
+
 ## Historical — R2 controlled remediation A-1..A-8 executed locally, pre-commit (2026-10-29)
 
 - **Task:** R2 batch — A-2 Auth redirect allowlist, A-3 Android merged-manifest gate, A-4 canonical

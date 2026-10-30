@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../workout_copy.dart';
 import '../../../../ui/theme/app_theme.dart';
+import '../../../../ui/candy/candy_button.dart';
 
 class RestTimerWidget extends ConsumerWidget {
   final int secondsRemaining;
@@ -207,63 +208,171 @@ class RestTimerWidget extends ConsumerWidget {
   }
 }
 
-class RestTimerQuickSelect extends ConsumerWidget {
+class DurationWheelPicker extends ConsumerWidget {
   final ValueChanged<int> onSelect;
-  const RestTimerQuickSelect({super.key, required this.onSelect});
+  const DurationWheelPicker({super.key, required this.onSelect});
+
+  static const int _maxMinutes = 10;
+  static const int _secondsStep = 5;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            workoutText(ref, 'rest'),
-            style: const TextStyle(
-              color: AppTheme.textMain,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final minutes = ValueNotifier<int>(0);
+    final seconds = ValueNotifier<int>(_secondsStep);
+
+    int totalSeconds() => minutes.value * 60 + seconds.value;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              workoutText(ref, 'set_rest_time'),
+              style: const TextStyle(
+                color: AppTheme.textMain,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            alignment: WrapAlignment.center,
-            children: [30, 60, 90, 120]
-                .map(
-                  (seconds) => SizedBox(
-                    width: 90,
-                    height: 56,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: AppTheme.cyanNeon.withValues(alpha: 0.4),
+            const SizedBox(height: 20),
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 104,
+                      height: 136,
+                      child: ListWheelScrollView.useDelegate(
+                        itemExtent: 34,
+                        diameterRatio: 1.4,
+                        physics: const FixedExtentScrollPhysics(),
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (_, i) {
+                            final m = i;
+                            final selected = m == minutes.value;
+                            return Center(
+                              child: Text(
+                                '$m',
+                                style: TextStyle(
+                                  fontSize: selected ? 24 : 17,
+                                  fontWeight: selected
+                                      ? FontWeight.w900
+                                      : FontWeight.normal,
+                                  color: selected
+                                      ? AppTheme.textMain
+                                      : AppTheme.textDim,
+                                ),
+                              ),
+                            );
+                          },
+                          childCount: _maxMinutes + 1,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        onSelect(seconds);
-                      },
-                      child: Text(
-                        '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-                        style: const TextStyle(
-                          color: AppTheme.cyanNeon,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        onSelectedItemChanged: (i) => minutes.value = i,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      workoutText(ref, 'minutes'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.textDim,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 104,
+                      height: 136,
+                      child: ListWheelScrollView.useDelegate(
+                        itemExtent: 34,
+                        diameterRatio: 1.4,
+                        physics: const FixedExtentScrollPhysics(),
+                        childDelegate: ListWheelChildBuilderDelegate(
+                          builder: (_, i) {
+                            final s = i * _secondsStep;
+                            final selected = s == seconds.value;
+                            return Center(
+                              child: Text(
+                                '$s',
+                                style: TextStyle(
+                                  fontSize: selected ? 24 : 17,
+                                  fontWeight: selected
+                                      ? FontWeight.w900
+                                      : FontWeight.normal,
+                                  color: selected
+                                      ? AppTheme.textMain
+                                      : AppTheme.textDim,
+                                ),
+                              ),
+                            );
+                          },
+                          childCount: 60 ~/ _secondsStep,
+                        ),
+                        onSelectedItemChanged: (i) =>
+                            seconds.value = i * _secondsStep,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      workoutText(ref, 'seconds_short'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppTheme.textDim,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Text(
+              '${totalSeconds() ~/ 60}:${(totalSeconds() % 60).toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Space Mono',
+                color: AppTheme.textMain,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: CandyButton(
+                    label: workoutText(ref, 'cancel'),
+                    variant: CandyButtonVariant.neutral,
+                    onPressed: () => Navigator.of(context).pop(),
+                    isFullWidth: false,
                   ),
-                )
-                .toList(),
-          ),
-        ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CandyButton(
+                    label: workoutText(ref, 'confirm'),
+                    variant: CandyButtonVariant.primary,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      onSelect(totalSeconds());
+                    },
+                    isFullWidth: false,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
