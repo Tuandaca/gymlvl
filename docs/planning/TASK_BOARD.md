@@ -1,38 +1,43 @@
 # GymLvl — Task Board
 
-## Current — R2 committed, pushed, remote CI green (2026-10-29)
+## Current — R3 hardening locally verified; release/signing & data gates still open (2026-10-29)
 
-**Scope:** owner-approved A-2, A-3, A-4, A-7, A-8 plus conditional A-1; one batch at a time,
-smallest safe change, regression test per fix.
-**Baseline:** `main` @ `b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc`, tree dirty (owner work preserved).
-**Entry gates:** analyze 0, format 129→134 files / 0 changed, full suite 200→215, SQL 11 units +
-365 ACL, Edge 36/44 then 44/44 after the runner fix, Android manifest gate absent.
+**Scope:** CI hardening (FND-TEST-001), Android fail-closed signing (FND-BUG-002), remaining contrast
+(FND-BUG-004), KPI labeling (FND-BUG-005), Supabase data integrity (FND-DATA-001 / D-037). One batch at
+a time; smallest safe change; regression test per fix. No production migration, deploy, signing-key
+change, or OpenGym migration.
+**Baseline:** `main` @ `aa52aa0ad185a2bc8ce99f1959543d7d4cfd49a5` (remote == local); five owner files
+preserved (`app/android/gradle.properties`, `app/android/run_gradle.bat`, `gradle_check.ps1`,
+`run_gradle_check.bat`, `docs/audit/phases/A8_BATCH_EXECUTION.md`); tree clean otherwise.
 **Fixed/verified this batch:**
-- A-2 `FND-INTG-001` Fixed — `site_url`/allowlist/`config.example.json`/docs aligned to
-  `--web-port 8080`; new `auth_redirect_config_test.dart` 6/6.
-- A-3 `FND-BUG-001` Fixed — real `:app:processReleaseMainManifest` → `BUILD SUCCESSFUL`; merged
-  manifest has direct `INTERNET`, package/label correct; `tools/android-verify` 8/8 + gate exit 0;
-  CI job added (NOT RUN).
-- A-4 register synced — 12 findings gained `r2_review`; 35 IDs preserved; counts 18 Fixed / 12
-  Accepted / 3 NV / 2 FP.
-- A-7 `FND-BUG-003` Fixed — `GymLvl`/`GYMLVL` across app, l10n, docs, CI; widget + adversarial tests
-  31/31; technical identifiers unchanged.
-- A-8 `FND-GOV-005` Fixed — `app/analysis.txt` untracked, ignored, local 84,864-byte copy preserved.
-- A-1 `FND-DATA-001` Fixed in repository scope — additive migration `20261029000200` blocks a second
-  award when `xp_logs` evidence exists; RED→GREEN SQL regression (12 units + 365 ACL).
-**Final gates:** analyze 0; format 134 files 0 changed; full 221/221; SQL 12 units + 365 ACL; Edge
-44/44; Android manifest gate exit 0; workflow YAML parsed after fixing a joined `steps:` line.
-**Still blocked:** production counts/backfill for DATA-001 (`O-07` + operator approval); release
-APK/signature (`GYMLVL_RELEASE_*` absent); iOS build (Windows); hosted Edge and live Auth round trips;
-remote CI run.
-**Carried:** `FND-TEST-001` Accepted (CI job unproven), `FND-BUG-002` Accepted (signing),
-`FND-BUG-004` Accepted (partial contrast); 3 NV and 2 FP unchanged.
-**Next action:** no R3 work has started. Open decisions for the owner: (a) wire
-`tools/android-verify/invoke.test.mjs` into the `android-release-manifest` job (the step still runs only
-`manifest-check.test.mjs`); (b) approve `O-07` read-only at-risk counts for `FND-DATA-001`; (c) the
-unchanged release/platform blockers. **Remote CI is green**: run `40834000928` at `a018ec2` passed
-`database-and-edge`, `flutter` and `android-release-manifest`. Closure state — REPOSITORY: CLOSED ·
-CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT READY.
+- FND-TEST-001 CI hardened: `verify.yml` adds `invoke.test.mjs` to the manifest-gate step (18 Android
+  tests), a `dart format` gate, per-job `timeout-minutes`, workflow `concurrency`+cancel, `push.branches:
+  [main]`, and `checkout`/`setup-node`/`setup-java`/`upload-artifact` pinned to Node-24 commit SHAs
+  (`subosito/flutter-action@v2` kept). `dart format` gate 0 changed; YAML parses to 3 jobs.
+  Generated-code drift gate **withheld** — regeneration rewrites 12 tracked files (measured).
+- FND-BUG-002 fail-closed signing verified locally **without credentials**:
+  `:app:validateReleaseSigningInputs` exit 1 (lists all 4 missing `GYMLVL_RELEASE_*`); partial-input
+  placeholder still exit 1 (lists 3 missing); `:app:assembleRelease` fails at the gate producing no
+  APK/AAB. Keystore absent → artifact/signature verification NOT RUN.
+- FND-BUG-004 contrast **Fixed**: 7 profile text nodes + onboarding chip icon/label/checkmark paints
+  resolved from the live tree; `ui_regression_test.dart` 7 new tests + a negative-control run proving
+  8 failures on pre-fix colours.
+- FND-BUG-005 KPI **Fixed**: volume tile names its 7-day window, workouts/sets tiles name the last-3
+  window (`dashboard_kpi_window_test.dart`, 3 tests). Product-intended window is unchanged (decision).
+- FND-INTG-008/009 source-confirmed remains Needs Verification (bare retryable insert, no unique
+  constraint; sequential reorder without transaction); real fix needs an isolated two-connection stack.
+- FND-DATA-001/D-037: migration re-validated additive/idempotent; the two read-only cohort queries are
+  recorded in `REMEDIATION_EXECUTION.md` §11.5 and schema-validated locally (positive/negative controls
+  pass); production counts BLOCKED on `O-07`, concurrency BLOCKED (PGlite is single-connection).
+- Release signing operator steps documented in `docs/admin/ANDROID_RELEASE_SIGNING_VI.md` (no keys created).
+**Final gates (session, local):** analyze 0; format 135 files 0 changed; full 231/231; SQL 12 units +
+365 ACL PASS; Edge 44/44; Android manifest gate exit 0; invoke 10/10, manifest-check 8/8; YAML 3 jobs.
+**Still blocked:** production counts/backfill for FND-DATA-001 (`O-07`); release signing keys; iOS
+(Windows); hosted Edge/live Auth; remote CI for the R3 changes (pending owner approval to push).
+**Open findings of record:** FND-BUG-002 Accepted; FND-TEST-001 Accepted; FND-INTG-008/009 (2× NV);
+FND-DATA-002 / INTG-003/004/005/006/007 / TEST-002 Accepted; GOV-002 (stale doc) Accepted; 2 FP.
+Counts: Fixed 20 · Accepted 11 · Needs Verification 2 · False Positive 2 = 35.**
+**Next action:** owner reviews the R3 commit manifest below and approves the push that triggers remote CI. (a) `invoke.test.mjs` is already wired into the R3 `verify.yml` manifest-gate step — no separate wiring needed; (b) approve `O-07` read-only at-risk counts for FND-DATA-001 (queries prepared, BLOCKED on live Supabase); (c) the unchanged release/platform blockers (signing keys, iOS, hosted Edge/Auth). R3 stops at READY_FOR_APPROVAL: no push of code/test/CI changes without approval; docs-only update may follow the approved green run. R2 remote CI run `40834000928` at `a018ec2` passed all three jobs (REPOSITORY: CLOSED · CI: VERIFIED · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT READY).
 
 ## Historical A8 — remediation batch executed; platform gates blocked (2026-10-29)
 

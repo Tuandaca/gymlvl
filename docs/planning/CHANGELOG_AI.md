@@ -2,6 +2,42 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-29 — R3 release-readiness hardening (local pass; remote CI pending approval)
+
+- **CI hardening (FND-TEST-001):** `.github/workflows/verify.yml` now runs `invoke.test.mjs` in the
+  manifest-gate step (18 Android tests), adds `dart format --set-exit-if-changed`, per-job
+  `timeout-minutes` (15/25/30), workflow `concurrency`+cancel, restricts push to `main`, and pins
+  `checkout`/`setup-node`/`setup-java`/`upload-artifact` to Node-24 commit SHAs (`subosito/flutter-action@v2`
+  kept). YAML parses to 3 jobs. Generated-file drift gate **withheld** — regenerating at the locked
+  generator versions rewrites 12 tracked files (measured: 846+/1303 lines), so the gate would fail
+  immediately. All gates **PASS locally**; remote CI **NOT RUN** (pending owner approval to push).
+- **Android fail-closed signing (FND-BUG-002):** verified locally **without credentials** —
+  `gradlew :app:validateReleaseSigningInputs` exits 1 listing all four `GYMLVL_RELEASE_*`; a placeholder
+  `STORE_FILE` still lists 3 missing; `:app:assembleRelease` fails at the gate and produces no APK/AAB.
+  Keystore absent → signature verification **NOT RUN**. AGP 8.11.1 / Gradle 8.13 / Kotlin 2.2.20 /
+  JDK 21 compatible (`java -version` local is 1.8 but gradlew uses `JAVA_HOME` = Android Studio JBR).
+- **FND-BUG-004 contrast:** 7 profile text nodes + onboarding chip paints resolved; 7 new UI tests + a
+  negative-control run (8 failures on pre-fix colours) prove the assertions regress-detect. **Fixed.**
+- **FND-BUG-005 KPI window:** labels now state the real windows (7-day volume, last-3 workouts/sets); 3
+  tests added. **Fixed.**
+- **Findings:** register 35 — Fixed 20 · Accepted 11 · Needs Verification 2 · False Positive 2.
+  INTG-008/009 source-confirmed remain Needs Verification (bare retryable insert / non-transactional
+  reorder); real fix needs an isolated two-connection PostgreSQL stack.
+- **Supabase (FND-DATA-001/D-037):** migration `20261029000200` re-validated as additive/idempotent; SQL
+  suite 12 units + 365 ACL PASS. The two read-only cohort queries are now recorded in
+  `REMEDIATION_EXECUTION.md` §11.5 and were schema-validated locally against every versioned migration
+  (cohort A/B execute, guard+index present, positive control isolates exactly one synthetic at-risk tuple,
+  negative control clears it, `complete_workout` returns `alreadyAwarded:true` on that tuple). Live run
+  **BLOCKED** on `O-07`. PGlite is single-connection → concurrency **BLOCKED**; no production count claimed.
+- **Validation (local):** analyze 0, format 135 files 0 changed, `flutter test` 231/231, SQL 12 units +
+  365 ACL PASS, Edge 44/44, manifest gate exit 0, invoke 10/10, manifest-check 8/8, YAML 3 jobs.
+- **Docs:** `REMEDIATION_EXECUTION.md` §11 records the R3 evidence (§11.1–§11.4 work/commands,
+  §11.5 cohort queries + local controls, §11.6 Android readiness matrix, §11.7 owner actions); operator
+  signing guide added at `docs/admin/ANDROID_RELEASE_SIGNING_VI.md` (Vietnamese, no secrets).
+- **Commit:** no commit/push/tag yet — this batch stops at `READY_FOR_APPROVAL`. Five owner files
+  preserved. Closure so far: REPOSITORY: CLOSED (R2) · CI: VERIFIED (R2) · PRODUCTION: NOT VERIFIED ·
+  OPENGYM: NOT READY.
+
 ## 2026-10-29 — R2 controlled remediation: A-2, A-3, A-4, A-7, A-8 done; A-1 guard done, data repair blocked
 
 - Entry `main` @ `b85d674` with a dirty tree preserved (owner work + A8 batch). No commit, push, tag,

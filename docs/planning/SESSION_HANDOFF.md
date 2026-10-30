@@ -59,6 +59,24 @@
 - **Next action:** owner approves the §9.4 manifest, then the push that triggers CI; separately
   approves `O-07` read-only counts. No further batch starts automatically.
 
+## Current — R3 release-readiness hardening complete locally (2026-10-29)
+
+- **Task:** CI hardening (FND-TEST-001), Android fail-closed signing (FND-BUG-002), remaining profile/onboarding contrast (FND-BUG-004), dashboard KPI window labeling (FND-BUG-005), Supabase data integrity (FND-DATA-001/D-037), and INTG-008/009 source confirmation. No production migration, deploy, signing-key or OpenGym change.
+- **Commit / branch / remote:** `main` @ `aa52aa0a` == `origin/main`; index empty; working tree holds 12 modified tracked files total = **11 R3 edits + 1 owner edit (`app/android/gradle.properties`, excluded)**, plus **3 new R3 files** (`app/test/dashboard_kpi_window_test.dart`, `docs/admin/ANDROID_RELEASE_SIGNING_VI.md`, `tools/db-tests/cohort_validation.mjs`) and **4 other owner files untracked** (`app/android/run_gradle.bat`, `gradle_check.ps1`, `run_gradle_check.bat`, `docs/audit/phases/A8_BATCH_EXECUTION.md`). R3-owned paths = 14 (11 modified + 3 new); owner paths = 5, all preserved.
+- **Local verification (status vocabulary AGENTS §5):**
+  - `flutter analyze --no-pub` → `No issues found!` (exit 0)
+  - `dart format --output=none --set-exit-if-changed lib test` → 135 files, 0 changed (exit 0)
+  - `flutter test --no-pub --reporter expanded` → `+231: All tests passed!` (221 R2 baseline + 10 new)
+  - `node tools/db-tests/run.mjs` → 12 SQL units + 365 ACL assertions PASS (exit 0)
+  - `node tools/db-tests/edge-tests.mjs` → 44 passed / 0 failed (exit 0)
+  - `node tools/android-verify/manifest-check.test.mjs` → 8/8; `invoke.test.mjs` → 10/10; gate `run.mjs` → exit 0
+  - `package:yaml` parse of `.github/workflows/verify.yml` → 3 jobs
+  - `:app:assembleRelease` (no signing inputs) → fails at `:app:validateReleaseSigningInputs`, **no APK/AAB produced**
+- **CI changes** (`.github/workflows/verify.yml`): added `invoke.test.mjs` to the manifest-gate step (18 Android tests), `dart format` gate, per-job `timeout-minutes`, `concurrency`+cancel, `push.branches: [main]`, pinned Node-24 action SHAs. Generated-drift gate withheld (build_runner rewrites 12 files at locked versions). **NOT RUN remotely** — no push yet.
+- **Supabase verification:** migration `20261029000200` re-validated as additive/idempotent; the two read-only cohort queries are recorded in `REMEDIATION_EXECUTION.md` §11.5 and schema-validated locally (cohort A/B execute on the migrated schema, guard+index present, positive control isolates exactly 1 synthetic at-risk tuple, negative control clears it, `complete_workout` returns `alreadyAwarded:true`). Production counts and two-connection concurrency remain **BLOCKED** (`O-07`, no real PostgreSQL host); PGlite is single-connection and is not concurrency proof.
+- **Status:** REPOSITORY: R3 READY_FOR_APPROVAL · CI: R2 VERIFIED, R3 pending remote ✅/❌ · PRODUCTION: NOT VERIFIED · OPENGYM: NOT READY.
+- **Next action:** owner reviews the R3 commit manifest (see response) and approves the push; then approve `O-07` read-only cohort counts. Release signing steps are documented for the owner in `docs/admin/ANDROID_RELEASE_SIGNING_VI.md` (no keys created, none committed). Stops at READY_FOR_APPROVAL; no push of code/CI without approval.
+
 ## R2 closure — commits, pushes, and remote CI (2026-10-29)
 
 - **Commits:** `7a10031` (A-8, 19 files), `74aaa22` (R2, 39 files), `a018ec2` (CI invocation fix +
