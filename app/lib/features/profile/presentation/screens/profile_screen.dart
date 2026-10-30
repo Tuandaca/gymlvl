@@ -587,7 +587,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Text(
             title,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppTheme.textMain,
               fontWeight: FontWeight.bold,
               letterSpacing: 1,
               fontSize: 13,
@@ -689,7 +689,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Text(
                   title.toUpperCase(),
                   style: const TextStyle(
-                    color: Colors.amber,
+                    color: AppTheme.textDim,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
@@ -884,7 +884,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               Text(
                 "$gymDays/$homeDays ${'days'.tr(ref)}",
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textMain,
                   fontFamily: CandyFonts.mono,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -946,7 +946,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               vi: 'Buổi gym mỗi tuần: $_gymDays',
               en: 'Gym sessions per week: $_gymDays',
             ),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
           ),
           Slider(
             value: _gymDays.toDouble(),
@@ -964,7 +964,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               vi: 'Buổi tập tại nhà mỗi tuần: $_homeDays',
               en: 'Home sessions per week: $_homeDays',
             ),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
           ),
           Slider(
             value: _homeDays.toDouble(),
@@ -978,7 +978,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 16),
           Text(
             'preferred_protocols'.tr(ref),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
+            style: const TextStyle(color: AppTheme.textMain, fontSize: 13),
           ),
           const SizedBox(height: 8),
           Wrap(
@@ -990,7 +990,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 label: Text(
                   _dayLabel(day),
                   style: TextStyle(
-                    color: isSelected ? Colors.black : Colors.white,
+                    color: isSelected ? Colors.black : AppTheme.textMain,
                     fontSize: 12,
                   ),
                 ),

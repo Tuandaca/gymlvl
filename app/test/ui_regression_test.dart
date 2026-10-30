@@ -112,6 +112,7 @@ Future<ProviderContainer> pumpFixture(
   double textScale = 1,
   bool questFailure = false,
   bool questEmpty = false,
+  ThemeData? theme,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -160,7 +161,7 @@ Future<ProviderContainer> pumpFixture(
       child: RepaintBoundary(
         key: const ValueKey('capture'),
         child: MaterialApp(
-          theme: AppTheme.darkTheme,
+          theme: theme ?? AppTheme.darkTheme,
           debugShowCheckedModeBanner: false,
           locale: Locale(language == AppLangMode.en ? 'en' : 'vi'),
           supportedLocales: const [Locale('en'), Locale('vi')],
@@ -201,6 +202,233 @@ Future<void> capture(WidgetTester tester, String name) async {
     image.dispose();
   });
 }
+
+// ---------------------------------------------------------------------------
+// Painted-colour resolution for the FND-BUG-004 light-surface checks.
+//
+// These helpers read the colours the widget tree actually hands to its
+// painters instead of comparing two declared constants:
+//   * text colour comes from the RenderParagraph that rasterises the glyphs
+//     (or EditableText.style for input fields), with translucency composited
+//     over the surface behind it;
+//   * the background comes from the ancestor fill layers (Material, Container,
+//     DecoratedBox, ColoredBox, Ink) composited outermost-to-innermost, which
+//     is what the engine paints behind the node.
+// A node whose surface cannot be resolved throws instead of falling back to a
+// guessed value.
+// ---------------------------------------------------------------------------
+
+const double bodyTextContrastTarget = 4.5;
+const double nonTextContrastTarget = 3.0;
+
+double contrastRatio(Color a, Color b) {
+  final double first = a.computeLuminance();
+  final double second = b.computeLuminance();
+  final double lighter = first > second ? first : second;
+  final double darker = first > second ? second : first;
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/// Composites translucent paint over the surface behind it, as the engine does.
+Color flattenOnto(Color foreground, Color background) =>
+    foreground.a < 1 ? Color.alphaBlend(foreground, background) : foreground;
+
+Color? _decorationColour(Decoration? decoration) => switch (decoration) {
+  BoxDecoration(:final Color? color) => color,
+  ShapeDecoration(:final Color? color) => color,
+  _ => null,
+};
+
+Color? _paintedFill(Widget widget, ThemeData theme) => switch (widget) {
+  // Container and AnimatedContainer never paint themselves; they hand the
+  // fill to a child ColoredBox/DecoratedBox, so reading them here would
+  // composite a translucent fill twice.
+  Material(:final Color? color, :final MaterialType type) =>
+    color ??
+        switch (type) {
+          MaterialType.canvas => theme.canvasColor,
+          MaterialType.card => theme.cardColor,
+          _ => null,
+        },
+  Scaffold(:final Color? backgroundColor) =>
+    backgroundColor ?? theme.scaffoldBackgroundColor,
+  DecoratedBox(:final Decoration decoration) => _decorationColour(decoration),
+  ColoredBox(:final Color color) => color,
+  Ink(:final Decoration? decoration) => _decorationColour(decoration),
+  _ => null,
+};
+
+/// Composites every ancestor fill that paints behind [finder].
+Color resolvePaintedBackground(WidgetTester tester, Finder finder) {
+  final List<Color> layers = <Color>[];
+  tester.element(finder).visitAncestorElements((Element element) {
+    final Color? fill = _paintedFill(element.widget, Theme.of(element));
+    if (fill != null && fill.a > 0) {
+      layers.add(fill);
+    }
+    return true;
+  });
+  if (layers.isEmpty) {
+    throw StateError('No painted background resolves for $finder');
+  }
+  Color surface = layers.last;
+  if (surface.a < 1) {
+    throw StateError('Outermost painted background for $finder is transparent');
+  }
+  for (var i = layers.length - 2; i >= 0; i--) {
+    surface = Color.alphaBlend(layers[i], surface);
+  }
+  return surface;
+}
+
+/// The colour the paragraph renderer uses for the glyphs.
+Color resolvePaintedTextColour(WidgetTester tester, Finder finder) {
+  final Finder richText = find.descendant(
+    of: finder,
+    matching: find.byType(RichText),
+  );
+  final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+    richText.first,
+  );
+  final Color? colour = paragraph.text.style?.color;
+  if (colour == null) {
+    throw StateError('Text at $finder has no resolved paint colour');
+  }
+  return colour;
+}
+
+/// The colour an input field rasterises its value with.
+Color resolveInputTextColour(WidgetTester tester, Finder finder) {
+  final Finder editable = find.descendant(
+    of: finder,
+    matching: find.byType(EditableText),
+  );
+  final Color? colour = tester.widget<EditableText>(editable.first).style.color;
+  if (colour == null) {
+    throw StateError('EditableText at $finder has no resolved paint colour');
+  }
+  return colour;
+}
+
+Color resolveIconColour(WidgetTester tester, Finder finder) {
+  final Color? colour = tester.widget<Icon>(finder).color;
+  if (colour == null) {
+    throw StateError('Icon at $finder has no resolved paint colour');
+  }
+  return colour;
+}
+
+/// The checkmark colour the chip render object actually paints.
+///
+/// `RawChip` hands the resolved colour to the private `_ChipRenderTheme` that
+/// owns the checkmark painter, so it is not reachable through a public widget
+/// property. Reading that theme keeps the assertion on the painted value
+/// instead of on the `FilterChip.checkmarkColor` argument.
+Color resolveChipCheckmarkColour(WidgetTester tester, Finder finder) {
+  final Finder renderChip = find.descendant(
+    of: finder,
+    matching: find.byWidgetPredicate(
+      (Widget widget) => widget.runtimeType.toString() == '_ChipRenderWidget',
+    ),
+  );
+  final Widget chipWidget = tester.widget<Widget>(renderChip.first);
+  // The resolved chip paint theme is private, so it is read through dynamic
+  // dispatch on the widget that hands the colour to the checkmark painter.
+  // ignore: avoid_dynamic_calls
+  final dynamic chipTheme = (chipWidget as dynamic).theme;
+  // ignore: avoid_dynamic_calls
+  final Color? colour = chipTheme.checkmarkColor as Color?;
+  if (colour == null) {
+    throw StateError('Chip at $finder paints no checkmark colour');
+  }
+  return colour;
+}
+
+/// Asserts that [node] paints [expectedForeground] on its real surface with at
+/// least [target] contrast, and that [regressionColour] (the colour this node
+/// shipped with before the fix) would fail the very same assertion.
+void expectPaintedContrast(
+  WidgetTester tester, {
+  required String name,
+  required Finder node,
+  required Color expectedForeground,
+  required Color regressionColour,
+  required double target,
+  Color Function(WidgetTester tester, Finder finder)? resolveForeground,
+}) {
+  final Color background = resolvePaintedBackground(tester, node);
+  final Color painted = (resolveForeground ?? resolvePaintedTextColour)(
+    tester,
+    node,
+  );
+  final Color foreground = flattenOnto(painted, background);
+  expect(foreground, expectedForeground, reason: '$name paints $foreground');
+  final double ratio = contrastRatio(foreground, background);
+  expect(
+    ratio,
+    greaterThanOrEqualTo(target),
+    reason: '$name: $foreground on $background = ${ratio.toStringAsFixed(2)}:1',
+  );
+  final double control = contrastRatio(
+    flattenOnto(regressionColour, background),
+    background,
+  );
+  expect(
+    control,
+    lessThan(target),
+    reason:
+        '$name positive control: $regressionColour on $background = '
+        '${control.toStringAsFixed(2)}:1 must fail the $target target',
+  );
+}
+
+typedef _ProfileCopy = ({
+  String biometrics,
+  String schedule,
+  String classes,
+  String classTitle,
+  String ratio,
+  String gymSessions,
+  String homeSessions,
+  String preferred,
+  String selectedDay,
+  String unselectedDay,
+});
+
+_ProfileCopy _profileCopy(AppLangMode language) => switch (language) {
+  AppLangMode.vi => (
+    biometrics: 'CHỈ SỐ CƠ THỂ',
+    schedule: 'LỊCH TRÌNH TẬP LUYỆN',
+    classes: 'HỆ PHÁI KÍCH HOẠT',
+    classTitle: 'WARRIOR',
+    ratio: '3/1 NGÀY',
+    gymSessions: 'Buổi gym mỗi tuần: 3',
+    homeSessions: 'Buổi tập tại nhà mỗi tuần: 1',
+    preferred: 'NGÀY ƯU TIÊN',
+    selectedDay: 'T2',
+    unselectedDay: 'T3',
+  ),
+  AppLangMode.en || AppLangMode.bilingual => (
+    biometrics: 'BIOMETRICS BOARD',
+    schedule: 'BATTLE SCHEDULE',
+    classes: 'ACTIVE CLASSES',
+    classTitle: 'WARRIOR',
+    ratio: '3/1 DAYS',
+    gymSessions: 'Gym sessions per week: 3',
+    homeSessions: 'Home sessions per week: 1',
+    preferred: 'PREFERRED PROTOCOLS',
+    selectedDay: 'Mon',
+    unselectedDay: 'Tue',
+  ),
+};
+
+typedef _OnboardingCopy = ({String male, String mon, String tue});
+
+_OnboardingCopy _onboardingCopy(AppLangMode language) => switch (language) {
+  AppLangMode.vi => (male: 'Nam', mon: 'T2', tue: 'T3'),
+  AppLangMode.en ||
+  AppLangMode.bilingual => (male: 'Male', mon: 'Mon', tue: 'Tue'),
+};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -413,35 +641,277 @@ void main() {
     },
   );
 
-  testWidgets(
-    'profile identity and edit text meet contrast on the light card',
-    (tester) async {
-      await pumpFixture(tester, const ProfileScreen(), textScale: 2);
+  // -----------------------------------------------------------------------
+  // FND-BUG-004: production Candy light surfaces.
+  //
+  // Every assertion below resolves the colour the widget tree actually paints
+  // (text via the RenderParagraph / EditableText that rasterises the glyphs,
+  // background via the ancestor fill layers composited outermost-inward), so
+  // it fails if the app drifts back to legacy white/amber foregrounds even
+  // though the constants still compile. Each node also carries a positive
+  // control proving the same assertion rejects the pre-fix colour.
+  // -----------------------------------------------------------------------
+  for (final language in [AppLangMode.en, AppLangMode.vi]) {
+    for (final textScale in [1.0, 2.0]) {
+      testWidgets(
+        'profile light surfaces keep readable paint (${language.name}, ${textScale}x)',
+        (tester) async {
+          final s = _profileCopy(language);
+          await pumpFixture(
+            tester,
+            const ProfileScreen(),
+            language: language,
+            textScale: textScale,
+            size: const Size(320, 844),
+            theme: AppTheme.lightTheme,
+          );
+          expect(AppTheme.lightTheme.brightness, Brightness.light);
+          // The pumped theme is the one app.dart installs (CandyTheme.theme),
+          // and the panel/backdrop tokens the screen reads match it.
+          expect(
+            AppTheme.lightTheme.scaffoldBackgroundColor,
+            AppTheme.background,
+          );
+          expect(AppTheme.lightTheme.cardColor, AppTheme.panelBackground);
+          // Filled inputs paint their own surface inside a private render
+          // object, so the input pair is only honest if that fill is the same
+          // colour as the panel the resolver sees behind the field.
+          expect(
+            AppTheme.lightTheme.inputDecorationTheme.fillColor,
+            AppTheme.panelBackground,
+          );
 
-      double contrast(Color a, Color b) {
-        final first = a.computeLuminance();
-        final second = b.computeLuminance();
-        final lighter = first > second ? first : second;
-        final darker = first > second ? second : first;
-        return (lighter + 0.05) / (darker + 0.05);
-      }
+          // View mode.
+          expectPaintedContrast(
+            tester,
+            name: 'profile identity',
+            node: find.text('Alex Nguyen'),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'section header',
+            node: find.text(s.biometrics),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'section header (schedule)',
+            node: find.text(s.schedule),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'section header (classes)',
+            node: find.text(s.classes),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'class title',
+            node: find.text(s.classTitle),
+            expectedForeground: AppTheme.textDim,
+            regressionColour: Colors.amber,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'schedule ratio value',
+            node: find.text(s.ratio),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
 
-      final name = tester.widget<Text>(find.text('Alex Nguyen'));
-      expect(name.style?.color, AppTheme.textMain);
-      expect(
-        contrast(name.style!.color!, AppTheme.panelBackground),
-        greaterThanOrEqualTo(4.5),
+          // Edit mode.
+          await tester.tap(find.byIcon(Icons.edit_rounded));
+          await tester.pumpAndSettle();
+          expectPaintedContrast(
+            tester,
+            name: 'profile name field',
+            node: find.byType(TextField).first,
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+            resolveForeground: resolveInputTextColour,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'edit gym sessions label',
+            node: find.text(s.gymSessions),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'edit home sessions label',
+            node: find.text(s.homeSessions),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'edit preferred protocols label',
+            node: find.text(s.preferred),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'edit selected day chip',
+            node: find.text(s.selectedDay),
+            expectedForeground: Colors.black,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'edit unselected day chip',
+            node: find.text(s.unselectedDay),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: Colors.white,
+            target: bodyTextContrastTarget,
+          );
+          expect(tester.takeException(), isNull);
+        },
       );
+    }
+  }
 
-      await tester.tap(find.byIcon(Icons.edit_rounded));
-      await tester.pumpAndSettle();
-      final field = tester.widget<TextField>(find.byType(TextField).first);
-      expect(field.style?.color, AppTheme.textMain);
-      expect(
-        contrast(field.style!.color!, AppTheme.panelBackground),
-        greaterThanOrEqualTo(4.5),
+  // -----------------------------------------------------------------------
+  // FND-BUG-004 onboarding extension: unselected/selected chip paint resolved
+  // from the live tree, plus the interaction that flips each chip.
+  // -----------------------------------------------------------------------
+  for (final language in [AppLangMode.en, AppLangMode.vi]) {
+    for (final textScale in [1.0, 2.0]) {
+      testWidgets(
+        'onboarding chip paint is readable before and after selection '
+        '(${language.name}, ${textScale}x)',
+        (tester) async {
+          final s = _onboardingCopy(language);
+          final container = await pumpFixture(
+            tester,
+            const OnboardingScreen(),
+            language: language,
+            textScale: textScale,
+            size: const Size(320, 844),
+            theme: AppTheme.lightTheme,
+          );
+          final PageView pages = tester.widget<PageView>(find.byType(PageView));
+
+          // Step 7 (index 6) — gender chips on the explicit light panel.
+          pages.controller!.jumpToPage(6);
+          await tester.pumpAndSettle();
+          expect(find.text(s.male), findsOneWidget);
+
+          expectPaintedContrast(
+            tester,
+            name: 'gender chip label (unselected)',
+            node: find.text(s.male),
+            expectedForeground: AppTheme.textDim,
+            regressionColour: Colors.white54,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'gender chip icon (unselected)',
+            node: find.byIcon(Icons.male),
+            expectedForeground: AppTheme.textDim,
+            regressionColour: Colors.white54,
+            target: nonTextContrastTarget,
+            resolveForeground: resolveIconColour,
+          );
+
+          await tester.ensureVisible(find.text(s.male));
+          await tester.tap(find.text(s.male));
+          await tester.pumpAndSettle();
+          expect(container.read(onboardingDraftProvider).gender, 'male');
+
+          expectPaintedContrast(
+            tester,
+            name: 'gender chip label (selected)',
+            node: find.text(s.male),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: AppTheme.cyanNeon,
+            target: bodyTextContrastTarget,
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'gender chip icon (selected)',
+            node: find.byIcon(Icons.male),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: AppTheme.cyanNeon,
+            target: nonTextContrastTarget,
+            resolveForeground: resolveIconColour,
+          );
+          // Resolver self-check: the selected chip paints exactly one 15%
+          // accent fill over the card panel, not a double-composited fill.
+          expect(
+            resolvePaintedBackground(tester, find.text(s.male)),
+            Color.alphaBlend(
+              AppTheme.cyanNeon.withValues(alpha: 0.15),
+              AppTheme.panelBackground,
+            ),
+          );
+
+          // Step 8 (index 7) — preferred-day FilterChips.
+          pages.controller!.jumpToPage(7);
+          await tester.pumpAndSettle();
+          expect(find.text(s.tue), findsOneWidget);
+          expectPaintedContrast(
+            tester,
+            name: 'day chip label (unselected)',
+            node: find.text(s.tue),
+            expectedForeground: AppTheme.textDim,
+            regressionColour: Colors.white54,
+            target: bodyTextContrastTarget,
+          );
+
+          await tester.ensureVisible(find.text(s.mon));
+          await tester.tap(find.text(s.mon));
+          await tester.pumpAndSettle();
+          expect(
+            container.read(onboardingDraftProvider).preferredDays,
+            contains('mon'),
+          );
+          expectPaintedContrast(
+            tester,
+            name: 'day chip label (selected)',
+            node: find.text(s.mon),
+            expectedForeground: AppTheme.textMain,
+            regressionColour: AppTheme.cyanNeon,
+            target: bodyTextContrastTarget,
+          );
+
+          final Finder selectedChip = find.widgetWithText(FilterChip, s.mon);
+          final Color chipSurface = resolvePaintedBackground(
+            tester,
+            find.text(s.mon),
+          );
+          final Color checkmark = resolveChipCheckmarkColour(
+            tester,
+            selectedChip,
+          );
+          expect(checkmark, AppTheme.textMain);
+          expect(
+            contrastRatio(checkmark, chipSurface),
+            greaterThanOrEqualTo(nonTextContrastTarget),
+            reason: 'selected day chip checkmark on $chipSurface',
+          );
+          expect(tester.takeException(), isNull);
+        },
       );
-      expect(tester.takeException(), isNull);
-    },
-  );
+    }
+  }
 }

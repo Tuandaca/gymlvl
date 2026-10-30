@@ -914,14 +914,14 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? AppTheme.cyanNeon : Colors.white54,
+                color: isSelected ? AppTheme.textMain : AppTheme.textDim,
                 size: 24,
               ),
               const SizedBox(height: 8),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? AppTheme.cyanNeon : Colors.white54,
+                  color: isSelected ? AppTheme.textMain : AppTheme.textDim,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   fontSize: 12,
                 ),
@@ -1106,9 +1106,9 @@ class _StepScheduling extends ConsumerWidget {
       label: Text(label),
       selected: isSelected,
       selectedColor: AppTheme.cyanNeon.withValues(alpha: 0.2),
-      checkmarkColor: AppTheme.cyanNeon,
+      checkmarkColor: AppTheme.textMain,
       labelStyle: TextStyle(
-        color: isSelected ? AppTheme.cyanNeon : Colors.white54,
+        color: isSelected ? AppTheme.textMain : AppTheme.textDim,
         fontSize: 12,
       ),
       onSelected: (selected) {
