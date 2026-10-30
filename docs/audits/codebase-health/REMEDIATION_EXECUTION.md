@@ -657,4 +657,198 @@ defect, fixed and verified remotely.
 - Not changed by this batch: signing keys, release artifact, iOS build, hosted Supabase/Auth/RLS, live
   at-risk counts (`O-07`), true two-connection concurrency.
 
+## 11. R3 Release-readiness hardening & local verification (2026-10-29)
+
+**Baseline:** `main` @ `aa52aa0ad185a2bc8ce99f1959543d7d4cfd49a5` (verified remote CI run `40834760495` / `40834000928`).
+**Objective:** Hardened CI, fail-closed release signing validation, profile/onboarding light contrast fixes, dashboard KPI window labeling, and integration finding confirmation. All changes verified locally; no production migration, signing key creation, or unauthorized git push.
+
+### 11.1 Work Completed in R3
+
+1. **FND-TEST-001 — CI Hardening (`.github/workflows/verify.yml`):**
+   - Added `invoke.test.mjs` execution alongside `manifest-check.test.mjs` in the `android-release-manifest` job, enforcing all 18 Android tool verification tests in CI.
+   - Pinned GitHub Actions to immutable full commit SHAs running on the Node 24 runtime (`actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09`, `actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444`, `actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961`, `actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f`). Kept `subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2` (v2 composite).
+   - Added `timeout-minutes` per job: 15 min for `database-and-edge`, 25 min for `flutter`, 30 min for `android-release-manifest`.
+   - Added workflow concurrency control (`group: ${{ github.workflow }}-${{ github.ref }}`, `cancel-in-progress: true`).
+   - Restricted push triggers to `main` branch only.
+   - Added `dart format --output=none --set-exit-if-changed lib test` step in the `flutter` job.
+   - Code-drift check intentionally withheld because code generation (`build_runner`) with pinned dependencies currently touches 12 tracked files.
+
+2. **FND-BUG-002 — Android Fail-Closed Signing Verification:**
+   - Evaluated `:app:validateReleaseSigningInputs` task in Gradle.
+   - Executed without signing credentials: task fails with code 1, correctly listing all 4 missing `GYMLVL_RELEASE_*` environment variables.
+   - Executed with partial credentials: task fails with code 1, correctly listing remaining missing inputs.
+   - `:app:assembleRelease` fails at the gate before generating any APK or AAB artifact.
+   - Status remains **Accepted** until production signing keystore and credentials are provided by the repository owner.
+
+3. **FND-BUG-004 — Profile & Onboarding Text Contrast (Fixed):**
+   - In `ProfileScreen`: replaced remaining hardcoded `Colors.white` and amber foregrounds on light Candy cards with theme tokens (`AppTheme.textMain`, `AppTheme.textDim`).
+   - In `OnboardingScreen`: resolved chip paint colors dynamically for gender and scheduling chips, ensuring compliant contrast in both selected and unselected states across light themes.
+   - In `ui_regression_test.dart`: added 7 regression test cases evaluating painted contrast on light surfaces across 1.0x and 2.0x text scaling in both English and Vietnamese.
+   - Negative control verified: reverting color tokens causes 8 failures.
+   - Status updated: **Fixed** in repository scope.
+
+4. **FND-BUG-005 — Dashboard KPI Window Qualification (Fixed):**
+   - In `KpiTilesGrid`: updated tile labels and subtitles to clearly qualify aggregation windows:
+     - Volume: labeled as "VOLUME" / "KHỐI LƯỢNG" with subtitle "last 7 days" / "7 ngày gần nhất".
+     - Workouts: labeled as "WORKOUTS" / "BUỔI TẬP" with subtitle "last 3 workouts" / "3 buổi gần nhất".
+     - Sets: labeled as "SETS" / "SỐ HIỆP" with subtitle "last 3 workouts" / "3 buổi gần nhất".
+   - Created `app/test/dashboard_kpi_window_test.dart` (3 tests) verifying labels, absence of misleading "TOTAL"/"TỔNG", and resilience down to 320px viewport width.
+   - Status updated: **Fixed**.
+
+5. **FND-INTG-008 & FND-INTG-009 — Transport Reconciliation (Needs Verification):**
+   - Confirmed root cause and test boundaries from canonical register.
+   - Requires isolated multi-connection real gateway/PostgreSQL stack to verify live duplicate prevention and non-transactional ordering recovery.
+   - Retained as **Needs Verification** in canonical register.
+
+### 11.2 Verification Commands and Evidence
+
+| Command | Working Dir | Result | Evidence |
+|---|---|---|---|
+| `flutter analyze --no-pub` | `app` | **PASS** | `No issues found! (ran in 4.6s)` (exit 0) |
+| `dart format --output=none --set-exit-if-changed lib test` | `app` | **PASS** | `Formatted 135 files (0 changed) in 0.65 seconds` (exit 0) |
+| `flutter test --no-pub` | `app` | **PASS** | `+231: All tests passed!` (exit 0) |
+| `node tools/db-tests/run.mjs` | root | **PASS** | `12 SQL verification units`, `365 ACL assertions PASS` (exit 0) |
+| `node tools/db-tests/edge-tests.mjs` | root | **PASS** | `44 passed \| 0 failed` (exit 0) |
+| `node tools/android-verify/manifest-check.test.mjs` | root | **PASS** | `8/8 manifest-check tests passed` (exit 0) |
+| `node tools/android-verify/invoke.test.mjs` | root | **PASS** | `10/10 gradle-invocation tests passed` (exit 0) |
+| `node tools/android-verify/run.mjs` | root | **PASS** | `PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0` (exit 0) |
+| `gradlew :app:validateReleaseSigningInputs` | `app/android` | **PASS (fail-closed)** | Fails closed with code 1, missing 4 `GYMLVL_RELEASE_*` inputs |
+
+### 11.3 Finding Register Reconciliation
+
+- Total findings: 35
+- **Fixed:** 20 (+2 from R2: FND-BUG-004, FND-BUG-005)
+- **Accepted:** 11 (-1: FND-BUG-004 moved to Fixed)
+- **Needs Verification:** 2 (-1: FND-BUG-005 moved to Fixed)
+- **False Positive:** 2 (unchanged)
+
+### 11.4 Current State & Next Steps
+
+- **Repository:** READY_FOR_APPROVAL (Staged locally; no commits or pushes performed).
+- **CI:** R2 VERIFIED remotely (run `40834760495` / `40834000928`); R3 hardened locally, remote run pending owner push approval.
+- **Production:** NOT VERIFIED — Live Supabase access (`O-07`), release signing keys, and iOS compilation remain pending owner credentials and authorization.
+- **OpenGym migration:** NOT READY.
+
+### 11.5 Supabase data integrity — FND-DATA-001 / D-037 (repository verified, production BLOCKED)
+
+**Repository guard (unchanged in R3, re-validated):** `supabase/migrations/20261029000200_prevent_legacy_double_award.sql`
+is additive and idempotent. It re-creates `public.complete_workout(uuid,text)` with one extra evidence
+guard — `EXISTS(SELECT 1 FROM public.xp_logs l WHERE l.user_id=uid AND l.source_id=w.id::text AND l.source IN ('workout','quest'))`
+— which returns the same `alreadyAwarded` payload as the `is_xp_calculated` branch and writes nothing; it
+also adds `idx_xp_logs_user_source(user_id, source_id)`. No `xp_logs`, `users` or `workout_rewards` row is
+deleted, rewritten or backfilled. Table/ACL footprint from R2 remains: 17 tables before and after, one index
+added, function ACL restated as `REVOKE ALL ... FROM PUBLIC,anon,authenticated` + `GRANT EXECUTE ... TO authenticated`.
+
+**Two read-only cohort assessment queries — prepared for live Supabase under `O-07` (not executed there).**
+Both are pure `SELECT`s; introduce no temp tables, no locks beyond MVCC reads, and no writes.
+
+Cohort A — rewarded-workout baseline (establishes the rewarded population the guard must not disturb):
+
+```sql
+WITH rewarded AS (
+  SELECT w.id, w.user_id, w.completed_at
+  FROM public.workouts w
+  JOIN public.workout_rewards r ON r.workout_id = w.id
+  WHERE w.status = 'completed'
+)
+SELECT count(*)::bigint                          AS rewarded_workouts,
+       count(DISTINCT user_id)::bigint           AS users_with_reward,
+       count(*) FILTER (WHERE completed_at IS NULL)::bigint AS missing_completed_at
+FROM rewarded;
+```
+
+Cohort B — at-risk ledger evidence (the exact legacy tuple the migration protects):
+
+```sql
+WITH at_risk AS (
+  SELECT w.id AS workout_id, w.user_id,
+         count(l.id)::bigint                      AS ledger_rows,
+         coalesce(sum(l.amount), 0)::bigint       AS ledger_xp
+  FROM public.workouts w
+  JOIN public.xp_logs l
+    ON l.user_id = w.user_id
+   AND l.source_id = w.id::text
+   AND l.source IN ('workout', 'quest')
+  LEFT JOIN public.workout_rewards r ON r.workout_id = w.id
+  WHERE w.status = 'completed'
+    AND coalesce(w.is_xp_calculated, false) = false
+    AND r.workout_id IS NULL
+  GROUP BY w.id, w.user_id
+)
+SELECT count(*)::bigint                          AS at_risk_workouts,
+       count(DISTINCT user_id)::bigint           AS affected_users,
+       coalesce(sum(ledger_rows), 0)::bigint     AS ledger_rows,
+       coalesce(sum(ledger_xp), 0)::bigint       AS ledger_xp_evidence
+FROM at_risk;
+```
+
+**Local validation (isolated `PGlite` 0.4.6, all versioned migrations applied, synthetic data only):**
+Validation script retained at `tools/db-tests/cohort_validation.mjs` and is re-runnable from the repository:
+
+| Check | Result | Evidence |
+|---|---|---|
+| Query syntax/schema validity on migrated schema | **PASS** | `PASS cohort A (already rewarded)` / `PASS cohort B (at risk)` via `node tools/db-tests/cohort_validation.mjs` |
+| Guard + supporting index present in the deployed function body | **PASS** | `GUARD_INDEX_PRESENCE {"index_present":true,"guard_present":true}` |
+| Cohort B positive control on a synthetic legacy tuple (completed, flag false, no reward row, one 42 XP ledger row) | **PASS** | `POSITIVE_CONTROL {"at_risk_workouts":1,"affected_users":1,"ledger_rows":1,"ledger_xp_evidence":42}` |
+| Cohort B negative control after inserting the reward row | **PASS** | `NEGATIVE_CONTROL {"at_risk_workouts":0,...}` (tuple leaves the at-risk set) |
+| `complete_workout` refuses a second award for that legacy tuple | **PASS (single connection)** | `GUARD_RESULT {"earnedXP":0,"totalXP":0,"alreadyAwarded":true,...}`, no reward row written |
+
+**Limits (do not overclaim).**
+
+- `PGlite` is a **single-connection** embedded engine. Nothing above proves real PostgreSQL concurrency,
+  gateway/serialization behaviour, or production data absence. No `psql`, `postgres`, `docker` or Supabase
+  CLI is installed on this host, so a two-connection isolation test is **BLOCKED**.
+- The guard matches `xp_logs.source_id = w.id::text` exactly. A historical row keyed differently (for
+  example a bare UUID without text form, a per-class `class_xp` row only, or a quest id) does not trigger the
+  guard. Cohort B is therefore a **lower bound** on the affected population, not an exact count.
+- `is_xp_calculated` is nullable; the query uses `coalesce(..., false)` to match the guard's truthiness test.
+- `switch_class` ignores ledger-only rows (`20261026000200:297,300`), so a legacy tuple can still be
+  re-credited through the class path; that is FND-DATA-002 scope and is unchanged.
+- Production counts, any `workout_rewards` backfill, and live verification are **NOT RUN** — they require
+  `O-07` read-only access plus operator approval.
+
+**`O-07` prerequisites before the cohort run:** owner-authorized read-only credentials/project ref, a
+statement timeout, and an explicit instruction to execute only the two `SELECT`s above (no `INSERT`,
+`UPDATE`, `DELETE`, `VACUUM`, migration or Edge deploy). Expected output interpretation: `at_risk_workouts = 0`
+closes the production question; any non-zero value keeps FND-DATA-001's data-repair decision open and
+requires a separate approved backfill plan.
+
+### 11.6 Android release readiness (FND-BUG-001 / FND-BUG-002 surface)
+
+| Item | Observed value | Verification |
+|---|---|---|
+| Application ID / namespace | `com.gymlvl.app` | `app/android/app/build.gradle.kts` namespace :21, applicationId :36 |
+| Launcher label | `GymLvl` | merged-manifest gate `label=GymLvl` |
+| Permissions | `INTERNET` present once, `nested=0`, `duplicates=0` | `node tools/android-verify/run.mjs` → `PASS merged release manifest: package=com.gymlvl.app label=GymLvl internet=1 nested=0 duplicates=0` |
+| Release signing gate | Fail-closed on 4 env inputs `GYMLVL_RELEASE_STORE_FILE/_STORE_PASSWORD/_KEY_ALIAS/_KEY_PASSWORD`; no debug fallback | `:app:validateReleaseSigningInputs` → exit 1 listing all four; placeholder `STORE_FILE` → exit 1 listing the three remaining; `:app:assembleRelease` → exit 1 at the gate, **no APK/AAB written** |
+| Gradle | 8.13, wrapper `distributionSha256Sum=20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78` | `app/android/gradle/wrapper/gradle-wrapper.properties` |
+| AGP / Kotlin | `com.android.application` 8.11.1 / Kotlin 2.2.20 | `app/android/settings.gradle.kts` |
+| Java target vs toolchain | `sourceCompatibility`/`targetCompatibility`/`jvmTarget` = 17 (:25-28, :30-32); builds run on JDK 21 (`JAVA_HOME` = Android Studio JBR on this host; bare `java` is 1.8) | `build.gradle.kts:25-32`, local environment probe |
+| SDK installed | `android-36`, `android-36.1` build-tools 36.1.0 | `%LOCALAPPDATA%\Android\Sdk` listing |
+| Signature verification tool | `apksigner` 0.9 present at `build-tools\36.1.0\apksigner.bat` | file probe |
+| AAB verification tool | `bundletool` **not installed** | recursive probe of the SDK returned no `bundletool*.jar` |
+| Release artifact | none produced | `app/build/outputs` empty after the gated `assembleRelease` |
+
+**Verdict:** release **NOT READY**. The build pipeline is correctly fail-closed, so no keyless artifact can
+be produced; APK/AAB signing and `apksigner verify` are `NOT RUN`. Creating production keys, inserting
+placeholder credentials into a real build, or wiring the gate to `preReleaseBuild` (which would break the
+keyless `android-release-manifest` CI job) is explicitly out of scope. Operator steps are in
+`docs/admin/ANDROID_RELEASE_SIGNING_VI.md`.
+
+### 11.7 R3 owner actions and remaining blockers
+
+| # | Owner action | Blocked work |
+|---|---|---|
+| 1 | Review and approve the R3 commit manifest, then push to trigger remote CI | FND-TEST-001 stays Accepted until a green remote run exists |
+| 2 | Decide whether to approve a one-off generated-code regeneration commit | Generated-file drift gate stays withheld (12 tracked files rewrite at locked generator versions) |
+| 3 | Provide release keystore + `GYMLVL_RELEASE_*` in a private shell (never in the repo) | `assembleRelease`, APK/AAB signing, `apksigner verify` |
+| 4 | Install `bundletool` (or accept APK-only verification) | AAB verification |
+| 5 | Approve `O-07` read-only access and run the two §11.5 queries | FND-DATA-001 production counts and the backfill decision |
+| 6 | Approve an isolated two-connection PostgreSQL/Supabase test stack | FND-INTG-008 / FND-INTG-009 and the FND-DATA-001 concurrency claim |
+| 7 | macOS with Xcode | iOS build/signing verification |
+
+Closure state at the end of R3: **REPOSITORY: R3 READY_FOR_APPROVAL · CI: VERIFIED for R2, R3 pending
+remote run · PRODUCTION: NOT VERIFIED · OPENGYM MIGRATION: NOT READY.**
+
+
 
