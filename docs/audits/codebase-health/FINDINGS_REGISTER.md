@@ -1,6 +1,6 @@
 # GymLvl — Findings Register
 
-**Generated:** 2026-10-29 (R2 pass; supersedes the earlier 23-row draft in this path)
+**Generated:** 2026-10-29 (R2 local pass; R3 local pass; remote CI for R3 changes **pending owner approval**, not yet observed)
 **Baseline:** `main` @ `b85d674b27b7eb024b42a8d1b05d5f624a3ee6bc` (tree dirty; owner work preserved)
 **Canonical source:** `docs/audit/FINDINGS_REGISTER.json` (35 findings, machine-readable)
 **Scope:** Complete inventory. "Session evidence" records only checks executed on 2026-10-29;
@@ -43,7 +43,7 @@ The earlier draft also drifted from the canonical register in four places. Canon
 It also misattributed FND-INTG-001: the finding is the local Auth redirect allowlist mismatch in
 `supabase/config.toml` / `config.example.json`, not a `/coach` router allowlist.
 
-**Counts (canonical):** Accepted 12 · Fixed 18 · Needs Verification 3 · False Positive 2.
+**Counts (canonical):** Accepted 11 · Fixed 20 · Needs Verification 2 · False Positive 2.
 **Confidence:** Confirmed 16 · High 18 · Medium 1 · Low 0.
 
 Two titles previously drifted from the canonical JSON in this Markdown file and are corrected below:
@@ -74,9 +74,9 @@ Statuses below are canonical. "Session 2026-10-29" describes only work executed 
 | FND-GOV-001 | Confirmed | Fixed | Governance | Agents could not write `docs/audit/**` | Not re-verified (superseded by D-024). |
 | FND-GOV-004 | High | Fixed | Governance | Destructive git-operation gates miss spellings | Config change requires approval; not re-verified. |
 | FND-SEC-001 | High | Fixed | Governance | Secret-read gates cover four spellings only | Config change requires approval; not re-verified. |
-| FND-TEST-001 | High | Accepted | CI | CI cannot detect platform, formatting, or generated-code regressions | Source gate extended (13/13) and a real `android-release-manifest` job added to `.github/workflows/verify.yml`. The job is **NOT RUN** on a remote runner, so the finding stays Accepted. |
-| FND-BUG-004 | Confirmed | Accepted (partial fix) | Profile UI | White-on-white profile identity and edit text | Identity/edit pair changed to `AppTheme.textMain`; 200%-text contrast test PASS. Seven other text nodes on the screen still paint white/amber on a light card, and onboarding chip paints remain source-only — finding stays Accepted. |
-| FND-BUG-005 | Medium | Needs Verification | Dashboard | KPIs silently limited to last three workouts | Not re-verified. |
+| FND-TEST-001 | High | Accepted | CI | CI cannot detect platform, formatting, or generated-code regressions | CI hardened (R3): `invoke.test.mjs` now runs in the manifest-gate step (18 Android tests), a `dart format --set-exit-if-changed` gate, per-job `timeout-minutes`, workflow-level `concurrency`+cancel, `push.branches: [main]`, and `checkout`/`setup-node`/`setup-java`/`upload-artifact` pinned to Node-24 commit SHAs (`subosito/flutter-action@v2` kept: composite). **Generated-code drift gate deliberately withheld** — regenerating at locked generator versions rewrites 12 tracked files (measured locally, 846+/1303 lines)—so it would fail immediately. All gates **PASS locally** (format 0 changed, invoke 10/10, manifest 8/8, YAML 3 jobs); remote CI for these steps **NOT RUN** pending owner approval, so the finding stays Accepted. |
+| FND-BUG-004 | Confirmed | Fixed | Profile UI | White-on-white profile identity and edit text | **Fixed (R3 repository scope):** the identity/edit pair plus all seven remaining white/amber-on-card text nodes resolve ink-on-card contrast; onboarding chip icon+label and day-chip label/checkmark paints resolved from the live tree. 8-test negative control fails on pre-fix paints, proving the assertions detect regressions. Still source-only: class-picker sheet, accent text and dark theme (separate scope). |
+| FND-BUG-005 | Medium | Fixed | Dashboard | KPIs silently limited to last three workouts | **Fixed (R3):** every KPI tile now states its real window (VOLUME -> 7-day trend, WORKOUTS/SETS -> last 3 sessions). `dashboard_kpi_window_test.dart` asserts EN/VI labels and a 320 px no-overflow case; full suite 231/231. Whether 7-day/3-session is the product-intended aggregate (vs lifetime) is unchanged and remains a product decision. |
 | FND-BUG-006 | High | Fixed | Quest UI | Fixed 35% progress and 350/100 fallback rewards | Fabricated progress/reward removed; 3 regression tests PASS. Live payloads **NOT RUN**. |
 | FND-BUG-007 | High | Fixed | Workout summary | Deep link fabricates completed workout and 500 XP | Summary now redirects without context; XP badge and level/progress render only from receipt fields; 5 regression tests PASS. Live journey **NOT RUN**. |
 | FND-INTG-002 | Confirmed | Fixed | Flutter/Database | Completion acknowledgement/hydration semantics | Same 61 focused tests PASS. Real backend **NOT RUN**. |
