@@ -33,14 +33,24 @@ class KpiTilesGrid extends ConsumerWidget {
         : totalVolume.toStringAsFixed(0);
     final volumeUnit = totalVolume >= 10000 ? 't' : 'kg';
 
-    final volumeLabel = translateText(
-      ref,
-      vi: 'KHỐI LƯỢNG',
-      en: 'TOTAL VOLUME',
-    );
+    final volumeLabel = translateText(ref, vi: 'KHỐI LƯỢNG', en: 'VOLUME');
     final workoutsLabel = translateText(ref, vi: 'BUỔI TẬP', en: 'WORKOUTS');
-    final setsLabel = translateText(ref, vi: 'TỔNG SỐ HIỆP', en: 'TOTAL SETS');
+    final setsLabel = translateText(ref, vi: 'SỐ HIỆP', en: 'SETS');
     final streakLabel = translateText(ref, vi: 'CHUỖI TẬP', en: 'STREAK');
+
+    // The caller supplies windowed values, never lifetime totals: volume covers
+    // the seven-day trend and workouts/sets cover the three most recent sessions.
+    // Each tile states its own window instead of claiming a total (FND-BUG-005).
+    final volumeWindow = translateText(
+      ref,
+      vi: '7 ngày gần nhất',
+      en: 'last 7 days',
+    );
+    final recentWindow = translateText(
+      ref,
+      vi: '3 buổi gần nhất',
+      en: 'last 3 workouts',
+    );
 
     final workoutsUnit = translateText(ref, vi: 'buổi', en: 'done');
     final setsUnit = translateText(ref, vi: 'hiệp', en: 'sets');
@@ -55,6 +65,7 @@ class KpiTilesGrid extends ConsumerWidget {
       label: volumeLabel,
       value: volumeText,
       unit: volumeUnit,
+      subtitle: volumeWindow,
       icon: Icons.fitness_center_rounded,
       accentColor: CandyColors.canaryYellow,
     );
@@ -63,6 +74,7 @@ class KpiTilesGrid extends ConsumerWidget {
       label: workoutsLabel,
       value: '$totalWorkouts',
       unit: workoutsUnit,
+      subtitle: recentWindow,
       icon: Icons.check_circle_outline_rounded,
       accentColor: CandyColors.hotPink,
     );
@@ -71,6 +83,7 @@ class KpiTilesGrid extends ConsumerWidget {
       label: setsLabel,
       value: '$totalSets',
       unit: setsUnit,
+      subtitle: recentWindow,
       icon: Icons.repeat_rounded,
       accentColor: CandyColors.mintGreen,
     );
