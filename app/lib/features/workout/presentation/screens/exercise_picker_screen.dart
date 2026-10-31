@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../workout_copy.dart';
-import '../../../../ui/theme/app_theme.dart';
+import '../../../../ui/candy/candy_badge.dart';
+import '../../../../ui/candy/candy_button.dart';
+import '../../../../ui/candy/candy_card.dart';
+import '../../../../ui/candy/candy_empty_state.dart';
+import '../../../../ui/candy/candy_error_state.dart';
+import '../../../../ui/candy/candy_exercise_card.dart';
+import '../../../../ui/candy/candy_text_field.dart';
 import '../../../../core/theme/candy_colors.dart';
-import '../../../../ui/widgets/system_text_field.dart';
-import '../../../../ui/widgets/system_panel.dart';
+import '../../workout_copy.dart';
 import '../../domain/exercise.dart';
 import '../providers/exercise_providers.dart';
-import '../widgets/exercise_card.dart';
 
 class ExercisePickerScreen extends ConsumerStatefulWidget {
   final bool multiSelect;
@@ -22,6 +25,7 @@ class ExercisePickerScreen extends ConsumerStatefulWidget {
 class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
   final TextEditingController _searchController = TextEditingController();
   final List<Exercise> _selectedExercises = [];
+  bool _gridView = false;
 
   @override
   void initState() {
@@ -30,17 +34,10 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
       if (!mounted) return;
       ref.read(searchQueryProvider.notifier).set('');
       ref.read(selectedCategoryProvider.notifier).set(null);
+      ref.read(selectedEquipmentProvider.notifier).set(null);
+      ref.read(selectedMuscleProvider.notifier).set(null);
     });
   }
-
-  final List<String> _categories = [
-    'Chest',
-    'Back',
-    'Legs',
-    'Shoulders',
-    'Arms',
-    'Core',
-  ];
 
   @override
   void dispose() {
@@ -67,10 +64,203 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
     Navigator.of(context).pop(_selectedExercises);
   }
 
+  void _clearSearch() {
+    _searchController.clear();
+    ref.read(searchQueryProvider.notifier).clear();
+  }
+
+  void _clearAllFilters() {
+    _searchController.clear();
+    ref.read(searchQueryProvider.notifier).clear();
+    ref.read(selectedCategoryProvider.notifier).set(null);
+    ref.read(selectedEquipmentProvider.notifier).set(null);
+    ref.read(selectedMuscleProvider.notifier).set(null);
+  }
+
+  Widget _buildExerciseItem(Exercise exercise) {
+    final selected = _isSelected(exercise);
+
+    // Multi-select shows an explicit check badge instead of the default
+    // navigation arrow so tapping toggles selection rather than navigating.
+    Widget? trailing;
+    if (widget.multiSelect) {
+      trailing = selected
+          ? Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: CandyColors.hotPink,
+                shape: BoxShape.circle,
+                border: CandyColors.standardBorder(width: 1.5),
+              ),
+              child: const Icon(Icons.check, color: CandyColors.card, size: 16),
+            )
+          : const SizedBox.shrink();
+    }
+
+    return Semantics(
+      button: true,
+      label: exercise.name,
+      child: CandyExerciseCard(
+        key: ValueKey(exercise.id),
+        title: exercise.name,
+        category: exercise.category,
+        equipment: exercise.equipment,
+        isSelected: selected,
+        onTap: () {
+          if (widget.multiSelect) {
+            _toggleSelection(exercise);
+          } else {
+            // Single select → return immediately
+            Navigator.of(context).pop(exercise);
+          }
+        },
+        trailing: trailing,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CandyEmptyState(
+          icon: Icons.search_off,
+          title: workoutText(ref, 'empty_state_title'),
+          message: workoutText(ref, 'empty_state_message'),
+          actionLabel: _hasActiveFilters ? workoutText(ref, 'clear_all') : null,
+          onAction: _hasActiveFilters ? _clearAllFilters : null,
+          actionVariant: CandyButtonVariant.secondary,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: CandyErrorState(
+          title: workoutText(ref, 'error_state_title'),
+          message: workoutText(ref, 'error_state_message'),
+          retryLabel: workoutText(ref, 'retry'),
+          onRetry: () => ref.invalidate(exerciseListProvider),
+        ),
+      ),
+    );
+  }
+
+  bool get _hasActiveFilters {
+    final searchQuery = ref.watch(searchQueryProvider);
+    final category = ref.watch(selectedCategoryProvider);
+    final equipment = ref.watch(selectedEquipmentProvider);
+    final muscle = ref.watch(selectedMuscleProvider);
+    return searchQuery.isNotEmpty ||
+        category != null ||
+        equipment != null ||
+        muscle != null;
+  }
+
+  Widget _activeFilterChip(String label, String value, VoidCallback onRemove) {
+    return Semantics(
+      button: true,
+      label: '$label: $value, bấm để xóa',
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+        child: CandyBadge(
+          label: '$label: $value',
+          variant: CandyBadgeVariant.pink,
+          onTap: onRemove,
+          fontSize: 11,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterSection({
+    required AsyncValue<List<String>> async,
+    required String labelKey,
+    required String? selected,
+    required void Function(String?) onChanged,
+  }) {
+    return async.when(
+      data: (items) {
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 2.0, bottom: 8.0),
+              child: Text(
+                workoutText(ref, labelKey),
+                style: const TextStyle(
+                  fontFamily: CandyFonts.display,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: CandyColors.ink,
+                  letterSpacing: 0.3,
+                  height: 1.35,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 38,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index];
+                  final isSelected = selected == item;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Semantics(
+                      button: true,
+                      label:
+                          '$labelKey: $item, ${isSelected ? 'đã chọn' : 'chọn để lọc'}',
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          minHeight: 48,
+                          minWidth: 48,
+                        ),
+                        child: CandyBadge(
+                          label: item,
+                          variant: isSelected
+                              ? CandyBadgeVariant.pink
+                              : CandyBadgeVariant.card,
+                          onTap: () => onChanged(isSelected ? null : item),
+                          fontSize: 11,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (Object error, StackTrace stack) => const SizedBox.shrink(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final exercisesAsync = ref.watch(filteredExercisesProvider);
-    ref.watch(selectedCategoryProvider);
+    final searchQuery = ref.watch(searchQueryProvider);
+    final category = ref.watch(selectedCategoryProvider);
+    final equipment = ref.watch(selectedEquipmentProvider);
+    final muscle = ref.watch(selectedMuscleProvider);
+    final categoriesAsync = ref.watch(exerciseCategoriesProvider);
+    final equipmentsAsync = ref.watch(exerciseEquipmentsProvider);
+    final musclesAsync = ref.watch(exerciseMusclesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -89,10 +279,13 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                   letterSpacing: 1,
                 ),
               ),
-              style: TextButton.styleFrom(
-                foregroundColor: AppTheme.successGreen,
-              ),
+              style: TextButton.styleFrom(foregroundColor: CandyColors.hotPink),
             ),
+          IconButton(
+            icon: Icon(_gridView ? Icons.list_rounded : Icons.grid_view),
+            onPressed: () => setState(() => _gridView = !_gridView),
+            tooltip: workoutText(ref, _gridView ? 'view_list' : 'view_grid'),
+          ),
         ],
       ),
       body: Column(
@@ -100,30 +293,111 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
           // Search & Filter Area
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: SystemPanel(
-              padding: const EdgeInsets.all(12.0),
+            child: CandyCard(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SystemTextField(
+                  CandyTextField(
                     controller: _searchController,
                     hintText: workoutText(ref, 'search'),
                     prefixIcon: Icons.search,
+                    suffix: searchQuery.isNotEmpty
+                        ? Semantics(
+                            button: true,
+                            label: workoutText(ref, 'clear_search'),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: 48,
+                                minHeight: 48,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.clear, size: 20),
+                                onPressed: _clearSearch,
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
+                          )
+                        : null,
                     onChanged: (value) {
                       ref.read(searchQueryProvider.notifier).set(value);
                     },
                   ),
                   const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+                  // Active filter badges
+                  if (_hasActiveFilters) ...[
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        _buildCategoryChip(null, workoutText(ref, 'all')),
-                        ..._categories.map(
-                          (cat) =>
-                              _buildCategoryChip(cat, workoutText(ref, cat)),
-                        ),
+                        if (searchQuery.isNotEmpty)
+                          _activeFilterChip(
+                            workoutText(ref, 'search'),
+                            searchQuery,
+                            _clearSearch,
+                          ),
+                        if (category != null)
+                          _activeFilterChip(
+                            workoutText(ref, 'category'),
+                            category,
+                            () => ref
+                                .read(selectedCategoryProvider.notifier)
+                                .set(null),
+                          ),
+                        if (equipment != null)
+                          _activeFilterChip(
+                            workoutText(ref, 'equipment'),
+                            equipment,
+                            () => ref
+                                .read(selectedEquipmentProvider.notifier)
+                                .set(null),
+                          ),
+                        if (muscle != null)
+                          _activeFilterChip(
+                            workoutText(ref, 'muscle_group'),
+                            muscle,
+                            () => ref
+                                .read(selectedMuscleProvider.notifier)
+                                .set(null),
+                          ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: CandyButton(
+                        label: workoutText(ref, 'clear_all'),
+                        variant: CandyButtonVariant.neutral,
+                        size: CandyButtonSize.small,
+                        isFullWidth: false,
+                        onPressed: _clearAllFilters,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  // Dynamic filter chips derived from actual exercise data
+                  _buildFilterSection(
+                    async: categoriesAsync,
+                    labelKey: 'category',
+                    selected: category,
+                    onChanged: (value) =>
+                        ref.read(selectedCategoryProvider.notifier).set(value),
+                  ),
+                  _buildFilterSection(
+                    async: equipmentsAsync,
+                    labelKey: 'equipment',
+                    selected: equipment,
+                    onChanged: (value) =>
+                        ref.read(selectedEquipmentProvider.notifier).set(value),
+                  ),
+                  _buildFilterSection(
+                    async: musclesAsync,
+                    labelKey: 'muscle_group',
+                    selected: muscle,
+                    onChanged: (value) =>
+                        ref.read(selectedMuscleProvider.notifier).set(value),
                   ),
                 ],
               ),
@@ -134,21 +408,22 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
           if (widget.multiSelect)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: AppTheme.cyanNeon.withValues(alpha: 0.08),
+              color: CandyColors.hotPink.withValues(alpha: 0.08),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: AppTheme.cyanNeon.withValues(alpha: 0.7),
+                    color: CandyColors.hotPink.withValues(alpha: 0.7),
                     size: 16,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       workoutText(ref, 'select_exercises'),
-                      style: TextStyle(
-                        color: AppTheme.cyanNeon.withValues(alpha: 0.8),
+                      style: const TextStyle(
+                        color: CandyColors.ink,
                         fontSize: 12,
+                        height: 1.35,
                       ),
                     ),
                   ),
@@ -156,130 +431,49 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
               ),
             ),
 
-          // Exercise List
+          // Exercise List / Grid
           Expanded(
             child: exercisesAsync.when(
               data: (exercises) {
                 if (exercises.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: AppTheme.textDim.withValues(alpha: 0.5),
+                  return _buildEmptyState();
+                }
+
+                if (_gridView) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12.0,
+                          crossAxisSpacing: 12.0,
+                          childAspectRatio: 1.6,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          workoutText(ref, 'no_results'),
-                          style: AppTheme.darkTheme.textTheme.bodyLarge
-                              ?.copyWith(color: AppTheme.textDim),
-                        ),
-                      ],
-                    ),
+                    itemCount: exercises.length,
+                    itemBuilder: (context, index) {
+                      return _buildExerciseItem(exercises[index]);
+                    },
                   );
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   itemCount: exercises.length,
                   itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    final selected = _isSelected(exercise);
-
-                    if (widget.multiSelect) {
-                      return Stack(
-                        children: [
-                          ExerciseCard(
-                            exercise: exercise,
-                            onTap: () => _toggleSelection(exercise),
-                          ),
-                          if (selected)
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  color: AppTheme.successGreen,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppTheme.successGreen.withValues(
-                                        alpha: 0.5,
-                                      ),
-                                      blurRadius: 8,
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    }
-
-                    return ExerciseCard(
-                      exercise: exercise,
-                      onTap: () {
-                        // Single select → return immediately
-                        Navigator.of(context).pop(exercise);
-                      },
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: _buildExerciseItem(exercises[index]),
                     );
                   },
                 );
               },
               loading: () => const Center(
-                child: CircularProgressIndicator(color: AppTheme.cyanNeon),
+                child: CircularProgressIndicator(color: CandyColors.hotPink),
               ),
-              error: (err, stack) => Center(
-                child: TextButton(
-                  onPressed: () => ref.invalidate(exerciseListProvider),
-                  child: Text(workoutText(ref, 'retry')),
-                ),
-              ),
+              error: (err, stack) => _buildErrorState(),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCategoryChip(String? category, String label) {
-    final isSelected = ref.read(selectedCategoryProvider) == category;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          ref
-              .read(selectedCategoryProvider.notifier)
-              .set(selected ? category : null);
-        },
-        selectedColor: AppTheme.cyanNeon.withValues(alpha: 0.3),
-        backgroundColor: Colors.transparent,
-        labelStyle: TextStyle(
-          color: isSelected ? AppTheme.cyanNeon : AppTheme.textDim,
-          fontSize: 12,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected
-                ? AppTheme.cyanNeon
-                : AppTheme.cyanNeon.withValues(alpha: 0.1),
-          ),
-        ),
-        showCheckmark: false,
       ),
     );
   }

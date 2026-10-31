@@ -150,6 +150,24 @@ const _copy = <String, List<String>>{
   'return_home': ['Return Home', 'Về trang chủ'],
   'reorder': ['Reorder exercises', 'Sắp xếp bài tập'],
   'reorder_hint': ['Hold and drag to reorder', 'Giữ và kéo để đổi thứ tự'],
+  // Exercise picker
+  'clear_search': ['Clear search', 'Xóa tìm kiếm'],
+  'clear_all': ['Clear all', 'Xóa tất cả'],
+  'view_grid': ['Grid', 'Lưới'],
+  'view_list': ['List', 'Danh sách'],
+  'category': ['Category', 'Danh mục'],
+  'equipment': ['Equipment', 'Thiết bị'],
+  'muscle_group': ['Muscle group', 'Nhóm cơ'],
+  'empty_state_title': ['No exercises found', 'Không tìm thấy bài tập'],
+  'empty_state_message': [
+    'Try adjusting your search or filters.',
+    'Thử thay đổi tìm kiếm hoặc bộ lọc của bạn.',
+  ],
+  'error_state_title': ['Could not load exercises', 'Không thể tải bài tập'],
+  'error_state_message': [
+    'Please check your connection and try again.',
+    'Vui lòng kiểm tra kết nối và thử lại.',
+  ],
 };
 
 String workoutText(WidgetRef ref, String key) {

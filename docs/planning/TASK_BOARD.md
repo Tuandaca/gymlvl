@@ -53,6 +53,31 @@ Counts: Fixed 20 · Accepted 11 · Needs Verification 2 · False Positive 2 = 35
 **Status:** M0 implementation slice PASS (READY_FOR_APPROVAL); no commit/push/tag.
 **Next action:** owner review; proposed next slice: exercise catalogue navigation/filter improvement (ADAPT, P1) or workout detail layout (ADAPT, P1).
 
+## Current product task — M1.1 Exercise Catalogue Test Hardening & Independent QA (2026-10-31) — COMPLETED
+
+**Task:** M1.1 Exercise Catalogue Test Hardening & Independent QA for `ExercisePickerScreen`.
+**Status:** `PASS` — comprehensive automated test suite implemented; 67 dedicated tests pass; analyzer clean.
+**Commit:** branch `main`, HEAD `9b874111692dee1f69dc686e1dbbc38981529cf5`; local working tree dirty (M1+M1.1 files + preserved owner files). No commit/push/tag.
+**New test file:** `app/test/exercise_picker_test.dart` (67 tests covering search normalization, debounce, multi-filter AND logic, derived options, loading/empty/error states, single/multi-selection, a11y & 320dp narrow layout).
+**Verification:**
+- `flutter test --no-pub test/exercise_picker_test.dart` → `+67: All tests passed!` (exit 0)
+- `flutter analyze --no-pub` → `No issues found! (ran in 3.7s)` (exit 0)
+- `dart format --output=none --set-exit-if-changed test/exercise_picker_test.dart` → 0 changed (exit 0)
+- `flutter test --no-pub` → 297/298 passed (1 pre-existing fail in `release_config_test.dart` due to local uncommitted Gradle 9.7.1 wrapper edit; zero regressions on core code).
+**Protected owner files:** all 5 SHA-256 hashes verified identical pre- and post-execution.
+**Next action:** M1.2 Controlled Commit & Push (pending owner authorization).
+
+## Current product task — M1 Exercise Catalogue Navigation & Filtering (2026-10-31) — COMPLETED
+
+**Task:** M1 Exercise Catalogue Navigation & Filtering in `ExercisePickerScreen` + providers/copy (the proposed M0 next slice).
+**Status:** `PASS` — implementation complete; all acceptance criteria met.
+**Commit:** branch `main`, HEAD `9b874111692dee1f69dc686e1dbbc38981529cf5`; only 3 source files edited (pre-existing owner files untouched). No commit/push/tag.
+**Changed files:** `app/lib/features/workout/presentation/providers/exercise_providers.dart`, `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart`, `app/lib/features/workout/workout_copy.dart`.
+**Verification:** `flutter analyze` → 0 issues; `flutter test test/navigation_integration_test.dart test/candy_ui_test.dart` → 14/14 passed; `normalizeSearchText` verified via temporary test (removed afterwards; no test files left behind).
+**Decisions:** none (UI-only change; no architecture/dependency/schema/licensing/milestone-scope change).
+**Blockers:** none.
+**Next action:** owner review; qa-reviewer to add dedicated exercise-picker tests (test files were not touched per scope).
+
 ## Historical A8 — remediation batch executed; platform gates blocked (2026-10-29)
 
 **Scope:** owner-requested verification-first remediation of the 35-finding register; one group at a

@@ -1,5 +1,35 @@
 # GymLvl — Session Handoff
 
+## Current — M1.1 / M1.1-FIX Exercise Catalogue Hardening & Verification (2026-10-31)
+
+**Task:** M1.1 / M1.1-FIX Exercise Catalogue Test Hardening, Diagnosis & Commit Readiness.
+**Status:** `PASS` for M1 scope (67/67 tests); Full suite: `FAIL` (1 fail in `release_config_test.dart` classified as `PRE_EXISTING_OR_OWNER_CONFIGURATION`); QA: `INDEPENDENT_QA_UNAVAILABLE_QUOTA_429`; Commit readiness: `READY_WITH_DOCUMENTED_BASELINE_EXCEPTION`.
+**Commit:** branch `main`, HEAD `9b874111692dee1f69dc686e1dbbc38981529cf5`; tree has local uncommitted M1 implementation + M1.1 test file + preserved owner/unrelated files. No commit, push, tag, or deployment performed.
+**Changed / Added files:**
+- New test: `app/test/exercise_picker_test.dart` (67 tests)
+- M1 implementation files (retained): `app/lib/features/workout/presentation/providers/exercise_providers.dart`, `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart`, `app/lib/features/workout/workout_copy.dart`
+- Documentation: `M1_1_FINAL_REPORT.md`, `M1_1_FIX_REPORT.md`, `docs/planning/{TASK_BOARD.md,SESSION_HANDOFF.md,CHANGELOG_AI.md}`
+**Verification:**
+- `flutter test --no-pub test/exercise_picker_test.dart` → `+67: All tests passed!` (exit 0)
+- `flutter analyze --no-pub` → `No issues found! (ran in 3.7s)` (exit 0)
+- `dart format --output=none --set-exit-if-changed test/exercise_picker_test.dart` → 0 changed (exit 0)
+- `flutter test --no-pub test/release_config_test.dart` → 13 passed / 1 failed (fails on local `gradle-9.7.1-bin.zip` in preserved `gradle-wrapper.properties` vs D-031 `gradle-8.13-bin.zip` in HEAD).
+**Protected owner files:** all 5 SHA-256 hashes verified identical pre- and post-execution.
+**Decisions:** none.
+**Blockers:** none for repository code.
+**Next action:** owner review; execute M1.2 Controlled Commit & Push for the 10 approved candidate files.
+
+## Historical — M1 Exercise Catalogue Navigation & Filtering (2026-10-31)
+
+**Task:** M1 Exercise Catalogue Navigation & Filtering in `ExercisePickerScreen` + providers/copy.
+**Status:** `PASS` — implementation complete; all acceptance criteria met including accessibility fixes.
+**Commit:** branch `main`, HEAD `9b874111692dee1f69dc686e1dbbc38981529cf5`; tree has only my 3 source edits plus pre-existing untouched owner files. No commit, push, tag, or deployment performed.
+**Changed files:** `app/lib/features/workout/presentation/providers/exercise_providers.dart`, `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart`, `app/lib/features/workout/workout_copy.dart`.
+**Verification:** `flutter analyze --no-pub` → `No issues found!` (exit 0); `dart format --output=none --set-exit-if-changed lib test` → 0 changed; `flutter test --no-pub` → `+231: All tests passed!` (231 tests, no regression). Accessibility fixes: Semantics labels on chips/cards/clear-search, 48dp touch targets, WCAG AA banner contrast, line-height headroom for 200% VI scaling.
+**Decisions:** none (UI-only change; no architecture/dependency/schema/licensing change).
+**Blockers:** none.
+**Next action:** owner review; qa-reviewer to add dedicated exercise-picker tests (test files were not touched per scope).
+
 ## Current — M0 OpenGym source pinning & migration foundation (2026-10-31)
 
 **Task:** M0 — OpenGym source pinning & migration foundation (one migration slice).

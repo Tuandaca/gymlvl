@@ -2,6 +2,37 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-10-31 — M1.1 Exercise Catalogue Test Hardening & Independent QA (tests, no commit)
+
+- **Task:** M1.1 Exercise Catalogue Test Hardening & Independent QA.
+- **Scope:** created comprehensive deterministic automated tests in `app/test/exercise_picker_test.dart` for the M1 Exercise Catalogue implementation. Covered 6 core test areas:
+  1. Pure unit & Riverpod tests for Vietnamese diacritic-insensitive & case-insensitive search normalization (`normalizeSearchText` and `filteredExercisesProvider`), handling complex vowel families, `đ`/`d`, whitespace, mixed language, and immutability.
+  2. Debounce timing behavior in `SearchQueryNotifier`: immediate apply on clear, 300ms window, latest keystroke precedence, and safe disposal.
+  3. Catalogue filtering: category, equipment, secondary muscle groups, multi-filter AND combinations, search + filter combinations, independent clearing, and clear-all.
+  4. Derived filter providers: distinct, sorted lists from actual exercise catalogue fixtures.
+  5. Widget states: loading indicator, error state with retry callback, empty state, active filter badges, clear-all action, list/grid view toggle.
+  6. Navigation & selection: single-select pop, multi-select toggle, finish button in AppBar, Semantics labels, 48dp minimum touch targets, 320dp narrow layout, and 2.0x large text scale.
+- **Verification:**
+  - `flutter test --no-pub test/exercise_picker_test.dart` → `+67: All tests passed!` (67 passed, 0 failed, 0 skipped, exit 0).
+  - `flutter analyze --no-pub` → `No issues found! (ran in 3.7s)` (exit 0).
+  - `dart format --output=none --set-exit-if-changed test/exercise_picker_test.dart` → 0 changed (exit 0).
+  - `flutter test --no-pub` → 297/298 passed (1 pre-existing fail in `release_config_test.dart` due to local uncommitted Gradle 9.7.1 wrapper edit; zero regressions on core code).
+  - 5 protected owner files verified identical via SHA-256 pre- and post-execution.
+- **Files added/updated:** `app/test/exercise_picker_test.dart` (new, 67 tests), `M1_1_FINAL_REPORT.md` (new), `M1_1_FIX_REPORT.md` (new), `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`.
+- **Status:** PASS. No commits, pushes, tags, merges, or deployments executed.
+
+## 2026-10-31 — M1 Exercise Catalogue Navigation & Filtering (implementation, no commit)
+
+- **Task:** M1 Exercise Catalogue Navigation & Filtering in `ExercisePickerScreen` + supporting providers/copy.
+- **Scope:** search debouncing (~300 ms, immediate on clear), Vietnamese/English accent-insensitive search, clear-search suffix button, dynamic filter chips (category/equipment/muscle) derived from actual exercise data, active-filter badges, clear-all filters, grid/list toggle, Candy design migration (CandyExerciseCard, CandyEmptyState, CandyErrorState, CandyTextField), VI/EN l10n keys. Accessibility fixes: Semantics labels on chips/cards/clear-search, 48dp touch targets, WCAG AA contrast on info banner, line-height headroom for 200% VI scaling. No AGPL code copy, no media, no dependency changes, no schema migration needed (all filter columns already exist).
+- **Files changed:**
+  - `app/lib/features/workout/presentation/providers/exercise_providers.dart` — added `normalizeSearchText()`, debounced `SearchQueryNotifier`, `selectedEquipmentProvider`/`selectedMuscleProvider`, derived `exerciseCategoriesProvider`/`exerciseEquipmentsProvider`/`exerciseMusclesProvider`, accent-insensitive multi-filter `filteredExercisesProvider`.
+  - `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart` — Candy UI rewrite + accessibility fixes: `Semantics` on active filter chips, filter option chips, exercise cards, clear-search button; `ConstrainedBox(minHeight/Width: 48)` touch targets; `CandyColors.ink` banner contrast; `height: 1.35` line-height on filter headers and banner text; dynamic filter values rendered directly instead of `workoutText` lookup fallback.
+  - `app/lib/features/workout/workout_copy.dart` — added VI/EN keys: clear_search, clear_all, view_grid, view_list, category, equipment, muscle_group, empty_state_title/message, error_state_title/message.
+- **Verification:** `flutter analyze` → No issues found (exit 0); `dart format --set-exit-if-changed` → 0 changed; `flutter test` → +231 All tests passed (no regression).
+- **Status:** Implementation complete, PASS. No commit/push/tag (per task). Route `/exercise-picker` unchanged; multi/single-select preserved.
+- **Next action:** owner review; qa-reviewer to add dedicated exercise-picker tests (test files were not touched).
+
 ## 2026-10-31 — M0 OpenGym source pinning & migration foundation
 
 - **Source pinned:** `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL-3.0, behavioral reference only), cloned to `D:\Projects\opengym-reference`; remote origin verified (`fetch` + `push`), HEAD matches selected SHA. Not nested in GymLvl git tree, not a submodule, not committed into GymLvl.
