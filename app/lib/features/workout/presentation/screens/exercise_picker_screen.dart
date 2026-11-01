@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../ui/candy/candy_badge.dart';
 import '../../../../ui/candy/candy_button.dart';
 import '../../../../ui/candy/candy_card.dart';
@@ -64,6 +65,19 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
     Navigator.of(context).pop(_selectedExercises);
   }
 
+  Future<void> _openDetail(Exercise exercise) async {
+    final selected = await context.push<Exercise>(
+      '/exercise/${Uri.encodeComponent(exercise.id)}?select=true',
+      extra: exercise,
+    );
+    if (!mounted || selected == null) return;
+    if (widget.multiSelect) {
+      _toggleSelection(selected);
+    } else {
+      Navigator.of(context).pop(selected);
+    }
+  }
+
   void _clearSearch() {
     _searchController.clear();
     ref.read(searchQueryProvider.notifier).clear();
@@ -79,24 +93,6 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
 
   Widget _buildExerciseItem(Exercise exercise) {
     final selected = _isSelected(exercise);
-
-    // Multi-select shows an explicit check badge instead of the default
-    // navigation arrow so tapping toggles selection rather than navigating.
-    Widget? trailing;
-    if (widget.multiSelect) {
-      trailing = selected
-          ? Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: CandyColors.hotPink,
-                shape: BoxShape.circle,
-                border: CandyColors.standardBorder(width: 1.5),
-              ),
-              child: const Icon(Icons.check, color: CandyColors.card, size: 16),
-            )
-          : const SizedBox.shrink();
-    }
 
     return Semantics(
       button: true,
@@ -115,7 +111,32 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
             Navigator.of(context).pop(exercise);
           }
         },
-        trailing: trailing,
+        trailing: SizedBox(
+          width: 48,
+          height: 48,
+          child: Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                tooltip: workoutText(ref, 'detail_open'),
+                onPressed: () => _openDetail(exercise),
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              ),
+              if (widget.multiSelect && selected)
+                const Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: IgnorePointer(
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: CandyColors.hotPink,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -440,19 +461,20 @@ class _ExercisePickerScreenState extends ConsumerState<ExercisePickerScreen> {
                 }
 
                 if (_gridView) {
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 12.0,
-                          crossAxisSpacing: 12.0,
-                          childAspectRatio: 1.6,
-                        ),
-                    itemCount: exercises.length,
-                    itemBuilder: (context, index) {
-                      return _buildExerciseItem(exercises[index]);
-                    },
+                  return LayoutBuilder(
+                    builder: (context, constraints) => GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: constraints.maxWidth < 560 ? 1 : 2,
+                        mainAxisSpacing: 12.0,
+                        crossAxisSpacing: 12.0,
+                        childAspectRatio: 1.6,
+                      ),
+                      itemCount: exercises.length,
+                      itemBuilder: (context, index) {
+                        return _buildExerciseItem(exercises[index]);
+                      },
+                    ),
                   );
                 }
 

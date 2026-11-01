@@ -21,6 +21,21 @@ final exerciseListProvider = FutureProvider<List<Exercise>>((ref) async {
   return repository.getExercises();
 });
 
+/// Resolves a stable exercise ID from the catalogue already held by Riverpod.
+/// This keeps picker-to-detail navigation from issuing another network request.
+final exerciseDetailProvider = Provider.family<AsyncValue<Exercise?>, String>((
+  ref,
+  id,
+) {
+  if (id.trim().isEmpty) return const AsyncData<Exercise?>(null);
+  return ref.watch(exerciseListProvider).whenData((exercises) {
+    for (final exercise in exercises) {
+      if (exercise.id == id) return exercise;
+    }
+    return null;
+  });
+});
+
 // ─── Search text normalization ───
 
 /// Strips Vietnamese diacritics (e.g. á→a, đ→d) and lowercases so search is

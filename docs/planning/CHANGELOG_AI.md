@@ -2,6 +2,22 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-01 — M2 Exercise Detail local implementation
+
+- **Task/status:** M2 Exercise Detail Layout & Information Architecture `PASS` for local functionality; no commit, push, tag, migration, deployment, or M3 work. Baseline remains `main` @ `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`.
+- **Implementation:** stable UUID route, Riverpod catalogue lookup, picker detail entry preserving single/multi selection, Candy detail cards, VI/EN labels and states, accessible media placeholder, narrow/2x scrolling, and unavailable states for missing primary muscle and unverified instructions. No `imageUrl` use, third-party media, or AGPL code. A measured picker 320dp overflow was fixed by wrapping card badges.
+- **Verification:** M2 focused test 11/11 (`PASS`), M1 picker test 67/67 (`PASS`), analyzer no issues (`PASS`), formatter seven files/0 changed (`PASS`). Full Flutter suite 308/309 (`FAIL`): one `release_config_test.dart` Gradle 8.13 assertion against protected local wrapper 9.7.1. Independent read-only QA reran M2 11/11 and found no actionable defect. Live Supabase, device, and remote CI `NOT RUN`.
+- **Content limits:** O-08 provenance of the curated exercise prose is open; instructions/form cues/common mistakes are not newly displayed. Model lacks primary-muscle and instruction-locale fields; metadata values lack localized variants. O-01/O-02 and release/data blockers remain open.
+- **Manifest:** six M2 app files, one new M2 test, additions to the three planning files, and new `M2_FINAL_REPORT.md`. Prior six-file M1-FINAL planning baseline and protected owner/unrelated paths were preserved. Candidate manifest is in the report; nothing staged.
+
+## 2026-11-01 — M1-FINAL verified closeout and M2 handoff
+
+- **Task:** reconcile the existing M1.2 Git delivery and close Exercise Catalogue M1 for implementation and Git delivery; prepare Exercise Detail M2 handoff without starting implementation.
+- **Git verification at `main` `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`:** `git show -s --format="%H%n%P%n%s" HEAD` confirmed parent `9b874111692dee1f69dc686e1dbbc38981529cf5` and approved subject; `git diff-tree --no-commit-id --name-only -r HEAD` listed exactly 10 approved files; `git ls-remote origin refs/heads/main` returned the same SHA. No new commit, push, tag, branch, or deployment was performed.
+- **Historical M1 verification retained:** 67/67 focused tests, analyzer, and formatter `PASS`; full Flutter suite `FAIL` at 297/298 due to preserved local Gradle Wrapper 9.7.1 versus approved 8.13; independent QA `BLOCKED` by quota 429. Flutter checks were `NOT RUN` in this closeout. Remote CI was not observed.
+- **Decision:** D-038 `ACCEPTED` with owner confirmation; product M1 is Exercise Catalogue and product M2 is Exercise Detail. Former release-stabilization and bulk-import work, O-01/O-02 and other blockers remain open. M1 is not fully QA-approved or production-ready.
+- **Local files changed:** `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`, `docs/planning/DECISIONS.md`, `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`. Protected owner, Gradle Wrapper, and `.agents/teamwork/` files were preserved.
+
 ## 2026-10-31 — M1.1 Exercise Catalogue Test Hardening & Independent QA (tests, no commit)
 
 - **Task:** M1.1 Exercise Catalogue Test Hardening & Independent QA.

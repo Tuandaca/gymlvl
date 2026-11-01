@@ -45,7 +45,9 @@ class CandyExerciseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
                     CandyBadge(
                       label: category.toUpperCase(),
@@ -57,7 +59,6 @@ class CandyExerciseCard extends StatelessWidget {
                       ),
                     ),
                     if (equipment != null) ...[
-                      const SizedBox(width: 6),
                       CandyBadge(
                         label: equipment!,
                         variant: CandyBadgeVariant.card,

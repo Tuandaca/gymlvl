@@ -168,6 +168,40 @@ const _copy = <String, List<String>>{
     'Please check your connection and try again.',
     'Vui lòng kiểm tra kết nối và thử lại.',
   ],
+  // Exercise detail
+  'exercise_detail': ['Exercise details', 'Chi tiết bài tập'],
+  'detail_open': ['View details', 'Xem chi tiết'],
+  'detail_back': ['Back to exercises', 'Quay lại bài tập'],
+  'detail_back_short': ['Back', 'Quay lại'],
+  'detail_select': ['Select exercise', 'Chọn bài tập'],
+  'detail_primary_muscle': ['Primary muscle', 'Nhóm cơ chính'],
+  'detail_secondary_muscles': ['Secondary muscles', 'Nhóm cơ phụ'],
+  'detail_movement_pattern': ['Movement pattern', 'Kiểu chuyển động'],
+  'detail_difficulty': ['Difficulty', 'Độ khó'],
+  'detail_instructions': ['Instructions', 'Hướng dẫn'],
+  'detail_unavailable': ['Not available', 'Chưa có thông tin'],
+  'detail_instructions_unavailable': [
+    'Reliable instructions are not available for this exercise yet.',
+    'Chưa có hướng dẫn đáng tin cậy cho bài tập này.',
+  ],
+  'detail_media_unavailable': [
+    'Exercise visual unavailable',
+    'Chưa có hình minh họa bài tập',
+  ],
+  'detail_not_found_title': ['Exercise not found', 'Không tìm thấy bài tập'],
+  'detail_not_found_message': [
+    'This exercise is unavailable in the library.',
+    'Bài tập này không có trong thư viện.',
+  ],
+  'detail_error_title': ['Could not load exercise', 'Không thể tải bài tập'],
+  'detail_error_message': [
+    'Check your connection and try again.',
+    'Kiểm tra kết nối rồi thử lại.',
+  ],
+  'detail_name_fallback': [
+    'An available name is shown; the English translation is unavailable.',
+    'Đang hiển thị tên hiện có; chưa có bản dịch tiếng Việt.',
+  ],
 };
 
 String workoutText(WidgetRef ref, String key) {

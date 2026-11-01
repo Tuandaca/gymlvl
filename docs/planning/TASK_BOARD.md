@@ -1,5 +1,35 @@
 # GymLvl — Task Board
 
+## Current product task — M2 Exercise Detail Layout & Information Architecture (2026-11-01)
+
+**Task:** M2 — implement a canonical Exercise Detail screen, picker entry, localized Candy layout, and focused tests.
+**Status:** `PASS` for locally implemented M2 functionality; not committed or deployed. Instructions are intentionally unavailable pending O-08 provenance, and primary muscle is unavailable because the model has no field. M2 is not production-ready.
+**Commit:** `main` @ `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`; the working tree contains preserved M1-FINAL planning edits, M2 app/test/docs edits, and protected owner/unrelated files. Index is empty.
+**M2 files:** modified `app/lib/core/router/app_router.dart`, `app/lib/features/workout/presentation/providers/exercise_providers.dart`, `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart`, `app/lib/features/workout/workout_copy.dart`, `app/lib/ui/candy/candy_exercise_card.dart`; new `app/lib/features/workout/presentation/screens/exercise_detail_screen.dart` and `app/test/exercise_detail_test.dart`; M2 additions to the three planning files and new `M2_FINAL_REPORT.md`.
+**Verification:** `flutter test --no-pub test/exercise_detail_test.dart --reporter expanded` → 11/11 `PASS`; `flutter test --no-pub test/exercise_picker_test.dart --reporter compact` → 67/67 `PASS`; `flutter analyze --no-pub` → no issues (`PASS`); `dart format --output=none --set-exit-if-changed` on seven M2 app files → 0 changed (`PASS`). `flutter test --no-pub --reporter expanded` → 308/309, exit 1 (`FAIL`): only `release_config_test.dart`, due to the preserved local Gradle Wrapper 9.7.1 versus approved 8.13. Independent read-only QA reran M2 11/11 and found no actionable defect.
+**Open blockers:** O-08 curated-text provenance and missing instruction locale; no primary-muscle model field; raw metadata values lack localized variants. Live Supabase, real-device checks, and remote CI were `NOT RUN`. O-01/O-02 and existing release/data gates remain open.
+**Next action:** owner reviews the local M2 candidate manifest and O-08 gate in `M2_FINAL_REPORT.md`. Proposed next milestone in the current plan: M3 Offline-first Workout Core, not started.
+
+## Historical product checkpoint — M1-FINAL closeout (2026-11-01)
+
+**Task:** M1-FINAL — verify M1.2 Git delivery, close Exercise Catalogue M1, and hand off Exercise Detail M2.
+**Status:** `PASS` for M1 implementation and Git delivery at `main`/`origin/main`
+`1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3` (parent `9b874111692dee1f69dc686e1dbbc38981529cf5`).
+The existing commit contains exactly the 10 approved M1/M1.1 paths; no new commit or push was made
+for this closeout. M1.1 focused test hardening is complete.
+**Verification:** `git show -s --format="%H%n%P%n%s" HEAD` and
+`git diff-tree --no-commit-id --name-only -r HEAD` → expected parent, subject, and 10-file manifest;
+`git ls-remote origin refs/heads/main` → same SHA as local HEAD. Historical M1 evidence: 67/67 focused
+tests, analyzer and formatter `PASS`; full Flutter suite `FAIL` at 297/298 because the preserved
+local Gradle Wrapper 9.7.1 conflicts with approved 8.13; independent QA `BLOCKED` by quota 429.
+These Flutter results were not rerun for M1-FINAL. Remote CI was not observed.
+**Open blockers:** full-suite release-config failure; independent QA; O-01/O-02 licensing and other
+existing provenance, data, release, and production gates remain open. M1 is not fully QA-approved or
+production-ready. The former release-stabilization M1 and bulk-import M2 labels are superseded by D-038;
+their unfinished work is retained.
+**Next task:** M2 — Exercise Detail Layout & Information Architecture. Start by inspecting the existing
+Exercise Detail screen/model and setting focused acceptance criteria. M2 implementation is not started.
+
 ## Current — R3 hardening locally verified; release/signing & data gates still open (2026-10-29)
 
 **Scope:** CI hardening (FND-TEST-001), Android fail-closed signing (FND-BUG-002), remaining contrast

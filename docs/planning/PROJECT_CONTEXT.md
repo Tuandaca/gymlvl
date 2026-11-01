@@ -39,6 +39,11 @@ trainer — **without** losing the RPG identity or the existing user history.
 | Tags | None |
 | Tracked files at HEAD | 570 at `b85d674` (511 at `17ca562`) |
 
+**Current product milestone checkpoint (2026-11-01):** D-038 closes Exercise Catalogue M1 for
+implementation and Git delivery at `main`/`origin/main` `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`.
+Exercise Detail M2 is ready for execution and has not started. The table above is a historical
+baseline snapshot; the working tree remains intentionally dirty with preserved owner files.
+
 **Important:** the M0 audit observed 166 dirty entries on top of `e003803`. Between sessions that
 work was committed as `56c1122` ("feat: add core workout features, Supabase backend functions, and
 end-to-end testing infrastructure": 381 files, +33,198/−8,080) and pushed to
@@ -162,6 +167,7 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 | M0 report filename `GYMLVL_OPENGYM_MIGRATION_MASTER_PLAN.md` | Actual file is `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` (Windows is case-insensitive). |
 | Android/iOS display names | **Resolved 2026-10-29.** Android `android:label` is `GymLvl`; iOS `CFBundleDisplayName`/`CFBundleName` are `GymLvl`; `pubspec.yaml` description starts with `GymLvl:`. Earlier M0/A5 claims of `app`/`App` are stale. Merged manifest and iOS build still unverified. |
 | Android release networking | **Resolved at source 2026-10-29.** `android/app/src/main/AndroidManifest.xml` declares `android.permission.INTERNET` as a direct `<manifest>` child. Whether the merged release manifest keeps it is unverified: no manifest merger or APK inspection has run on this host. Earlier claims that only debug/profile manifests carry it are stale. |
+| Product M1/M2 labels versus the earlier execution index | Resolved by accepted D-038 (2026-11-01): M1 is Exercise Catalogue, closed for implementation/Git; M2 is Exercise Detail, not started. The release-stabilization and bulk-import proposals remain historical, with unfinished work and blockers open. |
 
 ## 9. Hard constraints
 
@@ -181,11 +187,12 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 | Term | Meaning |
 |---|---|
 | M0 | Completed audit/planning milestone (no application changes). |
-| M1 | Re-baselined release-critical stabilization milestone; not started. |
-| M1-01 | Next proposed task (requires explicit go-ahead): baseline stabilization and evidence lock. |
+| M1 | Exercise Catalogue Navigation, Filtering, and Test Hardening; closed for implementation and Git delivery under D-038. |
+| M2 | Exercise Detail Layout & Information Architecture; ready for execution, not started. |
+| M1-01 | Historical task ID from the superseded release-stabilization proposal. |
 | Candy | The Bold Candy Neubrutalism design system. |
 | Authoritative progression | Server-side `complete_workout` transaction that owns all awards. |
-| `main` @ `17ca562` | Current consolidated baseline. `56c1122` is the historical audit-branch checkpoint. |
+| `main` @ `17ca562` | Historical consolidation checkpoint. `56c1122` is the historical audit-branch checkpoint. |
 | AGPL | Copyleft license on both OpenGym repositories; reference-only. |
 | MIT text | Exercise metadata/instructions from the dataset; importable with notice. |
 | Media | Images/GIFs/videos; all postponed and unlicensed for GymLvl. |

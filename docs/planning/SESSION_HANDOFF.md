@@ -1,6 +1,62 @@
 # GymLvl — Session Handoff
 
-## Current — M1.1 / M1.1-FIX Exercise Catalogue Hardening & Verification (2026-10-31)
+## Current — M2 Exercise Detail implementation and verification (2026-11-01)
+
+**Task:** M2 — Exercise Detail Layout & Information Architecture.
+**Status:** `PASS` for local M2 functionality; full suite `FAIL` at 308/309 due to the preserved local Gradle Wrapper 9.7.1 versus approved 8.13; independent QA `PASS` for read-only code/test review. O-08 blocks newly displaying curated instructions as approved guidance.
+**Commit:** `main` @ `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`; tree intentionally dirty, index empty. No new commit, push, tag, branch, migration, or deployment.
+**Changed files:** M2 app: `app/lib/core/router/app_router.dart`, `app/lib/features/workout/presentation/providers/exercise_providers.dart`, `app/lib/features/workout/presentation/screens/exercise_picker_screen.dart`, `app/lib/features/workout/presentation/screens/exercise_detail_screen.dart` (new), `app/lib/features/workout/workout_copy.dart`, `app/lib/ui/candy/candy_exercise_card.dart`; M2 test: `app/test/exercise_detail_test.dart` (new); M2 records: `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`, `M2_FINAL_REPORT.md` (new). The three planning files already contained M1-FINAL edits before M2. Other M1-FINAL planning files remain unchanged by M2.
+**Verification:**
+- `flutter test --no-pub test/exercise_detail_test.dart --reporter expanded` → 11/11, exit 0 (`PASS`); independent QA reran the same file with compact reporter → 11/11, exit 0 (`PASS`).
+- `flutter test --no-pub test/exercise_picker_test.dart --reporter compact` → 67/67, exit 0 (`PASS`).
+- `flutter analyze --no-pub` → `No issues found! (5.2s)`, exit 0 (`PASS`).
+- `dart format --output=none --set-exit-if-changed` on seven M2 app files → 0 changed, exit 0 (`PASS`).
+- `flutter test --no-pub --reporter expanded` → `+308 -1: Some tests failed.`, exit 1 (`FAIL`); sole error is `release_config_test.dart` expecting Gradle 8.13 while protected local wrapper has 9.7.1.
+- Live Supabase, real device, and remote CI → `NOT RUN` (outside this local M2 verification scope).
+**Decisions:** none new; D-038 remains in force. No schema, licensing, or architecture change.
+**Blockers:** O-08 undocumented curated-text provenance and absent instruction-locale field prevent new guidance display. Primary muscle has no model field; raw metadata values lack localized variants. O-01/O-02 and existing release/data gates remain open.
+**Next action:** owner reviews the local M2 candidate manifest and O-08 gate in `M2_FINAL_REPORT.md`; M3 Offline-first Workout Core is the next planned milestone and has not started.
+
+## Historical — M1-FINAL verified closeout and M2 handoff (2026-11-01)
+
+**Task:** M1-FINAL — Exercise Catalogue implementation/Git closeout and Exercise Detail M2 handoff.
+**Status:** `PASS` for M1 implementation and Git delivery; full Flutter suite `FAIL` (historical
+297/298, preserved local Gradle Wrapper 9.7.1 versus approved 8.13); independent QA `BLOCKED`
+(`INDEPENDENT_QA_UNAVAILABLE_QUOTA_429`). M1 is not fully QA-approved or production-ready.
+**Commit:** `main` @ `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`, parent
+`9b874111692dee1f69dc686e1dbbc38981529cf5`; `origin/main` matches. The tree remains intentionally
+dirty with preserved owner and `.agents/teamwork/` files; this closeout adds only local, uncommitted
+planning-document changes.
+**Changed files:** `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`,
+`docs/planning/CHANGELOG_AI.md`, `docs/planning/DECISIONS.md`, `docs/planning/MASTER_PLAN.md`, and
+`docs/planning/PROJECT_CONTEXT.md` (local documentation reconciliation only).
+**Verification:**
+- `git show -s --format="%H%n%P%n%s" HEAD` → expected M1.2 SHA, parent, and subject (`PASS`).
+- `git diff-tree --no-commit-id --name-only -r HEAD` → exactly 10 approved paths; protected paths excluded (`PASS`).
+- `git ls-remote origin refs/heads/main` → `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3` (`PASS`).
+- `git bundle create` + bundle clone and `git archive HEAD` → clone SHA matches HEAD; archive has 595/595 Git-tree files (`PASS`).
+- `Get-FileHash -Algorithm SHA256` on 12 preserved dirty paths before/after edits → all hashes match (`PASS`).
+- Flutter tests/analyzer/formatter → `NOT RUN` in M1-FINAL; prior M1/M1.1 evidence remains historical.
+- Remote CI → `NOT RUN` in M1-FINAL; no remote CI result was observed.
+**Decisions:** D-038 `ACCEPTED` by the project owner on 2026-11-01. It assigns product M1 to Exercise
+Catalogue and product M2 to Exercise Detail. Historical release-stabilization and bulk-import work
+remains open without a new milestone assignment.
+**Blockers:** full-suite release-config failure, independent QA quota 429, O-01/O-02 licensing,
+O-08 curated-text provenance, and existing data/release/production gates remain unresolved.
+**Next action:** M2 — inspect the existing Exercise Detail screen and model, then define focused
+acceptance criteria before implementation. M2 has not started.
+
+### M2 scope for the next execution task
+
+Build an Exercise Detail layout using the GymLvl Candy design and existing Riverpod, GoRouter, and
+database conventions. Show the exercise name, available metadata, primary/secondary muscles,
+equipment, instructions, and supported actions. Handle loading, empty, error, and unavailable-media
+states; support VI/EN, accessibility, and responsive layouts. Use only exercise text/metadata with
+verified legal provenance. Write focused tests during M2. Do not copy AGPL implementation or
+proprietary media. Full Workout Detail redesign, bulk imports, media procurement, remote Supabase
+deployment, and Android release/signing are outside M2 scope.
+
+## Historical — M1.1 / M1.1-FIX Exercise Catalogue Hardening & Verification (2026-10-31)
 
 **Task:** M1.1 / M1.1-FIX Exercise Catalogue Test Hardening, Diagnosis & Commit Readiness.
 **Status:** `PASS` for M1 scope (67/67 tests); Full suite: `FAIL` (1 fail in `release_config_test.dart` classified as `PRE_EXISTING_OR_OWNER_CONFIGURATION`); QA: `INDEPENDENT_QA_UNAVAILABLE_QUOTA_429`; Commit readiness: `READY_WITH_DOCUMENTED_BASELINE_EXCEPTION`.

@@ -44,8 +44,8 @@ These are inherited from the original plan and remain fixed:
 | Milestone | Scope | Depends on | Status |
 |---|---|---|---|
 | **M0** | Repository audit, reference analysis, migration plan, license inventory | — | **COMPLETE (reported)** — planning only; no app/DB changes |
-| **M1** | Release-critical baseline stabilization | M0 | **NOT STARTED** |
-| **M2** | MIT exercise catalog import + schema/provenance + search/cache | M1 | Planned |
+| **M1** | Exercise Catalogue Navigation, Filtering, and Test Hardening | M0 | **CLOSED for implementation and Git delivery**; QA exceptions open |
+| **M2** | Exercise Detail Layout & Information Architecture | M1 | Ready for execution; not started |
 | **M3** | Offline-first workout core, modes, timers, supersets | M2 | Planned |
 | **M4** | Progression, 1RM/PR, RPE/RIR, RPG bridge | M3 | Planned |
 | **M5** | Weekly plans/scheduling, analytics, bodyweight, novice journey | M3, M4 | Planned |
@@ -57,7 +57,10 @@ These are inherited from the original plan and remain fixed:
 **Critical path:** M1 → M2 → M3 → M4 → M5 → M6 → M8.
 M7 must never block M8.
 
-## 4. Milestone M1 — re-baselined
+## 4. Historical M1 release-stabilization proposal — superseded by D-038
+
+The six-task release-stabilization proposal below is retained for provenance. It is not the current
+product M1. Unfinished release and data gates remain open outside the closed product M1 scope.
 
 The original plan's M1 (Candy foundation, theme cleanup, shell navigation, auth redirect) is already
 implemented and verified. Repeating it would waste a milestone. M1 is therefore re-scoped to close
@@ -108,8 +111,8 @@ blocker, not an M1-01 blocker.
 
 | Milestone | Exit gate |
 |---|---|
-| M1 | Release APK manifest has `INTERNET`; app name is GymLvl on both platforms; no Orbitron declaration; docs match evidence; CI builds Android; no media or schema change |
-| M2 | 1,324 MIT text records imported; idempotent source-keyed ETL; zero media; existing 150 UUIDs preserved |
+| M1 | Exercise Catalogue navigation/filtering implemented; focused tests verified; one approved 10-file commit on `main` matches `origin/main`; full-suite and independent-QA exceptions recorded |
+| M2 | Exercise Detail layout and information architecture with available metadata, VI/EN, accessibility, responsive/loading/error/unavailable-media states, and focused tests; no bulk import or media procurement |
 | M3 | Offline/reconnect scenarios pass; no lost sets; modes/timers/supersets verified |
 | M4 | Golden progression tables; one reward per retried workout; class math reproducible |
 | M5 | Beginner completes three workouts from a generated plan; charts reconcile |
@@ -118,6 +121,10 @@ blocker, not an M1-01 blocker.
 | M8 | Device matrix, signed artifacts, RLS penetration checks |
 
 ## 6. Corrections to the original plan
+
+The 2026-11-01 D-038 decision assigns product M1 to Exercise Catalogue and product M2 to Exercise
+Detail. The earlier release-stabilization and bulk-import milestone labels are historical; their
+unfinished work and blockers remain open without a new milestone assignment.
 
 | Original claim | Current verified fact | Handling |
 |---|---|---|

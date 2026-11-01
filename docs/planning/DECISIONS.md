@@ -22,7 +22,7 @@ Status values:
 | D-001 | Preserve Flutter/Supabase/RPG/Candy architecture | ACCEPTED | 2026-10-27 |
 | D-002 | No AGPL code reuse; MIT text only | ACCEPTED for current milestones; long-term posture OPEN | 2026-10-27 |
 | D-003 | Third-party exercise media postponed | ACCEPTED | 2026-10-27 |
-| D-004 | Re-baseline M1 to release-critical stabilization | PROPOSED | 2026-10-28 |
+| D-004 | Re-baseline M1 to release-critical stabilization | SUPERSEDED by D-038 | 2026-10-28 |
 | D-005 | Drift as the local offline store | PROPOSED | 2026-10-27 |
 | D-006 | Import all 1,324 MIT text records | PROPOSED | 2026-10-27 |
 | D-007 | AI proposes; user approves; server applies | ACCEPTED (product contract); implementation pending | 2026-10-27 |
@@ -35,6 +35,7 @@ Status values:
 | D-014 | `main` is the sole development branch | ACCEPTED | 2026-10-28 |
 | D-022 | Orchestrator may write `docs/audit/**` (nothing wider) | ACCEPTED | 2026-10-28 |
 | D-023 | `default_agent` is a session-creation default, not a live switch | RECORDED | 2026-10-28 |
+| D-038 | Close product M1 as Exercise Catalogue; set product M2 to Exercise Detail | ACCEPTED | 2026-11-01 |
 
 > Rows D-015–D-021 are missing from this summary; their sections exist below. The gap is recorded as
 > evidence for `FND-GOV-002` in `docs/audit/MASTER_FINDINGS.md` and is repaired in W4, not here.
@@ -76,8 +77,8 @@ media milestone requires explicit authorization and written rights evidence.
 
 ## D-004 — Re-baseline M1
 
-**Status:** PROPOSED — M1-01 is the proposed next task; the full six-task M1 scope requires approval
-before M1-02.
+**Status:** SUPERSEDED by D-038. This release-stabilization proposal remains historical; its open
+release and data gates are not closed by product M1.
 **Context:** The original M1 (Candy foundation, theme cleanup, shell/auth routing) is already
 implemented and verified. The actual blockers are release configuration and stale documentation.
 **Decision:** Redefine M1 as release-critical stabilization: baseline evidence (M1-01), platform
@@ -560,6 +561,22 @@ indistinguishable from a legitimate unawarded session and is still awarded. Prod
 ambiguous-row classification and any `workout_rewards` repair require `O-07` access and operator
 approval. `switch_class`'s ledger branch still requires `is_xp_calculated` and was not changed.
 **Recovery:** revert the migration; no data rollback is needed because it writes no historical rows.
+
+## D-038 — Product milestone scope after M1 Git delivery
+
+**Status:** ACCEPTED — approved by the project owner in the 2026-11-01 M1-FINAL request and explicit
+follow-up confirmation to reconcile the canonical planning documents.
+**Decision:** Product M1 means Exercise Catalogue Navigation, Filtering, and Test Hardening. It is
+closed for implementation and Git delivery at `main`/`origin/main` commit
+`1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`. Product M2 means Exercise Detail Layout &
+Information Architecture; implementation has not started. The former release-stabilization M1
+proposal (D-004) and former bulk-import M2 slot are superseded as milestone labels. Their unfinished
+work and existing legal, provenance, data, release, and QA blockers remain open; bulk import is
+deferred without a new milestone assignment.
+**Limits:** This decision does not approve AGPL reuse, media, data import, production deployment,
+release signing, or closure of the full Flutter suite failure and unavailable independent QA.
+Historical milestone references in older reports and open-decision rows describe the plan in force
+when written; they do not authorize those actions under the new M2 scope.
 
 ## Open decisions
 

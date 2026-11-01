@@ -14,6 +14,7 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
 import '../../features/workout/presentation/screens/exercise_picker_screen.dart';
+import '../../features/workout/presentation/screens/exercise_detail_screen.dart';
 import '../../features/workout/presentation/screens/active_workout_screen.dart';
 import '../../features/workout/presentation/screens/workout_history_screen.dart';
 import '../../features/workout/presentation/screens/workout_detail_screen.dart';
@@ -22,6 +23,7 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 import '../../features/workout/domain/workout.dart';
 import '../../features/workout/domain/workout_exercise.dart';
+import '../../features/workout/domain/exercise.dart';
 import 'main_shell_screen.dart';
 
 class RouterNotifier extends ChangeNotifier {
@@ -176,6 +178,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               state.uri.queryParameters['multiSelect'] == 'true';
           return ExercisePickerScreen(multiSelect: multiSelect);
         },
+      ),
+      GoRoute(
+        path: '/exercise/:id',
+        builder: (context, state) => ExerciseDetailScreen(
+          exerciseId: state.pathParameters['id'] ?? '',
+          initialExercise: state.extra is Exercise
+              ? state.extra as Exercise
+              : null,
+          canSelect: state.uri.queryParameters['select'] == 'true',
+        ),
       ),
     ],
   );
