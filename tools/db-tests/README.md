@@ -33,3 +33,17 @@ They do not verify GoTrue email delivery, the deployed JWT gateway, Edge runtime
 Storage, or true multiple-session concurrency. Those checks require the local
 Supabase stack or a separately verified staging project. PGlite documentation:
 https://pglite.dev/docs/ and https://pglite.dev/extensions/.
+
+## Two-connection concurrency (M3.6)
+
+`npm run test:concurrency` boots a disposable PostgreSQL 17.5 cluster from
+`embedded-postgres` in the OS temp directory and proves idempotency under real
+row-lock contention. Two independent connections call
+`apply_workout_set_create_v1` and `complete_workout` in overlapping transactions
+while a third connection samples `pg_stat_activity` for a lock wait; a scenario
+without observed contention fails. It also covers cross-user operation UUIDs and
+unauthorized ownership. The cluster and its data directory are removed in a
+`finally` block and the run fails if either survives. See
+`concurrency/README.md`. This is the multi-session companion to the PGlite
+single-connection suite above, not a replacement for it.
+

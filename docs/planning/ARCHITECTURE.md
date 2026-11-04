@@ -5,9 +5,11 @@
 **Related:** [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) (existing runtime documentation),
 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md), [`DECISIONS.md`](DECISIONS.md)
 
-> **Read this distinction first.** Sections 1–4 describe what exists **today**. Sections 5–8
-> describe the **proposed target**. Proposed components are not implemented and require approval.
-> Nothing in this file authorizes a schema or code change.
+> **Read this distinction first.** Sections 1–4 describe the production runtime. Sections 5–8
+> describe the target. D-039/D-041 approve Drift/SQLite and the M3 Superset, mode, and
+> offline lifecycle contracts for local/test implementation. Production offline storage,
+> replay, and the new remote schema remain disabled pending encryption/security evidence,
+> genuine PostgreSQL concurrency verification, and separate deployment approval.
 
 ---
 

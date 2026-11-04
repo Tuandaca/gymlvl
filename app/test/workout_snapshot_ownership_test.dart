@@ -45,6 +45,28 @@ String snapshot(String owner) => jsonEncode({
   'elapsed_seconds': 123,
 });
 
+String snapshotWithRest(
+  String owner, {
+  String workoutId = 'workout',
+  int remaining = 90,
+  int total = 120,
+  bool paused = false,
+  DateTime? deadline,
+}) {
+  final value = jsonDecode(snapshot(owner)) as Map<String, dynamic>;
+  value['rest_timer'] = {
+    'workout_id': workoutId,
+    'remaining_seconds': remaining,
+    'total_seconds': total,
+    'paused': paused,
+    'target_end_at': paused
+        ? null
+        : (deadline ?? DateTime.now().toUtc().add(Duration(seconds: remaining)))
+              .toIso8601String(),
+  };
+  return jsonEncode(value);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('plugins.flutter.io/shared_preferences');
@@ -55,6 +77,7 @@ void main() {
   late ActiveWorkoutController controller;
   late SnapshotRepository repository;
   late List<ActiveWorkoutState> observed;
+  DateTime Function()? restClockOverride;
   Completer<Map<String, Object>>? readGate;
   Completer<void>? readEntered;
 
@@ -63,6 +86,7 @@ void main() {
     disk = {};
     readGate = null;
     readEntered = null;
+    restClockOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
           if (call.method == 'getAll') {
@@ -85,6 +109,9 @@ void main() {
       overrides: [
         authStateStreamProvider.overrideWith((ref) => events.stream),
         workoutRepositoryProvider.overrideWithValue(repository),
+        restClockProvider.overrideWithValue(
+          () => restClockOverride?.call() ?? DateTime.now(),
+        ),
       ],
     );
     observed = [];
@@ -182,6 +209,97 @@ void main() {
       expect(state.hasActiveWorkout, isTrue);
     });
 
+    test('$path restores a running rest countdown while offline', () async {
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.offline = true;
+      await identity('a');
+      await restore(explicit);
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.workout?.id, 'workout');
+      expect(state.isResting, isTrue);
+      expect(state.isRestPaused, isFalse);
+      expect(state.restSecondsRemaining, inInclusiveRange(88, 90));
+      expect(state.restTargetEndTime, isNotNull);
+    });
+
+    test('$path keeps a paused rest fixed while offline', () async {
+      disk['flutter.$key'] = snapshotWithRest('a', remaining: 42, paused: true);
+      repository.offline = true;
+      await identity('a');
+      await restore(explicit);
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.isResting, isTrue);
+      expect(state.isRestPaused, isTrue);
+      expect(state.restSecondsRemaining, 42);
+      expect(state.restTargetEndTime, isNull);
+    });
+
+    test('$path does not revive expired or wrong-workout rest', () async {
+      await identity('a');
+      repository.offline = true;
+      disk['flutter.$key'] = snapshotWithRest(
+        'a',
+        deadline: DateTime.utc(2020),
+      );
+      await restore(explicit);
+      expect(
+        container.read(activeWorkoutControllerProvider).isResting,
+        isFalse,
+      );
+      container.invalidate(activeWorkoutControllerProvider);
+      controller = container.read(activeWorkoutControllerProvider.notifier);
+      disk['flutter.$key'] = snapshotWithRest('a', workoutId: 'other');
+      await restore(explicit);
+      expect(
+        container.read(activeWorkoutControllerProvider).isResting,
+        isFalse,
+      );
+    });
+
+    test('$path clears rest when the remote workout is absent', () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = null;
+      await restore(explicit);
+      expect(
+        container.read(activeWorkoutControllerProvider).isResting,
+        isFalse,
+      );
+    });
+
+    test('$path clears rest when the remote workout differs', () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = workout_fixture.fixture().copyWith(
+        id: 'other',
+        userId: 'a',
+      );
+      await restore(explicit);
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.workout?.id, 'other');
+      expect(state.isResting, isFalse);
+    });
+
+    test('$path ignores a foreign remote workout and clears rest', () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = workout_fixture.fixture().copyWith(userId: 'b');
+      await restore(explicit);
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.workout?.userId, 'a');
+      expect(state.isResting, isFalse);
+    });
+
+    test('$path preserves rest when the remote workout matches', () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = workout_fixture.fixture().copyWith(userId: 'a');
+      await restore(explicit);
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.workout?.id, 'workout');
+      expect(state.isResting, isTrue);
+    });
+
     for (final nextOwner in <String?>[null, 'b']) {
       test(
         '$path aborts when identity changes during preference read to $nextOwner',
@@ -202,6 +320,112 @@ void main() {
       );
     }
   }
+
+  test(
+    'timer transitions persist only in the authenticated owner backup',
+    () async {
+      await identity('a');
+      repository.draft = workout_fixture.fixture().copyWith(userId: 'a');
+      await controller.startWorkout();
+      controller.startRest(90);
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final ownerKey = 'flutter.$key:a';
+      final running =
+          jsonDecode(disk[ownerKey]! as String) as Map<String, dynamic>;
+      expect((running['rest_timer'] as Map)['workout_id'], 'workout');
+      expect((running['rest_timer'] as Map)['paused'], false);
+      expect(disk['flutter.$key'], isNull);
+
+      controller.pauseRest();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final paused =
+          jsonDecode(disk[ownerKey]! as String) as Map<String, dynamic>;
+      expect((paused['rest_timer'] as Map)['paused'], true);
+      expect((paused['rest_timer'] as Map)['target_end_at'], isNull);
+
+      controller.resumeRest();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final resumed =
+          jsonDecode(disk[ownerKey]! as String) as Map<String, dynamic>;
+      expect((resumed['rest_timer'] as Map)['paused'], false);
+      expect((resumed['rest_timer'] as Map)['target_end_at'], isNotNull);
+
+      controller.skipRest();
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final skipped =
+          jsonDecode(disk[ownerKey]! as String) as Map<String, dynamic>;
+      expect(skipped['rest_timer'], isNull);
+    },
+  );
+
+  test(
+    'completed remote workout clears restored rest and its backup',
+    () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = workout_fixture.fixture().copyWith(
+        userId: 'a',
+        status: WorkoutStatus.completed,
+        completedAt: DateTime.utc(2026, 10, 26, 2),
+      );
+      await controller.restoreFromLocalBackup();
+      expect(
+        container.read(activeWorkoutControllerProvider).isResting,
+        isFalse,
+      );
+      expect(container.read(activeWorkoutControllerProvider).workout, isNull);
+      expect(disk['flutter.$key'], isNull);
+    },
+  );
+
+  test(
+    'running rest retains its exact deadline across offline restores',
+    () async {
+      var now = DateTime.utc(2026, 11, 1, 1);
+      restClockOverride = () => now;
+      final deadline = now.add(const Duration(milliseconds: 90500));
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest(
+        'a',
+        remaining: 91,
+        deadline: deadline,
+      );
+      repository.offline = true;
+
+      await controller.restoreFromLocalBackup();
+      expect(
+        container.read(activeWorkoutControllerProvider).restTargetEndTime,
+        deadline,
+      );
+
+      now = now.add(const Duration(milliseconds: 400));
+      container.invalidate(activeWorkoutControllerProvider);
+      controller = container.read(activeWorkoutControllerProvider.notifier);
+      await controller.restoreFromLocalBackup();
+      expect(
+        container.read(activeWorkoutControllerProvider).restTargetEndTime,
+        deadline,
+      );
+    },
+  );
+
+  test(
+    'automatic recovery clears a completed remote and stale backup',
+    () async {
+      await identity('a');
+      disk['flutter.$key'] = snapshotWithRest('a');
+      repository.remote = workout_fixture.fixture().copyWith(
+        userId: 'a',
+        status: WorkoutStatus.completed,
+        completedAt: DateTime.utc(2026, 10, 26, 2),
+      );
+      await controller.checkForActiveWorkout();
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.workout, isNull);
+      expect(state.isResting, isFalse);
+      expect(disk['flutter.$key'], isNull);
+    },
+  );
 
   for (final raw in [
     snapshot('a'),

@@ -5,6 +5,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'exercise.dart';
 import 'workout_set.dart';
+import 'workout_mode_contract.dart';
 
 part 'workout_exercise.freezed.dart';
 part 'workout_exercise.g.dart';
@@ -16,6 +17,11 @@ abstract class WorkoutExercise with _$WorkoutExercise {
     @JsonKey(name: 'workout_id') required String workoutId,
     @JsonKey(name: 'exercise_id') required String exerciseId,
     @JsonKey(name: 'order_index') @Default(0) int orderIndex,
+    @JsonKey(name: 'superset_group_id') String? supersetGroupId,
+    @JsonKey(name: 'superset_position') int? supersetPosition,
+    @JsonKey(name: 'superset_locked') bool? supersetLocked,
+    @JsonKey(fromJson: workoutModeFromJson, toJson: workoutModeToJson)
+    WorkoutMode? mode,
     String? notes,
     @JsonKey(name: 'created_at') DateTime? createdAt,
 

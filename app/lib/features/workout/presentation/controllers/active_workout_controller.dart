@@ -9,7 +9,9 @@ import '../../domain/exercise.dart';
 import '../../domain/workout.dart';
 import '../../domain/workout_exercise.dart';
 import '../../domain/workout_set.dart';
+import '../../domain/workout_mode_contract.dart';
 import '../../domain/workout_repository.dart';
+import '../../domain/superset_rounds.dart';
 import '../../domain/workout_templates.dart';
 import '../providers/exercise_providers.dart';
 import 'workout_history_controller.dart';
@@ -21,6 +23,9 @@ import '../../../dashboard/presentation/providers/stats_providers.dart';
 import '../../../dashboard/presentation/providers/class_providers.dart';
 
 part 'active_workout_controller.freezed.dart';
+
+/// Provides a clock for deadline-based rest calculations and deterministic tests.
+final restClockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
 
 @freezed
 abstract class ActiveWorkoutState with _$ActiveWorkoutState {
@@ -74,6 +79,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   Timer? _workoutTimer;
   Timer? _restTimer;
   Future<void> _pending = Future.value();
+  Future<void> _backupWrites = Future.value();
   Future<Map<String, dynamic>?>? _completion;
   int _generation = 0;
   bool _mutationFailed = false;
@@ -84,6 +90,19 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       _pendingReceipt != null || _completionUncertain;
 
   WorkoutRepository get _repository => ref.read(workoutRepositoryProvider);
+  DateTime get _restNow => ref.read(restClockProvider)().toUtc();
+
+  static int _secondsUntil(DateTime target, DateTime now) {
+    final milliseconds = target.difference(now).inMilliseconds;
+    return milliseconds <= 0 ? 0 : (milliseconds + 999) ~/ 1000;
+  }
+
+  int _currentRestRemaining() {
+    final target = state.restTargetEndTime;
+    return target == null
+        ? state.restSecondsRemaining
+        : _secondsUntil(target, _restNow);
+  }
 
   @override
   ActiveWorkoutState build() {
@@ -113,8 +132,17 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   bool _isCurrent(int generation) => ref.mounted && generation == _generation;
 
-  void _adopt(Workout workout, int generation) {
+  void _adopt(
+    Workout workout,
+    int generation, {
+    Map<String, dynamic>? localBackup,
+  }) {
     if (!_isCurrent(generation)) return;
+    if (state.workout?.id != workout.id ||
+        workout.status != WorkoutStatus.active ||
+        localBackup != null) {
+      _clearRestTimer();
+    }
     state = state.copyWith(
       workout: workout,
       exercises: workout.exercises,
@@ -123,6 +151,9 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       elapsedSeconds: elapsedFor(workout, DateTime.now().toUtc()),
       errorMessage: null,
     );
+    if (localBackup != null && workout.status == WorkoutStatus.active) {
+      _restoreRestTimer(localBackup, workout.id);
+    }
     _updatePreviewXP();
     _startWorkoutTimer();
     _saveLocalBackup();
@@ -190,6 +221,76 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     }
   }
 
+  Map<String, dynamic>? _restSnapshot(String workoutId) {
+    if (!state.isResting || state.restSecondsRemaining <= 0) return null;
+    return {
+      'workout_id': workoutId,
+      'remaining_seconds': state.restSecondsRemaining,
+      'total_seconds': state.restSecondsTotal,
+      'paused': state.isRestPaused,
+      'target_end_at': state.isRestPaused
+          ? null
+          : state.restTargetEndTime?.toUtc().toIso8601String(),
+    };
+  }
+
+  void _clearRestTimer() {
+    _restTimer?.cancel();
+    _restTimer = null;
+    state = state.copyWith(
+      isResting: false,
+      isRestPaused: false,
+      restSecondsRemaining: 0,
+      restSecondsTotal: 0,
+      restTargetEndTime: null,
+    );
+  }
+
+  void _restoreRestTimer(Map<String, dynamic> backup, String workoutId) {
+    final rest = backup['rest_timer'];
+    if (rest is! Map<String, dynamic> || rest['workout_id'] != workoutId) {
+      return;
+    }
+    final remaining = rest['remaining_seconds'];
+    final total = rest['total_seconds'];
+    final paused = rest['paused'];
+    if (remaining is! int ||
+        total is! int ||
+        paused is! bool ||
+        remaining <= 0 ||
+        total <= 0 ||
+        total > 7200 ||
+        remaining > total) {
+      return;
+    }
+    if (paused) {
+      state = state.copyWith(
+        isResting: true,
+        isRestPaused: true,
+        restSecondsRemaining: remaining,
+        restSecondsTotal: total,
+        restTargetEndTime: null,
+      );
+      return;
+    }
+    final rawEnd = rest['target_end_at'];
+    final end = rawEnd is String ? DateTime.tryParse(rawEnd)?.toUtc() : null;
+    if (end == null) return;
+    final now = _restNow;
+    final maximumEnd = now.add(Duration(seconds: total));
+    final restoredEnd = end.isAfter(maximumEnd) ? maximumEnd : end;
+    final restoredRemaining = _secondsUntil(restoredEnd, now);
+    if (restoredRemaining <= 0) return;
+    state = state.copyWith(
+      isResting: true,
+      isRestPaused: false,
+      restSecondsRemaining: restoredRemaining,
+      restSecondsTotal: total,
+      restTargetEndTime: restoredEnd,
+    );
+    _startRestTicker();
+  }
+
   Future<void> _saveLocalBackup() async {
     final workout = state.workout;
     final owner = _backupOwner;
@@ -204,19 +305,28 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       'workout': workout.copyWith(exercises: state.exercises).toJson(),
       'local_updated_at': DateTime.now().toUtc().toIso8601String(),
       'elapsed_seconds': state.elapsedSeconds,
+      'rest_timer': _restSnapshot(workout.id),
     };
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      if (!_isBackupContextCurrent(generation, owner)) return;
-      final key = _ownerBackupKey(owner);
-      final existing = prefs.getString(key);
-      // Preserve unknown/corrupt data even if it occupies an owner-scoped key.
-      if (existing != null && _ownedBackup(existing, owner) == null) return;
-      // Never overwrite the shared legacy key: it may belong to another account.
-      await prefs.setString(key, jsonEncode(snapshot));
-    } catch (_) {
-      // Local backup failure should not crash interactive workout
-    }
+    final write = _backupWrites.then((_) async {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        if (!_isBackupContextCurrent(generation, owner) ||
+            !state.hasActiveWorkout ||
+            state.workout?.id != workout.id) {
+          return;
+        }
+        final key = _ownerBackupKey(owner);
+        final existing = prefs.getString(key);
+        // Preserve unknown/corrupt data even if it occupies an owner-scoped key.
+        if (existing != null && _ownedBackup(existing, owner) == null) return;
+        // Never overwrite the shared legacy key: it may belong to another account.
+        await prefs.setString(key, jsonEncode(snapshot));
+      } catch (_) {
+        // Local backup failure should not crash interactive workout.
+      }
+    });
+    _backupWrites = write;
+    await write;
   }
 
   Future<void> _clearLocalBackup() async {
@@ -224,6 +334,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     final generation = _generation;
     if (owner == null) return;
     try {
+      await _backupWrites;
       final prefs = await SharedPreferences.getInstance();
       if (!_isBackupContextCurrent(generation, owner)) return;
       for (final key in [_ownerBackupKey(owner), backupKey]) {
@@ -260,7 +371,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       if (workoutMap == null) return;
       final workout = Workout.fromJson(workoutMap);
       _mutationFailed = false;
-      _adopt(workout, generation);
+      _adopt(workout, generation, localBackup: backup);
 
       // Verify and synchronize with remote active workout if available
       try {
@@ -268,10 +379,23 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         if (remote != null &&
             _isBackupContextCurrent(generation, owner) &&
             remote.userId == owner) {
-          // If remote is newer, adopt remote; otherwise keep local edits and save
-          _adopt(remote, generation);
+          if (remote.status == WorkoutStatus.active) {
+            // Keep the timer only when the server confirms the same workout.
+            _adopt(remote, generation);
+          } else {
+            _clearRestTimer();
+            await _clearLocalBackup();
+            if (_isBackupContextCurrent(generation, owner)) {
+              _cleanup();
+              state = const ActiveWorkoutState();
+            }
+          }
+        } else if (_isBackupContextCurrent(generation, owner)) {
+          _clearRestTimer();
+          _saveLocalBackup();
         }
       } catch (_) {}
+      await _backupWrites;
     } catch (_) {
       if (_isCurrent(generation)) {
         state = state.copyWith(errorMessage: 'restore_failed');
@@ -305,7 +429,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
               try {
                 final localWorkout = Workout.fromJson(workoutMap);
                 _mutationFailed = false;
-                _adopt(localWorkout, generation);
+                _adopt(localWorkout, generation, localBackup: backup);
               } catch (_) {}
             }
           }
@@ -315,8 +439,20 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
             final workout = await _repository.getActiveWorkout();
             if (!_isCurrent(generation)) return;
             _mutationFailed = false;
-            if (workout != null) {
-              _adopt(workout, generation);
+            if (workout != null && (owner == null || workout.userId == owner)) {
+              if (workout.status == WorkoutStatus.active) {
+                _adopt(workout, generation);
+              } else {
+                _clearRestTimer();
+                await _clearLocalBackup();
+                if (_isContextCurrent(generation, owner)) {
+                  _cleanup();
+                  state = const ActiveWorkoutState();
+                }
+              }
+            } else if (backup != null) {
+              _clearRestTimer();
+              _saveLocalBackup();
             } else if (backup == null) {
               _cleanup();
               state = const ActiveWorkoutState();
@@ -328,6 +464,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
               state = const ActiveWorkoutState();
             }
           }
+          await _backupWrites;
         });
 
   Future<void> startWorkout() => _enqueue((generation) async {
@@ -352,36 +489,64 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   Future<void> _addExercise(
     Exercise exercise, {
     PrescribedExercise? prescription,
+    WorkoutMode? mode,
   }) async {
     final generation = _generation;
     if (!state.hasActiveWorkout ||
         state.exercises.any((e) => e.exerciseId == exercise.id)) {
       return;
     }
+    if (mode != null && !productionWorkoutModesEnabled) {
+      state = state.copyWith(errorMessage: 'mode_unavailable');
+      return;
+    }
     final order =
         state.exercises.fold<int>(-1, (v, e) => math.max(v, e.orderIndex)) + 1;
-    final item = await _repository.addExerciseToWorkout(
-      state.workout!.id,
-      exercise.id,
-      order,
-    );
+    final isTimedCatalog =
+        exercise.forceType?.toLowerCase() == 'static' ||
+        exercise.movementPattern == 'carry' ||
+        (exercise.slug?.contains('plank') ?? false);
+    final selectedMode =
+        mode ??
+        (exercise.category.toLowerCase() == 'cardio'
+            ? WorkoutMode.cardio
+            : isTimedCatalog
+            ? WorkoutMode.timed
+            : exercise.equipment.toLowerCase().contains('body')
+            ? WorkoutMode.bodyweight
+            : WorkoutMode.repsWeight);
+    final item =
+        productionWorkoutModesEnabled &&
+            _repository is ModeAwareWorkoutRepository
+        ? await (_repository as ModeAwareWorkoutRepository)
+              .addExerciseToWorkoutWithMode(
+                state.workout!.id,
+                exercise.id,
+                order,
+                selectedMode,
+              )
+        : await _repository.addExerciseToWorkout(
+            state.workout!.id,
+            exercise.id,
+            order,
+          );
     if (!_isCurrent(generation)) return;
     try {
       // Existing logged loads are suggestions only. No load is invented for a new exercise.
       final previous = await _repository.getLastSetForExercise(exercise.id);
       if (!_isCurrent(generation)) return;
-      final bodyweight = exercise.equipment.toLowerCase().contains('body');
-      final weight = bodyweight
+      final weight =
+          selectedMode == WorkoutMode.bodyweight ||
+              selectedMode == WorkoutMode.timed ||
+              selectedMode == WorkoutMode.cardio
           ? 0.0
           : (prescription?.weightKg ?? previous?.weightKg ?? 0.0).clamp(
               0.0,
               1000.0,
             );
       final isTimed =
-          exercise.forceType?.toLowerCase() == 'static' ||
-          exercise.movementPattern == 'carry' ||
-          exercise.category.toLowerCase() == 'cardio' ||
-          (exercise.slug?.contains('plank') ?? false);
+          selectedMode == WorkoutMode.timed ||
+          selectedMode == WorkoutMode.cardio;
       final sets = <WorkoutSet>[];
       final count = prescription?.sets ?? 3;
       final defaultReps = isTimed
@@ -420,8 +585,8 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     }
   }
 
-  Future<void> addExercise(Exercise exercise) =>
-      _enqueue((_) => _addExercise(exercise));
+  Future<void> addExercise(Exercise exercise, {WorkoutMode? mode}) =>
+      _enqueue((_) => _addExercise(exercise, mode: mode));
 
   Future<void> addExercises(List<Exercise> exercises) =>
       _enqueue((generation) async {
@@ -506,6 +671,10 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       });
 
   Future<void> removeExercise(String id) => _enqueue((generation) async {
+    if (state.exercises.any((e) => e.id == id && e.supersetGroupId != null)) {
+      state = state.copyWith(errorMessage: 'superset_ungroup_before_remove');
+      return;
+    }
     await _repository.removeExerciseFromWorkout(id);
     if (!_isCurrent(generation)) return;
     state = state.copyWith(
@@ -515,21 +684,60 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _saveLocalBackup();
   });
 
+  Future<void> setSupersetLayout(List<SupersetGroupLayout> groups) =>
+      _enqueue((generation) async {
+        if (!state.hasActiveWorkout) return;
+        if (!productionSupersetEnabled) {
+          state = state.copyWith(errorMessage: 'superset_unavailable');
+          return;
+        }
+        if (_repository is! SupersetLayoutRepository) {
+          throw StateError('superset_unavailable');
+        }
+        try {
+          await (_repository as SupersetLayoutRepository).setSupersetLayout(
+            state.workout!.id,
+            groups,
+          );
+        } on SupersetLayoutLocked {
+          if (_isCurrent(generation)) {
+            state = state.copyWith(errorMessage: 'superset_locked');
+          }
+          return;
+        }
+        if (!_isCurrent(generation)) return;
+        await _reload();
+        _saveLocalBackup();
+      });
+
   Future<void> addSet(
     String id, {
-    int reps = 10,
-    double weightKg = 0,
-    int durationSeconds = 0,
+    int? reps,
+    double? weightKg,
+    int? durationSeconds,
   }) => _enqueue((generation) async {
     final exercise = state.exercises.firstWhere((e) => e.id == id);
+    final timed =
+        exercise.mode == WorkoutMode.timed ||
+        exercise.mode == WorkoutMode.cardio;
+    final effectiveReps = reps ?? (timed ? 0 : 10);
+    final effectiveWeight = weightKg ?? 0;
+    final effectiveDuration = durationSeconds ?? (timed ? 30 : 0);
+    validateWorkoutSetForMode(
+      mode: exercise.mode,
+      reps: effectiveReps,
+      weightKg: effectiveWeight,
+      durationSeconds: effectiveDuration,
+      isCompleted: false,
+    );
     final number =
         exercise.sets.fold<int>(0, (v, s) => math.max(v, s.setNumber)) + 1;
     final set = await _repository.addSet(
       id,
       number,
-      reps,
-      weightKg,
-      durationSeconds: durationSeconds,
+      effectiveReps,
+      effectiveWeight,
+      durationSeconds: effectiveDuration,
     );
     if (!_isCurrent(generation)) return;
     state = state.copyWith(
@@ -554,11 +762,20 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     final current = currentExercise.sets.firstWhere((s) => s.id == setId);
 
     final newReps = reps ?? current.reps;
+    final newWeight = weightKg ?? current.weightKg;
     final newDuration = durationSeconds ?? current.durationSeconds;
     final newIsCompleted = isCompleted ?? current.isCompleted;
 
-    if (newIsCompleted && newReps <= 0 && newDuration <= 0) {
-      state = state.copyWith(errorMessage: 'reps_required');
+    try {
+      validateWorkoutSetForMode(
+        mode: currentExercise.mode,
+        reps: newReps,
+        weightKg: newWeight,
+        durationSeconds: newDuration,
+        isCompleted: newIsCompleted,
+      );
+    } on ArgumentError {
+      state = state.copyWith(errorMessage: 'mode_measurements_invalid');
       return;
     }
 
@@ -588,7 +805,13 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _saveLocalBackup();
 
     // Auto-start rest timer on completing a set
-    if (isCompleted == true && !current.isCompleted) {
+    if (isCompleted == true &&
+        !current.isCompleted &&
+        shouldStartRestAfterSetCompletion(
+          state.exercises,
+          exerciseId,
+          updated.setNumber,
+        )) {
       final restSec = current.restSeconds > 0 ? current.restSeconds : 60;
       startRest(restSec);
     }
@@ -615,10 +838,10 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   // --- RE-ARCHITECTED REST TIMER (1-second interval, pause/resume, +30s/-15s, background accurate) ---
 
   void startRest(int seconds) {
-    if (completionNeedsRecovery) return;
+    if (state.isCompleting || completionNeedsRecovery) return;
     if (seconds <= 0 || seconds > 7200) return;
     _restTimer?.cancel();
-    final targetEndTime = DateTime.now().add(Duration(seconds: seconds));
+    final targetEndTime = _restNow.add(Duration(seconds: seconds));
     state = state.copyWith(
       isResting: true,
       isRestPaused: false,
@@ -627,14 +850,16 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       restTargetEndTime: targetEndTime,
     );
 
+    _startRestTicker();
+    _saveLocalBackup();
+  }
+
+  void _startRestTicker() {
+    _restTimer?.cancel();
     _restTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (state.isRestPaused) return;
 
-      final now = DateTime.now();
-      final target = state.restTargetEndTime;
-      final remaining = target != null
-          ? math.max(0, target.difference(now).inSeconds)
-          : math.max(0, state.restSecondsRemaining - 1);
+      final remaining = _currentRestRemaining();
 
       if (remaining <= 0) {
         timer.cancel();
@@ -647,6 +872,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           restSecondsRemaining: 0,
           restTargetEndTime: null,
         );
+        _saveLocalBackup();
       } else {
         state = state.copyWith(restSecondsRemaining: remaining);
       }
@@ -654,39 +880,64 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   }
 
   void pauseRest() {
-    if (completionNeedsRecovery) return;
+    if (state.isCompleting || completionNeedsRecovery) return;
     if (!state.isResting || state.isRestPaused) return;
-    state = state.copyWith(isRestPaused: true);
+    final remaining = _currentRestRemaining();
+    if (remaining <= 0) {
+      _clearRestTimer();
+      _saveLocalBackup();
+      return;
+    }
+    _restTimer?.cancel();
+    _restTimer = null;
+    state = state.copyWith(
+      isRestPaused: true,
+      restSecondsRemaining: remaining,
+      restTargetEndTime: null,
+    );
+    _saveLocalBackup();
   }
 
   void resumeRest() {
-    if (completionNeedsRecovery) return;
+    if (state.isCompleting || completionNeedsRecovery) return;
     if (!state.isResting || !state.isRestPaused) return;
-    final newTarget = DateTime.now().add(
+    final newTarget = _restNow.add(
       Duration(seconds: state.restSecondsRemaining),
     );
     state = state.copyWith(isRestPaused: false, restTargetEndTime: newTarget);
+    _startRestTicker();
+    _saveLocalBackup();
   }
 
   void resetRest() {
-    if (completionNeedsRecovery) return;
+    if (state.isCompleting || completionNeedsRecovery) return;
     if (!state.isResting) return;
     final total = state.restSecondsTotal > 0 ? state.restSecondsTotal : 60;
     startRest(total);
   }
 
   void adjustRest(int deltaSeconds) {
-    if (completionNeedsRecovery) return;
+    if (state.isCompleting || completionNeedsRecovery) return;
     if (!state.isResting) return;
-    final current = state.restSecondsRemaining;
-    final updated = math.max(1, current + deltaSeconds);
-    final newTarget = DateTime.now().add(Duration(seconds: updated));
+    final current = state.isRestPaused
+        ? state.restSecondsRemaining
+        : _currentRestRemaining();
+    if (current <= 0) {
+      _clearRestTimer();
+      _saveLocalBackup();
+      return;
+    }
+    final updated = math.min(7200, math.max(1, current + deltaSeconds));
+    final newTarget = state.isRestPaused
+        ? null
+        : _restNow.add(Duration(seconds: updated));
     final newTotal = math.max(state.restSecondsTotal, updated);
     state = state.copyWith(
       restSecondsRemaining: updated,
       restSecondsTotal: newTotal,
       restTargetEndTime: newTarget,
     );
+    _saveLocalBackup();
   }
 
   void addRest30() => adjustRest(30);
@@ -694,15 +945,9 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   void subtractRest15() => adjustRest(-15);
 
   void skipRest() {
-    if (completionNeedsRecovery) return;
-    _restTimer?.cancel();
-    _restTimer = null;
-    state = state.copyWith(
-      isResting: false,
-      isRestPaused: false,
-      restSecondsRemaining: 0,
-      restTargetEndTime: null,
-    );
+    if (state.isCompleting || completionNeedsRecovery) return;
+    _clearRestTimer();
+    _saveLocalBackup();
   }
 
   // --- WORKOUT COMPLETION & RECOVERY CLEANUP ---
@@ -753,6 +998,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       }
 
       // Clean up local interruption backup upon genuine completion
+      _restTimer?.cancel();
       await _clearLocalBackup();
       if (!_isContextCurrent(generation, owner)) return null;
       _cleanup();
@@ -813,6 +1059,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     await _repository.cancelWorkout(state.workout!.id);
     if (!_isContextCurrent(generation, owner)) return;
     _mutationFailed = false;
+    _restTimer?.cancel();
     await _clearLocalBackup();
     if (!_isContextCurrent(generation, owner)) return;
     _cleanup();

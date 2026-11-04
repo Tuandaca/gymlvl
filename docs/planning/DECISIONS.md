@@ -9,6 +9,7 @@ milestone scope needs an entry here. Do not silently change a decision.
 Status values:
 
 - **ACCEPTED** — approved and in force.
+- **PARTIALLY_APPROVED** — only the listed technical scope is authorized; named gates remain open.
 - **PROPOSED** — recommended, not approved; implementation is blocked until accepted.
 - **SUPERSEDED** — replaced by a later entry; keep for history.
 - **RECORDED** — a fact or constraint, not a choice.
@@ -23,7 +24,7 @@ Status values:
 | D-002 | No AGPL code reuse; MIT text only | ACCEPTED for current milestones; long-term posture OPEN | 2026-10-27 |
 | D-003 | Third-party exercise media postponed | ACCEPTED | 2026-10-27 |
 | D-004 | Re-baseline M1 to release-critical stabilization | SUPERSEDED by D-038 | 2026-10-28 |
-| D-005 | Drift as the local offline store | PROPOSED | 2026-10-27 |
+| D-005 | Drift as the local offline store | PARTIALLY_APPROVED by D-039 | 2026-11-03 |
 | D-006 | Import all 1,324 MIT text records | PROPOSED | 2026-10-27 |
 | D-007 | AI proposes; user approves; server applies | ACCEPTED (product contract); implementation pending | 2026-10-27 |
 | D-008 | PostgreSQL remains authoritative for XP/rewards | ACCEPTED | Existing invariant |
@@ -36,6 +37,10 @@ Status values:
 | D-022 | Orchestrator may write `docs/audit/**` (nothing wider) | ACCEPTED | 2026-10-28 |
 | D-023 | `default_agent` is a session-creation default, not a live switch | RECORDED | 2026-10-28 |
 | D-038 | Close product M1 as Exercise Catalogue; set product M2 to Exercise Detail | ACCEPTED | 2026-11-01 |
+| D-039 | M3 offline foundation, server ledger, and superset schema | PARTIALLY_APPROVED | 2026-11-03 |
+| D-040 | M3.3 synthetic sync coordination and verification | PARTIALLY_APPROVED | 2026-11-03 |
+| D-041 | M3 real-data lifecycle, Superset v1 behavior, and four-mode contract | PARTIALLY_APPROVED — contracts accepted for local/test implementation; production gate closed | 2026-11-03 |
+| D-042 | M3.6 offline payload encryption, platform-backed key storage, auth/account-switch lifecycle, and two-connection PostgreSQL concurrency verification | ACCEPTED for additive local/test verification only: AES-256-GCM authenticated envelopes (`cryptography 2.9.0`, BSD-3) bound to owner/operation/workout/contract-version via length-prefixed AAD; keys never persist in SQLite/source/env/preferences/payload metadata and live behind `OfflinePayloadKeyStore` (`flutter_secure_storage 11.2.0`, BSD-3, DPAPI-protected file backend on Windows). `OfflinePayloadCipher.production()` and `OfflineSyncCoordinator.production()` throw `StateError` while `productionOfflinePayloadProtectionEnabled`/`productionOfflineSyncEnabled` stay `false`. Store schema v3 stores ciphertext+commit tag+nonce+key version only; plaintext and ciphertext are mutually exclusive per row; legacy v2 rows survive migration. Logout clears owner/generation and stops sync before ACK without discarding rows; discard requires explicit `ownerConfirmed`. Genuine two-connection PostgreSQL idempotency/race scenarios C1–C6 verified against an isolated disposable PostgreSQL 17.5 (embedded, two `pg.Client` connections, monitor sampled `pg_stat_activity` lock waits). Unit-tested encryption = deterministic fake key store; platform secure storage = verified on Windows real-runtime (two separate processes: create + recover); PostgreSQL concurrency = real two-connection verified; production activation = not approved. | 2026-11-04 |
 
 > Rows D-015–D-021 are missing from this summary; their sections exist below. The gap is recorded as
 > evidence for `FND-GOV-002` in `docs/audit/MASTER_FINDINGS.md` and is repaired in W4, not here.
@@ -89,14 +94,14 @@ as a scope correction in `MASTER_PLAN.md` §6.
 
 ## D-005 — Local storage: Drift
 
-**Status:** PROPOSED — not approved; do not add the dependency yet.
+**Status:** PARTIALLY_APPROVED by D-039 for local/test foundation only.
 **Context:** GymLvl has no local database. Offline logging, catalog cache, and drafts need durable
 local storage. Candidates: Drift, Isar, sqflite, raw SQLite.
-**Decision:** Use Drift as the single local store if approved.
+**Decision:** Use Drift + SQLite as the single local store for the approved local/test foundation.
 **Rationale:** Mature SQLite, typed queries, migrations, testability, good fit for cache + outbox +
 drafts. `shared_preferences` remains for lightweight settings.
 **Consequences:** Adds a dependency, code generation, and a local schema to maintain. Web/WASM is not
-a release requirement. Requires an approved M3 design before implementation.
+a release requirement. Real user data and production replay remain blocked by D-039's open policies.
 
 ## D-006 — Catalog import scope
 
@@ -578,6 +583,76 @@ release signing, or closure of the full Flutter suite failure and unavailable in
 Historical milestone references in older reports and open-decision rows describe the plan in force
 when written; they do not authorize those actions under the new M2 scope.
 
+## D-039 — M3 offline foundation approval boundary
+
+**Status:** PARTIALLY_APPROVED by the project owner on 2026-11-03.
+**Approved:** Drift + SQLite; a transactional local outbox with stable `operation_id`; a server-side
+idempotency ledger that checks a versioned request fingerprint and exact request body; additive
+local/test migrations; nullable `superset_group_id` on `workout_exercises`; and the four existing mode
+names `reps-weight`, `bodyweight`, `timed`, and `cardio`.
+**Implementation boundary:** Only synthetic local/test data may enter the new store or ledger. No
+production migration, deployment, controller/repository integration, real-user storage, production sync replay,
+or production superset write is authorized. The nullable group field is guarded against non-null
+writes pending a later decision. Modes remain inactive.
+**Still open:** encryption, retention and deletion, logout/account switching, replay conflict and
+reconciliation behavior, superset grouping/order/rest/edit behavior, and mode-specific data and
+transition contracts. These require separate owner approval before use with real data. `complete_workout`
+remains the sole authoritative reward path. O-07 is still required for live Supabase verification.
+
+## D-040 — M3.3 synthetic synchronization foundation
+
+**Status:** PARTIALLY_APPROVED by the project owner's M3.3 implementation request on 2026-11-03.
+**Approved:** Implement and test local database lifecycle, schema compatibility, durable outbox
+metadata, deterministic state transitions, retry eligibility with bounded backoff, duplicate
+prevention, and lost-acknowledgement reconciliation using synthetic fixtures. Strengthen the
+local/test server idempotency contract and test it against local database infrastructure.
+**Boundary:** A production feature gate must remain disabled. No real-user data may be stored in the
+new local database; no existing online workout write path is replaced. No remote migration,
+deployment, production credential, real-user replay, superset write behavior, or workout mode
+activation is approved. The unresolved D-039 policies and O-03 remain open.
+
+## D-041 — Remaining M3 contract approval gate
+
+**Status:** PARTIALLY_APPROVED by the project owner on 2026-11-03: contracts accepted for additive implementation and local/test verification. Production offline-write activation, remote migration, deployment, commit, and push remain unapproved.
+**Precedence:** This decision supersedes the earlier D-039/D-040 restrictions on implementing Superset, modes, and lifecycle foundations locally; their production and real-user activation restrictions remain in force until the evidence gate below is met.
+**Context:** M3.4 could not run a genuine two-connection PostgreSQL idempotency race because no
+already-available local PostgreSQL/Docker runtime exists. Static inspection also found that
+`complete_workout` rejects completed `reps=0` sets despite the duration-friendly set constraint,
+and deleting a `workout_exercises` row cascades to its sets.
+**Decision:** Retain unsynced work until sync or the original owner's explicit discard; no TTL. Encrypt sensitive local payloads before real-user activation, keep keys outside SQLite in platform-backed secure storage, and require the authenticated owner to match before any local read, mutation, or sync. Stop sync immediately on logout/account switch, never process the prior owner's queue under a new session, and retain the prior owner's protected pending work for that owner. Different content under the same operation ID is a hard conflict with no silent merge; unresolved conflicts must be recoverable and user-visible. PostgreSQL and `complete_workout` remain authoritative for completion, XP, and rewards.
+**Superset v1:** Nullable `superset_group_id` and `superset_position` on `workout_exercises`; position is unique and contiguous within a group of at least two exercises. Sets keep their original `workout_exercise_id`. Ungrouping never deletes the exercise row or reassigns historical sets; move/reorder/ungroup are transactional, and groups dissolve below two active members. Round N uses each member's set N where present; missing sets are skipped without renumbering. No automatic rest between members; rest starts after the last member of a round while manual controls remain. Membership/order lock after the first completed group set.
+**Modes:** Persist a four-value `mode` discriminator on `workout_exercises`; legacy rows may remain `NULL` and must not be inferred from nullable measurements. Mode is immutable after the first set. `reps-weight` and `bodyweight` use reps 1–1000 and weight 0–1000 kg; bodyweight weight means external load. `timed` and duration-only `cardio` use 1–7200 seconds, reps=0, weight=0; no distance/speed inference. Server validation and `complete_workout` may be amended to accept these sets without introducing a second reward path.
+**Boundary:** Additive local/database migrations, implementation, and local/test verification are approved. Production offline writes stay disabled until genuine two-connection PostgreSQL idempotency/concurrency and relevant security tests pass. No production deployment, remote migration, commit, or push is authorized.
+**M3.5 implementation checkpoint:** The approved Superset/mode SQL and Flutter contracts and a synthetic owner-scoped offline facade were verified locally in `M3_5_FINAL_REPORT.md`. This does not approve real-user SQLite storage or production activation. Platform-backed encryption/key storage, a production Supabase Auth/device lifecycle adapter, true two-connection PostgreSQL races, and separate remote migration/deployment authorization remain required.
+
+## D-042 — M3.6 security & concurrency verification (additive)
+
+**Status:** ACCEPTED for additive local/test verification only.
+
+**Changed/added sources (uncommitted, local only):**
+- `app/lib/features/workout/data/offline_payload_cipher.dart` (new) — AES-256-GCM `OfflinePayloadCipher` with `seal`/`open`, fresh 96-bit nonce per seal via `Random.secure()`, envelope `cipherVersion`/`keyVersion`, binding AAD `OfflineWriteBinding`, typed failures `OfflinePayloadAuthenticationException`/`OfflinePayloadKeyUnavailableException`/`OfflinePayloadFormatException`, `promoteCurrentKeyVersion` for forward-compatible rotation; `production()` throws `StateError` while the gate is off.
+- `app/lib/features/workout/data/offline_secure_key_store.dart` (new) — narrow `OfflinePayloadKeyStore` abstraction (`readKey`/`createKey`; no enumeration/bulk delete), `InMemoryOfflinePayloadKeyStore` for deterministic tests, `PlatformSecureOfflinePayloadKeyStore` via `flutter_secure_storage` (base64 32-byte key, name `gymlvl.offline.payload.key.<owner>.v<ver>`, no key material in SQLite/source/env/preferences/payload metadata).
+- `app/lib/features/workout/data/offline_security_payload.dart` — `productionOfflinePayloadProtectionEnabled` remains `const false`.
+- `app/lib/features/workout/data/offline_security_session.dart` — added `OfflineAuthenticatedSession.logout()` clearing owner and bumping generation.
+- `app/lib/features/workout/data/offline_workout_store.dart` + `.g.dart` — store schema v3: `payloadJson` nullable plus `payloadCipherVersion`/`payloadKeyVersion`/`payloadNonce`/`payloadCiphertext` nullable envelope columns on both `offline_write_intents` and `offline_set_projections`; mutual exclusion enforced at read (`fromColumns` throws when both coexist); encrypted `enqueueSetCreate`/`pending*`/`acknowledge`/`encryptLegacyRowsForOwner`; `OwnerScopedOfflineQueue.encrypted(...)` constructor; legacy v2 rows preserved through migration.
+- `app/lib/features/workout/data/offline_sync_coordinator.dart` — unchanged behavior; `productionOfflineSyncEnabled` remains `false`.
+- `app/test/offline_payload_cipher_test.dart`, `app/test/offline_encrypted_queue_test.dart`, `app/test/offline_security_lifecycle_test.dart`, `app/test/offline_workout_schema_migration_test.dart` — 52 focused tests all `PASS`.
+- `app/integration_test/offline_secure_storage_runtime_test.dart` — real-runtime Windows verification (`create` then `recover` in two separate processes): key survives restart, envelope decrypts after restart, owner B denied, wrong binding rejected as authentication failure, explicit key delete fails closed, artifact cleaned up.
+- `tools/db-tests/concurrency/m3-idempotency.mjs`, `pg-runtime.mjs`, `README.md` — C1–C6 all `PASS` on isolated disposable PostgreSQL 17.5 with two independent `pg.Client` connections; lock-wait evidence captured via `pg_stat_activity` monitor; data directory removed after run; no leftover process/listener.
+
+**Verification:**
+- `cd app; flutter pub get` → `PASS`.
+- `cd app; dart run build_runner build --delete-conflicting-outputs` → `PASS`.
+- focused Flutter suite → 52/52 `PASS`.
+- `cd app; flutter analyze --no-pub` → `No issues found!` `PASS`.
+- `cd app; dart format --output=none --set-exit-if-changed` on changed Dart files → `PASS`.
+- full Flutter suite → 411 pass / 1 fail; sole failure is pre-existing protected local Gradle Wrapper 9.7.1 vs approved 8.13 (`release_config_test.dart`), classified as a protected owner-file issue, not an M3.6 regression.
+- `cd tools/db-tests; npm test` → 16 SQL units / 365 ACL assertions `PASS` (existing single-connection suite unaffected).
+- `cd tools/db-tests; npm run test:concurrency` → C1–C6 `PASS` (6/6), real two-connection PostgreSQL evidence.
+- Runtime integration test → `create` PASS and `recover` PASS on Windows; no residue left behind.
+
+**No plaintext sensitive outbox payload remains in the stored representation.** `productionOfflineSyncEnabled` and `productionOfflinePayloadProtectionEnabled` remain `false`. No commit, push, tag, deployment, remote migration, or production write occurred; `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`, tree dirty, index empty. No protected owner path was modified.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:
@@ -586,7 +661,7 @@ These remain unresolved and block later milestones:
 |---|---|---|---|
 | O-01 | GymLvl's own license and contributor rights | M8 / distribution | Project owner + legal |
 | O-02 | AGPL posture (stay proprietary vs adopt AGPL) | Any OpenGym-derived reuse | Project owner + legal |
-| O-03 | Approval of Drift | M3 | Project owner |
+| O-03 | Drift and real-data policy approved by D-039/D-041; production activation gate remains closed pending concurrency/security evidence | M3 production activation | Project owner |
 | O-04 | Approval of full 1,324 import vs curated subset | M2 | Project owner |
 | O-05 | AI provider and cost policy | M6 | Project owner |
 | O-06 | Android SDK/device availability | M1-02, M1-05, M8 | Project owner |

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../workout_copy.dart';
-import '../../../../ui/theme/app_theme.dart';
+import '../../../../core/theme/candy_colors.dart';
 import '../../../../ui/candy/candy_button.dart';
+import '../../../../ui/candy/candy_card.dart';
 
 class RestTimerWidget extends ConsumerWidget {
   final int secondsRemaining;
@@ -35,88 +36,76 @@ class RestTimerWidget extends ConsumerWidget {
     final formatted =
         '${(secondsRemaining ~/ 60).toString().padLeft(2, '0')}:${(secondsRemaining % 60).toString().padLeft(2, '0')}';
 
-    return Container(
+    return CandyCard(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.panelBackground.withValues(alpha: 0.95),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isPaused
-              ? AppTheme.goldWarning.withValues(alpha: 0.6)
-              : AppTheme.cyanNeon.withValues(alpha: 0.6),
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (isPaused ? AppTheme.goldWarning : AppTheme.cyanNeon)
-                .withValues(alpha: 0.2),
-            blurRadius: 16,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+      backgroundColor: isPaused
+          ? CandyColors.softLilac
+          : CandyColors.canaryYellow,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     isPaused ? Icons.pause_circle_outline : Icons.timer,
-                    color: isPaused ? AppTheme.goldWarning : AppTheme.cyanNeon,
+                    color: CandyColors.ink,
                     size: 18,
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    workoutText(ref, 'rest').toUpperCase(),
-                    style: TextStyle(
-                      color: isPaused
-                          ? AppTheme.goldWarning
-                          : AppTheme.cyanNeon,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      letterSpacing: 1.5,
+                  Flexible(
+                    child: Text(
+                      workoutText(ref, 'rest').toUpperCase(),
+                      softWrap: true,
+                      style: const TextStyle(
+                        color: CandyColors.ink,
+                        fontFamily: CandyFonts.body,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 0.8,
+                      ),
                     ),
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () {
+              CandyButton(
+                label: workoutText(ref, 'skip_rest'),
+                variant: CandyButtonVariant.neutral,
+                size: CandyButtonSize.small,
+                isFullWidth: false,
+                onPressed: () {
                   HapticFeedback.lightImpact();
                   onSkip();
                 },
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Text(
-                    workoutText(ref, 'skip_rest'),
-                    style: const TextStyle(
-                      color: AppTheme.textDim,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
 
           // Main Countdown Display
-          Text(
-            formatted,
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Space Mono',
-              color: isPaused ? AppTheme.goldWarning : AppTheme.textMain,
-              letterSpacing: 2,
+          Semantics(
+            label: '${workoutText(ref, 'rest')}: $formatted',
+            child: ExcludeSemantics(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  formatted,
+                  style: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: CandyFonts.mono,
+                    color: CandyColors.ink,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -127,17 +116,19 @@ class RestTimerWidget extends ConsumerWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
-              backgroundColor: AppTheme.background,
+              backgroundColor: CandyColors.card,
               valueColor: AlwaysStoppedAnimation<Color>(
-                isPaused ? AppTheme.goldWarning : AppTheme.cyanNeon,
+                isPaused ? CandyColors.coral : CandyColors.hotPink,
               ),
             ),
           ),
           const SizedBox(height: 14),
 
           // Controls: -15s, Pause/Resume, Reset, +30s
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _buildControlButton(
                 label: workoutText(ref, 'subtract_15s'),
@@ -149,7 +140,7 @@ class RestTimerWidget extends ConsumerWidget {
                     ? workoutText(ref, 'resume_rest')
                     : workoutText(ref, 'pause_rest'),
                 icon: isPaused ? Icons.play_arrow : Icons.pause,
-                color: isPaused ? AppTheme.goldWarning : AppTheme.cyanNeon,
+                variant: CandyButtonVariant.lilac,
                 onPressed: onPauseResume,
               ),
               _buildControlButton(
@@ -160,6 +151,7 @@ class RestTimerWidget extends ConsumerWidget {
               _buildControlButton(
                 label: workoutText(ref, 'add_30s'),
                 icon: Icons.add,
+                variant: CandyButtonVariant.mint,
                 onPressed: onAdd30,
               ),
             ],
@@ -172,38 +164,19 @@ class RestTimerWidget extends ConsumerWidget {
   Widget _buildControlButton({
     required String label,
     required IconData icon,
-    Color color = AppTheme.textDim,
+    CandyButtonVariant variant = CandyButtonVariant.neutral,
     required VoidCallback onPressed,
   }) {
-    return SizedBox(
-      height: 44,
-      child: OutlinedButton(
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          onPressed();
-        },
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(color: color.withValues(alpha: 0.4)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          backgroundColor: color.withValues(alpha: 0.06),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return CandyButton(
+      label: label,
+      icon: icon,
+      variant: variant,
+      size: CandyButtonSize.small,
+      isFullWidth: false,
+      onPressed: () {
+        HapticFeedback.selectionClick();
+        onPressed();
+      },
     );
   }
 }
@@ -232,7 +205,8 @@ class DurationWheelPicker extends ConsumerWidget {
             Text(
               workoutText(ref, 'set_rest_time'),
               style: const TextStyle(
-                color: AppTheme.textMain,
+                color: CandyColors.ink,
+                fontFamily: CandyFonts.display,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -266,8 +240,8 @@ class DurationWheelPicker extends ConsumerWidget {
                                       ? FontWeight.w900
                                       : FontWeight.normal,
                                   color: selected
-                                      ? AppTheme.textMain
-                                      : AppTheme.textDim,
+                                      ? CandyColors.ink
+                                      : CandyColors.charcoal,
                                 ),
                               ),
                             );
@@ -282,7 +256,8 @@ class DurationWheelPicker extends ConsumerWidget {
                       workoutText(ref, 'minutes'),
                       style: const TextStyle(
                         fontSize: 16,
-                        color: AppTheme.textDim,
+                        color: CandyColors.charcoal,
+                        fontFamily: CandyFonts.body,
                       ),
                     ),
                   ],
@@ -310,8 +285,8 @@ class DurationWheelPicker extends ConsumerWidget {
                                       ? FontWeight.w900
                                       : FontWeight.normal,
                                   color: selected
-                                      ? AppTheme.textMain
-                                      : AppTheme.textDim,
+                                      ? CandyColors.ink
+                                      : CandyColors.charcoal,
                                 ),
                               ),
                             );
@@ -327,7 +302,8 @@ class DurationWheelPicker extends ConsumerWidget {
                       workoutText(ref, 'seconds_short'),
                       style: const TextStyle(
                         fontSize: 16,
-                        color: AppTheme.textDim,
+                        color: CandyColors.charcoal,
+                        fontFamily: CandyFonts.body,
                       ),
                     ),
                   ],
@@ -340,8 +316,8 @@ class DurationWheelPicker extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 34,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Space Mono',
-                color: AppTheme.textMain,
+                fontFamily: CandyFonts.mono,
+                color: CandyColors.ink,
               ),
               textAlign: TextAlign.center,
             ),

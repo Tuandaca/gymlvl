@@ -110,12 +110,15 @@ void main() {
   late FakeRepository repository;
   late ProviderContainer container;
   late ActiveWorkoutController controller;
+  late DateTime restNow;
   setUp(() {
     repository = FakeRepository();
+    restNow = DateTime.utc(2026, 10, 26, 2);
     container = ProviderContainer(
       overrides: [
         authStateStreamProvider.overrideWith((ref) => const Stream.empty()),
         workoutRepositoryProvider.overrideWithValue(repository),
+        restClockProvider.overrideWithValue(() => restNow),
       ],
     );
     controller = container.read(activeWorkoutControllerProvider.notifier);
@@ -196,6 +199,37 @@ void main() {
       container.read(activeWorkoutControllerProvider).hasActiveWorkout,
       false,
     );
+  });
+  test('completing a workout stops the active rest timer', () async {
+    await controller.startWorkout();
+    controller.startRest(90);
+    expect(container.read(activeWorkoutControllerProvider).isResting, isTrue);
+    expect(await controller.completeWorkout(), isNotNull);
+    final state = container.read(activeWorkoutControllerProvider);
+    expect(state.hasActiveWorkout, isFalse);
+    expect(state.isResting, isFalse);
+  });
+  test(
+    'pause after a missed deadline does not keep a phantom second',
+    () async {
+      await controller.startWorkout();
+      controller.startRest(30);
+      restNow = restNow.add(const Duration(seconds: 31));
+      controller.pauseRest();
+      final state = container.read(activeWorkoutControllerProvider);
+      expect(state.isResting, isFalse);
+      expect(state.isRestPaused, isFalse);
+      expect(state.restSecondsRemaining, 0);
+    },
+  );
+  test('rest adjustment uses deadline after background time passes', () async {
+    await controller.startWorkout();
+    controller.startRest(90);
+    restNow = restNow.add(const Duration(seconds: 60));
+    controller.addRest30();
+    final state = container.read(activeWorkoutControllerProvider);
+    expect(state.restSecondsRemaining, 60);
+    expect(state.restTargetEndTime, restNow.add(const Duration(seconds: 60)));
   });
   test('failed completion retains session for safe retry', () async {
     await controller.startWorkout();

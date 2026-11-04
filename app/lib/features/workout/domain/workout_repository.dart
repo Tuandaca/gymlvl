@@ -1,6 +1,42 @@
 import 'workout.dart';
 import 'workout_exercise.dart';
 import 'workout_set.dart';
+import 'workout_mode_contract.dart';
+
+/// A full desired layout. The server applies every group in one transaction.
+class SupersetGroupLayout {
+  final String groupId;
+  final List<String> workoutExerciseIds;
+
+  SupersetGroupLayout(this.groupId, List<String> workoutExerciseIds)
+    : workoutExerciseIds = List.unmodifiable(workoutExerciseIds);
+
+  Map<String, Object> toJson() => {
+    'group_id': groupId,
+    'exercise_ids': workoutExerciseIds,
+  };
+}
+
+/// Optional capabilities keep older repository test doubles source compatible.
+abstract interface class SupersetLayoutRepository {
+  Future<void> setSupersetLayout(
+    String workoutId,
+    List<SupersetGroupLayout> groups,
+  );
+}
+
+class SupersetLayoutLocked implements Exception {
+  const SupersetLayoutLocked();
+}
+
+abstract interface class ModeAwareWorkoutRepository {
+  Future<WorkoutExercise> addExerciseToWorkoutWithMode(
+    String workoutId,
+    String exerciseId,
+    int orderIndex,
+    WorkoutMode mode,
+  );
+}
 
 abstract class WorkoutRepository {
   /// Tạo workout mới (status: active)

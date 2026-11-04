@@ -3,8 +3,13 @@ import '../domain/workout.dart';
 import '../domain/workout_exercise.dart';
 import '../domain/workout_set.dart';
 import '../domain/workout_repository.dart';
+import '../domain/workout_mode_contract.dart';
 
-class SupabaseWorkoutRepository implements WorkoutRepository {
+class SupabaseWorkoutRepository
+    implements
+        WorkoutRepository,
+        ModeAwareWorkoutRepository,
+        SupersetLayoutRepository {
   final SupabaseClient _supabase;
   SupabaseWorkoutRepository(this._supabase);
 
@@ -173,6 +178,54 @@ class SupabaseWorkoutRepository implements WorkoutRepository {
         .select('*, exercises(*), workout_sets(*)')
         .single();
     return WorkoutExercise.fromJson(response);
+  }
+
+  @override
+  Future<WorkoutExercise> addExerciseToWorkoutWithMode(
+    String workoutId,
+    String exerciseId,
+    int orderIndex,
+    WorkoutMode mode,
+  ) async {
+    if (!productionWorkoutModesEnabled) {
+      throw StateError('workout_mode_schema_not_deployed');
+    }
+    final response = await _supabase
+        .from('workout_exercises')
+        .insert({
+          'workout_id': workoutId,
+          'exercise_id': exerciseId,
+          'order_index': orderIndex,
+          'mode': mode.wireValue,
+        })
+        .select('*, exercises(*), workout_sets(*)')
+        .single();
+    return WorkoutExercise.fromJson(response);
+  }
+
+  @override
+  Future<void> setSupersetLayout(
+    String workoutId,
+    List<SupersetGroupLayout> groups,
+  ) async {
+    if (!productionSupersetEnabled) {
+      throw StateError('superset_schema_not_deployed');
+    }
+    try {
+      await _supabase.rpc(
+        'set_superset_layout_v1',
+        params: {
+          'p_workout_id': workoutId,
+          'p_groups': groups.map((group) => group.toJson()).toList(),
+        },
+      );
+    } on PostgrestException catch (error) {
+      if (error.code == '22023' &&
+          error.message.contains('Completed superset membership')) {
+        throw const SupersetLayoutLocked();
+      }
+      rethrow;
+    }
   }
 
   @override

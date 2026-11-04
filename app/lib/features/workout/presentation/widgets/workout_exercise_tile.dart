@@ -3,12 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../workout_copy.dart';
 import '../../../../ui/theme/app_theme.dart';
 import '../../domain/workout_exercise.dart';
+import '../../domain/workout_mode_contract.dart';
 import 'set_row_widget.dart';
 
 class WorkoutExerciseTile extends ConsumerWidget {
   final WorkoutExercise workoutExercise;
   final int index;
   final bool isEditable;
+  final bool canReorder;
+  final bool isGroupLocked;
   final VoidCallback? onAddSet;
   final VoidCallback? onRemove;
   final VoidCallback? onStartRest;
@@ -27,6 +30,8 @@ class WorkoutExerciseTile extends ConsumerWidget {
     required this.workoutExercise,
     this.index = 0,
     this.isEditable = true,
+    this.canReorder = true,
+    this.isGroupLocked = false,
     this.onAddSet,
     this.onRemove,
     this.onStartRest,
@@ -57,8 +62,16 @@ class WorkoutExerciseTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final exercise = workoutExercise.exercise;
     final sets = workoutExercise.sets;
-    final isBodyweight = exercise?.isBodyweight ?? false;
-    final isTimeBased = exercise?.isTimeBased ?? false;
+    final mode = workoutExercise.mode;
+    final isBodyweight = mode == WorkoutMode.bodyweight;
+    final isTimeBased = mode == WorkoutMode.timed || mode == WorkoutMode.cardio;
+    final modeLabel = switch (mode) {
+      WorkoutMode.repsWeight => 'mode_reps_weight',
+      WorkoutMode.bodyweight => 'mode_bodyweight',
+      WorkoutMode.timed => 'mode_timed',
+      WorkoutMode.cardio => 'mode_cardio',
+      null => 'mode_unspecified',
+    };
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -101,17 +114,20 @@ class WorkoutExerciseTile extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                if (isEditable)
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Container(
-                      width: 32,
-                      height: 40,
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.drag_indicator,
-                        color: AppTheme.textDim,
-                        size: 20,
+                if (canReorder && isEditable)
+                  Semantics(
+                    button: true,
+                    label: workoutText(ref, 'reorder'),
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: const SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: Icon(
+                          Icons.drag_indicator,
+                          color: AppTheme.textDim,
+                          size: 24,
+                        ),
                       ),
                     ),
                   ),
@@ -155,7 +171,9 @@ class WorkoutExerciseTile extends ConsumerWidget {
                           fontSize: 14,
                         ),
                       ),
-                      Row(
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
                           if (exercise?.category != null)
                             Text(
@@ -166,29 +184,42 @@ class WorkoutExerciseTile extends ConsumerWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          if (isBodyweight) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 1,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.cyanNeon.withValues(
-                                  alpha: 0.12,
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                workoutText(ref, 'bodyweight'),
-                                style: const TextStyle(
-                                  color: AppTheme.cyanNeon,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.cyanNeon.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              workoutText(ref, modeLabel),
+                              style: const TextStyle(
+                                color: AppTheme.cyanNeon,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
+                          ),
+                          if (workoutExercise.supersetGroupId != null)
+                            Text(
+                              '${workoutText(ref, 'superset')} '
+                              '${(workoutExercise.supersetPosition ?? 0) + 1}',
+                              style: const TextStyle(
+                                color: AppTheme.purpleNeon,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          if (isGroupLocked)
+                            Text(
+                              workoutText(ref, 'superset_locked'),
+                              style: const TextStyle(
+                                color: AppTheme.textDim,
+                                fontSize: 11,
+                              ),
+                            ),
                         ],
                       ),
                     ],
@@ -218,12 +249,12 @@ class WorkoutExerciseTile extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             child: Row(
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 32,
                   child: Text(
-                    'SET',
+                    workoutText(ref, 'set_label'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.textDim,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -233,7 +264,7 @@ class WorkoutExerciseTile extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    isBodyweight ? 'LOAD' : 'KG',
+                    workoutText(ref, isBodyweight ? 'load_label' : 'kg_label'),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppTheme.textDim,
@@ -245,7 +276,7 @@ class WorkoutExerciseTile extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    isTimeBased ? 'TIME' : 'REPS',
+                    workoutText(ref, isTimeBased ? 'time_label' : 'reps_label'),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: AppTheme.textDim,
@@ -266,36 +297,55 @@ class WorkoutExerciseTile extends ConsumerWidget {
             child: Column(
               children: sets
                   .map(
-                    (set) => SetRowWidget(
+                    (set) => Column(
                       key: ValueKey(set.id),
-                      setNumber: set.setNumber,
-                      reps: set.reps,
-                      weightKg: set.weightKg,
-                      durationSeconds: set.durationSeconds,
-                      isBodyweight: isBodyweight,
-                      isTimeBased: isTimeBased,
-                      isCompleted: set.isCompleted,
-                      isEditable: isEditable,
-                      onRepsChanged: isEditable
-                          ? (reps) => onUpdateSet?.call(set.id, reps: reps)
-                          : null,
-                      onWeightChanged: isEditable
-                          ? (weight) =>
-                                onUpdateSet?.call(set.id, weightKg: weight)
-                          : null,
-                      onDurationChanged: isEditable
-                          ? (sec) =>
-                                onUpdateSet?.call(set.id, durationSeconds: sec)
-                          : null,
-                      onCompletedChanged: isEditable
-                          ? (completed) => onUpdateSet?.call(
-                              set.id,
-                              isCompleted: completed,
-                            )
-                          : null,
-                      onDelete: isEditable
-                          ? () => onDeleteSet?.call(set.id)
-                          : null,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SetRowWidget(
+                          setNumber: set.setNumber,
+                          reps: set.reps,
+                          weightKg: set.weightKg,
+                          durationSeconds: set.durationSeconds,
+                          isBodyweight: isBodyweight,
+                          isTimeBased: isTimeBased,
+                          isCompleted: set.isCompleted,
+                          isEditable: isEditable,
+                          onRepsChanged: isEditable
+                              ? (reps) => onUpdateSet?.call(set.id, reps: reps)
+                              : null,
+                          onWeightChanged: isEditable
+                              ? (weight) =>
+                                    onUpdateSet?.call(set.id, weightKg: weight)
+                              : null,
+                          onDurationChanged: isEditable
+                              ? (sec) => onUpdateSet?.call(
+                                  set.id,
+                                  durationSeconds: sec,
+                                )
+                              : null,
+                          onCompletedChanged: isEditable
+                              ? (completed) => onUpdateSet?.call(
+                                  set.id,
+                                  isCompleted: completed,
+                                )
+                              : null,
+                          onDelete: isEditable
+                              ? () => onDeleteSet?.call(set.id)
+                              : null,
+                        ),
+                        if (mode == null && set.durationSeconds > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 28, bottom: 6),
+                            child: Text(
+                              '${workoutText(ref, 'duration')}: '
+                              '${set.durationSeconds} ${workoutText(ref, 'seconds')}',
+                              style: const TextStyle(
+                                color: AppTheme.textDim,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   )
                   .toList(),

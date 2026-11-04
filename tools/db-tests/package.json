@@ -8,11 +8,14 @@
     "test:live": "node live-e2e.mjs",
     "test:edge": "node edge-tests.mjs",
     "check:edge": "node edge-tests.mjs --check",
-    "test:web": "node browser-smoke.mjs"
+    "test:web": "node browser-smoke.mjs",
+    "test:concurrency": "node concurrency/m3-idempotency.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.4.6",
     "deno": "2.9.6",
+    "embedded-postgres": "17.5.0-beta.15",
+    "pg": "8.16.3",
     "playwright": "1.64.1"
   }
 }

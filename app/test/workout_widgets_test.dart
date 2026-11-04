@@ -10,6 +10,7 @@ import 'package:app/features/workout/presentation/widgets/workout_exercise_tile.
 import 'package:app/features/workout/presentation/widgets/rest_timer_widget.dart';
 import 'package:app/features/workout/presentation/widgets/workout_summary_card.dart';
 import 'package:app/ui/candy/candy_button.dart';
+import 'package:app/ui/candy/candy_card.dart';
 
 class FixedLanguage extends LocalizationModeNotifier {
   final AppLangMode mode;
@@ -98,6 +99,108 @@ void main() {
     expect(find.text('Hủy'), findsOneWidget);
     expect(find.text('phút'), findsOneWidget);
     expect(find.text('giây'), findsOneWidget);
+  });
+  testWidgets('rest timer keeps every action accessible at 320dp and 2x text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    var skipped = 0;
+    var paused = 0;
+    var reset = 0;
+    var added = 0;
+    var subtracted = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localizationModeProvider.overrideWith(
+            () => FixedLanguage(AppLangMode.en),
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: SingleChildScrollView(
+                child: RestTimerWidget(
+                  secondsRemaining: 90,
+                  secondsTotal: 120,
+                  onSkip: () => skipped++,
+                  onPauseResume: () => paused++,
+                  onReset: () => reset++,
+                  onAdd30: () => added++,
+                  onSubtract15: () => subtracted++,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(CandyCard), findsOneWidget);
+    expect(find.bySemanticsLabel('Rest timer: 01:30'), findsOneWidget);
+
+    for (final label in ['Finish rest', '-15s', 'Pause', 'Reset', '+30s']) {
+      final button = find.widgetWithText(CandyButton, label);
+      expect(button, findsOneWidget);
+      expect(tester.getSize(button).height, greaterThanOrEqualTo(48));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+    }
+    expect([skipped, subtracted, paused, reset, added], [1, 1, 1, 1, 1]);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('paused rest timer has localized Vietnamese resume control', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var resumed = 0;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localizationModeProvider.overrideWith(
+            () => FixedLanguage(AppLangMode.vi),
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: MediaQuery(
+              data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+              child: SingleChildScrollView(
+                child: RestTimerWidget(
+                  secondsRemaining: 45,
+                  secondsTotal: 60,
+                  isPaused: true,
+                  onSkip: () {},
+                  onPauseResume: () => resumed++,
+                  onReset: () {},
+                  onAdd30: () {},
+                  onSubtract15: () {},
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.bySemanticsLabel('Đồng hồ nghỉ: 00:45'), findsOneWidget);
+    final resumeButton = find.widgetWithText(CandyButton, 'Tiếp tục');
+    expect(tester.getSize(resumeButton).height, greaterThanOrEqualTo(48));
+    await tester.ensureVisible(resumeButton);
+    await tester.tap(resumeButton);
+    expect(resumed, 1);
+    expect(tester.takeException(), isNull);
   });
   test(
     'relative workout dates follow calendar midnight, not 24-hour duration',

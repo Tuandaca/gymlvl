@@ -128,54 +128,60 @@ class _SetRowWidgetState extends ConsumerState<SetRowWidget> {
           ),
           const SizedBox(width: 4),
 
-          // WEIGHT COLUMN (or Bodyweight badge)
-          Expanded(
-            child:
-                (widget.isBodyweight &&
-                    !_customWeightExpanded &&
-                    widget.weightKg == 0)
-                ? InkWell(
-                    onTap: widget.isEditable
-                        ? () {
-                            setState(() => _customWeightExpanded = true);
-                            _weightFocus.requestFocus();
-                          }
-                        : null,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.panelBackground.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppTheme.cyanNeon.withValues(alpha: 0.2),
+          // Timed/cardio have no weight field; bodyweight uses added load.
+          if (!widget.isTimeBased) ...[
+            Expanded(
+              child:
+                  (widget.isBodyweight &&
+                      !_customWeightExpanded &&
+                      widget.weightKg == 0)
+                  ? InkWell(
+                      onTap: widget.isEditable
+                          ? () {
+                              setState(() => _customWeightExpanded = true);
+                              _weightFocus.requestFocus();
+                            }
+                          : null,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.panelBackground.withValues(
+                            alpha: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppTheme.cyanNeon.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(
+                          workoutText(ref, 'bodyweight_external_load'),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.cyanNeon,
+                          ),
                         ),
                       ),
-                      child: Text(
-                        workoutText(ref, 'bodyweight'),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.cyanNeon,
-                        ),
-                      ),
+                    )
+                  : _input(
+                      _weight,
+                      _weightFocus,
+                      widget.isBodyweight
+                          ? workoutText(ref, 'bodyweight_external_load')
+                          : workoutText(ref, 'weight'),
+                      false,
+                      suffix: 'kg',
                     ),
-                  )
-                : _input(
-                    _weight,
-                    _weightFocus,
-                    workoutText(ref, 'weight'),
-                    false,
-                    suffix: 'kg',
-                  ),
-          ),
-          const SizedBox(width: 6),
+            ),
+            const SizedBox(width: 6),
+          ],
 
           // REPS OR DURATION COLUMN
           Expanded(
@@ -298,8 +304,8 @@ class _SetRowWidgetState extends ConsumerState<SetRowWidget> {
       textAlign: TextAlign.center,
       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
       decoration: InputDecoration(
-        labelText: suffix ?? (integer ? workoutText(ref, 'reps') : 'kg'),
-        semanticCounterText: label,
+        labelText: label,
+        suffixText: suffix,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 14),
       ),

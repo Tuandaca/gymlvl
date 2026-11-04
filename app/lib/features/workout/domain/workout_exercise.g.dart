@@ -12,6 +12,10 @@ _WorkoutExercise _$WorkoutExerciseFromJson(Map<String, dynamic> json) =>
       workoutId: json['workout_id'] as String,
       exerciseId: json['exercise_id'] as String,
       orderIndex: (json['order_index'] as num?)?.toInt() ?? 0,
+      supersetGroupId: json['superset_group_id'] as String?,
+      supersetPosition: (json['superset_position'] as num?)?.toInt(),
+      supersetLocked: json['superset_locked'] as bool?,
+      mode: workoutModeFromJson(json['mode'] as String?),
       notes: json['notes'] as String?,
       createdAt: json['created_at'] == null
           ? null
@@ -32,8 +36,12 @@ Map<String, dynamic> _$WorkoutExerciseToJson(_WorkoutExercise instance) =>
       'workout_id': instance.workoutId,
       'exercise_id': instance.exerciseId,
       'order_index': instance.orderIndex,
+      'superset_group_id': instance.supersetGroupId,
+      'superset_position': instance.supersetPosition,
+      'superset_locked': instance.supersetLocked,
+      'mode': workoutModeToJson(instance.mode),
       'notes': instance.notes,
       'created_at': instance.createdAt?.toIso8601String(),
-      'exercises': instance.exercise?.toJson(),
-      'workout_sets': instance.sets.map((e) => e.toJson()).toList(),
+      'exercises': instance.exercise,
+      'workout_sets': instance.sets,
     };

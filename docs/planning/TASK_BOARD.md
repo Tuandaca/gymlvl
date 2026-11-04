@@ -1,6 +1,88 @@
 # GymLvl — Task Board
 
-## Current product task — M2 Exercise Detail Layout & Information Architecture (2026-11-01)
+## Current product checkpoint — M3.6 security & concurrency verification (2026-11-04)
+
+**Task:** M3.6 — complete offline payload encryption with platform-backed key handling, prove PostgreSQL idempotency under real two-connection concurrency, verify logout/account-switch isolation on the available real runtime, resolve only defects demonstrated by these gates, and decide M3 readiness.
+**Status:** `PASS` for all executable M3.6 gates. M3 overall is technically ready for M3-FINAL Git delivery subject to owner approval; production offline activation remains closed (four gates `false`). No commit, push, tag, deploy, remote migration, or production write occurred.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; working tree dirty by design (M3+M3.6 work preserved), index empty. Protected owner paths untouched.
+**Implementation:**
+- Offline payload: `OfflinePayloadCipher` (AES-256-GCM, fresh 96-bit nonce per seal, 128-bit tag, length-prefixed AAD binding owner/operation/workout/contract-version/mutation-kind), envelope columns `cipherVersion`/`keyVersion`/`nonce`/`ciphertextWithTag`, fail-closed typed exceptions, key-version promotion for forward rotation. Store schema v3 on both `offline_write_intents` and `offline_set_projections` with mutual-exclusion plaintext/ciphertext enforcement; legacy v2 rows preserved through migration; `encryptLegacyRowsForOwner` converts an owner's legacy plaintext rows.
+- Key storage: narrow `OfflinePayloadKeyStore` (`readKey`/`createKey`, no enumeration/bulk delete), deterministic `InMemoryOfflinePayloadKeyStore` for tests, `PlatformSecureOfflinePayloadKeyStore` via `flutter_secure_storage` (base64 32-byte key, DPAPI-protected file backend on Windows).
+- Auth lifecycle: `OfflineAuthenticatedSession.logout()` clears owner and bumps generation; sync pump checks session before every step, stops before ACK without processing, preserves rows (logout ≠ discard); discard requires explicit `ownerConfirmed`; only the matching owner may claim/sync/discard their operations; re-authentication recovers the owner's queue.
+- Dependencies added: `cryptography ^2.9.0` and `flutter_secure_storage ^11.2.0` (both BSD-3, non-AGPL, no media); `integration_test` dev dependency.
+**Verification:**
+- `cd app; flutter pub get` → `PASS`; `dart run build_runner build --delete-conflicting-outputs` → `PASS`; focused Flutter suite → **52/52 PASS** (cipher 12, encrypted queue 8, security lifecycle 11, schema migration 2, store 10, coordinator 9).
+- `cd app; flutter analyze --no-pub` → `No issues found!` `PASS`; `dart format` on changed Dart files → 0 changed `PASS`.
+- Full Flutter suite → 411 pass / 1 fail; sole failure is pre-existing protected local Gradle Wrapper 9.7.1 vs approved 8.13 (`release_config_test.dart`), a protected owner-file issue, **not** an M3.6 regression.
+- `cd tools/db-tests; npm test` → 16 SQL units / 365 ACL assertions `PASS` (existing single-connection suite unaffected).
+- `cd tools/db-tests; npm run test:concurrency` → **C1–C6 PASS (6/6)** on isolated disposable PostgreSQL 17.5 with two independent `pg.Client` connections: lock-wait evidence captured via `pg_stat_activity` monitor; at most one business mutation and one committed outcome per race; no duplicate reward; cross-user isolation; unauthorized rejection with SQLSTATE 42501 and no leakage. Data directory removed after run; no leftover process/listener.
+- Real-runtime platform secure storage: Windows integration test `create` + `recover` in two separate processes → key survives restart, envelope decrypts after restart, owner B denied, wrong binding rejected, delete fails closed; artifact cleaned up; **no residue**.
+- Independent QA (static + executed evidence review): `NO_DEFECT_FOUND`; no unresolved P0–P2.
+**Decision and files:** D-041 `PARTIALLY_APPROVED`; D-042 `ACCEPTED` for additive local/test verification only (recorded in `DECISIONS.md`). M3 candidate manifest is prepared but **not staged**. Exact changed/new files are listed in `M3_6_FINAL_REPORT.md`. Existing owner files and earlier M3 changes preserved.
+**Blockers:** M3-FINAL Git delivery requires owner approval to commit/push; `origin/main` not verified as current (no `git ls-remote` relied upon); remote migration/deployment and live Supabase/device production verification remain separate owner approvals (O-07/O-06). Device-runtime gate alone cannot be satisfied beyond the available Windows desktop (no Android emulator/physical device was installed solely for this gate, per project policy).
+**Next action:** Owner reviews `M3_6_FINAL_REPORT.md` and the exact M3 candidate manifest; approve M3-FINAL Git delivery (commit on `main`) when ready. Do not start M4.
+
+## Current product checkpoint — M3.5 approved server contracts (2026-11-03)
+
+**Task:** M3.5 — record D-041 owner approval and implement the bounded local/test PostgreSQL Superset v1 and four-mode contract.
+**Status:** `PARTIAL` for M3 overall. The server contract slice is `PASS` in single-connection PGlite; client Superset rounds/rest behavior, encrypted owner-scoped local lifecycle, and real-user integration are not implemented. Production offline-write activation remains closed.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; dirty tree preserved and index empty. No commit, push, deployment, or remote migration.
+**Changed files:** `supabase/migrations/20261103000200_m3_superset_modes.sql`, `supabase/tests/m3_superset_modes.sql`, `docs/planning/DECISIONS.md`, this board, `docs/planning/SESSION_HANDOFF.md`, and `docs/planning/CHANGELOG_AI.md`.
+**Implementation:** Nullable position and mode fields with constraints; transactional owner-checked Superset layout RPC; client direct group edits blocked; append-only private lock preserves group membership/order after a completed set even if that set is later uncompleted/deleted; ungroup preserves exercise/set rows; typed set validation; `complete_workout` accepts duration-only sets through its existing sole reward path and excludes them from strength PRs. Legacy NULL mode is preserved without inference. The existing online client path and production offline gate remain unchanged.
+**Verification:** `cd tools/db-tests; npm test` → 16 SQL verification units and 365 ACL assertions (`PASS`), including the new Superset/mode contract regression. `git diff --check` → exit 0 (`PASS`). PGlite is single-connection only; genuine two-connection PostgreSQL idempotency and security gate remains `BLOCKED` by the absent runtime. Flutter tests/analyzer `NOT RUN`: no app code changed in this slice. Live Supabase/device checks `NOT RUN`: unauthorized or unavailable.
+**Decision:** D-041 `PARTIALLY_APPROVED`: contracts accepted for implementation, with production activation explicitly unapproved. Earlier D-039/D-040 synthetic-only restrictions are superseded for approved local/test implementation, but real-user storage stays blocked until encryption/key/ownership/security evidence and PostgreSQL concurrency are complete.
+**Next action:** M3.6 — implement encrypted, owner-scoped local lifecycle and account-switch cancellation with synthetic fixtures; then integrate Superset rounds/rest and four modes behind the closed production gate. M4 is not started.
+
+## Current product checkpoint — M3.4 concurrency and contract gate (2026-11-03)
+
+**Task:** M3.4 — verify genuine PostgreSQL idempotency races if an existing runtime permits it, and prepare the remaining M3 owner contract gate.
+**Status:** `PARTIAL`. `POSTGRES_CONCURRENCY_RUNTIME_BLOCKED`: no local PostgreSQL/Docker/Podman service or WSL installation was found; the six two-connection scenarios were not run. Data lifecycle, Superset behavior, and four-mode contracts are `PROPOSED` in D-041, not approved. No app/SQL/test code changed.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; existing dirty tree preserved, index empty. No commit, push, deploy, remote migration, or real-user storage.
+**Evidence:** bounded environment check found `psql`/`pg_ctl`/`postgres`/Docker/Podman absent, no PostgreSQL service, port 5432 closed, and WSL not installed (`BLOCKED` for concurrency). SQL/Dart schema inspection identified `complete_workout` rejecting completed `reps=0` sets and `workout_sets` cascading on workout-exercise deletion. One read-only Codex subagent independently reviewed the contracts. M3.3's 103/103 Flutter, 14 SQL units, 365 ACL assertions, analyzer, and QA results are historical; tests `NOT RUN` in M3.4 because no code changed.
+**Decision gate:** [M3_4_FINAL_REPORT.md](../../M3_4_FINAL_REPORT.md) proposes encrypted payload/account lifecycle/retention/conflict policy, Superset order/round/rest/edit behavior, and an explicit legacy-preserving four-mode contract. Retention A versus B and any TTL duration require the owner; no option is auto-approved. Timed/cardio also need an approved server completion/reward update before activation.
+**Next action:** owner reviews and responds to the single D-041 approval gate; genuine PostgreSQL concurrency verification remains required before production integration. M3 is incomplete; M4 is not started.
+
+## Current product checkpoint — M3.3 synthetic sync foundation (2026-11-03)
+
+**Task:** M3.3 — complete the D-039/D-040 approved local/test offline outbox and idempotent sync foundation without production activation.
+**Status:** `PARTIAL` overall: technical implementation and focused local checks `PASS`; true two-connection PostgreSQL concurrency verification `BLOCKED`. Full M3 remains open.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; tree dirty, index empty. No commit, push, deploy, production migration, or real-user storage.
+**Implemented:** Drift schema v2 with additive v1 migration, atomic synthetic projection/outbox, canonical lowercase UUIDs, fingerprint, owner/workout-scoped claim/retry/conflict/ACK with a 30-second fenced lease; test-only coordinator with disabled production gate and bounded retry; normalized server fingerprint and private idempotency ledger with atomic set-create RPC. Superset non-null writes remain guarded; modes inactive. Existing online write path unchanged.
+**Verification:** focused M3/M3.1/M3.3 Flutter tests 103/103 (`PASS`); `npm test` 14 SQL units and 365 ACL assertions (`PASS`); analyzer no issues (`PASS`); format 146 files/0 changed (`PASS`); full Flutter suite 359/360 (`FAIL`) solely at the preserved local Gradle Wrapper 9.7.1 versus approved 8.13 assertion. Independent QA found two P2 defects, both fixed and re-reviewed; no actionable defect remains. True PostgreSQL two-connection test `BLOCKED` by absent local server/Docker; live/device/remote checks `NOT RUN`.
+**Decisions/blockers:** D-005/D-039/D-040 remain `PARTIALLY_APPROVED`. Encryption, retention/deletion, logout/account switching, replay conflict policy, superset behavior, and mode data/transitions remain unapproved. Local/server fingerprint bytes are intentionally separate; production wire canonicalization is pending.
+**Next action:** M3.3 verification — run concurrent same-operation duplicate requests against an isolated two-connection PostgreSQL instance; then obtain the remaining owner decisions before real-user integration. M4 is not started.
+
+## Current product checkpoint — M3.2 synthetic offline foundation (2026-11-03)
+
+**Task:** M3.2 — implement the D-039 approved Drift/SQLite outbox and server idempotency foundation for local/test only.
+**Status:** `PASS` for the scoped technical foundation. Full M3 remains `BLOCKED` for real-user offline writes, replay, supersets, and modes until the remaining D-039 policies and contracts are approved.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; working tree remains dirty and unstaged. No commit, push, deployment, production migration, or real-user storage.
+**Implementation:** Drift 2.28.x store with an atomic synthetic set projection and immutable outbox intent; local reopening and owner-scoped operations; additive PostgreSQL ledger/RPC with versioned SHA-256 request fingerprint and exact-body conflict check; nullable superset group UUID with a non-null write guard. No controller, repository, or sync worker connection. Four mode names remain inactive.
+**Verification at this checkpoint:** `flutter pub get` (`PASS`); focused Flutter tests 11/11 (`PASS`); `flutter analyze --no-pub` no issues (`PASS`); `dart format --output=none --set-exit-if-changed lib test` 143 files/0 changed (`PASS`); `npm test` 14 SQL units and 365 ACL assertions (`PASS`). Full Flutter suite 342/343 (`FAIL`): the sole `release_config_test.dart` mismatch is the preserved local Gradle Wrapper 9.7.1 versus approved 8.13. Live Supabase, two-connection concurrency, device, and remote CI are `NOT RUN`.
+**Decisions/blockers:** D-005/D-039 `PARTIALLY_APPROVED`. Encryption, retention/deletion, logout/account switching, replay conflict/reconciliation, superset behavior, and mode data/transition rules remain unapproved. O-07 blocks live Supabase verification.
+**Next action:** M3.3 — obtain owner decisions on those real-data policies and contracts before connecting the outbox to production workout writes.
+
+## Current product checkpoint — M3.1 offline architecture and safe foundation (2026-11-01)
+
+**Task:** M3.1 — propose offline write, superset, and workout-mode contracts; implement only a disconnected, testable foundation.
+**Status:** `PARTIAL` for the remaining M3 capability. The M3.1 proposal and isolated identity foundation are complete locally; production offline replay, persisted supersets, and active modes remain `BLOCKED` on owner decisions.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`; `origin/main` matched at preflight. The M3 timer changes, M3.1 changes, and owner-controlled files remain uncommitted and unstaged.
+**Changes:** `docs/planning/M3_1_DECISION_PROPOSAL.md` (`PROPOSED`), `app/lib/features/workout/domain/workout_write_identity.dart`, `app/test/workout_write_identity_test.dart`, `M3_1_FINAL_REPORT.md`, and M3.1 additions to this board, `SESSION_HANDOFF.md`, and `CHANGELOG_AI.md`. The earlier M3 timer files were preserved.
+**Verification:** `flutter test --no-pub test/workout_write_identity_test.dart --reporter compact` → 7/7 (`PASS`); M3 timer/controller/widget focused tests → 75/75 (`PASS`); `flutter analyze --no-pub` → no issues (`PASS`); `dart format --output=none --set-exit-if-changed` on two M3.1 Dart files → 0 changed (`PASS`). Full suite `NOT RUN` in M3.1 because the new model is disconnected; prior M3 331/332 remains historical evidence, not a current pass.
+**Decisions/blockers:** D-005/O-03 stays proposed; the outbox/server idempotency contract, superset persistence/interaction contract, and mode-specific data rules need owner approval. No new schema, persistence dependency, production write path, or approved decision was introduced.
+**Next action:** owner reviews the M3.1 decision proposal; after approval is recorded, implement the chosen transactional local outbox and server idempotency path as the next M3 task. M4 is not started.
+
+## Current product checkpoint — M3 rest-timer migration slice (2026-11-01)
+
+**Task:** M3 — Offline-first Workout Core, Modes, Timers, Supersets; bounded timer-continuity and Candy UI slice.
+**Status:** `PARTIAL` for the full M3 milestone. The timer slice is implemented and locally verified; durable offline set writes, additional modes, and persisted supersets are not complete. D-005/O-03 still blocks a new local-store design. No production readiness is claimed.
+**Commit:** `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe` (`origin/main` matched at preflight). Five M3 app/test files and M3 records are local and uncommitted; protected owner files remain dirty and preserved. Index is empty.
+**Implemented:** owner/workout-bound rest snapshot in the existing backup; accurate running/paused recovery, expiry and remote-completion cleanup; serialized backup writes; Candy timer/wheel UI with VI/EN semantics and 48dp controls at 320dp/2x.
+**Verification:** `flutter test --no-pub test/workout_snapshot_ownership_test.dart test/workout_controller_test.dart test/workout_widgets_test.dart --reporter expanded` → 75/75 (`PASS`); `flutter analyze --no-pub` → no issues (`PASS`); `dart format --output=none --set-exit-if-changed lib test` → 138 files/0 changed (`PASS`). Full suite `flutter test --no-pub --reporter expanded` → 331/332, exit 1 (`FAIL`): sole `release_config_test.dart` Gradle 8.13 assertion against protected local wrapper 9.7.1. Independent QA reran ownership tests 49/49 (`PASS`); two QA defects were fixed and re-reviewed.
+**Blockers:** O-03/D-005 local-store design for durable offline write queue; approved additive superset grouping contract; O-02 AGPL reuse and O-08 exercise-text provenance remain open. Live Supabase, real-device, and remote CI checks were `NOT RUN`.
+**Next action:** prepare the M3 local-store and superset data design for owner approval, then finish the remaining M3 exit criteria. M4 is planned but not started.
+
+## Historical product task — M2 Exercise Detail Layout & Information Architecture (2026-11-01)
 
 **Task:** M2 — implement a canonical Exercise Detail screen, picker entry, localized Candy layout, and focused tests.
 **Status:** `PASS` for locally implemented M2 functionality; not committed or deployed. Instructions are intentionally unavailable pending O-08 provenance, and primary muscle is unavailable because the model has no field. M2 is not production-ready.
