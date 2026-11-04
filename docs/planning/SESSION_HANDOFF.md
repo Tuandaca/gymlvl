@@ -1,5 +1,40 @@
 # GymLvl — Session Handoff
 
+## Current — Flutter runtime configuration resolved (2026-11-05) — PASS
+
+**Task:** Resolve `SupabaseConfig.isConfigured == false` causing `ConfigurationApp` instead of `MainApp`.
+
+**Status:** `PASS`. `app/config.local.json` updated with production Supabase public values (URL + anon publishable key). `app/.vscode/launch.json` created with `--dart-define-from-file=config.local.json`. App launched successfully on Chrome (`flutter run -d chrome --web-port 8080 --dart-define-from-file=config.local.json`). Log confirmed `Supabase init completed`. `ConfigurationApp` did not appear; `MainApp` launched.
+
+**Changed files:** `app/config.local.json` (updated, gitignored), `app/.vscode/launch.json` (new).
+
+**Verification:** `flutter run -d chrome --web-port 8080 --dart-define-from-file=config.local.json` → `Supabase init completed` log → `PASS`.
+
+**Next action:** Return to Onboarding 9/9 investigation (BLOCKED on production DB access).
+
+---
+
+## Current — Onboarding 9/9 submit failure investigation (2026-11-04) — BLOCKED on production DB access
+
+**Task:** Investigate and fix `initialize_user` RPC failure when user completes onboarding step 9/9. UI shows `Không thể hoàn tất yêu cầu. Vui lòng thử lại.`
+
+**Status:** `BLOCKED` — Root cause identified but fix requires production database access/migration deployment, which requires explicit owner approval. Cannot confirm exact production error code without database access.
+
+**Commit:** `main` @ `2944c1a459204cf6962a157612bbb647ada8f349`; working tree dirty by pre-existing M3+M4 work (preserved); no new changes from this investigation (all temporary test files removed).
+
+**Investigation performed:**
+1. Traced call chain: `onboarding_screen.dart:42` → `onboarding_controller.dart:54-101` → `SupabaseClient.rpc('initialize_user', ...)` → PostgREST → PostgreSQL function `public.initialize_user(p_profile jsonb)` → INSERT `public.profiles`, `public.user_classes`; UPDATE `public.users`; INSERT `public.streaks`.
+2. Local reproduction with PGlite + all 10 migrations: `PASS`. `initialize_user` completes onboarding, sets `onboarding_completed=true`, inserts profile/class/streak rows. Idempotent retry returns "Onboarding already complete" without duplicate data. Dart code + SQL function are correct when database is fully migrated.
+3. Root cause (likely): Production Supabase database missing migration `20261026000200_authoritative_progression.sql` (or parts of it), which creates `public.initialize_user` function, adds `public.profiles.timezone` column, creates `public.handle_new_user` trigger and backfills `public.users`. Without this migration, `initialize_user` does not exist or `public.users` row is missing for the user.
+4. Files changed: None (read-only investigation; no application-code fix possible — root cause is database state).
+5. DB/RLS changes: None applied. Fix requires deploying missing migration(s) to production — requires explicit owner approval per AGENTS.md §0.3/§8.
+
+**Blockers:** No production Supabase access; `supabase db push`/remote migration requires explicit owner approval. Cannot confirm exact production error code (PostgrestException/AuthException/FunctionsException, status code, PostgreSQL error code, message, details, hint) without database access.
+
+**Next action:** Owner to verify production database schema (especially `public.initialize_user` function existence, `public.profiles.timezone` column, `public.users` rows for current user) and approve migration deployment if missing.
+
+---
+
 ## Current — M5 — First-Week Plan, Analytics, Bodyweight & Newcomer Journey (2026-11-04)
 
 **Task:** M5 — complete M5 milestone: first-week training plan generation/selection, newcomer journey state machine, analytics (heatmap, weight trend, PR chart, muscle balance), bodyweight trend with weight_kg-as-external-load semantics, Candy UI, VI/EN, additive SQL schema, focused tests, independent QA. Per MASTER_PLAN §3 and exit gate "Beginner completes three workouts from a generated plan; charts reconcile."

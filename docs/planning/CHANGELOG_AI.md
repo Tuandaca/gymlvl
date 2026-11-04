@@ -2,6 +2,34 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-05 — Flutter runtime configuration resolved; app launches into MainApp on Chrome
+
+- **Task:** Resolve `SupabaseConfig.isConfigured == false` causing `ConfigurationApp` to display instead of `MainApp`.
+- **Root cause:** `app/config.local.json` existed but `SUPABASE_PUBLISHABLE_KEY` was still the placeholder value `"REPLACE_WITH_YOUR_PUBLISHABLE_OR_ANON_KEY"`. `SupabaseConfig.isPublicClientKey()` returned `false` (key does not start with `sb_publishable_` and is not a valid anon JWT), so `isConfigured` evaluated to `false` and `main.dart` ran `ConfigurationApp`.
+- **Files changed:**
+  - `app/config.local.json` — updated `SUPABASE_URL` to `https://shulhhxdebsfbsxcborq.supabase.co` and `SUPABASE_PUBLISHABLE_KEY` to `sb_publishable_zgemxQoj9adnol-7qTIRfQ_wiqC9QR-` (public client values only; no secret/service_role). File already listed in `app/.gitignore` line 51.
+  - `app/.vscode/launch.json` — created launch configuration `GymLvl Chrome (config.local.json)` with `--web-port 8080 --dart-define-from-file=config.local.json` so future runs do not forget the flag.
+- **Command run:** `flutter run -d chrome --web-port 8080 --dart-define-from-file=config.local.json` from `app/`.
+- **Verification:**
+  - `SupabaseConfig.isConfigured`: `PASS` (app proceeded past the configuration check).
+  - `Supabase.initialize()`: `PASS` — log `supabase.supabase_flutter: INFO: ***** Supabase init completed *****`.
+  - `ConfigurationApp`: did not appear.
+  - `MainApp`: `PASS` — app launched successfully on Chrome (web-port 8080).
+- **No MCP changes. No database changes. No migration. No commit/push of credentials.**
+- **Next action:** None for this task. Onboarding 9/9 investigation remains BLOCKED on production DB access.
+
+## 2026-11-04 — Onboarding 9/9 submit failure investigation (BLOCKED — production DB state)
+
+- **Task:** Investigate and fix `initialize_user` RPC failure when user completes onboarding step 9/9. UI shows `Không thể hoàn tất yêu cầu. Vui lòng thử lại.`
+- **Call chain:** UI `onboarding_screen.dart:42` → Controller `onboarding_controller.dart:54-101` → `SupabaseClient.rpc('initialize_user', params: {'p_profile': {...}})` → PostgREST `POST /rest/v1/rpc/initialize_user` → PostgreSQL function `public.initialize_user(p_profile jsonb)` → INSERT `public.profiles`, `public.user_classes`; UPDATE `public.users`; INSERT `public.streaks`.
+- **Local reproduction (PGlite + all 10 migrations):** `PASS`. `initialize_user` completes onboarding, sets `onboarding_completed=true`, inserts profile/class/streak rows. Idempotent retry returns "Onboarding already complete" with no duplicate data. Code (Dart + SQL) is correct when database is fully migrated.
+- **Root cause (likely):** Production Supabase database is missing migration `20261026000200_authoritative_progression.sql` (or parts of it), which creates `public.initialize_user` function, adds `public.profiles.timezone` column, creates `public.handle_new_user` trigger and backfills `public.users`. Without this migration, `initialize_user` does not exist (or `public.users` row is missing for the user), causing the RPC to fail.
+- **Files changed:** None (read-only investigation; no code fix possible at application layer — root cause is database state).
+- **DB/RLS changes:** None applied. Fix requires deploying missing migration(s) to production — requires explicit owner approval per AGENTS.md §0.3/§8 (production database mutation).
+- **Verification:** Local PGlite test `PASS`. Production runtime verification `NOT RUN` (no production database access).
+- **Blocker:** No production Supabase access; `supabase db push`/remote migration requires explicit owner approval. Cannot confirm exact production error code without database access.
+- **Next action:** Owner to verify production database schema (especially `public.initialize_user` function, `public.profiles.timezone` column, `public.users` rows) and approve migration deployment if missing.
+
 ## 2026-11-04 — M5 complete: First-Week Plan, Analytics, Bodyweight & Newcomer Journey — local/test only (orchestrator summary)
 
 - **Status:** `PASS` for M5 (Agent E independent QA `PASS`; no P0–P1 findings). Branch `main` @ `b6b0172871d7d18e9d9c27eca3f883d381f5b206`. D-044 `RECORDED`. M5 is local/test verification only. No commit, push, tag, deploy, remote migration, or production write. Git delivery deferred to a separate `M5-FINAL` task; exact candidate manifest in `M5_FINAL_REPORT.md`.
