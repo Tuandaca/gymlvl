@@ -1,13 +1,27 @@
 {
   "manifestVersion": 1,
   "createdAt": "2026-10-31T00:00:00Z",
-  "purpose": "Pin immutable upstream OpenGym reference revisions for M0 migration work. Behavioral reference only; no AGPL code, catalogue text, or media reuse without a legal decision.",
+  "lastUpdated": "2026-11-05T00:00:00Z",
+  "purpose": "Pin immutable upstream OpenGym reference revisions for GymLvl. Behavioral reference only; no AGPL code, catalogue text, or media reuse without a legal decision.",
   "gymLvl": {
     "repository": "https://github.com/Tuandaca/gymlvl",
     "branch": "main",
-    "headSha": "6badfef29a871a978a09daee304dc1c3f3f69a84",
-    "verifiedBy": "git rev-parse HEAD (current session)",
-    "treeState": "dirty: 5 owner files preserved (app/android/gradle.properties, app/android/run_gradle.bat, docs/audit/phases/A8_BATCH_EXECUTION.md, gradle_check.ps1, run_gradle_check.bat)"
+    "planning_rebase_base_head": "da21eb742aeac1266a3aa1df9d043ec2602a843f",
+    "planning_rebase_base_head_note": "GymLvl repository HEAD at the time of P0 audit. This is a mutable GymLvl SHA, NOT an immutable upstream source pin. After the P0 commit is created, this SHA will no longer be the current repository HEAD. Every new session must determine live repository state using: git branch --show-current; git rev-parse HEAD; git status --short",
+    "remoteVerified": "origin/main == local main (at P0 audit time)",
+    "treeState": "dirty: pre-existing M3/M4 work preserved (6 modified tracked files, 10 untracked files); no source/application changes made in P0",
+    "planningFilesRewritten": [
+      "docs/planning/MASTER_PLAN.md",
+      "docs/planning/PROJECT_CONTEXT.md",
+      "docs/planning/TASK_BOARD.md",
+      "docs/planning/SESSION_HANDOFF.md",
+      "docs/planning/CHANGELOG_AI.md",
+      "docs/planning/DECISIONS.md",
+      "docs/planning/UPSTREAM_SOURCE_MANIFEST.json"
+    ],
+    "newFiles": [
+      "docs/planning/OPENGYM_PARITY_MATRIX.md"
+    ]
   },
   "openGymOfficial": {
     "repository": "https://github.com/DuarteSantos8/openGym",
@@ -33,5 +47,5 @@
     "license": "MIT for text/data; media excluded",
     "permittedUse": "Import text/metadata only, with notice; strip all media fields and links"
   },
-  "notes": "No commit, push, or tag performed. Manifest is commit-ready pending owner approval. Do not nest OpenGym inside GymLvl git tree; do not add as submodule; do not commit reference source into GymLvl."
+  "notes": "No commit, push, or tag performed by P0. Manifest is commit-ready pending owner approval. Do not nest OpenGym inside GymLvl git tree; do not add as submodule; do not commit reference source into GymLvl."
 }

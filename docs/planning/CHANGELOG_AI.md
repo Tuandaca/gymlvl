@@ -2,6 +2,24 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-05 — P0 Planning Rebase & Context Consolidation (COMPLETE)
+
+- **Task:** Reconcile accumulated planning documents against the actual repository and rewrite the canonical planning/control layer so a new OpenCode session can understand the project without relying on chat history. No product implementation.
+- **Roadmap:** Rebased active roadmap from legacy M0–M9 to P0–P8. P1 (OpenGym Parity Baseline + Legal-Safe Exercise Catalogue) is the next implementation phase. Old M6/AI PT is NOT the immediate next stage.
+- **Files rewritten:**
+  - `docs/planning/MASTER_PLAN.md` — P0–P8 roadmap, product destination, non-negotiable decisions, corrections register
+  - `docs/planning/PROJECT_CONTEXT.md` — current truth (`planning_rebase_base_head` `da21eb7` at P0 audit, mutable; M3 offline store exists, 10 migrations, production restrictions)
+  - `docs/planning/TASK_BOARD.md` — current execution state only; Onboarding 9/9 BLOCKED; P1 NOT STARTED
+  - `docs/planning/SESSION_HANDOFF.md` — NEW SESSION START HERE block; historical entries trimmed to CHANGELOG/reports
+  - `docs/planning/CHANGELOG_AI.md` — this entry
+  - `docs/planning/DECISIONS.md` — P0/P1 decisions added; legacy milestone decisions marked SUPERSEDED
+  - `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` — `planning_rebase_base_head` recorded as `da21eb7` at P0 audit (mutable)
+- **Files created:**
+  - `docs/planning/OPENGYM_PARITY_MATRIX.md` — empty/initial tracking framework for P1 (no detailed parity audit yet)
+- **Verification:** All canonical Markdown links valid; JSON manifest valid; no canonical document contradicts another; no active document says old M6 AI is the next task; P1 consistently identified as next implementation phase; historical reports remain accessible; no source/application behavior changed; no migrations changed; no dependency changed.
+- **No MCP changes. No database changes. No migration. No commit/push of credentials.**
+- **Next action:** Owner review of P0 deliverables; then P1.
+
 ## 2026-11-05 — Flutter runtime configuration resolved; app launches into MainApp on Chrome
 
 - **Task:** Resolve `SupabaseConfig.isConfigured == false` causing `ConfigurationApp` to display instead of `MainApp`.
@@ -23,9 +41,9 @@ Dated record of agent sessions and project checkpoints. Newest first.
 - **Task:** Investigate and fix `initialize_user` RPC failure when user completes onboarding step 9/9. UI shows `Không thể hoàn tất yêu cầu. Vui lòng thử lại.`
 - **Call chain:** UI `onboarding_screen.dart:42` → Controller `onboarding_controller.dart:54-101` → `SupabaseClient.rpc('initialize_user', params: {'p_profile': {...}})` → PostgREST `POST /rest/v1/rpc/initialize_user` → PostgreSQL function `public.initialize_user(p_profile jsonb)` → INSERT `public.profiles`, `public.user_classes`; UPDATE `public.users`; INSERT `public.streaks`.
 - **Local reproduction (PGlite + all 10 migrations):** `PASS`. `initialize_user` completes onboarding, sets `onboarding_completed=true`, inserts profile/class/streak rows. Idempotent retry returns "Onboarding already complete" with no duplicate data. Code (Dart + SQL) is correct when database is fully migrated.
-- **Root cause (likely):** Production Supabase database is missing migration `20261026000200_authoritative_progression.sql` (or parts of it), which creates `public.initialize_user` function, adds `public.profiles.timezone` column, creates `public.handle_new_user` trigger and backfills `public.users`. Without this migration, `initialize_user` does not exist (or `public.users` row is missing for the user), causing the RPC to fail.
+- **Root cause:** Production onboarding 9/9 is blocked by a production schema/runtime mismatch. Read-only inspection showed that expected initialization capability such as `initialize_user` and `profiles.timezone` was absent. The exact unapplied migration set has not yet been established.
 - **Files changed:** None (read-only investigation; no code fix possible at application layer — root cause is database state).
-- **DB/RLS changes:** None applied. Fix requires deploying missing migration(s) to production — requires explicit owner approval per AGENTS.md §0.3/§8 (production database mutation).
+- **DB/RLS changes:** None applied. This is a known production-environment blocker, not the current implementation task. The owner is currently testing UI. Do not deploy migrations or run `supabase db push` unless explicitly requested later.
 - **Verification:** Local PGlite test `PASS`. Production runtime verification `NOT RUN` (no production database access).
 - **Blocker:** No production Supabase access; `supabase db push`/remote migration requires explicit owner approval. Cannot confirm exact production error code without database access.
 - **Next action:** Owner to verify production database schema (especially `public.initialize_user` function, `public.profiles.timezone` column, `public.users` rows) and approve migration deployment if missing.

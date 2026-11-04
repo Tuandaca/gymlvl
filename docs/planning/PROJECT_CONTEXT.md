@@ -1,29 +1,29 @@
 # GymLvl — Project Context
 
 **Status:** Durable project memory
-**Last verified:** 2026-10-29
-**Baseline:** branch `main` (sole development branch), consolidation checkpoint `17ca562`
-(full SHA `17ca562f7d382cdd16e17a414460b8266edcf16b`)
+**Last verified:** 2026-11-05
+**Baseline:** branch `main` (sole development branch), `planning_rebase_base_head` `da21eb742aeac1266a3aa1df9d043ec2602a843f` (GymLvl HEAD at P0 audit time; mutable — re-verify with `git rev-parse HEAD` each session)
+**Remote:** `origin/main` == local `main` (verified at P0 audit time; re-verify with `git rev-parse origin/main` each session)
 **Owner:** GymLvl project
 
-This file answers: what is GymLvl, what is true now, what must not change, and which source wins
-when documents disagree. It is intentionally model-independent.
+This file answers: what is GymLvl, what is true now, what must not change, and which source wins when documents disagree. It is intentionally model-independent.
 
 ---
 
 ## 1. Product
 
-GymLvl is a **mobile-first fitness RPG** for Android and iOS. It combines structured workout
-tracking with an RPG progression layer:
+GymLvl is a **mobile-first fitness RPG** for Android and iOS. It combines structured workout tracking with an RPG progression layer:
 
 - Six classes (`A`–`F`), primary and secondary class selection, class synergy.
 - XP, levels, quests, streaks, achievements.
 - Workout logging with exercises, sets, weight, reps, duration, and completion.
 - Vietnamese and English UI.
 
-The product direction is to add credible training capabilities — a deeper exercise catalog, weekly
-plans, offline logging, progression intelligence, analytics, and an approval-based AI personal
-trainer — **without** losing the RPG identity or the existing user history.
+The product direction is to add credible training capabilities — a deeper exercise catalog, weekly plans, offline logging, progression intelligence, analytics, and an approval-based AI personal trainer — **without** losing the RPG identity or the existing user history.
+
+GymLvl should use OpenGym as the comprehensive reference for fitness functionality and data structures, migrate/reimplement as much useful functionality as legally and technically practical into the existing GymLvl Flutter/Supabase architecture, replace OpenGym's visual experience with GymLvl's Candy Neubrutalism design, and deeply integrate GymLvl's RPG systems.
+
+---
 
 ## 2. Repository and current baseline
 
@@ -31,25 +31,13 @@ trainer — **without** losing the RPG identity or the existing user history.
 |---|---|
 | Repository | `https://github.com/Tuandaca/gymlvl` |
 | Development branch | `main` (only) |
-| Consolidation checkpoint | `17ca562f7d382cdd16e17a414460b8266edcf16b` (`17ca562`) |
-| Previous `main` | `e0038038300d5bfaf3c4747094cf36a132eb8711` (`e003803`) |
-| Remote branch | `origin/main` — pushed and verified at the checkpoint (via `git ls-remote`) |
-| Retained branch | `codex/supabase-product-audit` = `17ca562` (read-only provenance) |
-| Working tree at baseline | Clean at `17ca562` (verified 2026-10-28); **dirty at `b85d674`** (verified 2026-10-29, preserved owner work plus audit-remediation edits) |
+| `planning_rebase_base_head` | `da21eb742aeac1266a3aa1df9d043ec2602a843f` (mutable; re-verify each session) |
+| Remote | `origin/main` == local `main` |
 | Tags | None |
-| Tracked files at HEAD | 570 at `b85d674` (511 at `17ca562`) |
+| Working tree | **Dirty** — pre-existing M3/M4 work preserved (6 modified tracked files, 10 untracked files); no source/application changes made in P0 |
+| `.gitignore` protects | `app/config.local.json` (never committed) |
 
-**Current product milestone checkpoint (2026-11-01):** D-038 closes Exercise Catalogue M1 for
-implementation and Git delivery at `main`/`origin/main` `1979dfd5fda7cebf6791c11ece3cc1aa333ce1c3`.
-Exercise Detail M2 is ready for execution and has not started. The table above is a historical
-baseline snapshot; the working tree remains intentionally dirty with preserved owner files.
-
-**Important:** the M0 audit observed 166 dirty entries on top of `e003803`. Between sessions that
-work was committed as `56c1122` ("feat: add core workout features, Supabase backend functions, and
-end-to-end testing infrastructure": 381 files, +33,198/−8,080) and pushed to
-`origin/codex/supabase-product-audit`. The actor and exact timing of that commit are not verified.
-On 2026-10-28 all work was consolidated into `main` at `17ca562` (fast-forward; D-014). All current
-work starts from `main`.
+---
 
 ## 3. Technology stack
 
@@ -60,153 +48,105 @@ work starts from `main`.
 | Routing | GoRouter 17.x |
 | Models | Freezed 3 + JSON serialization |
 | Backend | Supabase: Auth, PostgreSQL, PostgREST, Edge Functions (Deno) |
-| Local persistence | `shared_preferences` only (active-workout backup, preferences) |
+| Local persistence | Drift/SQLite store (M3, local/test only; production gate closed) + `shared_preferences` for settings |
 | Charts | `fl_chart` |
 | UI system | Bold Candy Neubrutalism (custom `Candy*` primitives) |
 | Tests | Flutter test, PGlite/PostgreSQL SQL harness, Deno edge tests |
 
-There is **no local SQL database**, no sync outbox, and no offline mutation queue today. Offline
-behavior is limited to a local active-workout snapshot; set mutations still require the network.
+---
 
-## 4. Verified baseline evidence (2026-10-28, `main` @ `17ca562`)
+## 4. What is implemented (evidence-based)
 
-These checks were re-executed during the consolidation session; the same suites passed at `56c1122`
-in the bootstrap session:
-
-| Check | Command | Result |
+| Capability | Status | Evidence |
 |---|---|---|
-| Static analysis | `cd app; flutter analyze` | `PASS` — 0 issues |
-| Formatting | `cd app; dart format --output=none --set-exit-if-changed lib test` | `PASS` — 125 files, 0 changed |
-| Flutter tests | `cd app; flutter test` | `PASS` — 126/126 |
-| SQL regression | `cd tools/db-tests; npm test` | `PASS` — 10/10 units, PostgreSQL 17.5 via PGlite |
-| Edge tests | `cd tools/db-tests; npm run test:edge` | `PASS` — 15/15 Deno tests |
-| Exercise catalog | SQL harness assertion | `PASS` — 150 exercises, 0 null/empty metadata |
-| Git state | `git status --porcelain=v1` | Clean, 0 entries |
+| Architecture/Foundation | COMPLETE | `app/lib/`, `supabase/migrations/`, `supabase/functions/` |
+| Exercise Catalogue | STRONG PARTIAL | 150 curated exercises, search/filter, detail screen |
+| Workout Core | STRONG PARTIAL | Workout logging, active session, sets, rest timer, history, modes, supersets |
+| Offline | PARTIAL (local/test only) | Drift store, encrypted payload, sync coordinator — production gate closed |
+| Progression | PARTIAL | Epley 1RM, PR detection, RPE/RIR, RPG bridge — server authority preserved |
+| RPG | PARTIAL | Classes A–F, XP, levels, quests, streaks |
+| Planning | PARTIAL | First-Week plan, newcomer journey |
+| Analytics | PARTIAL | Heatmap, weight trend, PR chart, muscle balance |
+| Bodyweight | PARTIAL | Weigh-in trend, external-load semantics |
+| AI | NOT STARTED | Chat-only proxy, no typed proposals/approval/apply-revert |
+| OpenGym parity | NOT STARTED | No catalogue import, no routine/planning parity |
+| Production activation | BLOCKED | No production DB access; onboarding 9/9 blocked by production schema/runtime mismatch (read-only inspection showed expected initialization capability such as `initialize_user` and `profiles.timezone` was absent; exact unapplied migration set not yet established) |
+| Release readiness | NOT STARTED | No Android/iOS release build, signing keys absent |
 
-Limitations: the SQL harness is a single-connection PGlite instance, not a full Supabase stack.
-Android/iOS release builds, device smoke tests, live Supabase, and live AI providers were **not run**
-in this session.
+**17 tables:** `users`, `profiles`, `exercises`, `workouts`, `workout_exercises`, `workout_sets`, `xp_logs`, `streaks`, `exercise_prs`, `quests`, `quest_instances`, `user_classes`, `class_definitions`, `class_synergies`, `workout_rewards`, `user_achievements`, `coach_daily_usage`.
 
-### 4.1 Current session baseline (2026-10-29, `main` @ `b85d674`)
+**10 migrations:** baseline, authoritative_progression, exercise_catalog_metadata, effective_progression_acl, prevent_legacy_double_award, m3_offline_foundation, m3_superset_modes, m4_progression_rpe_rir, m5_analytics_indexes, m5_bodyweight_measurements.
 
-Re-executed during the audit-remediation session; these supersede the counts in §4. The R2 pass
-(A-2, A-3, A-4, A-7, A-8, A-1) re-ran every gate after its changes.
+**7 Edge Functions:** ai-coach, calculate-xp, get-user-stats, initialize-user, switch-class, sync-daily-data.
 
-| Check | Command | Result |
-|---|---|---|
-| Static analysis | `cd app; flutter analyze --no-pub` | `PASS` — No issues found (exit 0) |
-| Formatting | `cd app; dart format --output=none --set-exit-if-changed lib test` | `PASS` — 134 files, 0 changed (exit 0) |
-| Flutter tests | `cd app; flutter test --no-pub` | `PASS` — 200/200 at entry; 215/215 after A8; 221/221 after R2 |
-| SQL regression + ACL | `cd tools/db-tests; node run.mjs` | `PASS` — 12 units + 365 ACL assertions (exit 0) |
-| Edge tests | `cd tools/db-tests; node edge-tests.mjs` | `PASS` — 44/44 (exit 0) |
-| Android merged manifest | `node tools/android-verify/run.mjs` | `PASS` — `INTERNET` direct child, label `GymLvl` (exit 0) |
-| Release APK / iOS / hosted / live Auth | `flutter build apk --release`, Xcode, hosted project | `NOT RUN` — signing keys, Windows host, `O-07` |
+`complete_workout` is the authoritative completion/reward path: transactional, row-locked, idempotent via `workout_rewards`, with suspicious-pace clamping. Clients cannot write XP, levels, streaks, quests, or PRs.
 
-This file is a durable snapshot, not a live status feed. When the numbers above disagree with a
-freshly executed command, the command wins (§7 precedence rule 1) and this section must be updated.
+---
 
-## 5. Backend facts
-
-- 17 tables: `users`, `profiles`, `exercises`, `workouts`, `workout_exercises`, `workout_sets`,
-  `xp_logs`, `streaks`, `exercise_prs`, `quests`, `quest_instances`, `user_classes`,
-  `class_definitions`, `class_synergies`, `workout_rewards`, `user_achievements`,
-  `coach_daily_usage`.
-- Migrations:
-  - `20261026000100_baseline.sql` (661 lines)
-  - `20261026000200_authoritative_progression.sql` (349 lines)
-  - `20261027000100_exercise_catalog_metadata.sql` (367 lines)
-- `complete_workout` is the authoritative completion/reward path: transactional, row-locked,
-  idempotent via `workout_rewards`, with suspicious-pace clamping.
-- RLS and grants are hardened. Direct client writes to XP, levels, streaks, quests, and PRs are
-  denied.
-- The curated catalog contains **150** exercises. Its text provenance is undocumented.
-- The AI Coach is currently a **chat-only proxy** (`ai-coach` Edge Function + chat screen). It has
-  no typed plan proposal, validation, approval, apply/revert, or consent record.
-
-## 6. Reference sources and their status
+## 5. Reference sources and their status
 
 | Source | Pinned revision | License | Permitted use |
 |---|---|---|---|
-| `emilfunk/opengym` (A) | `678bf5bf10446e8997a77d43e89c9b2721d8d0fc` | AGPL-3.0 | Behavioral reference only; no code/text/assets |
-| `DuarteSantos8/openGym` (B) | `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` | AGPL-3.0 + non-transferable app-store exception | Behavioral reference only |
+| `DuarteSantos8/openGym` (B) | `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` | AGPL-3.0 | Behavioral reference only; no code/text/assets |
 | `hasaneyldrm/exercises-dataset` (C) | `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` | MIT for text/data; media excluded | Import text/metadata only, with notice; strip media |
 | Gym visual media | — | Proprietary | **Not licensed.** Do not use. |
-| MuscleMap geometry | — | MIT | Optional, with attribution, if used. |
 
-Current OpenGym B catalogue count is **6,554** exercises, not the 5,632 stated in the original master
-plan. It has 17 translation files and 13,109 media files. The media count is informational only; no
-media may be imported.
+Current OpenGym B catalogue count is **6,554** exercises (not 5,632). It has 17 translation files and 13,109 media files. No media may be imported.
 
-## 7. Source precedence
+---
+
+## 6. Source precedence
 
 When documents disagree, use this order:
 
 1. **Executed verification at the current commit** (commands and output).
 2. `docs/planning/DECISIONS.md` — accepted decisions.
-3. `docs/planning/SESSION_HANDOFF.md` and `TASK_BOARD.md` — current work state.
-4. `docs/planning/M0_AUDIT.md` — audit findings, with evidence labels.
-5. `docs/planning/MASTER_PLAN.md` — milestone index.
-6. `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` — original product vision (preserved,
-   not edited).
-7. `PROJECT.md`, `docs/IMPLEMENTATION_STATUS.md`, `TEST_READY.md`, `TEST_INFRA.md` — historical
-   status documents; several claims are stale.
-8. Any other doc or comment.
+3. `docs/planning/MASTER_PLAN.md` — active roadmap.
+4. `docs/planning/PROJECT_CONTEXT.md` — this file.
+5. `docs/planning/TASK_BOARD.md` and `SESSION_HANDOFF.md` — current work state.
+6. `docs/planning/M0_AUDIT.md` — audit findings.
+7. `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` — original product vision (preserved, not edited).
+8. Other docs — historical/stale; several claims are outdated.
 
-Never resolve a conflict by silently editing the lower-precedence document. Record it in
-`DECISIONS.md` or the conflict register in `M0_AUDIT.md`.
+Never resolve a conflict by silently editing the lower-precedence document. Record it in `DECISIONS.md` or the conflict register in `M0_AUDIT.md`.
 
-## 8. Known documentation conflicts
+---
 
-| Conflict | Current truth |
-|---|---|
-| M0 report says 166 dirty entries / HEAD `e003803` | Work was committed as `56c1122`, consolidated into `main` at `17ca562`; tree is clean. |
-| `PROJECT.md` says Orbitron was eliminated | `app/pubspec.yaml` still declares the `Orbitron` family and asset. |
-| `TEST_READY.md` says 83 Flutter tests | Actual suite is 126 tests at `56c1122`. |
-| `PROJECT.md` milestone table says M2/M5 `IN_PROGRESS` | `docs/IMPLEMENTATION_STATUS.md` says they are complete; the milestone numbering in `PROJECT.md` is a different, older plan. |
-| Original master plan says 5,632 OpenGym exercises | Current upstream catalogue is 6,554. |
-| M0 report filename `GYMLVL_OPENGYM_MIGRATION_MASTER_PLAN.md` | Actual file is `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` (Windows is case-insensitive). |
-| Android/iOS display names | **Resolved 2026-10-29.** Android `android:label` is `GymLvl`; iOS `CFBundleDisplayName`/`CFBundleName` are `GymLvl`; `pubspec.yaml` description starts with `GymLvl:`. Earlier M0/A5 claims of `app`/`App` are stale. Merged manifest and iOS build still unverified. |
-| Android release networking | **Resolved at source 2026-10-29.** `android/app/src/main/AndroidManifest.xml` declares `android.permission.INTERNET` as a direct `<manifest>` child. Whether the merged release manifest keeps it is unverified: no manifest merger or APK inspection has run on this host. Earlier claims that only debug/profile manifests carry it are stale. |
-| Product M1/M2 labels versus the earlier execution index | Resolved by accepted D-038 (2026-11-01): M1 is Exercise Catalogue, closed for implementation/Git; M2 is Exercise Detail, not started. The release-stabilization and bulk-import proposals remain historical, with unfinished work and blockers open. |
-
-## 9. Hard constraints
+## 7. Hard constraints
 
 - Preserve Flutter/Dart/Riverpod/GoRouter/Supabase/PostgreSQL/Edge Functions.
 - Preserve classes A–F, multi-class, synergy, XP, quests, streaks, and all user history.
-- Preserve Bold Candy Neubrutalism: off-white `#FDF9F0`, ink `#111111`, hot pink `#FF3D81`,
-  yellow `#FFD23F`, mint `#3DDC97`, lilac `#C8A2FF`, coral `#FF6B5E`; Archivo Black, Space Grotesk,
-  Space Mono; 2px ink borders, hard shadows, tactile press states.
+- Preserve Bold Candy Neubrutalism tokens and primitives.
 - Core workouts must work without AI.
 - AI never awards XP or mutates completed workouts.
 - No third-party exercise media, ever, until a written license is approved.
 - No AGPL code, prompts, catalogue text, or assets without a legal decision.
 - No commit, push, tag, deploy, or production database change without explicit approval.
 
-## 10. Glossary
+---
 
-| Term | Meaning |
-|---|---|
-| M0 | Completed audit/planning milestone (no application changes). |
-| M1 | Exercise Catalogue Navigation, Filtering, and Test Hardening; closed for implementation and Git delivery under D-038. |
-| M2 | Exercise Detail Layout & Information Architecture; ready for execution, not started. |
-| M1-01 | Historical task ID from the superseded release-stabilization proposal. |
-| Candy | The Bold Candy Neubrutalism design system. |
-| Authoritative progression | Server-side `complete_workout` transaction that owns all awards. |
-| `main` @ `17ca562` | Historical consolidation checkpoint. `56c1122` is the historical audit-branch checkpoint. |
-| AGPL | Copyleft license on both OpenGym repositories; reference-only. |
-| MIT text | Exercise metadata/instructions from the dataset; importable with notice. |
-| Media | Images/GIFs/videos; all postponed and unlicensed for GymLvl. |
+## 8. Current production restrictions (recorded clearly)
 
-## 11. Where to look
+- **Do NOT deploy production migrations.**
+- **Do NOT run production `supabase db push`.**
+- **Do NOT treat onboarding production failure as a reason to deploy.**
+- **Do NOT start release hardening.**
+- Production onboarding 9/9 is currently blocked by a production schema/runtime mismatch. Read-only inspection showed that expected initialization capability such as `initialize_user` and `profiles.timezone` was absent. The exact unapplied migration set has not yet been established.
+- This is a known production-environment blocker, not the current implementation task. The owner is currently testing UI. Do not deploy migrations or run `supabase db push` unless explicitly requested later.
+
+---
+
+## 9. Where to look
 
 | Need | File |
 |---|---|
 | Current task and next action | `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md` |
-| Audit evidence and defects | `docs/planning/M0_AUDIT.md` |
-| Milestones | `docs/planning/MASTER_PLAN.md` |
+| Active roadmap | `docs/planning/MASTER_PLAN.md` |
 | Decisions | `docs/planning/DECISIONS.md` |
 | Runtime and target design | `docs/planning/ARCHITECTURE.md` |
-| Existing runtime documentation | `docs/ARCHITECTURE.md` |
-| Implementation status (historical) | `docs/IMPLEMENTATION_STATUS.md` |
+| Audit evidence and defects | `docs/planning/M0_AUDIT.md` |
+| External source pins | `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` |
+| Chronological history | `docs/planning/CHANGELOG_AI.md` |
 | Original product plan | `docs/planning/GymLvl_OpenGym_Migration_Master_Plan.md` |
+| Existing runtime documentation | `docs/ARCHITECTURE.md` |
 | License starter | `docs/planning/GymLvl_License_Ledger_Starter.csv` |

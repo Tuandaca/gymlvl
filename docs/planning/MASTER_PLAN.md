@@ -2,24 +2,20 @@
 
 **Document status:** Active control document
 **Established:** 2026-10-28
-**Baseline:** `main` @ `17ca562` (sole development branch; consolidated 2026-10-28)
-**Original product plan:** [`GymLvl_OpenGym_Migration_Master_Plan.md`](GymLvl_OpenGym_Migration_Master_Plan.md)
-(version 1.0, 27/10/2026, 31,935 bytes) — **preserved verbatim, do not overwrite.**
+**Baseline:** branch `main` (sole development branch), `planning_rebase_base_head` `da21eb7` (2026-11-05; mutable GymLvl SHA — re-verify with `git rev-parse HEAD` each session)
+**Original product plan:** [`GymLvl_OpenGym_Migration_Master_Plan.md`](GymLvl_OpenGym_Migration_Master_Plan.md) (version 1.0, 27/10/2026) — preserved verbatim, do not overwrite.
 
 ## 1. How to read this file
 
-The original master plan remains the authoritative statement of **product vision, scope, and
-non-negotiable decisions**. It is preserved unchanged.
+The original master plan remains the authoritative statement of **product vision, scope, and non-negotiable decisions**. It is preserved unchanged.
 
 This file is the **execution index**:
 
-- It records the current milestone order and status.
+- It records the current phase order and status.
 - It resolves stale facts identified by the M0 audit (see §6).
 - It defines the next proposed task at a granularity the original plan does not.
 
-If this index and the original plan disagree on **vision**, the original wins. If they disagree on
-**current facts or execution order**, this file plus `DECISIONS.md` win, and the difference must be
-listed in §6.
+If this index and the original plan disagree on **vision**, the original wins. If they disagree on **current facts or execution order**, this file plus `DECISIONS.md` win, and the difference must be listed in §6.
 
 ## 2. Non-negotiable product decisions
 
@@ -27,11 +23,8 @@ These are inherited from the original plan and remain fixed:
 
 1. **Mobile-first** Android and iOS.
 2. **Flutter + Dart + Riverpod + GoRouter + Supabase/PostgreSQL/Edge Functions.**
-3. Preserve **RPG classes A–F, multi-class, synergy, XP, levels, quests, streaks**, and all existing
-   user data and workout history.
-4. Preserve **Bold Candy Neubrutalism**: off-white `#FDF9F0`, ink `#111111`, hot pink `#FF3D81`,
-   yellow `#FFD23F`, mint `#3DDC97`, lilac `#C8A2FF`, coral `#FF6B5E`; Archivo Black, Space Grotesk,
-   Space Mono.
+3. Preserve **RPG classes A–F, multi-class, synergy, XP, levels, quests, streaks**, and all existing user data and workout history.
+4. Preserve **Bold Candy Neubrutalism**: off-white `#FDF9F0`, ink `#111111`, hot pink `#FF3D81`, yellow `#FFD23F`, mint `#3DDC97`, lilac `#C8A2FF`, coral `#FF6B5E`; Archivo Black, Space Grotesk, Space Mono.
 5. **Do not adopt OpenGym UI styling.**
 6. **No third-party exercise media** — no images, GIFs, animations, video, or media licensing work.
 7. **No AGPL code reuse.** OpenGym is a behavioral reference only.
@@ -39,114 +32,104 @@ These are inherited from the original plan and remain fixed:
 9. **PostgreSQL is authoritative for XP and rewards.** The client may preview only.
 10. **No commit, push, tag, deploy, or production DB change without explicit approval.**
 
-## 3. Current milestone status
+## 3. Product destination
 
-| Milestone | Scope | Depends on | Status |
-|---|---|---|---|
-| **M0** | Repository audit, reference analysis, migration plan, license inventory | — | **COMPLETE (reported)** — planning only; no app/DB changes |
-| **M1** | Exercise Catalogue Navigation, Filtering, and Test Hardening | M0 | **CLOSED for implementation and Git delivery**; QA exceptions open |
-| **M2** | Exercise Detail Layout & Information Architecture | M1 | Ready for execution; not started |
-| **M3** | Offline-first workout core, modes, timers, supersets | M2 | CLOSED — production activation/deployment deferred |
-| **M4** | Progression, 1RM/PR, RPE/RIR, RPG bridge | M3 | CLOSED — production activation/deployment deferred |
-| **M5** | Weekly plans/scheduling, analytics, bodyweight, novice journey | M3, M4 | Planned |
-| **M6** | AI PT v1: intake, create/review, proposals, apply/revert, audit | M2, M4, M5 | Planned |
-| **M7** | Licensed media — **only if explicitly authorized** | Legal approval | Postponed |
-| **M8** | iOS/Android release hardening | M1–M6 | Planned |
-| **M9** | Optional expansion (imports, Health, watch, larger catalog) | M8 | Not authorized |
+The real GymLvl product direction is:
 
-**Critical path:** M1 → M2 → M3 → M4 → M5 → M6 → M8.
-M7 must never block M8.
+> GymLvl should use OpenGym as the comprehensive reference for fitness functionality and data structures, migrate/reimplement as much useful functionality as legally and technically practical into the existing GymLvl Flutter/Supabase architecture, replace OpenGym's visual experience with GymLvl's Candy Neubrutalism design, and deeply integrate GymLvl's RPG systems so training feels like both a serious workout app and an engaging game.
 
-## 4. Historical M1 release-stabilization proposal — superseded by D-038
+GymLvl is NOT intended to evolve as an unrelated custom fitness tracker where isolated features are invented one milestone at a time.
 
-The six-task release-stabilization proposal below is retained for provenance. It is not the current
-product M1. Unfinished release and data gates remain open outside the closed product M1 scope.
+The target is conceptually:
 
-The original plan's M1 (Candy foundation, theme cleanup, shell navigation, auth redirect) is already
-implemented and verified. Repeating it would waste a milestone. M1 is therefore re-scoped to close
-the **release-critical and truth-telling gaps** that block a credible mobile baseline.
+`OpenGym fitness capability`
++
+`GymLvl architecture`
++
+`GymLvl Candy UI`
++
+`GymLvl RPG / progression / quests / levels`
++
+`AI PT later`
 
-**M1 is not one giant task.** It is six independently verifiable tasks. Only **M1-01** is proposed
-next; it requires explicit user go-ahead before starting.
+## 4. Current phase and status
 
-| ID | Task | Primary owner | Exclusive files | Status |
-|---|---|---|---|---|
-| **M1-01** | Baseline stabilization and evidence lock | Lead | `docs/planning/**` only | **NEXT — ready** |
-| M1-02 | Android/iOS release config | Platform | `app/android/app/src/main/AndroidManifest.xml`, `app/ios/Runner/Info.plist` | Planned |
-| M1-03 | Typography cleanup + Vietnamese fallback | Design | `app/pubspec.yaml`, `app/assets/fonts/Orbitron*`, `app/assets/fonts/SOURCES.md`, `app/lib/core/theme/candy_theme.dart` | Planned |
-| M1-04 | Documentation truth pass | Docs | `PROJECT.md`, `docs/IMPLEMENTATION_STATUS.md`, `TEST_READY.md`, `TEST_INFRA.md`, `docs/ARCHITECTURE.md` | Planned |
-| M1-05 | CI Android static build + config regression test | QA | `.github/workflows/verify.yml`, `app/test/release_config_test.dart` | Planned |
-| M1-06 | Rendered baseline screenshots | QA | `docs/verification/ui/**` | Planned |
+| Phase | Scope | Status |
+|---|---|---|
+| **P0** | Planning Rebase & Context Consolidation (this task) | **COMPLETE** — accurate truth established, contradictions removed, one canonical roadmap |
+| **P1** | OpenGym Parity Baseline + Legal-Safe Exercise Catalogue | **NEXT** — not started |
+| **P2** | Routine & Planning Parity | Planned |
+| **P3** | Workout Core Parity | Planned |
+| **P4** | Progress / Analytics / Utility Parity | Planned |
+| **P5** | Deep GymLvl Game Integration | Planned |
+| **P6** | AI Personal Trainer | Planned (after P1–P5) |
+| **P7** | Media, Optional Integrations & Expansion | Deferred (legal authorization required) |
+| **P8** | Release Hardening | Planned (after product core complete) |
 
-### M1-01 — the only proposed next task
+**Critical path:** P0 → P1 → P2 → P3 → P4 → P5 → P6 → P8.
+P7 must never block P8.
 
-**Goal:** make the baseline reproducible and trustworthy before any release or feature change.
+**Do NOT continue automatically to old M6 merely because previous documents say M6 is next. AI PT is not the immediate next implementation stage.**
 
-**Scope (documentation and verification only):**
+## 5. Foundation work already completed (pre-parity)
 
-1. Verify the external backup bundle/archive and record hashes.
-2. Confirm HEAD, branch, and remote refs, and that the only uncommitted files are the expected
-   bootstrap planning files.
-3. Create/refresh `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` pinning reference SHAs and licenses.
-4. Create/refresh `docs/planning/LICENSE_LEDGER.csv` based on the existing starter.
-5. Produce `docs/planning/BASELINE_REPORT.md` with commands, results, and a conflict register.
-6. Propose a checkpoint tag name and wait for approval. **Do not create the tag automatically.**
+M1–M5 work implemented before the OpenGym parity migration track must NOT be discarded. It is considered **foundation work already completed**. Summary by capability (see `PROJECT_CONTEXT.md` §4 for evidence):
 
-**Forbidden:** application code, SQL, Supabase, CI, dependency changes, catalog import, media, UI.
-
-**Acceptance:**
-
-- Backup hashes match the recorded manifest; a clone from the bundle equals HEAD.
-- All nine memory files are mutually consistent.
-- `flutter analyze` 0 issues; `flutter test` 126/126; `npm test` 10/10; `npm run test:edge` 15/15;
-  `dart format` clean.
-- Conflict register lists every known contradiction with an owner.
-- `git status` shows only the expected planning files.
-- The tag decision is recorded (approved or deferred).
-
-**Blockers:** none for M1-01 on this host. Android SDK/device availability is an M1-02/M1-05
-blocker, not an M1-01 blocker.
-
-## 5. Milestone exit gates
-
-| Milestone | Exit gate |
-|---|---|
-| M1 | Exercise Catalogue navigation/filtering implemented; focused tests verified; one approved 10-file commit on `main` matches `origin/main`; full-suite and independent-QA exceptions recorded |
-| M2 | Exercise Detail layout and information architecture with available metadata, VI/EN, accessibility, responsive/loading/error/unavailable-media states, and focused tests; no bulk import or media procurement |
-| M3 | Offline/reconnect scenarios pass; no lost sets; modes/timers/supersets verified |
-| M4 | Golden progression tables; one reward per retried workout; class math reproducible |
-| M5 | Beginner completes three workouts from a generated plan; charts reconcile |
-| M6 | Invalid IDs/ranges rejected; consent withdrawal blocks egress; AI failure never blocks a workout |
-| M7 | Written media rights evidence; release scan clean — **not authorized** |
-| M8 | Device matrix, signed artifacts, RLS penetration checks |
+| Capability | Status | Evidence |
+|---|---|---|
+| Architecture/Foundation | COMPLETE | Flutter 3.38.5, Riverpod, GoRouter, Supabase, Edge Functions, Candy UI |
+| Exercise Catalogue | STRONG PARTIAL | 150 curated exercises, search/filter, detail screen |
+| Workout Core | STRONG PARTIAL | Workout logging, active session, sets, rest timer, history, modes, supersets |
+| Offline | PARTIAL (local/test only) | Drift store, encrypted payload, sync coordinator — production gate closed |
+| Progression | PARTIAL | Epley 1RM, PR detection, RPE/RIR, RPG bridge — server authority preserved |
+| RPG | PARTIAL | Classes A–F, XP, levels, quests, streaks |
+| Planning | PARTIAL | First-Week plan, newcomer journey |
+| Analytics | PARTIAL | Heatmap, weight trend, PR chart, muscle balance |
+| Bodyweight | PARTIAL | Weigh-in trend, external-load semantics |
+| AI | NOT STARTED | Chat-only proxy, no typed proposals/approval/apply-revert |
+| OpenGym parity | NOT STARTED | No catalogue import, no routine/planning parity |
+| Production activation | BLOCKED | No production DB access; onboarding 9/9 blocked by production schema/runtime mismatch (read-only inspection showed expected initialization capability such as `initialize_user` and `profiles.timezone` was absent; exact unapplied migration set not yet established) |
+| Release readiness | NOT STARTED | No Android/iOS release build, signing keys absent |
 
 ## 6. Corrections to the original plan
-
-The 2026-11-01 D-038 decision assigns product M1 to Exercise Catalogue and product M2 to Exercise
-Detail. The earlier release-stabilization and bulk-import milestone labels are historical; their
-unfinished work and blockers remain open without a new milestone assignment.
 
 | Original claim | Current verified fact | Handling |
 |---|---|---|
 | OpenGym B catalogue is 5,632 exercises | 6,554 exercises at `e6a95c28`; 17 translations, 13,109 media files | Use 6,554 in planning; media remains prohibited |
 | M0 is "baseline, protect Antigravity work, legal inventory" | M0 was executed as an audit/planning milestone; no application changes | Recorded in `M0_AUDIT.md` |
-| M1 is design-system foundation | Already implemented and verified | M1 re-baselined to stabilization |
-| Workspace may be dirty and unpushed | Committed as `56c1122`; consolidated into `main` at `17ca562`; tree clean | Use `main` as the sole branch; baseline `17ca562` |
+| M1 is design-system foundation | Already implemented and verified | M1 re-baselined to Exercise Catalogue under D-038 |
+| Workspace may be dirty and unpushed | Consolidated into `main`; `planning_rebase_base_head` `da21eb7` at P0 audit (mutable; re-verify each session) | Use `main` as sole branch |
+| Next milestone is M6 (AI PT) | Foundation M1–M5 complete; parity gap remains | Next is P1 (OpenGym parity baseline), not M6 |
 | `GYMLVL_OPENGYM_MIGRATION_MASTER_PLAN.md` | Actual file is `GymLvl_OpenGym_Migration_Master_Plan.md` | Path corrected here |
 
 ## 7. Out of scope until separately authorized
 
 - Exercise images, GIFs, animations, video, thumbnails, or any media licensing/procurement.
 - AGPL adoption or code/catalogue-text reuse.
-- Camera form analysis, autonomous load changes, social PvP, wearables, HealthKit/Health Connect,
-  nutrition diagnosis.
+- Camera form analysis, autonomous load changes, social PvP, wearables, HealthKit/Health Connect, nutrition diagnosis.
 - Production deployment, database migration, or remote Supabase changes.
 - Commits, pushes, or tags without approval.
 
 ## 8. Change control
 
-- Milestone scope changes require an entry in `DECISIONS.md` and user approval.
+- Phase/scope changes require an entry in `DECISIONS.md` and user approval.
 - Task status changes require an update to `TASK_BOARD.md`.
 - Every checkpoint requires an update to `SESSION_HANDOFF.md` and `CHANGELOG_AI.md`.
-- The original plan is never edited. If it becomes obsolete, mark it superseded here and preserve the
-  file.
+- The original plan is never edited. If it becomes obsolete, mark it superseded here and preserve the file.
+
+## 9. Canonical documents
+
+| File | Purpose |
+|---|---|
+| `docs/planning/MASTER_PLAN.md` | This file — one authoritative active roadmap |
+| `docs/planning/PROJECT_CONTEXT.md` | Durable project memory for a new session |
+| `docs/planning/TASK_BOARD.md` | Current execution state only |
+| `docs/planning/SESSION_HANDOFF.md` | Fast restart context for the next session |
+| `docs/planning/CHANGELOG_AI.md` | Chronological history |
+| `docs/planning/DECISIONS.md` | Durable architecture/product/license decisions |
+| `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` | Immutable external source pins and licenses |
+| `docs/planning/OPENGYM_PARITY_MATRIX.md` | Empty/initial tracking framework for P1 (no detailed audit yet) |
+
+## 10. Historical milestone reports (preserved)
+
+Root reports `M0_FINAL_REPORT.md` through `M5_FINAL_REPORT.md` and detailed M3.x reports are historical evidence. They explain what foundation work was already built. Do not delete them. Their old "next milestone" instructions are no longer current authority — this `MASTER_PLAN.md` and `DECISIONS.md` govern.

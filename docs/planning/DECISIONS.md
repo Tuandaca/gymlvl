@@ -709,3 +709,52 @@ These remain unresolved and block later milestones:
 **Verification:** focused Dart unit/widget tests; `flutter analyze --no-pub`; `dart format`; full `flutter test --no-pub` (sole allowed failure: pre-existing `release_config_test.dart` Gradle wrapper mismatch).
 
 **Consequences:** M5 is local/test verification only. No commit, push, tag, deploy, or remote migration. Git delivery deferred to a separate `M5-FINAL` task.
+
+## D-045 — P0–P8 roadmap adopted; legacy M0–M9 roadmap superseded
+
+**Status:** RECORDED (planning/context consolidation, 2026-11-05)
+**Context:** The repository accumulated multiple milestone plans (M0–M9 in `MASTER_PLAN.md` and `GymLvl_OpenGym_Migration_Master_Plan.md`), audit tracks, historical reports, and partially conflicting descriptions of what GymLvl should become. A planning rebase (P0) was required to establish one accurate, durable, canonical roadmap.
+**Decision:** Adopt the P0–P8 roadmap in `docs/planning/MASTER_PLAN.md` as the single authoritative active roadmap. The legacy M0–M9 milestone order is historical foundation context, not the current execution order. M1–M5 foundation work already completed is preserved and classified as "pre-parity foundation"; it is NOT discarded.
+**Consequences:**
+- P0 (Planning Rebase & Context Consolidation) is complete.
+- P1 (OpenGym Parity Baseline + Legal-Safe Exercise Catalogue) is the next implementation phase.
+- Old M6/AI PT is NOT the immediate next implementation stage.
+- Do not continue automatically to old M6 merely because previous documents say M6 is next.
+- `GymLvl_OpenGym_Migration_Master_Plan.md` remains preserved verbatim as historical design input; it no longer competes with `MASTER_PLAN.md`.
+**Supersedes:** D-004 (re-baseline M1) and D-038 (close product M1 as Exercise Catalogue / set product M2 to Exercise Detail) are now historical under the P0–P8 roadmap; they remain ACCEPTED for their original bounded scope but are superseded as roadmap-governing decisions by D-045.
+
+## D-046 — P1 scope and constraints (not started)
+
+**Status:** RECORDED (planning/context consolidation, 2026-11-05)
+**Context:** P1 is the next implementation phase after P0. It must not be conflated with production activation, release hardening, or AI PT.
+**Decision:** P1 scope is bounded to:
+1. Full OpenGym feature parity inventory; classify GymLvl capability: existing / partial / missing / deferred / license-excluded.
+2. Build/import the legal-safe ExerciseDB-derived exercise catalogue (~1,324 MIT-covered source exercises).
+3. Preserve current GymLvl exercise UUID/history; provenance; idempotent import; no proprietary media.
+4. Integrate larger catalogue with current GymLvl search/filter/detail.
+**Constraints:**
+- No AGPL code/prompts/catalogue-text/media reuse without a legal decision.
+- No third-party exercise media.
+- No commit/push/tag/deploy without explicit owner approval.
+- No production database migration.
+- AI PT (P6) is not part of P1.
+**Consequences:** P1 is local/test verification only until O-04 (full 1,324 import vs curated subset) and O-07 (live Supabase project and credential ownership) are resolved by the project owner.
+
+## Open decisions
+
+These remain unresolved and block later milestones:
+
+| ID | Question | Blocks | Owner |
+|---|---|---|---|
+| O-01 | GymLvl's own license and contributor rights | M8 / distribution | Project owner + legal |
+| O-02 | AGPL posture (stay proprietary vs adopt AGPL) | Any OpenGym-derived reuse | Project owner + legal |
+| O-03 | Drift and real-data policy; production activation gate remains closed | M3 production activation | Project owner |
+| O-04 | Approval of full 1,324 import vs curated subset | M2/P1 | Project owner |
+| O-05 | AI provider and cost policy | P6 | Project owner |
+| O-06 | Android SDK/device availability | M8 | Project owner |
+| O-07 | Live Supabase project and credential ownership | P1+ verification, onboarding 9/9 | Project owner |
+| O-08 | Provenance of the 150 curated exercise texts | Catalog trust / P1 | Project owner |
+| O-09 | Checkpoint tag name and creation approval | Next authorized commit | Project owner |
+| O-10 | Full Apache-2.0 notice text for the `context-window-management` adaptation, or replacement with an original document | Public release | Project owner |
+| O-11 | Whether `.opencode/` and `docs/agent-system/` are committed together or separately | Next authorized commit | Project owner |
+
