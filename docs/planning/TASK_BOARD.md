@@ -1,70 +1,38 @@
 # GymLvl — Task Board
 
-## Current phase — P0: Planning Rebase & Context Consolidation (2026-11-05)
+## Current phase — P1: OpenGym Parity Baseline + Legal-Safe Exercise Catalogue (2026-11-05)
 
-**Task:** Reconcile accumulated planning documents against the actual repository and rewrite the canonical planning/control layer so a new OpenCode session can understand the project without relying on chat history. No product implementation.
+**Task:** Build a detailed OpenGym → GymLvl feature parity baseline AND implement the legal-safe exercise catalogue foundation using the pinned MIT dataset (1,324 exercisedb records). Continue through implementation, testing, documentation, and final reporting in the same task.
 
-**Status:** `COMPLETE` — `MASTER_PLAN.md`, `PROJECT_CONTEXT.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`, `DECISIONS.md`, `UPSTREAM_SOURCE_MANIFEST.json` rewritten; `OPENGYM_PARITY_MATRIX.md` created as initial tracking framework.
+**Status:** `COMPLETE`
 
-**Commit:** `main` @ `da21eb7` (`planning_rebase_base_head` at P0 audit; mutable — re-verify with `git rev-parse HEAD`; local only; push pending owner approval)
+**Commit:** `main` @ `962d8f7` (P0 base, pushed to origin/main); P1 changes committed/pending owner approval.
 
-**Changed files in P0:**
-- `docs/planning/MASTER_PLAN.md` (rewritten — P0–P8 roadmap)
-- `docs/planning/PROJECT_CONTEXT.md` (rewritten — current truth)
-- `docs/planning/TASK_BOARD.md` (rewritten — this file)
-- `docs/planning/SESSION_HANDOFF.md` (rewritten — NEW SESSION START HERE block)
-- `docs/planning/CHANGELOG_AI.md` (entry added)
-- `docs/planning/DECISIONS.md` (P0/P1 decisions added; old milestone decisions marked SUPERSEDED)
-- `docs/planning/UPSTREAM_SOURCE_MANIFEST.json` (`planning_rebase_base_head` recorded as `da21eb7` at P0 audit; mutable — re-verify each session)
-- `docs/planning/OPENGYM_PARITY_MATRIX.md` (new — empty/initial tracking framework)
+**Deliverables — all COMPLETE:**
+1. `docs/planning/OPENGYM_PARITY_MATRIX.md` — fully populated capability map (OpenGym vs GymLvl across Catalogue, Routine/Planning, Workout, Progression, Utilities, Analytics, Device/Platform, Account/Security, Coach/AI, Other).
+2. Legal-safe import pipeline: `tools/catalogue-import/{package.json,import.mjs,import.test.mjs}` — selects `textSource === 'exercisedb'` (1,324 MIT records), strips media, generates idempotent `INSERT ... ON CONFLICT (source, external_id) DO NOTHING` SQL. 10/10 pipeline tests pass.
+3. Additive migration: `supabase/migrations/20261105000300_p1_exercise_provenance.sql` — adds `source`/`external_id`/`source_revision` columns + `UNIQUE (source, external_id)` + backfills curated rows. Runs against PGlite (23/23 SQL units, 365 ACL assertions PASS). RLS not weakened.
+4. Flutter model: `app/lib/features/workout/domain/exercise.dart` (+ `.freezed.dart`/`.g.dart` regenerated) — provenance fields `source`/`externalId`/`sourceRevision`. `app/test/exercise_detail_test.dart` — 3 new provenance round-trip tests.
+5. Flutter analyze: `No issues found!`. Dart format: clean. Full Flutter suite: 558 pass / 1 fail (sole failure = pre-existing protected `release_config_test.dart` Gradle 9.7.1 vs 8.13, NOT a P1 regression).
 
-**Blockers:** None for P0.
+**Blockers:** None for P1.
 
-**Next action:** Owner review of P0 deliverables; then start P1.
+**Do NOT start:** P2, P3, P4, P5, P6 (AI PT), P7 (media), P8 (release), production migration, release hardening.
 
----
-
-## Current product blocker — Onboarding 9/9 submit failure (2026-11-04)
-
-**Task:** Investigate and fix `initialize_user` RPC failure when user completes onboarding step 9/9. UI shows `Không thể hoàn tất yêu cầu. Vui lòng thử lại.`
-
-**Status:** `BLOCKED` — Root cause identified but fix requires production database access/migration deployment, which requires explicit owner approval.
-
-**Root cause:** Production onboarding 9/9 is blocked by a production schema/runtime mismatch. Read-only inspection showed that expected initialization capability such as `initialize_user` and `profiles.timezone` was absent. The exact unapplied migration set has not yet been established.
-
-**Local verification:** PGlite + all 10 migrations → `initialize_user` PASS (onboarding completes, idempotent retry returns "Onboarding already complete").
-
-**Production verification:** `NOT RUN` — no production Supabase access.
-
-**Blockers:** No production Supabase access; `supabase db push`/remote migration requires explicit owner approval per AGENTS.md §0.3/§8.
-
-**Next action:** Owner to verify production database schema and approve migration deployment if missing.
+**Next implementation phase:** P2 — Routine & Planning Parity (NOT STARTED, awaits owner instruction).
 
 ---
 
-## Next implementation phase — P1: OpenGym Parity Baseline + Legal-Safe Exercise Catalogue
+## Current product blocker — Onboarding 9/9 submit failure (2026-11-04) — BLOCKED
 
-**Status:** `NOT STARTED`
-
-**Scope:**
-- Full OpenGym feature parity inventory; classify GymLvl capability: existing / partial / missing / deferred / license-excluded
-- Build/import the legal-safe ExerciseDB-derived exercise catalogue (~1,324 MIT-covered source exercises)
-- Preserve current GymLvl exercise UUID/history; provenance; idempotent import; no proprietary media
-- Integrate larger catalogue with current GymLvl search/filter/detail
-
-**Constraints:**
-- No AGPL code/catalogue-text/media reuse without legal decision
-- No commit/push/tag/deploy without explicit owner approval
-- No production database migration
-
-**Do NOT start:** M6/AI PT, P2–P8, production migration, release hardening.
+**Status:** `BLOCKED` — production schema/runtime mismatch; requires explicit owner approval to verify/deploy. Not the current task. Do not deploy migrations.
 
 ---
 
 ## Do not do (constraints)
 
-- Do not continue automatically to old M6 merely because previous documents say M6 is next.
-- AI PT is not the immediate next implementation stage.
-- No product implementation in P0.
+- Do not start P2+ automatically.
+- AI PT is not the immediate next implementation stage (P6).
 - No production deployment, database migration, or remote Supabase changes.
 - No third-party exercise media.
+- Do not commit/push without explicit owner approval.

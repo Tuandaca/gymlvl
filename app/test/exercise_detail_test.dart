@@ -13,6 +13,9 @@ import 'package:go_router/go_router.dart';
 
 const _id = '11111111-1111-4111-8111-111111111111';
 
+const sourceRevision =
+    'e6a95c28a6e3067bdd9b1188d5f37f448d528bd2';
+
 const _exercise = Exercise(
   id: _id,
   name: 'Original name',
@@ -399,5 +402,62 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     semantics.dispose();
+  });
+
+  group('exercise provenance (P1)', () {
+    test('source defaults to gymlvl_curated when omitted', () {
+      final e = Exercise(
+        id: _id,
+        name: 'Squat',
+        category: 'Legs',
+        equipment: 'Barbell',
+      );
+      expect(e.source, 'gymlvl_curated');
+      expect(e.externalId, isNull);
+      expect(e.sourceRevision, isNull);
+    });
+
+    test('exercisedb provenance round-trips through JSON', () {
+      final e = Exercise(
+        id: _id,
+        name: 'Barbell Bench Press',
+        category: 'Chest',
+        equipment: 'Barbell',
+        source: 'exercisedb',
+        externalId: '0025',
+        sourceRevision: sourceRevision,
+      );
+      final json = e.toJson();
+      expect(json['source'], 'exercisedb');
+      expect(json['external_id'], '0025');
+      expect(json['source_revision'], sourceRevision);
+
+      final roundTrip = Exercise.fromJson(json);
+      expect(roundTrip.source, 'exercisedb');
+      expect(roundTrip.externalId, '0025');
+      expect(roundTrip.sourceRevision, sourceRevision);
+      expect(roundTrip.id, _id);
+      expect(roundTrip.name, 'Barbell Bench Press');
+    });
+
+    test('copyWith preserves provenance', () {
+      final curated = Exercise(
+        id: _id,
+        name: 'Squat',
+        category: 'Legs',
+        equipment: 'Barbell',
+      );
+      final imported = curated.copyWith(
+        source: 'exercisedb',
+        externalId: '0100',
+        sourceRevision: sourceRevision,
+      );
+      expect(imported.source, 'exercisedb');
+      expect(imported.externalId, '0100');
+      expect(imported.sourceRevision, sourceRevision);
+      // Curated original is unchanged.
+      expect(curated.source, 'gymlvl_curated');
+      expect(curated.externalId, isNull);
+    });
   });
 }

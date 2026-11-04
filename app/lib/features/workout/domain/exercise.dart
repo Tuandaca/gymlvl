@@ -33,6 +33,9 @@ abstract class Exercise with _$Exercise {
     @JsonKey(name: 'alternative_exercise_slugs')
     @Default([])
     List<String> alternativeExerciseSlugs,
+    @Default('gymlvl_curated') String source,
+    @JsonKey(name: 'external_id') String? externalId,
+    @JsonKey(name: 'source_revision') String? sourceRevision,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Exercise;

@@ -2,6 +2,17 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-05 — P1 OpenGym Parity Baseline + Legal-Safe Exercise Catalogue (COMPLETE)
+
+- **Task:** Build a detailed OpenGym → GymLvl feature parity baseline AND implement the legal-safe exercise catalogue foundation using the pinned MIT dataset (1,324 ExerciseDB records from `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd`).
+- **Parity matrix:** `docs/planning/OPENGYM_PARITY_MATRIX.md` fully populated — Catalogue, Routine/Planning, Workout, Progression, Utilities, Analytics, Device/Platform, Account/Security, Coach/AI, Other capability families classified (EXISTING/PARTIAL/MISSING/DEFERRED/EXCLUDED_LICENSE/NOT_APPLICABLE) and mapped to P2–P7.
+- **Import pipeline:** `tools/catalogue-import/{package.json,import.mjs,import.test.mjs}` — reads **directly from the pinned MIT dataset** (`hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd`, `data/exercises.json`), NOT from OpenGym catalogue. Selects all 1,324 MIT records, strips all media fields, maps to GymLvl schema with provenance (source/external_id/source_revision), unique slugs with duplicate disambiguation, generates idempotent `INSERT ... ON CONFLICT (source, external_id) DO NOTHING` SQL. 11/11 pipeline tests PASS.
+- **Migration:** `supabase/migrations/20261105000300_p1_exercise_provenance.sql` — additive: `source`/`external_id`/`source_revision` columns, `UNIQUE (source, external_id)`, backfills 150 curated rows as `gymlvl_curated`. Verified on PGlite: `PASS migration 20261105000300_p1_exercise_provenance.sql`, 23/23 SQL units + 365 ACL assertions PASS, RLS not weakened, existing data preserved.
+- **Flutter model:** `app/lib/features/workout/domain/exercise.dart` (+ `.freezed.dart`/`.g.dart` regenerated) — provenance fields `source`/`externalId`/`sourceRevision`. `app/test/exercise_detail_test.dart` — 3 new provenance round-trip tests (14/14 PASS).
+- **Verification:** `flutter analyze --no-pub` → `No issues found!`; `dart format` clean; full Flutter suite 558 pass / 1 fail (sole failure = pre-existing protected `release_config_test.dart` Gradle 9.7.1 vs 8.13, NOT a P1 regression).
+- **No MCP changes. No production database changes. No migration deployed. No commit/push of credentials.**
+- **Next action:** Owner review of P1 deliverables; then P2 — Routine & Planning Parity.
+
 ## 2026-11-05 — P0 Planning Rebase & Context Consolidation (COMPLETE)
 
 - **Task:** Reconcile accumulated planning documents against the actual repository and rewrite the canonical planning/control layer so a new OpenCode session can understand the project without relying on chat history. No product implementation.

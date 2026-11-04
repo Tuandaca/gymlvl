@@ -56,9 +56,9 @@ The target is conceptually:
 
 | Phase | Scope | Status |
 |---|---|---|
-| **P0** | Planning Rebase & Context Consolidation (this task) | **COMPLETE** — accurate truth established, contradictions removed, one canonical roadmap |
-| **P1** | OpenGym Parity Baseline + Legal-Safe Exercise Catalogue | **NEXT** — not started |
-| **P2** | Routine & Planning Parity | Planned |
+| **P0** | Planning Rebase & Context Consolidation | **COMPLETE** — accurate truth established, contradictions removed, one canonical roadmap |
+| **P1** | OpenGym Parity Baseline + Legal-Safe Exercise Catalogue | **COMPLETE** — parity matrix populated; legal-safe ExerciseDB import pipeline (1,324 MIT records from pinned `hasaneyldrm/exercises-dataset`) implemented and tested; additive provenance migration verified on PGlite; Flutter catalogue model updated |
+| **P2** | Routine & Planning Parity | NEXT — not started |
 | **P3** | Workout Core Parity | Planned |
 | **P4** | Progress / Analytics / Utility Parity | Planned |
 | **P5** | Deep GymLvl Game Integration | Planned |

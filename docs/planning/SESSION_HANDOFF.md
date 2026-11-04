@@ -6,21 +6,21 @@
 |---|---|
 | Date | 2026-11-05 |
 | Branch | `main` |
-| `planning_rebase_base_head` | `da21eb742aeac1266a3aa1df9d043ec2602a843f` (mutable GymLvl SHA at P0 audit — re-verify each session with `git rev-parse HEAD`) |
+| HEAD | `962d8f7eb20e82967306c4c73cf06a516fa2ef5f` (`planning_rebase_base_head` at P0 audit; mutable — re-verify with `git rev-parse HEAD`) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — pre-existing M3/M4 work preserved (6 modified tracked files, 10 untracked files); **do not discard, reset, or overwrite** |
+| Working-tree state | Dirty — pre-existing M3/M4 owner work preserved (6 modified tracked files, 10 untracked files); **do not discard, reset, or overwrite** |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
-| Completed foundation | M1–M5 foundation work complete (catalogue, workout core, offline local/test, progression, RPG, planning, analytics, bodyweight). AI not started. OpenGym parity not started. |
-| Current roadmap phase | P0 — Planning Rebase & Context Consolidation: COMPLETE |
-| Next implementation phase | P1 — OpenGym Parity Baseline + Legal-Safe Exercise Catalogue (NOT STARTED) |
+| Completed foundation | M1–M5 foundation complete. P1 complete: OpenGym parity matrix populated; legal-safe exercisedb import pipeline (1,324 MIT records) implemented and tested; additive provenance migration (source/external_id/source_revision) verified on PGlite; Flutter Exercise model provenance fields added and tested. |
+| Current roadmap phase | P1 — OpenGym Parity Baseline + Legal-Safe Exercise Catalogue: COMPLETE |
+| Next implementation phase | P2 — Routine & Planning Parity: NOT STARTED (awaits owner instruction) |
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
-| Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded) |
-| Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice |
+| Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
+| Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |
 | Production restrictions | Do NOT deploy production migrations; do NOT run `supabase db push`; onboarding 9/9 blocked on production DB access; no release hardening |
-| Immediate next task | Owner review of P0 deliverables; then P1 |
-| Do not do | Do not continue to old M6/AI PT; no product implementation in P0; no production deploy/migration; no media |
-| Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md` |
+| Immediate next task | Owner review of P1 deliverables; then P2 — Routine & Planning Parity |
+| Do not do | Do not start P2+ automatically; no AI PT (P6); no production deploy/migration; no media; no commit/push without owner approval |
+| Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md` |
 
 ---
 
@@ -48,4 +48,4 @@
 
 ## Historical entries
 
-Previous chronological entries (M1–M5, M3.x, R2, R3, audit A2–A8) are preserved in `CHANGELOG_AI.md` and the root `M*_FINAL_REPORT.md` files. They are not reproduced here to keep this handoff compact. A new session should read `MASTER_PLAN.md` and `PROJECT_CONTEXT.md` for current truth, then `TASK_BOARD.md` for the active task.
+P0 (Planning Rebase & Context Consolidation) and P1 (OpenGym Parity Baseline + Legal-Safe Exercise Catalogue) are complete. Their details are in `CHANGELOG_AI.md`. Previous M1–M5, M3.x, R2, R3, and audit entries are preserved in `CHANGELOG_AI.md` and root `M*_FINAL_REPORT.md` files, not reproduced here.

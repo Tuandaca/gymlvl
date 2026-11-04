@@ -1,0 +1,14 @@
+{
+  "name": "gymlvl-catalogue-import",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Legal-safe exercise catalogue import pipeline for GymLvl P1. Reads the pinned OpenGym catalogue, selects MIT-licensed exercisedb records, strips media, and generates idempotent GymLvl seed SQL.",
+  "scripts": {
+    "import": "node import.mjs",
+    "test": "node import.test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -60,7 +60,7 @@ GymLvl should use OpenGym as the comprehensive reference for fitness functionali
 | Capability | Status | Evidence |
 |---|---|---|
 | Architecture/Foundation | COMPLETE | `app/lib/`, `supabase/migrations/`, `supabase/functions/` |
-| Exercise Catalogue | STRONG PARTIAL | 150 curated exercises, search/filter, detail screen |
+| Exercise Catalogue | STRONG PARTIAL | 150 curated exercises, search/filter, detail screen; legal-safe import pipeline built (1,324 exercisedb MIT records), not yet applied to any database |
 | Workout Core | STRONG PARTIAL | Workout logging, active session, sets, rest timer, history, modes, supersets |
 | Offline | PARTIAL (local/test only) | Drift store, encrypted payload, sync coordinator — production gate closed |
 | Progression | PARTIAL | Epley 1RM, PR detection, RPE/RIR, RPG bridge — server authority preserved |
@@ -69,7 +69,7 @@ GymLvl should use OpenGym as the comprehensive reference for fitness functionali
 | Analytics | PARTIAL | Heatmap, weight trend, PR chart, muscle balance |
 | Bodyweight | PARTIAL | Weigh-in trend, external-load semantics |
 | AI | NOT STARTED | Chat-only proxy, no typed proposals/approval/apply-revert |
-| OpenGym parity | NOT STARTED | No catalogue import, no routine/planning parity |
+| OpenGym parity | PARTIAL (pipeline ready) | Parity matrix populated; legal-safe import pipeline implemented and tested; additive provenance migration verified on PGlite; catalogue data import not yet applied to any database |
 | Production activation | BLOCKED | No production DB access; onboarding 9/9 blocked by production schema/runtime mismatch (read-only inspection showed expected initialization capability such as `initialize_user` and `profiles.timezone` was absent; exact unapplied migration set not yet established) |
 | Release readiness | NOT STARTED | No Android/iOS release build, signing keys absent |
 

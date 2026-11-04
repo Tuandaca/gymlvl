@@ -42,6 +42,9 @@ _Exercise _$ExerciseFromJson(Map<String, dynamic> json) => _Exercise(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  source: json['source'] as String? ?? 'gymlvl_curated',
+  externalId: json['external_id'] as String?,
+  sourceRevision: json['source_revision'] as String?,
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -68,6 +71,9 @@ Map<String, dynamic> _$ExerciseToJson(_Exercise instance) => <String, dynamic>{
   'form_cues': instance.formCues,
   'common_mistakes': instance.commonMistakes,
   'alternative_exercise_slugs': instance.alternativeExerciseSlugs,
+  'source': instance.source,
+  'external_id': instance.externalId,
+  'source_revision': instance.sourceRevision,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
 };

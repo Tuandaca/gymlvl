@@ -45,7 +45,18 @@
     "repository": "https://github.com/hasaneyldrm/exercises-dataset",
     "selectedSha": "7455efae41b330c265e7cd4b78dfa848e7ce5ebd",
     "license": "MIT for text/data; media excluded",
-    "permittedUse": "Import text/metadata only, with notice; strip all media fields and links"
+    "permittedUse": "Import text/metadata only, with notice; strip all media fields and links",
+    "localReferenceDirectory": "D:\\Projects\\exercises-dataset-reference",
+    "verification": {
+      "totalRecords": 1324,
+      "schema": "data/exercises.schema.json",
+      "dataFile": "data/exercises.json",
+      "mediaDirectories": ["images/", "videos/"],
+      "licenseFile": "LICENSE",
+      "noticeFile": "NOTICE.md",
+      "mediaExcluded": true,
+      "recordCountVerified": true
+    }
   },
   "notes": "No commit, push, or tag performed by P0. Manifest is commit-ready pending owner approval. Do not nest OpenGym inside GymLvl git tree; do not add as submodule; do not commit reference source into GymLvl."
 }

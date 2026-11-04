@@ -740,6 +740,24 @@ These remain unresolved and block later milestones:
 - AI PT (P6) is not part of P1.
 **Consequences:** P1 is local/test verification only until O-04 (full 1,324 import vs curated subset) and O-07 (live Supabase project and credential ownership) are resolved by the project owner.
 
+## D-047 — P1 exercise catalogue provenance schema and legal-safe import pipeline (COMPLETE)
+
+**Status:** RECORDED (P1 implementation, 2026-11-05)
+**Context:** P1 requires importing the legal-safe MIT-covered exercisedb exercise records into GymLvl's catalogue while preserving existing curated exercise UUIDs/history and keeping import idempotent.
+**Decision:**
+1. Additive migration `supabase/migrations/20261105000300_p1_exercise_provenance.sql` adds `source` (TEXT NOT NULL DEFAULT 'gymlvl_curated'), `external_id` (TEXT), `source_revision` (TEXT) columns to `public.exercises` plus `UNIQUE (source, external_id)` constraint and backfills 150 curated rows as `gymlvl_curated`. No columns dropped/renamed/truncated; RLS not weakened.
+2. Import pipeline `tools/catalogue-import/import.mjs` reads the **pinned MIT dataset directly** (`hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd`, `D:\Projects\exercises-dataset-reference\data\exercises.json`), selects all 1,324 MIT records, strips all media fields, maps to GymLvl schema, guarantees unique slugs (duplicate names disambiguated with external id), and generates idempotent `INSERT ... ON CONFLICT (source, external_id) DO NOTHING` SQL.
+3. Dart `Exercise` model gains `source` (default `'gymlvl_curated'`), `externalId`, `sourceRevision` fields (freezed regenerated).
+4. No AGPL code/prompts/catalogue-text/media is copied; no proprietary media imported; Vietnamese translation left pending (MIT dataset has no `vi` i18n).
+**Consequences:** P1 import pipeline and provenance schema are implemented and tested (11/11 pipeline tests; 23/23 SQL units + 365 ACL assertions PASS on PGlite; 14/14 Flutter exercise tests). Catalogue data import is NOT applied to any database — awaiting O-04/O-07 owner approval.
+
+## D-048 — P1 complete; P2 is next implementation phase (COMPLETE)
+
+**Status:** RECORDED (P1 completion, 2026-11-05)
+**Context:** P1 (OpenGym Parity Baseline + Legal-Safe Exercise Catalogue) is complete. The active roadmap is P0–P8 per `MASTER_PLAN.md`.
+**Decision:** P1 is marked COMPLETE. P2 — Routine & Planning Parity is the next implementation phase and is NOT STARTED. P6 (AI PT) is not the immediate next stage. No P2+ implementation has been started.
+**Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md` reflect P1 complete / P2 next. Historical M0–M9 milestone labels no longer govern execution.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:
