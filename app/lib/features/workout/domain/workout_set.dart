@@ -21,11 +21,29 @@ abstract class WorkoutSet with _$WorkoutSet {
     @JsonKey(name: 'is_completed') @Default(false) bool isCompleted,
     @JsonKey(name: 'rest_seconds') @Default(0) int restSeconds,
     @JsonKey(name: 'duration_seconds') @Default(0) int durationSeconds,
+
+    /// RPE (1-10): NULLABLE, no default — backward compatible with legacy rows.
+    @JsonKey(name: 'rpe') int? rpe,
+
+    /// RIR (0-10): NULLABLE, no default — backward compatible with legacy rows.
+    @JsonKey(name: 'rir') int? rir,
     @JsonKey(name: 'created_at') DateTime? createdAt,
   }) = _WorkoutSet;
 
   factory WorkoutSet.fromJson(Map<String, dynamic> json) =>
       _$WorkoutSetFromJson(json);
+
+  /// RPE (1-10) and RIR (0-10) are optional set-level fields; nullable and
+  /// backward compatible — legacy records keep null.
+  bool get isRpeValid {
+    final value = rpe;
+    return value == null || (value >= 1 && value <= 10);
+  }
+
+  bool get isRirValid {
+    final value = rir;
+    return value == null || (value >= 0 && value <= 10);
+  }
 
   bool get isValid => isCompleted ? (reps > 0 || durationSeconds > 0) : true;
 }

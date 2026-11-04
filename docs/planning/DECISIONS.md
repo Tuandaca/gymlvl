@@ -653,6 +653,27 @@ and deleting a `workout_exercises` row cascades to its sets.
 
 **No plaintext sensitive outbox payload remains in the stored representation.** `productionOfflineSyncEnabled` and `productionOfflinePayloadProtectionEnabled` remain `false`. No commit, push, tag, deployment, remote migration, or production write occurred; `main` @ `bd078c79a25a5b253ce1c1e72300dddc050570fe`, tree dirty, index empty. No protected owner path was modified.
 
+## D-043 — M4 progression, 1RM/PR, RPE/RIR, RPG bridge (additive local/test verification)
+
+**Status:** ACCEPTED for additive local/test verification only. Production activation remains gated (offline gates `false`; `complete_workout` remains sole PostgreSQL reward authority).
+
+**Changed/added sources:**
+- `app/lib/features/progression/domain/progression_engine.dart` — extended with deterministic `calculateOneRepMax(weightKg, reps)` using Epley formula `weight_kg * (1 + reps / 30)` (matches existing server-side `complete_workout` estimated_1rm at m3_superset_modes.sql), `detectPersonalRecord(existingMaxWeight, existingMaxReps, newWeight, newReps)` returning PR status and kind (weight/reps/both/none), and `progressionSnapshot(...)` golden-table fixture type. Rounding: `estimated_1rm` floored to 2 decimals; inputs clamped (reps 1-1000, weight 0-1000 kg); invalid sets return null/false safely, never NaN/Infinity.
+- `app/lib/features/progression/domain/progression_models.dart` (new) — `ProgressionResult`, `PersonalRecordResult`, `OneRepMaxResult` immutable value types.
+- `app/lib/features/workout/domain/workout_set.dart` + `.freezed.dart` + `.g.dart` — add nullable `rpe` (int 1-10) and `rir` (int 0-10) fields; backward-compatible (nullable, legacy records null).
+- `app/test/progression_engine_test.dart` — extended with golden progression table cases (first record, improvement, equal, regression, bodyweight, timed, cardio, invalid sets), 1RM boundary/rounding/repeatability, PR detection (first/new/equal/non-record/replay-safe).
+- `supabase/migrations/20261104000100_m4_progression_rpe_rir.sql` (new) — additive: `ALTER TABLE public.workout_sets ADD COLUMN IF NOT EXISTS rpe INTEGER`, `rir INTEGER`; CHECK constraints `rpe BETWEEN 1 AND 10`, `rir BETWEEN 0 AND 10`; no existing rows modified, no RLS weakening.
+
+**1RM formula:** Epley (`estimated_1rm = weight_kg * (1 + reps / 30)`), chosen because it is already used server-side in `complete_workout` (m3_superset_modes.sql), deterministic, well-established v1, isolated behind `OneRepMaxStrategy` for replaceability without rewriting PR history.
+
+**RPE/RIR:** RPE nullable int 1-10 (10 = max effort), RIR nullable int 0-10 (0 = failure), both nullable on `workout_sets` at set level, independently enterable, meaningful for `reps-weight`/`bodyweight` modes only (null for timed/cardio and legacy null-mode records). Backward compatible — no historical data mutated.
+
+**PR detection:** A completed set is a PR when `weightKg > max_weight_kg` OR (`weightKg == max_weight_kg` AND `reps > max_reps`) relative to `exercise_prs`. Replay-safe: identical replayed workout yields no duplicate PR event or reward effect.
+
+**RPG/class bridge:** `user_classes.current_xp`/`level` use `class_definitions.xp_base`/`xp_slope` (XP for class level n = `xp_base * n^xp_slope`). Deterministic, golden-tested, versionable. PostgreSQL remains authoritative — Flutter displays estimates only, never writes rewards.
+
+**Production gates:** `productionOfflineSyncEnabled` and `productionOfflinePayloadProtectionEnabled` remain `false`. `complete_workout` remains sole server reward authority. No remote migration, deployment, commit, or push.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:

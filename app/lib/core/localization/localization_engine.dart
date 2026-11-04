@@ -263,6 +263,28 @@ const Map<String, Map<String, String>> _dictionary = {
     'en': 'Are you sure you want to sign out of this account?',
   },
   'confirm': {'vi': 'Đồng ý', 'en': 'Confirm'},
+
+  // Progression / RPG class bridge
+  'progression_title': {'vi': 'TIẾN ĐỘ TẬP LUYỆN', 'en': 'PROGRESSION'},
+  'class_progress': {'vi': 'TIẾN ĐỘ HỆ PHÁI', 'en': 'CLASS PROGRESS'},
+  'xp_earned': {'vi': 'XP đã kiếm', 'en': 'XP earned'},
+  'xp_to_next': {'vi': 'XP đến cấp tiếp', 'en': 'XP to next level'},
+  'estimated_1rm': {'vi': 'Ước tính 1RM', 'en': 'Estimated 1RM'},
+  'personal_record': {'vi': 'BẢNG KÍ NHÂN CAO', 'en': 'PERSONAL RECORD'},
+  'rpe_label': {'vi': 'RPE', 'en': 'RPE'},
+  'rir_label': {'vi': 'RIR', 'en': 'RIR'},
+  'no_class_data': {
+    'vi': 'Chưa có dữ liệu hệ phái.',
+    'en': 'No class data yet.',
+  },
+  'no_sets_data': {
+    'vi': 'Chưa có tập nào được ghi nhận.',
+    'en': 'No sets recorded yet.',
+  },
+  'level_cap': {'vi': 'Đã đạt cấp tối đa', 'en': 'Max level reached'},
+  'error_title': {'vi': 'LỖI', 'en': 'ERROR'},
+  'pending': {'vi': 'ĐANG DỞ', 'en': 'PENDING'},
+  'loading': {'vi': 'Đang tải...', 'en': 'Loading...'},
 };
 
 extension StringL10n on String {

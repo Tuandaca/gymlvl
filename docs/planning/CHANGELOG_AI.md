@@ -2,6 +2,15 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-04 — M4 progression, 1RM/PR, RPE/RIR & RPG bridge — local/test only
+
+- **Authority/status:** D-043 `ACCEPTED` for additive local/test verification only. M4 closed for development. Production activation remains gated (offline gates `false`; `complete_workout` stays sole PostgreSQL reward authority). No commit, push, tag, deploy, remote migration, or production write.
+- **Implementation (Agent A — domain):** `progression_engine.dart` extended with Epley 1RM (`weight_kg * (1 + reps / 30)`, rounded to 2 decimals, clamped inputs, null on invalid), `detectPersonalRecord()` (weight/reps/both/none, replay-safe), `progressionSnapshot()` golden-table type. `progression_models.dart` new (immutable value types). `workout_set.dart` + `.freezed.dart` + `.g.dart` — added nullable `rpe` (1-10) and `rir` (0-10). `progression_engine_test.dart` extended: 15 tests total (existing 10 + 5 new: golden progression, 1RM boundary/rounding/repeatability, PR detection/replay-safe).
+- **Implementation (Agent B — SQL):** `supabase/migrations/20261104000100_m4_progression_rpe_rir.sql` — additive `rpe`/`rir` columns on `public.workout_sets` with named CHECK constraints (`workout_sets_rpe_range` 1-10, `workout_sets_rir_range` 0-10, both `IS NULL OR`), RLS re-affirmed (no weakening). `supabase/tests/m4_rpe_rir.sql` — regression test for constraints, backward compatibility, RLS isolation. `npm test` → 18 units / 365 ACL assertions PASS.
+- **Implementation (Agent C — bridge + UI):** `rpg_bridge.dart` — `classXPForLevel` = `(xpBase * level^xpSlope).floor()`, `levelForXP` (capped at 20), `projectClass()` deterministic projection. Candy UI: `ProgressionScreen`, `ClassProgressCard`, `ExerciseProgressionCard`, `RpeRirTile`; VI/EN l10n; 320dp; Semantics; ≥48dp touch targets. `localization_engine.dart` — progression keys added. QA accessibility findings (Semantics + 48dp) fixed in all M4 UI widgets.
+- **Verification:** Flutter focused tests → 30/30 `PASS`; `flutter analyze --no-pub` → `No issues found!` `PASS`; `dart format` → clean `PASS`; `npm test` → 18 SQL units / 365 ACL assertions `PASS`.
+- **Safety/next:** Local/test verification only; nothing staged or committed. Production activation and remote migration remain gated (owner approval required). All math deterministic (same inputs → same outputs, no clock/locale/random).
+
 ## 2026-11-04 — M3.6 security & concurrency verification
 
 - **Authority/status:** D-042 `ACCEPTED` for additive local/test verification only. All executable M3.6 gates `PASS`; M3 technically ready for M3-FINAL Git delivery subject to owner approval. Four production gates remain false. No stage/commit/push/tag, remote migration, deploy, production offline write, or M4 work.

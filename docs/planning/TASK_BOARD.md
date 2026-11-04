@@ -1,5 +1,24 @@
 # GymLvl — Task Board
 
+## Current — M4 progression, 1RM/PR, RPE/RIR & RPG bridge (2026-11-04) — local/test only
+
+**Task:** M4 — complete M4 milestone: deterministic progression engine, Epley 1RM, PR detection, RPE/RIR columns, RPG/class bridge, Candy progression UI, additive SQL migration, per D-043.
+**Status:** `PASS` for all M4 implementation and verification; M4 closed for development. Production activation remains gated (`complete_workout` stays sole PostgreSQL reward authority; offline gates `false`).
+**Commit:** `main` @ `f409b1b4e051d5b66ee37b973a71add81234865a`; working tree dirty by pre-existing M3 + M4 work (preserved), index empty; no commit, push, tag, or deploy.
+**Changed files:**
+- Domain: `app/lib/features/progression/domain/progression_engine.dart` (Epley 1RM, PR detection, progressionSnapshot), `progression_models.dart` (new, value types), `rpg_bridge.dart` (new, class XP/level projection)
+- Model: `app/lib/features/workout/domain/workout_set.dart` (+ nullable `rpe`/`rir`), `.freezed.dart` + `.g.dart` (regenerated)
+- UI: `app/lib/features/progression/presentation/progression_screen.dart` (new), `class_progress_card.dart` (new), `exercise_progression_card.dart` (new), `rpe_rir_tile.dart` (new)
+- Localization: `app/lib/core/localization/localization_engine.dart` (progression VI/EN keys)
+- Tests: `app/test/progression_engine_test.dart` (extended, 15 total), `app/test/rpg_bridge_test.dart` (new, 10), `app/test/progression_screen_test.dart` (new, 5)
+- SQL: `supabase/migrations/20261104000100_m4_progression_rpe_rir.sql` (new, `rpe`/`rir` + CHECK constraints), `supabase/tests/m4_rpe_rir.sql` (new)
+- Records: `docs/planning/DECISIONS.md` (D-043), `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`
+- No `supabase/**` schema weakening, no protected owner paths, no AGENTS.md, no `.agents/teamwork/`.
+**Verification:** Flutter focused tests → 30/30 `PASS` (progression_engine 15, rpg_bridge 10, progression_screen 5); `flutter analyze --no-pub` → `No issues found!` `PASS`; `dart format` → clean `PASS`; `cd tools/db-tests; npm test` → `PASS 18 SQL verification units` + `365 ACL assertions` `PASS`. Accessibility QA findings (Semantics + ≥48dp touch targets) fixed in all M4 UI widgets.
+**Decisions:** D-043 `ACCEPTED` for additive local/test verification only (recorded in `DECISIONS.md`).
+**Blockers:** production activation remains gated; `complete_workout` stays sole PostgreSQL reward authority; offline gates `false`; remote migration/deploy not executed, requires explicit owner approval. Migration is `NOT RUN` on any production/linked database (local/test only). M3.6 Git delivery pending separate owner approval.
+**Next action:** owner review of M4; create `M4_FINAL_REPORT.md`; no further M4 work without approval. Do not start M5.
+
 ## Current product checkpoint — M3.6 security & concurrency verification (2026-11-04)
 
 **Task:** M3.6 — complete offline payload encryption with platform-backed key handling, prove PostgreSQL idempotency under real two-connection concurrency, verify logout/account-switch isolation on the available real runtime, resolve only defects demonstrated by these gates, and decide M3 readiness.
