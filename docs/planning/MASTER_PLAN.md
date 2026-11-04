@@ -46,7 +46,7 @@ These are inherited from the original plan and remain fixed:
 | **M0** | Repository audit, reference analysis, migration plan, license inventory | — | **COMPLETE (reported)** — planning only; no app/DB changes |
 | **M1** | Exercise Catalogue Navigation, Filtering, and Test Hardening | M0 | **CLOSED for implementation and Git delivery**; QA exceptions open |
 | **M2** | Exercise Detail Layout & Information Architecture | M1 | Ready for execution; not started |
-| **M3** | Offline-first workout core, modes, timers, supersets | M2 | Planned |
+| **M3** | Offline-first workout core, modes, timers, supersets | M2 | CLOSED — production activation/deployment deferred |
 | **M4** | Progression, 1RM/PR, RPE/RIR, RPG bridge | M3 | Planned |
 | **M5** | Weekly plans/scheduling, analytics, bodyweight, novice journey | M3, M4 | Planned |
 | **M6** | AI PT v1: intake, create/review, proposals, apply/revert, audit | M2, M4, M5 | Planned |
