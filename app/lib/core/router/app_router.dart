@@ -12,6 +12,9 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
+import '../../features/training_plan/presentation/newcomer_journey_screen.dart';
+import '../../features/analytics/presentation/analytics_screen.dart';
+import '../../features/bodyweight/presentation/screens/bodyweight_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
 import '../../features/workout/presentation/screens/exercise_picker_screen.dart';
 import '../../features/workout/presentation/screens/exercise_detail_screen.dart';
@@ -188,6 +191,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               : null,
           canSelect: state.uri.queryParameters['select'] == 'true',
         ),
+      ),
+      // ─── M5: Newcomer journey (first-week plan) ───
+      GoRoute(
+        path: '/plan',
+        builder: (context, state) => const NewcomerJourneyScreen(),
+      ),
+      // ─── M5: Analytics ───
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
+      ),
+      // ─── M5: Bodyweight ───
+      GoRoute(
+        path: '/bodyweight',
+        builder: (context, state) => const BodyweightScreen(),
       ),
     ],
   );

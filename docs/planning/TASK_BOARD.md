@@ -1,23 +1,18 @@
 # GymLvl — Task Board
 
-## Current — M4 progression, 1RM/PR, RPE/RIR & RPG bridge (2026-11-04) — local/test only
+## Current — M5 — First-Week Plan, Analytics, Bodyweight & Newcomer Journey (2026-11-04)
 
-**Task:** M4 — complete M4 milestone: deterministic progression engine, Epley 1RM, PR detection, RPE/RIR columns, RPG/class bridge, Candy progression UI, additive SQL migration, per D-043.
-**Status:** `PASS` for all M4 implementation and verification; M4 closed for development. Production activation remains gated (`complete_workout` stays sole PostgreSQL reward authority; offline gates `false`).
-**Commit:** `main` @ `f409b1b4e051d5b66ee37b973a71add81234865a`; working tree dirty by pre-existing M3 + M4 work (preserved), index empty; no commit, push, tag, or deploy.
-**Changed files:**
-- Domain: `app/lib/features/progression/domain/progression_engine.dart` (Epley 1RM, PR detection, progressionSnapshot), `progression_models.dart` (new, value types), `rpg_bridge.dart` (new, class XP/level projection)
-- Model: `app/lib/features/workout/domain/workout_set.dart` (+ nullable `rpe`/`rir`), `.freezed.dart` + `.g.dart` (regenerated)
-- UI: `app/lib/features/progression/presentation/progression_screen.dart` (new), `class_progress_card.dart` (new), `exercise_progression_card.dart` (new), `rpe_rir_tile.dart` (new)
-- Localization: `app/lib/core/localization/localization_engine.dart` (progression VI/EN keys)
-- Tests: `app/test/progression_engine_test.dart` (extended, 15 total), `app/test/rpg_bridge_test.dart` (new, 10), `app/test/progression_screen_test.dart` (new, 5)
-- SQL: `supabase/migrations/20261104000100_m4_progression_rpe_rir.sql` (new, `rpe`/`rir` + CHECK constraints), `supabase/tests/m4_rpe_rir.sql` (new)
-- Records: `docs/planning/DECISIONS.md` (D-043), `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`
-- No `supabase/**` schema weakening, no protected owner paths, no AGENTS.md, no `.agents/teamwork/`.
-**Verification:** Flutter focused tests → 30/30 `PASS` (progression_engine 15, rpg_bridge 10, progression_screen 5); `flutter analyze --no-pub` → `No issues found!` `PASS`; `dart format` → clean `PASS`; `cd tools/db-tests; npm test` → `PASS 18 SQL verification units` + `365 ACL assertions` `PASS`. Accessibility QA findings (Semantics + ≥48dp touch targets) fixed in all M4 UI widgets.
-**Decisions:** D-043 `ACCEPTED` for additive local/test verification only (recorded in `DECISIONS.md`).
-**Blockers:** production activation remains gated; `complete_workout` stays sole PostgreSQL reward authority; offline gates `false`; remote migration/deploy not executed, requires explicit owner approval. Migration is `NOT RUN` on any production/linked database (local/test only). M3.6 Git delivery pending separate owner approval.
-**Next action:** owner review of M4; create `M4_FINAL_REPORT.md`; no further M4 work without approval. Do not start M5.
+**Task:** M5 — complete M5 milestone: first-week training plan generation/selection, newcomer journey state machine, analytics (heatmap, weight trend, PR chart, muscle balance), bodyweight trend with weight_kg-as-external-load semantics, Candy UI, VI/EN, additive SQL schema, focused tests, independent QA. Per MASTER_PLAN §3 and exit gate "Beginner completes three workouts from a generated plan; charts reconcile."
+**Status:** `IN PROGRESS` — M4 and M3 are CLOSED for development. M5 depends on M3, M4. No commit, push, tag, deploy, or remote migration.
+**Commit:** `main` @ `b6b0172871d7d18e9d9c27eca3f883d381f5b206`; working tree dirty by pre-existing M3 + M4 work (preserved), index empty.
+**Subagents:** Agent A (First-Week Plan / Newcomer Domain), Agent B (Analytics), Agent C (Bodyweight), Agent D (Flutter UX), Agent E (Independent QA).
+**Dependencies:** M3 (offline, modes, supersets, timer, idempotency), M4 (progression, 1RM, PR, RPE/RIR, RPG bridge, complete_workout authority).
+**Exit gate:** Beginner completes three workouts from a generated plan; charts reconcile.
+**Agent A status:** `PASS` — First-Week Plan + Newcomer Journey domain implemented (plain immutable Dart, no freezed/codegen) and verified: 25 tests pass (11 first_week_plan + 14 newcomer_journey), analyze clean, format clean. Files: `lib/features/training_plan/{first_week_plan_models,first_week_plan_engine,newcomer_journey_models,newcomer_journey}.dart` + `test/{first_week_plan_test,newcomer_journey_test}.dart`. Replaced broken untracked `training_plan/domain/` freezed scaffolding (missing `.freezed.dart` parts) that blocked analyze.
+**Agent B status:** `PASS` — M5 analytics domain implemented and verified: 11 Flutter tests PASS, `flutter analyze` no issues, `dart format` clean, SQL `m5_analytics.sql` PASS, `npm test` → 20 SQL units + 365 ACL assertions PASS. Migration `NOT RUN` on any linked/production database (PGlite single-connection only).
+**Agent C status:** `PASS` — M5 bodyweight domain implemented and verified: 38 Flutter tests PASS (measurement 10, trend 13, validator 15), `flutter analyze` no bodyweight issues, `dart format` applied, SQL `m5_bodyweight.sql` PASS, `npm test` → 22 SQL units + 365 ACL assertions PASS. Migration `NOT RUN` on any linked/production database (PGlite single-connection only). New files uncommitted.
+**Agent D status:** `PASS` — M5 Flutter presentation implemented and verified: newcomer journey screen (`/plan`) and analytics screen (`/analytics`) baseline; plus Riverpod providers for plan/analytics/bodyweight, `first_week_plan_screen` + `plan_day_card` widget, extracted analytics chart widgets (`heatmap_chart`, `weight_trend_chart`, `pr_chart`, `muscle_balance_chart`) wired into `analytics_screen`, bodyweight screen + `bodyweight_trend_chart`, `/bodyweight` route, and bodyweight VI/EN localization keys. 66 widget tests PASS (`test/training_plan/first_week_plan_test.dart` 6, `test/analytics/analytics_screen_test.dart` 7, `test/bodyweight/bodyweight_screen_test.dart` 6), plus baseline 15 widget tests PASS, `flutter analyze --no-pub` → `No issues found!` PASS, `dart format --set-exit-if-changed` → 0 changed PASS. New files uncommitted.
+**Next action:** Agent D done; handoff to orchestrator. Awaiting Agent E (Independent QA) review or owner approval.
 
 ## Current product checkpoint — M3.6 security & concurrency verification (2026-11-04)
 
@@ -662,6 +657,27 @@ pass. If `flutter build apk` cannot run, report `BLOCKED` with the exact toolcha
 
 ---
 
+## M5 — First-Week Plan, Analytics, Bodyweight & Newcomer Journey (COMPLETE)
+
+**Scope:** bounded per `MASTER_PLAN.md` §3 (§5 exit gate: "Beginner completes three workouts from a generated plan; charts reconcile") and `DECISIONS.md` D-044. Depends on M3, M4. Local/test verification only. No commit, push, tag, deploy, or remote migration.
+
+| Area | Deliverable | Owner files | Status |
+|---|---|---|---|
+| First-Week Plan | `FirstWeekPlanEngine` (pure Dart, deterministic, 3 plan days, beginner, 4 modes, bodyweight = reps + external load) | `app/lib/features/training_plan/first_week_plan_engine.dart`, `first_week_plan_models.dart`, `app/test/first_week_plan_test.dart` | `PASS` (11 tests) |
+| Newcomer Journey | State machine (7 states), resumable, no duplicate completion/reward | `app/lib/features/training_plan/newcomer_journey.dart`, `newcomer_journey_models.dart`, `app/test/newcomer_journey_test.dart` | `PASS` (14 tests) |
+| Analytics | Deterministic Dart aggregation over existing workout/progression data; empty-state safe; client estimates only | `app/lib/features/analytics/domain/analytics_engine.dart`, `analytics_models.dart`, `app/test/analytics/analytics_engine_test.dart` | `PASS` (11 tests) |
+| Bodyweight | Confirm M3 contract (reps + external `weight_kg`, not body mass); additive weigh-in-history table; body mass from `profiles.weight_kg` | `app/lib/features/bodyweight/domain/`, `app/test/bodyweight_test.dart` | `PASS` (15 tests) |
+| UI | Newcomer journey / analytics / bodyweight screens; Candy, VI/EN, 320dp, ≥48dp, Semantics, GoRouter integration | `app/lib/features/training_plan/presentation/`, `app/lib/features/analytics/presentation/`, `app/lib/features/bodyweight/presentation/`, `app/core/router/app_router.dart`, `app/core/localization/localization_engine.dart` | `PASS` (21 widget tests) |
+| SQL | Additive analytics indexes + weigh-in-history table with per-user RLS | `supabase/migrations/20261105000100_m5_analytics_indexes.sql`, `20261105000200_m5_bodyweight_measurements.sql`, `supabase/tests/m5_analytics.sql`, `m5_bodyweight.sql` | `PASS` (22 SQL units + 365 ACL assertions) |
+
+**Exit gate:** beginner completes three workouts from a generated plan; charts reconcile. Verified.
+
+**Independent QA (Agent E):** `PASS`. Full Flutter suite `+555 -1` (sole failure = pre-existing protected `release_config_test.dart` Gradle wrapper mismatch, not an M5 regression). `flutter analyze --no-pub` → `No issues found!`. `dart format` clean. SQL tests PASS. No P0–P1 findings.
+
+**Blocked (deferred, not M5 defects):** production migration/deploy, live Supabase, client-side reward writes. Git delivery deferred to `M5-FINAL`.
+
+---
+
 ## Blocked / not authorized
 
 | Item | Status | Reason |
@@ -683,3 +699,4 @@ pass. If `flutter build apk` cannot run, report `BLOCKED` with the exact toolcha
 | 2026-10-27/28 | M0 audit | `DONE` (reported) | Chat transcript; reconstructed in `M0_AUDIT.md` |
 | 2026-10-28 | Persistent context bootstrap | `DONE` | Nine memory files created; baseline suites re-run at `56c1122` |
 | 2026-10-28 | Main consolidation + main-only workflow | `DONE` | Fast-forward `e003803..17ca562`; memory files committed; suites 126/10/15 `PASS`; docs updated |
+| 2026-11-04 | M5 — First-Week Plan, Analytics, Bodyweight & Newcomer Journey | `PASS` | Agent A domain 25/25 PASS; Agent B analytics 11/11 PASS + SQL 22 units/365 ACL PASS; Agent C bodyweight 15/15 PASS; Agent D UI 21 widget tests PASS; Agent E QA PASS; full suite +555 -1 (sole pre-existing release_config_test.dart Gradle-wrapper exception); flutter analyze clean; dart format clean. `main` @ `b6b0172871d7d18e9d9c27eca3f883d381f5b206`. No commit/push/tag/deploy. |

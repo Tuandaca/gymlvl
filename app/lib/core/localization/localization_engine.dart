@@ -285,6 +285,62 @@ const Map<String, Map<String, String>> _dictionary = {
   'error_title': {'vi': 'LỖI', 'en': 'ERROR'},
   'pending': {'vi': 'ĐANG DỞ', 'en': 'PENDING'},
   'loading': {'vi': 'Đang tải...', 'en': 'Loading...'},
+
+  // M5: Training plan / newcomer journey
+  'plan_title': {'vi': 'KẾ HOẠ ĐẦU TUẦN', 'en': 'FIRST WEEK PLAN'},
+  'day_1': {'vi': 'Ngày 1', 'en': 'Day 1'},
+  'day_2': {'vi': 'Ngày 2', 'en': 'Day 2'},
+  'day_3': {'vi': 'Ngày 3', 'en': 'Day 3'},
+  'journey_no_history': {'vi': 'Chưa có hồ sơ', 'en': 'No profile yet'},
+  'journey_plan_available': {'vi': 'Kế hoạch sẵn sàng', 'en': 'Plan ready'},
+  'journey_plan_started': {'vi': 'Đã mở kế hoạch', 'en': 'Plan opened'},
+  'journey_workout_partial': {
+    'vi': 'Buổi tập đang dở',
+    'en': 'Workout in progress',
+  },
+  'journey_workout_complete': {
+    'vi': 'Đã hoàn thành buổi tập',
+    'en': 'Workout complete',
+  },
+  'journey_progression_available': {
+    'vi': 'Đã mở khóa tiến độ',
+    'en': 'Progression unlocked',
+  },
+  'journey_returning_user': {'vi': 'Người dùng cũ', 'en': 'Returning user'},
+  'plan_empty': {'vi': 'Chưa có kế hoạch tập.', 'en': 'No plan yet.'},
+  'added_load': {'vi': 'Tạ thêm', 'en': 'Added load'},
+  'bodyweight_note': {
+    'vi': 'Trọng lượng trên một tập là tải thêm, không phải khối cơ thể.',
+    'en': 'Weight on a set is added load, not body mass.',
+  },
+  'mode_bodyweight': {'vi': 'Tự trọng', 'en': 'Bodyweight'},
+  'mode_reps_weight': {'vi': 'Trọng lượng', 'en': 'Reps x Weight'},
+  'sets': {'vi': 'Số set', 'en': 'Sets'},
+  'plan_open': {'vi': 'Mở kế hoạch', 'en': 'Open plan'},
+  'workouts': {'vi': 'buổi tập', 'en': 'workouts'},
+
+  // M5: Analytics
+  'analytics_title': {'vi': 'PHÂN TÍCH', 'en': 'ANALYTICS'},
+  'analytics_heatmap': {'vi': 'TẦN SUẤT TẬP', 'en': 'WORKOUT FREQUENCY'},
+  'analytics_volume_trend': {'vi': 'XU HƯỚNG TỔNG TẠ', 'en': 'VOLUME TREND'},
+  'analytics_pr_chart': {'vi': 'BẢNG KÍ NHÂN CAO', 'en': 'PERSONAL RECORDS'},
+  'analytics_empty': {
+    'vi': 'Chưa có dữ liệu tập luyện để hiển thị.',
+    'en': 'No workout data to display yet.',
+  },
+
+  // M5: Bodyweight
+  'bodyweight_title': {'vi': 'TRỌNG LƯỢNG CƠ THỂ', 'en': 'BODYWEIGHT'},
+  'bodyweight_body_mass': {'vi': 'Khối cơ thể', 'en': 'Body mass'},
+  'bodyweight_weigh_in': {'vi': 'Lần cân gần nhất', 'en': 'Last weigh-in'},
+  'bodyweight_no_data': {
+    'vi': 'Chưa có dữ liệu trọng lượng cơ thể.',
+    'en': 'No bodyweight data yet.',
+  },
+  'bodyweight_trend': {
+    'vi': 'Xu hướng trọng lượng cơ thể',
+    'en': 'Bodyweight trend',
+  },
 };
 
 extension StringL10n on String {

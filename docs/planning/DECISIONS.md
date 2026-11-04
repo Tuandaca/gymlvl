@@ -691,3 +691,21 @@ These remain unresolved and block later milestones:
 | O-09 | Checkpoint tag name and creation approval | M1-01 | Project owner |
 | O-10 | Full Apache-2.0 notice text for the `context-window-management` adaptation, or replacement with an original document | Public release | Project owner |
 | O-11 | Whether `.opencode/` and `docs/agent-system/` are committed together or separately | Next authorized commit | Project owner |
+
+## D-044 — M5 scope resolution (bounded, local/test verification)
+
+**Status:** RECORDED (scope defined by `MASTER_PLAN.md` §3 and §5 exit gate; bounded implementation authorized by the M5 execution instruction)
+
+**Context:** MASTER_PLAN defines M5 as "Weekly plans/scheduling, analytics, bodyweight, novice journey", depending on M3, M4, with exit gate "Beginner completes three workouts from a generated plan; charts reconcile." The planning documents define M5 themes but not exact day counts, exercise lists, or metric formulas.
+
+**Decision:** Implement a bounded, deterministic, fully testable M5:
+1. **First-Week Plan** — pure-Dart `FirstWeekPlanEngine` generating exactly 3 plan days for a beginner with no workout history; deterministic (sorted by stable exercise ID, no random); uses the existing 4 workout modes; bodyweight mode = reps + external `weight_kg` load (never body mass); idempotent output (same input → same output, retry-safe, no duplicate plan/workout creation at the domain level). Persistence/wiring to server is out of scope while the production offline gate is closed.
+2. **Newcomer Journey** — pure-Dart state machine: noHistory → planAvailable → planStarted → workoutPartial → workoutComplete → progressionAvailable → returningUser; resumable, no duplicate completion/reward, safe restart.
+3. **Analytics** — deterministic Dart aggregation over existing workout/progression data (volume, muscle split, PRs, 1RM via M4 engine); empty-state safe; client-side estimates only, PostgreSQL remains authoritative; no new reward path.
+4. **Bodyweight** — confirm M3 contract (reps + external `weight_kg` load, not body mass); `profiles.weight_kg` is the authoritative onboarding body-mass source; M5 additionally adds an additive `public.bodyweight_measurements` weigh-in-history table (migration `20261105000200_m5_bodyweight_measurements.sql`, `CREATE TABLE IF NOT EXISTS`, per-user RLS, `idx_bodyweight_measurements_user_measured`) to support the bodyweight trend chart, with `workout_sets.weight_kg` explicitly never used as body mass. No existing tables/columns dropped, renamed, or truncated; rollback documented in the migration.
+
+**Boundaries:** No AGPL code/media; no new database tables/migrations (reuses `profiles.weight_kg` and existing workout tables); no production migration/deploy; `complete_workout` remains sole reward authority; no client-side XP/reward writes. AI not involved (M6).
+
+**Verification:** focused Dart unit/widget tests; `flutter analyze --no-pub`; `dart format`; full `flutter test --no-pub` (sole allowed failure: pre-existing `release_config_test.dart` Gradle wrapper mismatch).
+
+**Consequences:** M5 is local/test verification only. No commit, push, tag, deploy, or remote migration. Git delivery deferred to a separate `M5-FINAL` task.
