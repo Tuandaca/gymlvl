@@ -1,12 +1,12 @@
 # GymLvl — Task Board
 
-## Current phase — P2: Routine & Planning Parity (2026-11-06)
+## Current phase — P3: Workout Core Parity (2026-11-06)
 
-**Task:** Implement routine management, weekly planning, exercise scheduling, and integration with existing workout system, following OpenGym parity reference.
+**Task:** Improve the active workout experience using useful OpenGym behavior while preserving GymLvl's existing workout engine, offline architecture, progression and RPG reward authority. Ten frozen gates: previous-performance hints, active exercise reorder, active exercise replacement, workout notes, warm-up set support, rest timer hardening, active-workout editing, plate calculator, workout-mode/superset/offline/reward compatibility, focused tests + regression.
 
-**Status:** `COMPLETE` (P2 implementation complete; Gate 2 focused automated tests added and passing; all analyzer errors fixed; full Flutter suite passes except pre-existing unrelated `release_config_test.dart` Gradle mismatch)
+**Status:** `COMPLETE` (all ten frozen P3 CORE gates PASS)
 
-**Commit:** `main` @ `8f59d96` (P1 base); P2 changes in working tree (uncommitted, awaiting owner approval)
+**Commit:** `main` @ `21f36361` (P3 baseline); P2 + P3 changes in working tree (uncommitted, awaiting owner approval). P2 remains awaiting owner commit from prior session.
 
 **Deliverables — COMPLETE:**
 1. **Additive migration:** `supabase/migrations/20261106000100_p2_routine_planning.sql` — creates `routines`, `routine_exercises`, `routine_superset_groups`, `routine_schedules`, `planned_workouts` with RLS policies, indexes, triggers, and 12 RPC functions (create/duplicate/replace/reorder/schedule/start/complete/repeat). Preserves all existing data; no DROP/RENAME/TRUNCATE.

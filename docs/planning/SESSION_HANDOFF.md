@@ -6,19 +6,19 @@
 |---|---|
 | Date | 2026-11-06 |
 | Branch | `main` |
-| HEAD | `8f59d96306da71cae2ea28cb0b943d3bcbbb0486` (P1 complete, pushed to origin/main; mutable — re-verify with `git rev-parse HEAD`) |
+| HEAD | `21f36361de7794f48924b5acf0bf7f25cc701ad7` (P3 baseline; origin/main == local main) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — **P2 changes (implementation + focused tests + SQL test)** + pre-existing M3/M4/M5 owner work preserved (modified tracked files + untracked owner files); **do not discard, reset, or overwrite** |
+| Working-tree state | Dirty — **P2 + P3 changes (implementation + focused tests + SQL test)** + pre-existing M3/M4/M5 owner work preserved (modified tracked files + untracked owner files); **do not discard, reset, or overwrite** |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
 | Completed foundation | M1–M5 foundation complete. P1 complete: OpenGym parity matrix populated; legal-safe exercisedb import pipeline (1,324 MIT records) implemented and tested; additive provenance migration (source/external_id/source_revision) verified on PGlite; Flutter Exercise model provenance fields added and tested. P2 complete: Routine & Planning Parity implemented and tested. |
-| Current roadmap phase | P2 — Routine & Planning Parity: **COMPLETE** (all 5 frozen gates PASS; focused tests added and verified; awaiting owner approval to commit) |
+| Current roadmap phase | P3 — Workout Core Parity: **COMPLETE** (all ten frozen gates PASS; focused tests added and verified; awaiting owner approval to commit). P4 — NEXT / NOT STARTED. |
 | Next implementation phase | P3 — Workout Core Parity: NOT STARTED |
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
 | Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
 | Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |
 | Production restrictions | Do NOT deploy production migrations; do NOT run `supabase db push`; onboarding 9/9 blocked on production DB access; no release hardening |
-| Immediate next task | Owner review of P2 candidate manifest; approve commit. P3 — Workout Core Parity — NOT STARTED. |
+| Immediate next task | Owner review of P3 candidate manifest (`git status --short` + `git diff --name-status`); approve commit. P4 — Workout Core Parity — NOT STARTED. |
 | Do not do | Do not start P3+ automatically; no AI PT (P6); no production deploy/migration; no media; no commit/push without owner approval |
 | Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md` |
 

@@ -686,7 +686,29 @@ These remain unresolved and block later milestones:
 | O-04 | Approval of full 1,324 import vs curated subset | M2 | Project owner |
 | O-05 | AI provider and cost policy | M6 | Project owner |
 | O-06 | Android SDK/device availability | M1-02, M1-05, M8 | Project owner |
-| O-07 | Live Supabase project and credential ownership | M2+ verification | Project owner |
+| O-07 | Live Supabase project and credential ownership | M2+ verification | Project owner
+
+## D-044 — P3 Workout Core Parity implementation (additive local/test verification)
+
+**Status:** ACCEPTED for additive local/test verification only. Production migration/deployment remains gated; `complete_workout` remains sole PostgreSQL reward authority.
+
+**Context:** P3 — Workout Core Parity extends the existing active-workout flow using OpenGym as behavioral reference only (no AGPL code/text/media reuse). It must not create a second workout engine, must not award XP directly, and must preserve warm-up/set/superset/mode/reward invariants.
+
+**Changed/added sources:**
+- `app/lib/features/workout/domain/workout_set.dart` + `.freezed.dart` + `.g.dart` — add `WorkoutSetType` enum (`workout`/`warmup`) and `setType` field (default `workout`); `isWarmup` getter. Backward compatible: legacy NULL decodes to `workout`.
+- `app/lib/features/workout/domain/plate_calculator.dart` (new) — pure Dart deterministic plate calculator (`PlateCalculator.calculate`, `PlateCalculationResult`) with validation; no service, no state mutation.
+- `app/lib/features/workout/presentation/controllers/active_workout_controller.dart` — add `replaceExercise(...)` (preserves workout identity/position/superset; refuses if old exercise has completed sets), `updateWorkoutNotes(...)`, `updateSet(...)` now accepts `setType`.
+- `app/lib/features/workout/data/supabase_workout_repository.dart` — `replaceExercise(...)` and `updateWorkoutNotes(...)` RPC/table updates; `updateSet` persists `set_type`.
+- `app/lib/features/workout/presentation/widgets/{set_row_widget,workout_exercise_tile,previous_performance_hint}.dart` — warm-up chip, replace action, previous-performance hint UI.
+- `app/lib/features/workout/presentation/screens/active_workout_screen.dart` — replace-exercise picker flow, edit-notes dialog.
+- `app/lib/features/progression/domain/progression_engine.dart` — `calculateXP` excludes warm-up sets.
+- `app/test/plate_calculator_test.dart` (new), `app/test/p3_workout_core_test.dart` (new) — focused tests: plate calculator, reorder, replace, warm-up exclusion, notes.
+- `supabase/migrations/20261107000100_p3_workout_core.sql` (new) — additive: `ALTER TABLE public.workout_sets ADD COLUMN set_type text DEFAULT 'workout'` + CHECK constraint; backfill legacy rows to `workout`; `CREATE OR REPLACE FUNCTION public.complete_workout(...)` excludes warm-up sets from completed-set count, base XP, PR (`exercise_prs`), and quest targets. Production NOT applied.
+- `supabase/tests/p3_workout_core.sql` (new) — verifies set_type column, constraint, default, warm-up insert.
+
+**Verification:** `flutter analyze` → `No issues found!`; `dart format` → stable; focused P3 Dart tests pass; `cd tools/db-tests && npm test` → all SQL/ACL units pass including p3 migration and `p3_workout_core.sql`; full Flutter suite passes except pre-existing unrelated `release_config_test.dart` (owner Gradle file untouched).
+
+**Production gates:** `productionWorkoutModesEnabled` and `productionSupersetEnabled` remain `false`; `complete_workout` remains sole server reward authority; no remote migration, deployment, commit, or push; no production data mutation. |
 | O-08 | Provenance of the 150 curated exercise texts | Catalog trust / M2 | Project owner |
 | O-09 | Checkpoint tag name and creation approval | M1-01 | Project owner |
 | O-10 | Full Apache-2.0 notice text for the `context-window-management` adaptation, or replacement with an original document | Public release | Project owner |

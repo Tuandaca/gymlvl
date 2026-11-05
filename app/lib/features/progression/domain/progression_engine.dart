@@ -12,7 +12,7 @@ class ProgressionEngine {
     bool isSuspicious = false,
   }) {
     final valid = completedSets
-        .where((set) => set.isCompleted && set.reps > 0)
+        .where((set) => set.isCompleted && set.reps > 0 && !set.isWarmup)
         .toList();
     if (valid.isEmpty) return 0;
     if (isSuspicious) return 10;

@@ -354,6 +354,51 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       ) ??
       false;
 
+  Future<void> _editNotes() async {
+    final controller = ref.read(activeWorkoutControllerProvider.notifier);
+    final currentState = ref.read(activeWorkoutControllerProvider);
+    final currentNotes = currentState.workout?.notes ?? '';
+    final owner = ref.read(authStateStreamProvider).value?.session?.user.id;
+    final workoutId = currentState.workout?.id;
+    if (owner == null || workoutId == null) return;
+    final textController = TextEditingController(text: currentNotes);
+    String? savedNotes;
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(t('edit_notes')),
+        content: TextField(
+          controller: textController,
+          maxLines: 4,
+          maxLength: 4000,
+          decoration: InputDecoration(
+            hintText: t('notes'),
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(t('cancel')),
+          ),
+          FilledButton(
+            onPressed: () {
+              savedNotes = textController.text;
+              Navigator.pop(dialogContext, 'save');
+            },
+            child: Text(t('confirm')),
+          ),
+        ],
+      ),
+    );
+    textController.dispose();
+    if (!mounted || result != 'save') return;
+    final current = ref.read(authStateStreamProvider).value?.session?.user.id;
+    final wid = ref.read(activeWorkoutControllerProvider).workout?.id;
+    if (current != owner || wid != workoutId) return;
+    await controller.updateWorkoutNotes(savedNotes ?? '');
+  }
+
   Future<void> _finish() async {
     FocusScope.of(context).unfocus();
     final controller = ref.read(activeWorkoutControllerProvider.notifier);
@@ -520,6 +565,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           title: _WorkoutTimerTitle(isSetupPhase: isSetupPhase),
           actions: [
             if (!isSetupPhase) _WorkoutTimerPauseAction(busy: busy || recovery),
+            if (!isSetupPhase)
+              IconButton(
+                tooltip: t('edit_notes'),
+                onPressed: busy || recovery ? null : _editNotes,
+                icon: const Icon(Icons.edit_note),
+              ),
             if (!isSetupPhase)
               TextButton(
                 onPressed: busy ? null : _finish,
@@ -909,6 +960,27 @@ class _TrainingView extends ConsumerWidget {
                           workoutText(ref, 'remove'),
                         )) {
                           await controller.removeExercise(exercise.id);
+                        }
+                      },
+                onReplace: exercise.supersetGroupId != null
+                    ? null
+                    : () async {
+                        if (!context.mounted) return;
+                        if (await onConfirm(
+                          workoutText(ref, 'replace_exercise'),
+                          workoutText(ref, 'replace_hint'),
+                          workoutText(ref, 'replace_exercise'),
+                        )) {
+                          if (!context.mounted) return;
+                          final result = await context.push<Exercise>(
+                            '/exercise-picker?select=true',
+                          );
+                          if (result != null && context.mounted) {
+                            await controller.replaceExercise(
+                              exercise.id,
+                              result,
+                            );
+                          }
                         }
                       },
                 onStartRest: onRest,

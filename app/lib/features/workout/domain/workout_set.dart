@@ -7,6 +7,44 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'workout_set.freezed.dart';
 part 'workout_set.g.dart';
 
+/// Whether a set is a regular working set or a warm-up set.
+///
+/// Warm-up sets are distinguishable from working sets and must not inflate
+/// progression, PR, or reward metrics. Legacy rows (no `set_type`) decode to
+/// [WorkoutSetType.workout] so existing history is never corrupted.
+enum WorkoutSetType {
+  @JsonValue('workout')
+  workout,
+  @JsonValue('warmup')
+  warmup,
+}
+
+WorkoutSetType _workoutSetTypeFromJson(String? value) {
+  switch (value) {
+    case 'warmup':
+      return WorkoutSetType.warmup;
+    case 'workout':
+      return WorkoutSetType.workout;
+    default:
+      // Legacy NULL / unknown decodes to a regular working set so existing
+      // history is never corrupted.
+      return WorkoutSetType.workout;
+  }
+}
+
+String? _workoutSetTypeToJson(WorkoutSetType? value) => value?.wireValue;
+
+extension on WorkoutSetType {
+  String get wireValue {
+    switch (this) {
+      case WorkoutSetType.workout:
+        return 'workout';
+      case WorkoutSetType.warmup:
+        return 'warmup';
+    }
+  }
+}
+
 @freezed
 abstract class WorkoutSet with _$WorkoutSet {
   const WorkoutSet._();
@@ -21,6 +59,9 @@ abstract class WorkoutSet with _$WorkoutSet {
     @JsonKey(name: 'is_completed') @Default(false) bool isCompleted,
     @JsonKey(name: 'rest_seconds') @Default(0) int restSeconds,
     @JsonKey(name: 'duration_seconds') @Default(0) int durationSeconds,
+    @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)
+    @Default(WorkoutSetType.workout)
+    WorkoutSetType setType,
 
     /// RPE (1-10): NULLABLE, no default — backward compatible with legacy rows.
     @JsonKey(name: 'rpe') int? rpe,
@@ -32,6 +73,10 @@ abstract class WorkoutSet with _$WorkoutSet {
 
   factory WorkoutSet.fromJson(Map<String, dynamic> json) =>
       _$WorkoutSetFromJson(json);
+
+  /// True when this set is a warm-up set. Warm-up sets are excluded from PR
+  /// and progression calculations.
+  bool get isWarmup => setType == WorkoutSetType.warmup;
 
   /// RPE (1-10) and RIR (0-10) are optional set-level fields; nullable and
   /// backward compatible — legacy records keep null.

@@ -5,6 +5,7 @@ import '../../../../ui/theme/app_theme.dart';
 import '../../domain/workout_exercise.dart';
 import '../../domain/workout_mode_contract.dart';
 import 'set_row_widget.dart';
+import 'previous_performance_hint.dart';
 
 class WorkoutExerciseTile extends ConsumerWidget {
   final WorkoutExercise workoutExercise;
@@ -14,6 +15,7 @@ class WorkoutExerciseTile extends ConsumerWidget {
   final bool isGroupLocked;
   final VoidCallback? onAddSet;
   final VoidCallback? onRemove;
+  final VoidCallback? onReplace;
   final VoidCallback? onStartRest;
   final Function(
     String setId, {
@@ -34,6 +36,7 @@ class WorkoutExerciseTile extends ConsumerWidget {
     this.isGroupLocked = false,
     this.onAddSet,
     this.onRemove,
+    this.onReplace,
     this.onStartRest,
     this.onUpdateSet,
     this.onDeleteSet,
@@ -220,6 +223,9 @@ class WorkoutExerciseTile extends ConsumerWidget {
                                 fontSize: 11,
                               ),
                             ),
+                          PreviousPerformanceHint(
+                            exerciseId: workoutExercise.id,
+                          ),
                         ],
                       ),
                     ],
@@ -232,6 +238,21 @@ class WorkoutExerciseTile extends ConsumerWidget {
                     icon: const Icon(
                       Icons.delete_outline,
                       color: AppTheme.dangerOrange,
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
+                    ),
+                  ),
+                if (isEditable && onReplace != null && !isGroupLocked)
+                  IconButton(
+                    tooltip: workoutText(ref, 'replace_exercise'),
+                    onPressed: onReplace,
+                    icon: const Icon(
+                      Icons.swap_horiz,
+                      color: AppTheme.cyanNeon,
                       size: 20,
                     ),
                     padding: EdgeInsets.zero,
@@ -309,6 +330,7 @@ class WorkoutExerciseTile extends ConsumerWidget {
                           isBodyweight: isBodyweight,
                           isTimeBased: isTimeBased,
                           isCompleted: set.isCompleted,
+                          isWarmup: set.isWarmup,
                           isEditable: isEditable,
                           onRepsChanged: isEditable
                               ? (reps) => onUpdateSet?.call(set.id, reps: reps)

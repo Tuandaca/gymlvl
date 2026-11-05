@@ -195,6 +195,15 @@ const _copy = <String, List<String>>{
   'return_home': ['Return Home', 'Về trang chủ'],
   'reorder': ['Reorder exercises', 'Sắp xếp bài tập'],
   'reorder_hint': ['Hold and drag to reorder', 'Giữ và kéo để đổi thứ tự'],
+  'previous_best': ['Previous best', 'Tốt nhất trước đây'],
+  'notes': ['Notes', 'Ghi chú'],
+  'edit_notes': ['Edit notes', 'Chỉnh sửa ghi chú'],
+  'replace_exercise': ['Replace exercise', 'Thay thế bài tập'],
+  'replace_hint': [
+    'This keeps its logged sets and position in the workout.',
+    'Điều này sẽ giữ các hiệp đã ghi lại và vị trí trong buổi tập.',
+  ],
+  'warmup_set': ['Warm-up', 'Hởi động'],
   // Exercise picker
   'clear_search': ['Clear search', 'Xóa tìm kiếm'],
   'clear_all': ['Clear all', 'Xóa tất cả'],

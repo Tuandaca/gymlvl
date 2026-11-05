@@ -684,6 +684,64 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _saveLocalBackup();
   });
 
+  // --- REPLACE EXERCISE (ACTIVE WORKOUT) ---
+  //
+  // Replaces the exercise while preserving the active-workout identity, the
+  // exercise position (order_index), superset group/position and any logged
+  // sets. Completed sets are never deleted or silently corrupted: if the
+  // exercise already has completed sets the replacement is refused explicitly.
+
+  Future<void> replaceExercise(
+    String workoutExerciseId,
+    Exercise newExercise, {
+    WorkoutMode? mode,
+  }) async {
+    final generation = _generation;
+    if (!state.hasActiveWorkout) return;
+    final current = state.exercises.firstWhere(
+      (e) => e.id == workoutExerciseId,
+      orElse: () => throw StateError('exercise_not_found'),
+    );
+    if (state.exercises.any((e) => e.exerciseId == newExercise.id)) {
+      state = state.copyWith(errorMessage: 'exercise_already_added');
+      return;
+    }
+    if (current.sets.any((set) => set.isCompleted)) {
+      state = state.copyWith(errorMessage: 'exercise_has_completed_sets');
+      return;
+    }
+    if (mode != null && !productionWorkoutModesEnabled) {
+      state = state.copyWith(errorMessage: 'mode_unavailable');
+      return;
+    }
+    try {
+      await _repository.replaceExercise(workoutExerciseId, newExercise.id);
+      if (!_isCurrent(generation)) return;
+      final selectedMode = mode ?? current.mode;
+      state = state.copyWith(
+        exercises: state.exercises.map((e) {
+          if (e.id != workoutExerciseId) return e;
+          return e.copyWith(
+            exerciseId: newExercise.id,
+            orderIndex: e.orderIndex,
+            supersetGroupId: e.supersetGroupId,
+            supersetPosition: e.supersetPosition,
+            supersetLocked: e.supersetLocked,
+            mode: selectedMode,
+            exercise: newExercise,
+            sets: e.sets,
+          );
+        }).toList(),
+      );
+      _saveLocalBackup();
+    } catch (_) {
+      if (!_isCurrent(generation)) return;
+      state = state.copyWith(errorMessage: 'replace_failed');
+      await _reload();
+      rethrow;
+    }
+  }
+
   Future<void> setSupersetLayout(List<SupersetGroupLayout> groups) =>
       _enqueue((generation) async {
         if (!state.hasActiveWorkout) return;
@@ -753,6 +811,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     String setId, {
     int? reps,
     double? weightKg,
+    WorkoutSetType? setType,
     int? durationSeconds,
     bool? isCompleted,
   }) => _enqueue((generation) async {
@@ -783,6 +842,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       setId,
       reps: reps,
       weightKg: weightKg,
+      setType: setType,
       durationSeconds: durationSeconds,
       isCompleted: isCompleted,
     );
@@ -1137,4 +1197,15 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     if (completionNeedsRecovery) return;
     state = state.copyWith(errorMessage: null);
   }
+
+  Future<void> updateWorkoutNotes(String notes) => _enqueue((generation) async {
+    if (!state.hasActiveWorkout) return;
+    final updated = await _repository.updateWorkoutNotes(
+      state.workout!.id,
+      notes,
+    );
+    if (!_isCurrent(generation)) return;
+    state = state.copyWith(workout: updated);
+    _saveLocalBackup();
+  });
 }

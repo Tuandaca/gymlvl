@@ -61,6 +61,9 @@ abstract class WorkoutRepository {
   /// Hủy workout
   Future<void> cancelWorkout(String workoutId);
 
+  /// Cập nhật ghi chú của workout đang active.
+  Future<Workout> updateWorkoutNotes(String workoutId, String notes);
+
   /// Thêm bài tập vào workout
   Future<WorkoutExercise> addExerciseToWorkout(
     String workoutId,
@@ -70,6 +73,13 @@ abstract class WorkoutRepository {
 
   /// Xóa bài tập khỏi workout (cascade xóa sets)
   Future<void> removeExerciseFromWorkout(String workoutExerciseId);
+
+  /// Thay thế bài tập trong workout đang active, giữ nguyên vị trí (orderIndex),
+  /// nhóm superset và các thiết lập đã có. Không xóa tập đã hoàn thành.
+  Future<WorkoutExercise> replaceExercise(
+    String workoutExerciseId,
+    String newExerciseId,
+  );
 
   /// Sắp xếp lại thứ tự bài tập
   Future<void> reorderExercises(
@@ -92,6 +102,7 @@ abstract class WorkoutRepository {
     String setId, {
     int? reps,
     double? weightKg,
+    WorkoutSetType? setType,
     bool? isCompleted,
     int? restSeconds,
     int? durationSeconds,

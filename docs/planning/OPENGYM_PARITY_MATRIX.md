@@ -56,14 +56,14 @@
 | Set logging (reps/weight) | `workout-model.js`, `per-set.js` | `workout_set.dart` (reps, weight_kg) | EXISTING | reuse | — | None | |
 | Timed holds | `workout-model.js` (hold), `finish-hold.test.jsx` | `workout_set.dart` (mode nullable), M4 superset/modes | PARTIAL | reuse | P3 | None | GymLvl has mode discriminator (M3.5). |
 | Cardio | `cardio-reps.test.js` | `workout_set.dart` mode | PARTIAL | reuse | P3 | None | |
-| Warmups | `warmup-seed.test.js` | None (set_type not in current schema) | MISSING | defer | P3 | None | |
+| Warmups | `warmup-seed.test.js` | Warm-up set support added (`set_type`); excluded from PR/XP | PARTIAL | implement | P3 | None | P3 supports warm-up sets but not warm-up generation algorithms |
 | Rest timer | `rest-timer` behavior, `RestTimer.jsx` | `rest_timer_widget.dart` | EXISTING | reuse | — | None | |
 | Supersets | `supersetFlow.js`, `superset-meta.js` | `superset_rounds.dart`, M3 migration `m3_superset_modes.sql` | PARTIAL | reuse | P3 | None | GymLvl has nullable superset_group_id/position. |
 | Notes | `session-note.test.jsx` | `workout.notes` (active workout only) | PARTIAL | reuse | P3 | None | |
-| Exercise swap | `sheets.swap.test.jsx`, `sheets.swap-same-muscle.test.jsx` | None | MISSING | defer | P3 | None | |
-| Ordering | `session-routines.js` | None | MISSING | defer | P3 | None | |
-| Previous-performance hints | `strength-exercises.js`, `exercise-history.js` | `progression_engine.dart` (1RM, PR) | PARTIAL | reuse | P3 | None | GymLvl M4 progression. |
-| Session editing | `session-edit.js` | None | MISSING | defer | P3 | None | |
+| Exercise swap | `sheets.swap.test.jsx`, `sheets.swap-same-muscle.test.jsx` | Active-workout replace/swap added; position preserved; completed sets protected | PARTIAL | implement | P3 | None | P3 replace refuses if old exercise has completed sets |
+| Ordering | `session-routines.js` | Reorder persists/reloads; superset preserved; blocked while locked | EXISTING | reuse | P3 | None | |
+| Previous-performance hints | `strength-exercises.js`, `exercise-history.js` | `progression_engine.dart` (1RM, PR); compact active-workout hint UI | PARTIAL | reuse | P3 | None | GymLvl M4 progression; active-workout hint added |
+| Session editing | `session-edit.js` | Active editing (weight/reps/notes/delete set/reorder/replace); history immutable | PARTIAL | implement | P3 | None | Old completed workouts never edited in P3 |
 | Unfinished sessions | `session-noprog.js` | `offline_workout_store.dart` (drafts) | PARTIAL | reuse | P3 | None | Offline drafts (local/test, gate closed). |
 | Finish-workout behavior | `finish-workout.js` | `complete_workout` RPC (transactional, idempotent) | EXISTING | reuse | — | None | Server-authoritative, sole reward path. |
 
@@ -81,7 +81,7 @@
 
 | Capability | OpenGym evidence/path | GymLvl evidence/path | Status | P1 action | Target phase | License/data concern | Notes / behavioral contract |
 |---|---|---|---|---|---|---|---|
-| Plate calculator | `plates.js` | None | MISSING | defer | P4 | None | |
+| Plate calculator | `plates.js` | Pure Dart plate calculator added | EXISTING | implement | P3 | None | P3 adds deterministic plate math |
 | Dumbbell utilities | `dumbbells.js`, `dumbbell-inventory.test.js` | None | MISSING | defer | P4 | None | |
 | Unit handling | `units.js` | None | MISSING | defer | P4 | None | kg/lb conversion. |
 | Bodyweight | `bodyweight.js` | `bodyweight_measurement.dart`, `bodyweight_trend.dart`, M5 migration | PARTIAL | reuse | P4 | None | GymLvl M5 bodyweight trend. |

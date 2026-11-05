@@ -98,11 +98,33 @@ class FakeRepository extends Fake implements WorkoutRepository {
     double? weightKg,
     bool? isCompleted,
     int? restSeconds,
+    WorkoutSetType? setType,
   }) async {
     updates.add(reps ?? 0);
     await updateGate?.future;
     if (failUpdate) throw StateError('offline');
-    return active.exercises.first.sets.first.copyWith(reps: reps ?? 10);
+    final base = active.exercises.first.sets.first.copyWith(reps: reps ?? 10);
+    if (setType == null) return base;
+    return base.copyWith(setType: setType);
+  }
+
+  @override
+  Future<WorkoutExercise> replaceExercise(
+    String workoutExerciseId,
+    String newExerciseId,
+  ) async {
+    final idx = active.exercises.indexWhere((e) => e.id == workoutExerciseId);
+    if (idx < 0) throw StateError('exercise_not_found');
+    active = active.copyWith(
+      exercises: [
+        for (final e in active.exercises)
+          if (e.id == workoutExerciseId)
+            e.copyWith(exerciseId: newExerciseId)
+          else
+            e,
+      ],
+    );
+    return active.exercises[idx];
   }
 }
 

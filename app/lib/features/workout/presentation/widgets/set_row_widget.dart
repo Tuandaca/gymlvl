@@ -12,6 +12,7 @@ class SetRowWidget extends ConsumerStatefulWidget {
   final bool isBodyweight;
   final bool isTimeBased;
   final bool isCompleted;
+  final bool isWarmup;
   final bool isEditable;
   final ValueChanged<int>? onRepsChanged;
   final ValueChanged<double>? onWeightChanged;
@@ -28,6 +29,7 @@ class SetRowWidget extends ConsumerStatefulWidget {
     this.isBodyweight = false,
     this.isTimeBased = false,
     this.isCompleted = false,
+    this.isWarmup = false,
     this.isEditable = true,
     this.onRepsChanged,
     this.onWeightChanged,
@@ -126,6 +128,22 @@ class _SetRowWidgetState extends ConsumerState<SetRowWidget> {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             ),
           ),
+          if (widget.isWarmup)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppTheme.cyanNeon.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                workoutText(ref, 'warmup_set'),
+                style: const TextStyle(
+                  color: AppTheme.cyanNeon,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           const SizedBox(width: 4),
 
           // Timed/cardio have no weight field; bodyweight uses added load.

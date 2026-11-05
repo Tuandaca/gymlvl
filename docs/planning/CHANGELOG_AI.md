@@ -2,6 +2,40 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-06 — P3: Workout Core Parity (COMPLETE — all ten frozen gates PASS)
+
+**Task:** Improve the active workout experience using useful OpenGym behavior while preserving GymLvl's existing workout engine, offline architecture, progression and RPG reward authority.
+
+**Status:** `COMPLETE` (all ten frozen P3 CORE gates PASS)
+
+**Changed/added sources:**
+- `app/lib/features/workout/domain/workout_set.dart` + `.freezed.dart` + `.g.dart` — `WorkoutSetType` (`workout`/`warmup`) + `setType` field (default `workout`); `isWarmup` getter; backward compatible (legacy NULL → `workout`).
+- `app/lib/features/workout/domain/plate_calculator.dart` (new) — pure Dart deterministic plate calculator with validation; no service, no state mutation.
+- `app/lib/features/workout/presentation/controllers/active_workout_controller.dart` — `replaceExercise(...)` (preserves identity/position/superset; refuses if old exercise has completed sets), `updateWorkoutNotes(...)`, `updateSet(...)` accepts `setType`.
+- `app/lib/features/workout/data/supabase_workout_repository.dart` — `replaceExercise(...)`, `updateWorkoutNotes(...)`, `updateSet` persists `set_type`.
+- `app/lib/features/workout/presentation/widgets/{set_row_widget,workout_exercise_tile,previous_performance_hint}.dart` — warm-up chip, replace action, previous-performance hint UI.
+- `app/lib/features/workout/presentation/screens/active_workout_screen.dart` — replace-exercise picker flow, edit-notes dialog.
+- `app/lib/features/progression/domain/progression_engine.dart` — `calculateXP` excludes warm-up sets.
+- `app/test/plate_calculator_test.dart` (new, 11 tests), `app/test/p3_workout_core_test.dart` (new, 8 tests) — focused tests.
+- `supabase/migrations/20261107000100_p3_workout_core.sql` (new) — additive `workout_sets.set_type` (text, DEFAULT 'workout', CHECK workout/warmup, legacy backfill); `complete_workout` excludes warm-up sets from completed-set count, base XP, PR (`exercise_prs`), quest targets. Production NOT applied.
+- `supabase/tests/p3_workout_core.sql` (new) — verifies set_type column/constraint/default/warm-up insert.
+- `docs/planning/OPENGYM_PARITY_MATRIX.md` — P3 rows truthfully updated (Warmups, Exercise swap, Ordering, Previous-performance hints, Session editing, Plate calculator).
+- `docs/planning/DECISIONS.md` — D-044 recorded.
+
+**Verification:** `flutter analyze` → `No issues found!`; `dart format --set-exit-if-changed .` → stable (0 changed); focused P3 Dart tests pass (plate calculator 11/11, p3_workout_core 8/8); full Flutter suite passes except pre-existing unrelated `release_config_test.dart` (owner Gradle file untouched); `cd tools/db-tests && npm test` → all SQL/ACL units pass including p3 migration and `p3_workout_core.sql`.
+
+**Schema (additive only, production NOT applied):** `workout_sets.set_type` column + CHECK constraint + legacy backfill; `complete_workout` updated to exclude warm-up sets from PR/XP/quests. No existing tables/columns dropped or renamed; no RLS/grants weakened; no production migration deployed.
+
+**No second workout engine:** all P3 behavior extends the existing active-workout flow; `complete_workout` remains sole authoritative reward path; warm-up sets award no XP/PR/quests; no direct XP award from editing/reorder/replace/notes/plate calculator.
+
+**P4:** NOT STARTED.
+
+**Pre-existing owner files preserved:** `app/android/gradle.properties`, `app/android/gradle/wrapper/gradle-wrapper.properties`, `app/lib/features/workout/domain/workout.freezed.dart`/`.g.dart`, `.agents/teamwork/` tree, all untracked owner files — untouched.
+
+**No commit/push** without owner approval.
+
+---
+
 ## 2026-11-06 — P2 Routine & Planning Parity (COMPLETE — Gate 2 closed)
 
 - **Task:** Close the only remaining frozen P2 gate — Gate 2 focused automated P2 tests — by adding the minimum focused test suite, fixing only real bugs those tests expose, running full verification, updating canonical status, and returning an exact Git-derived commit candidate.

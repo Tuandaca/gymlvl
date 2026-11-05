@@ -16,6 +16,9 @@ _WorkoutSet _$WorkoutSetFromJson(Map<String, dynamic> json) => _WorkoutSet(
   isCompleted: json['is_completed'] as bool? ?? false,
   restSeconds: (json['rest_seconds'] as num?)?.toInt() ?? 0,
   durationSeconds: (json['duration_seconds'] as num?)?.toInt() ?? 0,
+  setType: json['setType'] == null
+      ? WorkoutSetType.workout
+      : _workoutSetTypeFromJson(json['setType'] as String?),
   rpe: (json['rpe'] as num?)?.toInt(),
   rir: (json['rir'] as num?)?.toInt(),
   createdAt: json['created_at'] == null
@@ -34,6 +37,7 @@ Map<String, dynamic> _$WorkoutSetToJson(_WorkoutSet instance) =>
       'is_completed': instance.isCompleted,
       'rest_seconds': instance.restSeconds,
       'duration_seconds': instance.durationSeconds,
+      'setType': _workoutSetTypeToJson(instance.setType),
       'rpe': instance.rpe,
       'rir': instance.rir,
       'created_at': instance.createdAt?.toIso8601String(),

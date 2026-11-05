@@ -163,6 +163,20 @@ class SupabaseWorkoutRepository
   }
 
   @override
+  Future<Workout> updateWorkoutNotes(String workoutId, String notes) async {
+    if (notes.length > 4000) {
+      throw ArgumentError('notes_too_long');
+    }
+    final response = await _supabase
+        .from('workouts')
+        .update({'notes': notes})
+        .eq('id', workoutId)
+        .select(_detail)
+        .single();
+    return decodeWorkout(response);
+  }
+
+  @override
   Future<WorkoutExercise> addExerciseToWorkout(
     String workoutId,
     String exerciseId,
@@ -237,6 +251,20 @@ class SupabaseWorkoutRepository
   }
 
   @override
+  Future<WorkoutExercise> replaceExercise(
+    String workoutExerciseId,
+    String newExerciseId,
+  ) async {
+    final response = await _supabase
+        .from('workout_exercises')
+        .update({'exercise_id': newExerciseId})
+        .eq('id', workoutExerciseId)
+        .select('*, exercises(*), workout_sets(*)')
+        .single();
+    return WorkoutExercise.fromJson(response);
+  }
+
+  @override
   Future<void> reorderExercises(String workoutId, List<String> ids) async {
     for (var i = 0; i < ids.length; i++) {
       await _supabase
@@ -305,6 +333,7 @@ class SupabaseWorkoutRepository
     String setId, {
     int? reps,
     double? weightKg,
+    WorkoutSetType? setType,
     bool? isCompleted,
     int? restSeconds,
     int? durationSeconds,
@@ -318,6 +347,11 @@ class SupabaseWorkoutRepository
     final data = <String, dynamic>{};
     if (reps != null) data['reps'] = reps;
     if (weightKg != null) data['weight_kg'] = weightKg;
+    if (setType != null) {
+      data['set_type'] = setType == WorkoutSetType.warmup
+          ? 'warmup'
+          : 'workout';
+    }
     if (isCompleted != null) data['is_completed'] = isCompleted;
     if (restSeconds != null) data['rest_seconds'] = restSeconds;
     if (durationSeconds != null) data['duration_seconds'] = durationSeconds;
