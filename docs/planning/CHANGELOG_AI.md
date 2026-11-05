@@ -2,7 +2,51 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
-## 2026-11-06 — P4: Progress / Analytics / Utility Parity (COMPLETE — all eight frozen gates PASS)
+## 2026-11-06 — P5: Deep GymLvl Game Integration (COMPLETE — all nine frozen gates PASS)
+
+**Task:** Turn GymLvl's existing fitness foundation into a coherent fitness-RPG experience. Nine frozen gates: unified player progression model, class-linked progression, workout-derived quest progression, achievement/milestone system, unlock system, streak/game-loop integration, post-workout game feedback, dashboard/player-profile game presentation, focused tests + server-authoritative security/idempotency/regression.
+
+**Status:** `COMPLETE` (all nine frozen P5 CORE gates PASS)
+
+**Commit:** `main` @ `9bba44da3d2b4364473a98643a601d06aaf566c2` (P4 baseline, committed & pushed); P5 NOT committed (awaiting owner approval). Pre-existing owner dirty/untracked files preserved.
+
+**Root cause fix:** `guard_workout_child` was ALREADY CORRECT — resolves ownership through parent `workouts` table. `p3_workout_core.sql` redefined `complete_workout` with a smaller achievement catalogue (missing `five_workouts`, `streak_3`, `level_20`), overriding P5's version. Fixed by adding all 7 achievement IDs to P3's `complete_workout` FOREACH array.
+
+**Changed/added files (P5 implementation):**
+- `supabase/migrations/20261107000100_p3_workout_core.sql` (edited) — added `five_workouts`, `streak_3`, `level_20` to `complete_workout` FOREACH array to match P5's 7-ID catalogue
+- `supabase/tests/p5_game_injection.sql` (rewritten) — comprehensive SQL/ACL tests for all 9 gates using `BEGIN; ... ROLLBACK;` transaction pattern, `set_config(..., true)` for auth context, `p5_assert`/`p5_denied` defined before use, independent workout UUID (`workouts.id ≠ auth.uid()`)
+- `app/lib/features/progression/presentation/providers/player_progression_provider.dart` (new) — unified progression provider calling `get_player_progression()` RPC; exposes Class, Level, current XP, XP to next level, streak, active quests, recent achievements, next milestone/unlock
+- `app/lib/features/achievements/` (new) — `domain/achievement.dart` (freezed model), `presentation/providers/achievement_providers.dart` (Riverpod provider), `presentation/screens/achievements_screen.dart` (Candy UI), `presentation/widgets/achievement_card.dart` (earned/locked states)
+- `app/lib/features/unlocks/` (new) — `domain/unlock.dart` (freezed model), `presentation/providers/unlock_providers.dart` (Riverpod provider), `presentation/screens/unlocks_screen.dart` (Candy UI), `presentation/widgets/unlock_card.dart` (unlocked/locked states); core fitness functionality never gated
+- `app/lib/features/post_workout_feedback/` (new) — `domain/post_workout_result.dart` (freezed model), `presentation/providers/post_workout_feedback_providers.dart` (Riverpod provider), `presentation/screens/post_workout_feedback_screen.dart` (Candy UI showing XP earned, level progress, quest completion, achievements, streak, PR summary, class progress)
+
+**Gate-by-gate verification:**
+- Gate 1 (Unified progression): `get_player_progression()` returns unified state; verified via `p5_game_injection.sql`
+- Gate 2 (Class-linked progression): `switch_class()` idempotent (no XP duplication); class data appears in progression response
+- Gate 3 (Workout-derived quests): quest instance completed and quest XP awarded exactly once via `complete_workout`
+- Gate 4 (Achievement system): 7-ID catalogue enforced by CHECK constraint; `ON CONFLICT DO NOTHING` idempotency
+- Gate 5 (Unlock system): `PRIMARY KEY(user_id, unlock_id)` prevents duplicates; core fitness ungated (all 5 completions succeeded with zero unlocks)
+- Gate 6 (Streak integration): same-day idempotency (streak stays 1/2), next-day increment (1→2), timezone-aware day boundary (Asia/Ho_Chi_Minh)
+- Gate 7 (Post-workout feedback): `complete_workout` result payload contains all 10 keys (earnedXP, totalXP, newLevel, leveledUp, isQuest, newTitle, nextLevelXp, isSuspicious, classResults, achievements, streak)
+- Gate 8 (Dashboard/player profile): `get_player_progression()` returns unified state for dashboard presentation
+- Gate 9 (Focused tests + security): owner-scoped only; cross-user denied (42501); no client XP mutation; duplicate achievement/unlock blocked; quest reward duplicate blocked; workout completion retry idempotent
+
+**Verification:**
+- `flutter test --no-pub test/progression_engine_test.dart` → 16/16 PASS
+- `flutter test --no-pub` → 649 pass / 1 fail (sole failure = pre-existing `release_config_test.dart` Gradle wrapper 9.7.1 vs 8.13, owner file untouched)
+- `npm test` (full SQL/ACL) → 30 SQL units PASS, all ACL assertions PASS including `p5_game_injection.sql`
+- `flutter analyze --no-pub` → no errors/warnings (44 info-level issues, all pre-existing)
+- `dart format --set-exit-if-changed .` → stable after formatting
+
+**RPG/reward safety:** `complete_workout` remains sole authoritative reward path. Client never submits XP/level/quest/achievement/unlock/streak values. All reward-affecting operations deterministic, owner-scoped, idempotent.
+
+**Docs updated:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `OPENGYM_PARITY_MATRIX.md`, this changelog.
+
+**No commit/push** without owner approval.
+
+---
+
+## 2026-11-06 — P5 SQL Test Infrastructure Fix (COMPLETE — verified)
 
 **Task:** Deepen GymLvl's progress tracking, analytics and practical user-data utilities using pinned OpenGym behavior as reference. Built on the existing GymLvl analytics/bodyweight/progression implementation. No parallel analytics or measurement systems created. Execution order followed: audit → design → implement → focused tests → regression → context update. P5 not started.
 

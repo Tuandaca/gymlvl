@@ -8,17 +8,17 @@
 | Branch | `main` |
 | HEAD | `9b822b62d4e211bb2bd723aa34923231c7c52f73` (P4 baseline; origin/main == local main) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — **P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)**; **do not discard, reset, or overwrite** |
+| Working-tree state | Dirty — **P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)** + **P5 implementation (9 gates complete + SQL test infra fix)**; **do not discard, reset, or overwrite** |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
-| Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS.** |
-| Current roadmap phase | **P4 — Progress / Analytics / Utility Parity: COMPLETE.** P5 — Deep GymLvl Game Integration: NEXT / NOT STARTED (do not start P5). |
-| Next implementation phase | P5 — NOT STARTED. |
+| Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS. P5 complete — all nine frozen CORE gates PASS.** |
+| Current roadmap phase | **P5 — Deep GymLvl Game Integration: COMPLETE.** P6 — AI PT: NEXT / NOT STARTED (do not start P6). |
+| Next implementation phase | P5 = COMPLETE. P6 = NOT STARTED. |
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
 | Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
 | Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |
 | Production restrictions | Do NOT deploy production migrations; do NOT run `supabase db push`; onboarding 9/9 blocked on production DB access; no release hardening |
-| Immediate next task | Owner review of P4 candidate manifest (`git status --short` + `git diff --name-status`); approve commit. P5 NOT STARTED. |
+| Immediate next task | Owner review of P5 candidate manifest (`git status --short` + `git diff --name-status`); approve commit. P6 NOT STARTED. |
 | Do not do | Do not start P5 automatically; no AI PT (P6); no production deploy/migration; no media; no commit/push without owner approval |
 | Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md` |
 
@@ -149,6 +149,59 @@ feat(P2): Routine & Planning Parity
 
 Deferred: rotation details, template/occurrence separation, FirstWeekPlan adapter
 ```
+
+---
+
+## P5 SQL Test Infrastructure Fix (2026-11-06) — COMPLETE (verified)
+
+**Issue:** `supabase/tests/p5_game_injection.sql` failed via `db.exec(fileContent)` with "Workout is unavailable or already finished" (42501) from `guard_workout_child`.
+
+**Investigation:** `guard_workout_child` in `supabase/migrations/20261026000200_authoritative_progression.sql` (lines 107-129) was ALREADY CORRECT — it resolves ownership through the parent `workouts` table:
+```sql
+SELECT user_id,status INTO owner_id,parent_status FROM public.workouts WHERE id=wid FOR UPDATE;
+IF owner_id IS NULL OR owner_id IS DISTINCT FROM auth.uid() OR parent_status<>'active' THEN ...
+```
+No trigger/function change was needed. No RLS weakened. No workout ID changed to match user ID.
+
+**Root cause (test infrastructure only):**
+1. `w_id = '9999...'` (equal to `auth.uid()`) violated the fixture relationship (`workouts.id` must be independent, `workouts.user_id = auth.uid()`).
+2. `public.p5_assert`/`public.p5_denied` referenced without definition.
+3. `auth.uid()` did not persist when `db.exec()` read the file — `set_config(..., true)` is transaction-scoped but `db.exec()` runs each top-level statement separately.
+
+**Fix applied:** Rewrote `p5_game_injection.sql` as `BEGIN; ... ROLLBACK;` with `set_config(..., true)` at the top (same pattern as `p3_workout_core.sql`), `p5_assert`/`p5_denied` defined before use, `w_id = '2222...'` (independent UUID, `user_id = auth.uid()`).
+
+**Changed files:** `supabase/tests/p5_game_injection.sql` (rewritten).
+
+**Verification:**
+1. `flutter test --no-pub test/progression_engine_test.dart` → 16/16 PASS
+2. `flutter test --no-pub` → 649 pass / 1 fail (sole failure = pre-existing `release_config_test.dart` Gradle wrapper 9.7.1 vs 8.13, owner file untouched)
+3. `npm test` (full SQL/ACL) → 30 SQL units PASS, all ACL assertions PASS including p5_game_injection.sql
+4. `flutter analyze --no-pub` → no errors/warnings (44 info-level issues, all pre-existing)
+5. `dart format --set-exit-if-changed .` → stable after formatting
+
+**Blocker:** None.
+
+**P5 implementation complete (all nine gates PASS):**
+- Gate 1: Unified progression — `player_progression_provider.dart` calls `get_player_progression()` RPC, exposes Class/Level/XP/streak/quests/achievements/unlocks
+- Gate 2: Class-linked progression — existing `class_definitions.dart`, `class_providers.dart`, `RPGBridge`, `switch_class()` RPC; verified no XP duplication on class switch
+- Gate 3: Workout-derived quests — existing `quest_providers.dart`, extended `complete_workout` marks quest instances completed and awards quest XP exactly once
+- Gate 4: Achievement system — `achievements/` feature with 7-ID catalogue, ON CONFLICT DO NOTHING idempotency
+- Gate 5: Unlock system — `unlocks/` feature with `unlock_definitions`/`user_unlocks`, core fitness never gated
+- Gate 6: Streak integration — existing `streaks` table, same-day idempotency, timezone-aware day boundary
+- Gate 7: Post-workout feedback — `post_workout_feedback/` screen displays consolidated result payload from `complete_workout`
+- Gate 8: Dashboard/player profile — dashboard displays unified progression state (Class, Level, XP, Streak, Quests, Achievements, Unlocks)
+- Gate 9: Focused tests + security — `p5_game_injection.sql` covers all gates + ACL regression; owner-scoped only, cross-user denied, no client XP mutation, duplicate blocked, retry idempotent
+
+**Changed files (P5):**
+- `supabase/migrations/20261107000100_p3_workout_core.sql` (edited) — added 3 missing achievement IDs to `complete_workout` FOREACH array
+- `supabase/tests/p5_game_injection.sql` (rewritten) — comprehensive tests for all 9 gates
+- `app/lib/features/progression/presentation/providers/player_progression_provider.dart` (new)
+- `app/lib/features/achievements/` (new, 7 files)
+- `app/lib/features/unlocks/` (new, 7 files)
+- `app/lib/features/post_workout_feedback/` (new, 5 files)
+- `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md` (edited)
+
+**Next action:** Owner review of P5 candidate manifest, approve commit. P6 = NOT STARTED.
 
 ---
 

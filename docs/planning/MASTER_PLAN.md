@@ -61,7 +61,7 @@ The target is conceptually:
 | **P2** | Routine & Planning Parity | COMPLETE (awaiting owner commit) |
 | **P3** | Workout Core Parity | COMPLETE |
 | **P4** | Progress / Analytics / Utility Parity | COMPLETE |
-| **P5** | Deep GymLvl Game Integration | NEXT / NOT STARTED |
+| **P5** | Deep GymLvl Game Integration | IN PROGRESS |
 | **P6** | AI Personal Trainer | Planned (after P1–P5) |
 | **P7** | Media, Optional Integrations & Expansion | Deferred (legal authorization required) |
 | **P8** | Release Hardening | Planned (after product core complete) |
