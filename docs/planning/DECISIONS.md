@@ -753,10 +753,10 @@ These remain unresolved and block later milestones:
 
 ## D-048 — P1 complete; P2 is next implementation phase (COMPLETE)
 
-**Status:** RECORDED (P1 completion, 2026-11-05)
+**Status:** RECORDED (P2 completion, 2026-11-06)
 **Context:** P1 (OpenGym Parity Baseline + Legal-Safe Exercise Catalogue) is complete. The active roadmap is P0–P8 per `MASTER_PLAN.md`.
-**Decision:** P1 is marked COMPLETE. P2 — Routine & Planning Parity is the next implementation phase and is NOT STARTED. P6 (AI PT) is not the immediate next stage. No P2+ implementation has been started.
-**Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md` reflect P1 complete / P2 next. Historical M0–M9 milestone labels no longer govern execution.
+**Decision:** P1 is marked COMPLETE. P2 — Routine & Planning Parity is COMPLETE (Gate 1–5 all PASS). P3 — Workout Core Parity is the next implementation phase and is NOT STARTED. P6 (AI PT) is not the immediate next stage. No P3+ implementation has been started.
+**Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md` reflect P1 complete / P2 complete / P3 next. Historical M0–M9 milestone labels no longer govern execution.
 
 ## Open decisions
 

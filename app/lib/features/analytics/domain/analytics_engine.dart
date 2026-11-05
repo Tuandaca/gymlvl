@@ -23,7 +23,9 @@ class AnalyticsEngine {
   /// Hours added to a UTC instant to obtain the local date used for bucketing.
   final int timezoneOffsetHours;
 
-  const AnalyticsEngine({this.timezoneOffsetHours = kDefaultTimezoneOffsetHours});
+  const AnalyticsEngine({
+    this.timezoneOffsetHours = kDefaultTimezoneOffsetHours,
+  });
 
   /// Local (midnight) date for [instant] using [offset].
   DateTime _localDate(DateTime instant, int offset) {
@@ -63,15 +65,20 @@ class AnalyticsEngine {
     final offset = timezoneOffsetHours ?? this.timezoneOffsetHours;
     final counts = <DateTime, int>{};
     for (final w in workouts) {
-      if (w.status != WorkoutStatus.completed || w.completedAt == null) continue;
-      if (!_inWindow(w.completedAt!, start: start, end: end)) continue;
+      if (w.status != WorkoutStatus.completed || w.completedAt == null) {
+        continue;
+      }
+      if (!_inWindow(w.completedAt!, start: start, end: end)) {
+        continue;
+      }
       final day = _localDate(w.completedAt!, offset);
       counts[day] = (counts[day] ?? 0) + 1;
     }
-    final result = counts.entries
-        .map((e) => HeatmapPoint(date: e.key, workoutCount: e.value))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final result =
+        counts.entries
+            .map((e) => HeatmapPoint(date: e.key, workoutCount: e.value))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
     return result;
   }
 
@@ -119,15 +126,18 @@ class AnalyticsEngine {
       entry.totalSets += 1;
     }
 
-    final result = byDay.entries
-        .map((e) => WeightTrendPoint(
-              date: e.key,
-              volumeKg: _round2(e.value.volumeKg),
-              totalReps: e.value.totalReps,
-              totalSets: e.value.totalSets,
-            ))
-        .toList()
-      ..sort((a, b) => a.date.compareTo(b.date));
+    final result =
+        byDay.entries
+            .map(
+              (e) => WeightTrendPoint(
+                date: e.key,
+                volumeKg: _round2(e.value.volumeKg),
+                totalReps: e.value.totalReps,
+                totalSets: e.value.totalSets,
+              ),
+            )
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
     return result;
   }
 
@@ -148,22 +158,25 @@ class AnalyticsEngine {
       nameById[e.id] = e.name;
     }
 
-    final filtered = prRecords.where((r) => validExerciseIds.contains(r.exerciseId)).toList()
-      ..sort((a, b) {
-        final c = b.updatedAt.compareTo(a.updatedAt);
-        if (c != 0) return c;
-        return a.exerciseId.compareTo(b.exerciseId);
-      });
+    final filtered =
+        prRecords.where((r) => validExerciseIds.contains(r.exerciseId)).toList()
+          ..sort((a, b) {
+            final c = b.updatedAt.compareTo(a.updatedAt);
+            if (c != 0) return c;
+            return a.exerciseId.compareTo(b.exerciseId);
+          });
 
     return filtered
-        .map((r) => PRChartPoint(
-              exerciseId: r.exerciseId,
-              exerciseName: nameById[r.exerciseId] ?? r.exerciseId,
-              maxWeightKg: _round2(r.maxWeightKg),
-              maxReps: r.maxReps,
-              estimated1rm: _round2(r.estimated1rm),
-              updatedAt: r.updatedAt,
-            ))
+        .map(
+          (r) => PRChartPoint(
+            exerciseId: r.exerciseId,
+            exerciseName: nameById[r.exerciseId] ?? r.exerciseId,
+            maxWeightKg: _round2(r.maxWeightKg),
+            maxReps: r.maxReps,
+            estimated1rm: _round2(r.estimated1rm),
+            updatedAt: r.updatedAt,
+          ),
+        )
         .toList();
   }
 
@@ -217,22 +230,25 @@ class AnalyticsEngine {
       totalVolume += volume;
     }
 
-    final result = byCategory.entries
-        .map((e) => MuscleBalancePoint(
-              category: e.key,
-              volumeKg: _round2(e.value.volumeKg),
-              totalReps: e.value.totalReps,
-              totalSets: e.value.totalSets,
-              percent: totalVolume == 0
-                  ? 0.0
-                  : _round2(e.value.volumeKg / totalVolume * 100),
-            ))
-        .toList()
-      ..sort((a, b) {
-        final c = b.volumeKg.compareTo(a.volumeKg);
-        if (c != 0) return c;
-        return a.category.compareTo(b.category);
-    });
+    final result =
+        byCategory.entries
+            .map(
+              (e) => MuscleBalancePoint(
+                category: e.key,
+                volumeKg: _round2(e.value.volumeKg),
+                totalReps: e.value.totalReps,
+                totalSets: e.value.totalSets,
+                percent: totalVolume == 0
+                    ? 0.0
+                    : _round2(e.value.volumeKg / totalVolume * 100),
+              ),
+            )
+            .toList()
+          ..sort((a, b) {
+            final c = b.volumeKg.compareTo(a.volumeKg);
+            if (c != 0) return c;
+            return a.category.compareTo(b.category);
+          });
     return result;
   }
 

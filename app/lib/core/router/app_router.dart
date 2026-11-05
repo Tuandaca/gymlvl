@@ -13,6 +13,10 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/training_plan/presentation/newcomer_journey_screen.dart';
+import '../../features/training_plan/presentation/screens/routine_list_screen.dart';
+import '../../features/training_plan/presentation/screens/routine_editor_screen.dart';
+import '../../features/training_plan/presentation/screens/weekly_schedule_screen.dart';
+import '../../features/training_plan/presentation/screens/planned_workouts_screen.dart';
 import '../../features/analytics/presentation/analytics_screen.dart';
 import '../../features/bodyweight/presentation/screens/bodyweight_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
@@ -191,6 +195,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               : null,
           canSelect: state.uri.queryParameters['select'] == 'true',
         ),
+      ),
+      // ─── P2: Routine & Planning ───
+      GoRoute(
+        path: '/routines',
+        builder: (context, state) => const RoutineListScreen(),
+      ),
+      GoRoute(
+        path: '/routine/new',
+        builder: (context, state) => const RoutineEditorScreen(),
+      ),
+      GoRoute(
+        path: '/routine/:id',
+        builder: (context, state) =>
+            RoutineEditorScreen(routineId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: '/schedule',
+        builder: (context, state) => const WeeklyScheduleScreen(),
+      ),
+      GoRoute(
+        path: '/planned',
+        builder: (context, state) => const PlannedWorkoutsScreen(),
       ),
       // ─── M5: Newcomer journey (first-week plan) ───
       GoRoute(

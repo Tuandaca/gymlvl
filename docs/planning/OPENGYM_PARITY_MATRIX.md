@@ -36,15 +36,15 @@
 
 | Capability | OpenGym evidence/path | GymLvl evidence/path | Status | P1 action | Target phase | License/data concern | Notes / behavioral contract |
 |---|---|---|---|---|---|---|---|
-| Routine creation | `frontend/src/lib/routines.js` | `app/lib/features/training_plan/first_week_plan_engine.dart` (deterministic 3-day) | PARTIAL | adapt | P2 | None | OpenGym: full routine CRUD. GymLvl: First-Week plan only. |
-| Routine editing | `routines.update.test.js`, `routines.replace.test.js` | None | MISSING | defer | P2 | None | |
-| Exercise ordering | `session-routines.js`, day assignment | `first_week_plan_engine.dart` (fixed order) | PARTIAL | defer | P2 | None | |
-| Day assignment | `frontend/src/lib/day-notes.js`, `session-routines.js` | `newcomer_journey.dart` | PARTIAL | defer | P2 | None | |
-| Weekly schedules | `rotation.js` | None | MISSING | defer | P2 | None | |
-| Repeat session | `sheets.repeat-workout.test.jsx` | None | MISSING | defer | P2 | None | |
+| Routine creation | `frontend/src/lib/routines.js` | `app/lib/features/training_plan/routine_engine.dart`, `supabase/migrations/20261106000100_p2_routine_planning.sql` | EXISTING | adapt | P2 | None | OpenGym: full routine CRUD. GymLvl: create/duplicate/add/remove/reorder/replace exercises, superset groups, verified by focused Dart + SQL tests. |
+| Routine editing | `routines.update.test.js`, `routines.replace.test.js` | `app/lib/features/training_plan/routine_engine.dart` (rename/replace/reset incompatible fields) | EXISTING | adapt | P2 | None | Verified by focused Dart tests; rename via copyWith, replace with compatible/incompatible mode config. |
+| Exercise ordering | `session-routines.js`, day assignment | `app/lib/features/training_plan/routine_engine.dart` (add/remove/reorder reindex) | EXISTING | adapt | P2 | None | Verified by focused Dart tests (reorderExercises closes ordering gaps). |
+| Day assignment | `frontend/src/lib/day-notes.js`, `session-routines.js` | `app/lib/features/training_plan/schedule_engine.dart` (fixed_week, weekday 1=Mon..7=Sun) | EXISTING | adapt | P2 | None | Verified by focused Dart tests; weekday convention 1..7 enforced. |
+| Weekly schedules | `rotation.js` | `app/lib/features/training_plan/schedule_engine.dart`, `routine_schedules` table (fixed_week) | EXISTING | adapt | P2 | None | Fixed-week schedule assignment verified; rotation remains P2-EXTEND/DEFERRED. |
+| Repeat session | `sheets.repeat-workout.test.jsx` | `app/lib/features/training_plan/routine_engine.dart` (fromWorkoutSession), `repeat_workout` RPC, `planned_workouts` for CURRENT_DATE | EXISTING | adapt | P2 | None | Verified by SQL test: new planned-workout identity, old completed workout unchanged, rejects empty workout. |
 | Plan rotation | `rotation.js` | None | MISSING | defer | P2 | None | |
-| Exercise replacement | `sheets.replace.test.jsx`, `sheets.swap.test.jsx` | None | MISSING | defer | P2 | None | |
-| Routine persistence | `routines.js` | `training_plan_providers.dart` | PARTIAL | defer | P2 | None | |
+| Exercise replacement | `sheets.replace.test.jsx`, `sheets.swap.test.jsx` | `app/lib/features/training_plan/routine_engine.dart` (replaceExercise preserves compatible config, resets incompatible mode fields) | EXISTING | adapt | P2 | None | Verified by focused Dart tests (compatible preserved, incompatible mode resets weight/reps/duration). |
+| Routine persistence | `routines.js` | `app/lib/features/training_plan/routine_repository.dart`, `supabase_routine_repository.dart`, `routine_providers.dart` | EXISTING | adapt | P2 | None | Repository + Riverpod providers + SECURITY DEFINER RPCs with ownership validation. |
 | Program management | None found | None | NOT_APPLICABLE | exclude | — | None | No OpenGym "program" concept found beyond routines. |
 
 ### Workout

@@ -2,6 +2,24 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-06 — P2 Routine & Planning Parity (COMPLETE — Gate 2 closed)
+
+- **Task:** Close the only remaining frozen P2 gate — Gate 2 focused automated P2 tests — by adding the minimum focused test suite, fixing only real bugs those tests expose, running full verification, updating canonical status, and returning an exact Git-derived commit candidate.
+- **Focused P2 test files added:**
+  - `app/test/training_plan/routine_engine_test.dart` — create, rename, add, remove, reorder, replace (compatible config preserved / incompatible mode-specific config reset), duplicate independence
+  - `app/test/training_plan/schedule_engine_test.dart` — weekday convention (1=Mon..7=Sun), fixed-week assignment, upcoming workout, reschedule, snapshot immutability (existing occurrence unchanged after routine edit), independent snapshots across occurrences
+  - `app/test/training_plan/first_week_plan_adapter_test.dart` — existing FirstWeekPlan → P2 Routine + Schedule, exercise order preserved, Mon/Wed/Fri ([1,3,5]) mapping, canonical WorkoutMode, unique IDs
+  - `supabase/tests/p2_routine_planning.sql` — create/schedule/snapshot immutability/start-from-snapshot/new workout identity/repeat identity/zero-XP/cross-user RLS denial/weekday constraints/duplicate-occurrence constraint
+- **Migration fix:** removed duplicate `rest_seconds` column in `routine_exercises`; added `updated_at` + modtime triggers on `routine_superset_groups` and `planned_workouts`; fixed `get_next_planned_workout` to return a single record (was `RETURN QUERY` in a non-SETOF function).
+- **Real bug fixed:** `get_next_planned_workout` used `RETURN QUERY` in a function declared `RETURNS public.planned_workouts` (non-SETOF), causing migration load failure `42804`; fixed by `SELECT ... INTO v_planned` then `RETURN v_planned`.
+- **Verification:** Focused P2 Dart tests 29/29 PASS; `dart format --set-exit-if-changed .` stable (0 changed); `flutter analyze --no-pub` → `No issues found!`; `flutter test --no-pub` → 587 pass / 1 fail (pre-existing unrelated `release_config_test.dart` Gradle 9.7.1 vs 8.13, owner Gradle file untouched); `cd tools/db-tests && npm test` → 25 SQL units PASS, 365 ACL assertions PASS, including P2 migration and `p2_routine_planning.sql` PASS.
+- **Snapshot isolation (Option B):** confirmed — immutable routine snapshot captured at scheduling time; `start_planned_workout` builds workout from snapshot; later routine edits never rewrite existing occurrences.
+- **Weekday convention:** Dart `DateTime` (1=Monday ... 7=Sunday) enforced in migration CHECK, models, engines, RPCs.
+- **No second workout engine:** `complete_workout` remains sole authoritative award path; planning actions grant zero XP.
+- **P2 = COMPLETE; P3 = NEXT / NOT STARTED.** No additional P2 acceptance gates.
+- **Protected files preserved:** owner Gradle files (`gradle.properties`, `gradle-wrapper.properties`), `workout.freezed.dart`/`.g.dart`, `.agents/teamwork/` tree, all untracked owner files — untouched.
+- **No production migration/deployment. No commit/push without owner approval.**
+
 ## 2026-11-05 — P1 OpenGym Parity Baseline + Legal-Safe Exercise Catalogue (COMPLETE)
 
 - **Task:** Build a detailed OpenGym → GymLvl feature parity baseline AND implement the legal-safe exercise catalogue foundation using the pinned MIT dataset (1,324 ExerciseDB records from `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd`).
