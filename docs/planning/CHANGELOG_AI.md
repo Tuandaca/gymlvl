@@ -2,6 +2,51 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-06 — P4: Progress / Analytics / Utility Parity (COMPLETE — all eight frozen gates PASS)
+
+**Task:** Deepen GymLvl's progress tracking, analytics and practical user-data utilities using pinned OpenGym behavior as reference. Built on the existing GymLvl analytics/bodyweight/progression implementation. No parallel analytics or measurement systems created. Execution order followed: audit → design → implement → focused tests → regression → context update. P5 not started.
+
+**Status:** `COMPLETE` (all eight frozen P4 CORE gates PASS)
+
+**Commit:** `main` @ `9b822b62d4e211bb2bd723aa34923231c7c52f73` (baseline); P4 NOT committed (awaiting owner approval). Pre-existing owner dirty/untracked files preserved.
+
+**Changed/added sources (P4 candidate):**
+- `supabase/migrations/20261106000200_p4_body_measurements.sql` (new) — additive `public.body_measurements` table (body_weight, body_fat_percentage, chest, waist, hips, upper_arm, thigh; explicit kg/cm/percent units; owner-only RLS; index). Existing `bodyweight_measurements`/`profiles.weight_kg` untouched.
+- `app/lib/features/bodyweight/domain/body_measurement.dart` + `.freezed.dart`/`.g.dart` (new) — normalized `BodyMeasurement` value type, `BodyMeasurementType`, `BodyMeasurementUnit`, canonical-unit contract.
+- `app/lib/features/bodyweight/data/supabase_body_measurement_repository.dart` (new) — owner-scoped repository (insert/update/delete/read) via PostgREST + RLS; unit-canonical validation.
+- `app/lib/features/bodyweight/presentation/providers/body_measurement_providers.dart` (new) — Riverpod providers for all measurements and per-type measurements.
+- `app/lib/features/bodyweight/presentation/screens/body_measurements_screen.dart` (new) — Candy UI: latest per type + history, add-measurement dialog.
+- `app/lib/features/analytics/domain/exercise_progress_models.dart` (new) — `ExerciseSessionEntry`, `ExerciseProgressResult`.
+- `app/lib/features/analytics/domain/exercise_progress_engine.dart` (new) — per-exercise completed-session history, working sets, weight/reps, Epley 1RM, PR markers, warm-up excluded, chronological.
+- `app/lib/features/analytics/presentation/providers/exercise_progress_providers.dart` (new) — `exerciseProgressProvider`.
+- `app/lib/features/analytics/presentation/screens/exercise_progress_screen.dart` (new) — Candy UI exercise progress view.
+- `app/lib/features/analytics/domain/analytics_models.dart` (edited) — added `OneRepMaxTrendPoint`, `ExerciseStrengthTrendPoint`, `TimeRange`, extended `AnalyticsResult`.
+- `app/lib/features/analytics/domain/exercise_progress_engine.dart` → analytics engine extended (new `oneRepMaxTrend`, `exerciseStrengthTrend`; `aggregate` covers all six metrics; time-range filtering).
+- `app/lib/features/analytics/domain/structural_balance.dart` (new) — push/pull, upper/lower, anterior/posterior training distribution; deterministic thresholds; fitness analytics only (no medical diagnosis).
+- `app/lib/features/analytics/domain/recovery_readiness.dart` (new) — deterministic readiness (recently trained / moderately recovered / long time since trained / no history) from days-since-trained.
+- `app/lib/features/analytics/data/csv_export_service.dart` (new) — RFC 4180 UTF-8 CSV export (workouts, workout_exercises, workout_sets, body_measurements); stable columns; correct escaping.
+- `app/lib/features/analytics/data/backup_export_service.dart` (new) — versioned JSON backup (`format: gymlvl-backup`, `version: 1`, `exportedAt`, `data`); owner-only, no secrets, deterministic sorted keys.
+- `app/lib/features/analytics/presentation/providers/csv_export_providers.dart`, `backup_export_providers.dart` (new).
+- `app/lib/features/analytics/presentation/screens/data_export_screen.dart` (new) — CSV + backup export UI (copy to clipboard).
+- `app/lib/core/localization/localization_engine.dart` (edited) — P4 VI/EN keys.
+- `app/lib/core/router/app_router.dart` (edited) — `/exercise-progress/:id`, `/body-measurements`, `/data-export` routes.
+- `app/lib/features/profile/presentation/screens/profile_screen.dart` (edited) — export entry point.
+- Tests: `app/test/analytics/exercise_progress_test.dart`, `p4_analytics_test.dart`, `p4_structural_balance_test.dart`, `p4_recovery_readiness_test.dart`, `p4_csv_export_test.dart`, `p4_backup_export_test.dart` (new).
+
+**Verification:** `flutter analyze` → no errors/warnings; `dart format --set-exit-if-changed` → stable; all new focused tests pass (exercise_progress 8/8, p4_analytics 9/9, p4_structural_balance 7/7, p4_recovery_readiness 7/7, p4_csv_export 6/6, p4_backup_export 6/6); full Flutter suite 649 pass / 1 fail (sole failure = pre-existing `release_config_test.dart` Gradle wrapper 9.7.1 vs 8.13, owner file untouched). SQL/ACL for the new table follows the established owner style.
+
+**RPG/reward safety:** No P4 operation awards XP or touches progression; `complete_workout` remains sole authoritative reward path. Analytics/recovery views are informational only.
+
+**OpenGym parity matrix:** P4 rows updated honestly (structural balance, recovery, exports, backup, body measurements, unit handling → PARTIAL/EXISTING; imports and dumbbell utilities remain MISSING/DEFERRED).
+
+**Docs updated:** `MASTER_PLAN.md` (P4 COMPLETE, P5 NEXT), `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `OPENGYM_PARITY_MATRIX.md`, this changelog.
+
+**Deferred (explicitly, do not block P4):** CSV import, Hevy/Strong/GymMane import, backup restore, progress photos, Health Connect/Kit, watch, AI analytics, medical recovery metrics, advanced custom reporting.
+
+**No commit/push** without owner approval.
+
+---
+
 ## 2026-11-06 — P3: Workout Core Parity (COMPLETE — all ten frozen gates PASS)
 
 **Task:** Improve the active workout experience using useful OpenGym behavior while preserving GymLvl's existing workout engine, offline architecture, progression and RPG reward authority.

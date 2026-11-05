@@ -83,12 +83,12 @@
 |---|---|---|---|---|---|---|---|
 | Plate calculator | `plates.js` | Pure Dart plate calculator added | EXISTING | implement | P3 | None | P3 adds deterministic plate math |
 | Dumbbell utilities | `dumbbells.js`, `dumbbell-inventory.test.js` | None | MISSING | defer | P4 | None | |
-| Unit handling | `units.js` | None | MISSING | defer | P4 | None | kg/lb conversion. |
-| Bodyweight | `bodyweight.js` | `bodyweight_measurement.dart`, `bodyweight_trend.dart`, M5 migration | PARTIAL | reuse | P4 | None | GymLvl M5 bodyweight trend. |
-| Measurements | `measurements.js` | `bodyweight_measurement.dart` | PARTIAL | reuse | P4 | None | |
-| Exports | `export-csv.js` | None | MISSING | defer | P4 | None | |
+| Unit handling | `units.js` | `body_measurement.dart` (type-canonical units), `p4_body_measurements.sql` | PARTIAL | implement | P4 | None | Explicit kg/cm/percent per measurement type; values never silently converted. |
+| Bodyweight | `bodyweight.js` | `bodyweight_measurement.dart`, `bodyweight_trend.dart`, M5 migration + `body_measurements` table (P4) | PARTIAL | reuse | P4 | None | M5 bodyweight trend preserved; P4 adds normalized general measurements. |
+| Measurements | `measurements.js` | `body_measurement.dart`, `body_measurements` table (P4), owner-scoped RLS | PARTIAL | implement | P4 | None | Normalized body_weight, body_fat_percentage, chest, waist, hips, upper_arm, thigh. |
+| Exports | `export-csv.js` | `csv_export_service.dart`, `/data-export` screen | PARTIAL | implement | P4 | None | One-way CSV export: workouts, workout_exercises, workout_sets, body_measurements. UTF-8, RFC 4180 escaping. No import. |
 | Imports (Strong/Hevy/FitNotes/GymMane) | `import-csv.js`, `import-hevy.js` | None | MISSING | defer | P4 | None | CSV import. |
-| Backup/restore | `backup-media.js`, `sync-merge.js` | `offline_workout_store.dart` (local, gate closed) | PARTIAL | defer | P4 | None | Offline only, not activated. |
+| Backup/restore | `backup-media.js`, `sync-merge.js` | `backup_export_service.dart` (P4), `/data-export` screen | PARTIAL | implement | P4 | None | Versioned JSON backup export (format gymlvl-backup, version 1). Export only; no restore/import, no secrets. |
 
 ### Analytics
 
@@ -99,9 +99,9 @@
 | Volume trends | `report.js` | `analytics/presentation/widgets/weight_trend_chart.dart` (M5) | PARTIAL | reuse | P4 | None | |
 | Strength trends | `relative-strength.js` | `pr_chart.dart` (M5) | PARTIAL | reuse | P4 | None | |
 | Muscle balance | `structuralBalance.js` | `analytics/presentation/widgets/muscle_balance_chart.dart` (M5) | PARTIAL | reuse | P4 | None | |
-| Structural balance | `structuralBalance.js`, `structuralBalanceTemplates.js` | None | MISSING | defer | P4 | None | |
-| Recovery metrics | `recovery.js` | None | MISSING | defer | P4 | None | |
-| Measurements trends | `measurements.js` | `bodyweight_trend.dart` (M5) | PARTIAL | reuse | P4 | None | |
+| Structural balance | `structuralBalance.js`, `structuralBalanceTemplates.js` | `structural_balance.dart` (P4) | PARTIAL | implement | P4 | None | Push/pull, upper/lower, anterior/posterior training distribution. Fitness analytics only — no medical diagnosis. |
+| Recovery metrics | `recovery.js` | `recovery_readiness.dart` (P4) | PARTIAL | implement | P4 | None | Deterministic readiness from days-since-trained. Descriptive only — no physiological certainty, no wearable/HRV data. |
+| Measurements trends | `measurements.js` | `bodyweight_trend.dart` (M5) + `body_measurements` (P4) | PARTIAL | reuse | P4 | None | M5 bodyweight trend preserved; P4 adds general measurement trends. |
 
 ### Device / platform
 

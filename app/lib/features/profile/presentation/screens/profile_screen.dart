@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../ui/widgets/status_panel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +7,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/candy_colors.dart';
 import '../../../../core/config/supabase_config.dart';
 import '../../../../core/localization/localization_engine.dart';
+import '../../../../ui/candy/candy_button.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../dashboard/presentation/providers/class_providers.dart';
 import '../../../onboarding/domain/class_definitions.dart';
@@ -537,6 +539,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
                       _buildClassesSection(classesState),
+                      const SizedBox(height: 28),
+
+                      _buildSectionHeader('export_title'.tr(ref)),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CandyButton(
+                              label: 'export_csv'.tr(ref),
+                              variant: CandyButtonVariant.primary,
+                              size: CandyButtonSize.small,
+                              onPressed: () => context.push('/data-export'),
+                              icon: Icons.file_download,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: CandyButton(
+                              label: 'export_backup'.tr(ref),
+                              variant: CandyButtonVariant.secondary,
+                              size: CandyButtonSize.small,
+                              onPressed: () => context.push('/data-export'),
+                              icon: Icons.backup,
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 28),
 
                       if (_isEditing) _buildEditActions(),

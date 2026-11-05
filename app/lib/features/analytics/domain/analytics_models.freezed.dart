@@ -1109,7 +1109,9 @@ as double,
 /// @nodoc
 mixin _$AnalyticsResult {
 
- List<HeatmapPoint> get heatmap; List<WeightTrendPoint> get weightTrend; List<PRChartPoint> get prChart; List<MuscleBalancePoint> get muscleBalance;
+ List<HeatmapPoint> get heatmap; List<WeightTrendPoint> get weightTrend; List<PRChartPoint> get prChart; List<MuscleBalancePoint> get muscleBalance;/// P4: estimated 1RM trend over the window.
+ List<OneRepMaxTrendPoint> get oneRepMaxTrend;/// P4: exercise-specific strength trend over the window.
+ List<ExerciseStrengthTrendPoint> get exerciseStrengthTrend;
 /// Create a copy of AnalyticsResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1120,16 +1122,16 @@ $AnalyticsResultCopyWith<AnalyticsResult> get copyWith => _$AnalyticsResultCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnalyticsResult&&const DeepCollectionEquality().equals(other.heatmap, heatmap)&&const DeepCollectionEquality().equals(other.weightTrend, weightTrend)&&const DeepCollectionEquality().equals(other.prChart, prChart)&&const DeepCollectionEquality().equals(other.muscleBalance, muscleBalance));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnalyticsResult&&const DeepCollectionEquality().equals(other.heatmap, heatmap)&&const DeepCollectionEquality().equals(other.weightTrend, weightTrend)&&const DeepCollectionEquality().equals(other.prChart, prChart)&&const DeepCollectionEquality().equals(other.muscleBalance, muscleBalance)&&const DeepCollectionEquality().equals(other.oneRepMaxTrend, oneRepMaxTrend)&&const DeepCollectionEquality().equals(other.exerciseStrengthTrend, exerciseStrengthTrend));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(heatmap),const DeepCollectionEquality().hash(weightTrend),const DeepCollectionEquality().hash(prChart),const DeepCollectionEquality().hash(muscleBalance));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(heatmap),const DeepCollectionEquality().hash(weightTrend),const DeepCollectionEquality().hash(prChart),const DeepCollectionEquality().hash(muscleBalance),const DeepCollectionEquality().hash(oneRepMaxTrend),const DeepCollectionEquality().hash(exerciseStrengthTrend));
 
 @override
 String toString() {
-  return 'AnalyticsResult(heatmap: $heatmap, weightTrend: $weightTrend, prChart: $prChart, muscleBalance: $muscleBalance)';
+  return 'AnalyticsResult(heatmap: $heatmap, weightTrend: $weightTrend, prChart: $prChart, muscleBalance: $muscleBalance, oneRepMaxTrend: $oneRepMaxTrend, exerciseStrengthTrend: $exerciseStrengthTrend)';
 }
 
 
@@ -1140,7 +1142,7 @@ abstract mixin class $AnalyticsResultCopyWith<$Res>  {
   factory $AnalyticsResultCopyWith(AnalyticsResult value, $Res Function(AnalyticsResult) _then) = _$AnalyticsResultCopyWithImpl;
 @useResult
 $Res call({
- List<HeatmapPoint> heatmap, List<WeightTrendPoint> weightTrend, List<PRChartPoint> prChart, List<MuscleBalancePoint> muscleBalance
+ List<HeatmapPoint> heatmap, List<WeightTrendPoint> weightTrend, List<PRChartPoint> prChart, List<MuscleBalancePoint> muscleBalance, List<OneRepMaxTrendPoint> oneRepMaxTrend, List<ExerciseStrengthTrendPoint> exerciseStrengthTrend
 });
 
 
@@ -1157,13 +1159,15 @@ class _$AnalyticsResultCopyWithImpl<$Res>
 
 /// Create a copy of AnalyticsResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? heatmap = null,Object? weightTrend = null,Object? prChart = null,Object? muscleBalance = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? heatmap = null,Object? weightTrend = null,Object? prChart = null,Object? muscleBalance = null,Object? oneRepMaxTrend = null,Object? exerciseStrengthTrend = null,}) {
   return _then(_self.copyWith(
 heatmap: null == heatmap ? _self.heatmap : heatmap // ignore: cast_nullable_to_non_nullable
 as List<HeatmapPoint>,weightTrend: null == weightTrend ? _self.weightTrend : weightTrend // ignore: cast_nullable_to_non_nullable
 as List<WeightTrendPoint>,prChart: null == prChart ? _self.prChart : prChart // ignore: cast_nullable_to_non_nullable
 as List<PRChartPoint>,muscleBalance: null == muscleBalance ? _self.muscleBalance : muscleBalance // ignore: cast_nullable_to_non_nullable
-as List<MuscleBalancePoint>,
+as List<MuscleBalancePoint>,oneRepMaxTrend: null == oneRepMaxTrend ? _self.oneRepMaxTrend : oneRepMaxTrend // ignore: cast_nullable_to_non_nullable
+as List<OneRepMaxTrendPoint>,exerciseStrengthTrend: null == exerciseStrengthTrend ? _self.exerciseStrengthTrend : exerciseStrengthTrend // ignore: cast_nullable_to_non_nullable
+as List<ExerciseStrengthTrendPoint>,
   ));
 }
 
@@ -1248,10 +1252,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance,  List<OneRepMaxTrendPoint> oneRepMaxTrend,  List<ExerciseStrengthTrendPoint> exerciseStrengthTrend)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AnalyticsResult() when $default != null:
-return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance);case _:
+return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance,_that.oneRepMaxTrend,_that.exerciseStrengthTrend);case _:
   return orElse();
 
 }
@@ -1269,10 +1273,10 @@ return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalanc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance,  List<OneRepMaxTrendPoint> oneRepMaxTrend,  List<ExerciseStrengthTrendPoint> exerciseStrengthTrend)  $default,) {final _that = this;
 switch (_that) {
 case _AnalyticsResult():
-return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance);case _:
+return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance,_that.oneRepMaxTrend,_that.exerciseStrengthTrend);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1289,10 +1293,10 @@ return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalanc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<HeatmapPoint> heatmap,  List<WeightTrendPoint> weightTrend,  List<PRChartPoint> prChart,  List<MuscleBalancePoint> muscleBalance,  List<OneRepMaxTrendPoint> oneRepMaxTrend,  List<ExerciseStrengthTrendPoint> exerciseStrengthTrend)?  $default,) {final _that = this;
 switch (_that) {
 case _AnalyticsResult() when $default != null:
-return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance);case _:
+return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalance,_that.oneRepMaxTrend,_that.exerciseStrengthTrend);case _:
   return null;
 
 }
@@ -1304,7 +1308,7 @@ return $default(_that.heatmap,_that.weightTrend,_that.prChart,_that.muscleBalanc
 
 
 class _AnalyticsResult implements AnalyticsResult {
-  const _AnalyticsResult({required final  List<HeatmapPoint> heatmap, required final  List<WeightTrendPoint> weightTrend, required final  List<PRChartPoint> prChart, required final  List<MuscleBalancePoint> muscleBalance}): _heatmap = heatmap,_weightTrend = weightTrend,_prChart = prChart,_muscleBalance = muscleBalance;
+  const _AnalyticsResult({required final  List<HeatmapPoint> heatmap, required final  List<WeightTrendPoint> weightTrend, required final  List<PRChartPoint> prChart, required final  List<MuscleBalancePoint> muscleBalance, final  List<OneRepMaxTrendPoint> oneRepMaxTrend = const [], final  List<ExerciseStrengthTrendPoint> exerciseStrengthTrend = const []}): _heatmap = heatmap,_weightTrend = weightTrend,_prChart = prChart,_muscleBalance = muscleBalance,_oneRepMaxTrend = oneRepMaxTrend,_exerciseStrengthTrend = exerciseStrengthTrend;
   
 
  final  List<HeatmapPoint> _heatmap;
@@ -1335,6 +1339,24 @@ class _AnalyticsResult implements AnalyticsResult {
   return EqualUnmodifiableListView(_muscleBalance);
 }
 
+/// P4: estimated 1RM trend over the window.
+ final  List<OneRepMaxTrendPoint> _oneRepMaxTrend;
+/// P4: estimated 1RM trend over the window.
+@override@JsonKey() List<OneRepMaxTrendPoint> get oneRepMaxTrend {
+  if (_oneRepMaxTrend is EqualUnmodifiableListView) return _oneRepMaxTrend;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_oneRepMaxTrend);
+}
+
+/// P4: exercise-specific strength trend over the window.
+ final  List<ExerciseStrengthTrendPoint> _exerciseStrengthTrend;
+/// P4: exercise-specific strength trend over the window.
+@override@JsonKey() List<ExerciseStrengthTrendPoint> get exerciseStrengthTrend {
+  if (_exerciseStrengthTrend is EqualUnmodifiableListView) return _exerciseStrengthTrend;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_exerciseStrengthTrend);
+}
+
 
 /// Create a copy of AnalyticsResult
 /// with the given fields replaced by the non-null parameter values.
@@ -1346,16 +1368,16 @@ _$AnalyticsResultCopyWith<_AnalyticsResult> get copyWith => __$AnalyticsResultCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AnalyticsResult&&const DeepCollectionEquality().equals(other._heatmap, _heatmap)&&const DeepCollectionEquality().equals(other._weightTrend, _weightTrend)&&const DeepCollectionEquality().equals(other._prChart, _prChart)&&const DeepCollectionEquality().equals(other._muscleBalance, _muscleBalance));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AnalyticsResult&&const DeepCollectionEquality().equals(other._heatmap, _heatmap)&&const DeepCollectionEquality().equals(other._weightTrend, _weightTrend)&&const DeepCollectionEquality().equals(other._prChart, _prChart)&&const DeepCollectionEquality().equals(other._muscleBalance, _muscleBalance)&&const DeepCollectionEquality().equals(other._oneRepMaxTrend, _oneRepMaxTrend)&&const DeepCollectionEquality().equals(other._exerciseStrengthTrend, _exerciseStrengthTrend));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_heatmap),const DeepCollectionEquality().hash(_weightTrend),const DeepCollectionEquality().hash(_prChart),const DeepCollectionEquality().hash(_muscleBalance));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_heatmap),const DeepCollectionEquality().hash(_weightTrend),const DeepCollectionEquality().hash(_prChart),const DeepCollectionEquality().hash(_muscleBalance),const DeepCollectionEquality().hash(_oneRepMaxTrend),const DeepCollectionEquality().hash(_exerciseStrengthTrend));
 
 @override
 String toString() {
-  return 'AnalyticsResult(heatmap: $heatmap, weightTrend: $weightTrend, prChart: $prChart, muscleBalance: $muscleBalance)';
+  return 'AnalyticsResult(heatmap: $heatmap, weightTrend: $weightTrend, prChart: $prChart, muscleBalance: $muscleBalance, oneRepMaxTrend: $oneRepMaxTrend, exerciseStrengthTrend: $exerciseStrengthTrend)';
 }
 
 
@@ -1366,7 +1388,7 @@ abstract mixin class _$AnalyticsResultCopyWith<$Res> implements $AnalyticsResult
   factory _$AnalyticsResultCopyWith(_AnalyticsResult value, $Res Function(_AnalyticsResult) _then) = __$AnalyticsResultCopyWithImpl;
 @override @useResult
 $Res call({
- List<HeatmapPoint> heatmap, List<WeightTrendPoint> weightTrend, List<PRChartPoint> prChart, List<MuscleBalancePoint> muscleBalance
+ List<HeatmapPoint> heatmap, List<WeightTrendPoint> weightTrend, List<PRChartPoint> prChart, List<MuscleBalancePoint> muscleBalance, List<OneRepMaxTrendPoint> oneRepMaxTrend, List<ExerciseStrengthTrendPoint> exerciseStrengthTrend
 });
 
 
@@ -1383,13 +1405,558 @@ class __$AnalyticsResultCopyWithImpl<$Res>
 
 /// Create a copy of AnalyticsResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? heatmap = null,Object? weightTrend = null,Object? prChart = null,Object? muscleBalance = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? heatmap = null,Object? weightTrend = null,Object? prChart = null,Object? muscleBalance = null,Object? oneRepMaxTrend = null,Object? exerciseStrengthTrend = null,}) {
   return _then(_AnalyticsResult(
 heatmap: null == heatmap ? _self._heatmap : heatmap // ignore: cast_nullable_to_non_nullable
 as List<HeatmapPoint>,weightTrend: null == weightTrend ? _self._weightTrend : weightTrend // ignore: cast_nullable_to_non_nullable
 as List<WeightTrendPoint>,prChart: null == prChart ? _self._prChart : prChart // ignore: cast_nullable_to_non_nullable
 as List<PRChartPoint>,muscleBalance: null == muscleBalance ? _self._muscleBalance : muscleBalance // ignore: cast_nullable_to_non_nullable
-as List<MuscleBalancePoint>,
+as List<MuscleBalancePoint>,oneRepMaxTrend: null == oneRepMaxTrend ? _self._oneRepMaxTrend : oneRepMaxTrend // ignore: cast_nullable_to_non_nullable
+as List<OneRepMaxTrendPoint>,exerciseStrengthTrend: null == exerciseStrengthTrend ? _self._exerciseStrengthTrend : exerciseStrengthTrend // ignore: cast_nullable_to_non_nullable
+as List<ExerciseStrengthTrendPoint>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$OneRepMaxTrendPoint {
+
+/// Local date (midnight, user timezone).
+ DateTime get date;/// Best estimated 1RM (kg) in that day, rounded to 2 dp.
+ double get estimated1rm;
+/// Create a copy of OneRepMaxTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OneRepMaxTrendPointCopyWith<OneRepMaxTrendPoint> get copyWith => _$OneRepMaxTrendPointCopyWithImpl<OneRepMaxTrendPoint>(this as OneRepMaxTrendPoint, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OneRepMaxTrendPoint&&(identical(other.date, date) || other.date == date)&&(identical(other.estimated1rm, estimated1rm) || other.estimated1rm == estimated1rm));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,date,estimated1rm);
+
+@override
+String toString() {
+  return 'OneRepMaxTrendPoint(date: $date, estimated1rm: $estimated1rm)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OneRepMaxTrendPointCopyWith<$Res>  {
+  factory $OneRepMaxTrendPointCopyWith(OneRepMaxTrendPoint value, $Res Function(OneRepMaxTrendPoint) _then) = _$OneRepMaxTrendPointCopyWithImpl;
+@useResult
+$Res call({
+ DateTime date, double estimated1rm
+});
+
+
+
+
+}
+/// @nodoc
+class _$OneRepMaxTrendPointCopyWithImpl<$Res>
+    implements $OneRepMaxTrendPointCopyWith<$Res> {
+  _$OneRepMaxTrendPointCopyWithImpl(this._self, this._then);
+
+  final OneRepMaxTrendPoint _self;
+  final $Res Function(OneRepMaxTrendPoint) _then;
+
+/// Create a copy of OneRepMaxTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? estimated1rm = null,}) {
+  return _then(_self.copyWith(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as DateTime,estimated1rm: null == estimated1rm ? _self.estimated1rm : estimated1rm // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [OneRepMaxTrendPoint].
+extension OneRepMaxTrendPointPatterns on OneRepMaxTrendPoint {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _OneRepMaxTrendPoint value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _OneRepMaxTrendPoint value)  $default,){
+final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _OneRepMaxTrendPoint value)?  $default,){
+final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime date,  double estimated1rm)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint() when $default != null:
+return $default(_that.date,_that.estimated1rm);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime date,  double estimated1rm)  $default,) {final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint():
+return $default(_that.date,_that.estimated1rm);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime date,  double estimated1rm)?  $default,) {final _that = this;
+switch (_that) {
+case _OneRepMaxTrendPoint() when $default != null:
+return $default(_that.date,_that.estimated1rm);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _OneRepMaxTrendPoint implements OneRepMaxTrendPoint {
+  const _OneRepMaxTrendPoint({required this.date, required this.estimated1rm});
+  
+
+/// Local date (midnight, user timezone).
+@override final  DateTime date;
+/// Best estimated 1RM (kg) in that day, rounded to 2 dp.
+@override final  double estimated1rm;
+
+/// Create a copy of OneRepMaxTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OneRepMaxTrendPointCopyWith<_OneRepMaxTrendPoint> get copyWith => __$OneRepMaxTrendPointCopyWithImpl<_OneRepMaxTrendPoint>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OneRepMaxTrendPoint&&(identical(other.date, date) || other.date == date)&&(identical(other.estimated1rm, estimated1rm) || other.estimated1rm == estimated1rm));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,date,estimated1rm);
+
+@override
+String toString() {
+  return 'OneRepMaxTrendPoint(date: $date, estimated1rm: $estimated1rm)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OneRepMaxTrendPointCopyWith<$Res> implements $OneRepMaxTrendPointCopyWith<$Res> {
+  factory _$OneRepMaxTrendPointCopyWith(_OneRepMaxTrendPoint value, $Res Function(_OneRepMaxTrendPoint) _then) = __$OneRepMaxTrendPointCopyWithImpl;
+@override @useResult
+$Res call({
+ DateTime date, double estimated1rm
+});
+
+
+
+
+}
+/// @nodoc
+class __$OneRepMaxTrendPointCopyWithImpl<$Res>
+    implements _$OneRepMaxTrendPointCopyWith<$Res> {
+  __$OneRepMaxTrendPointCopyWithImpl(this._self, this._then);
+
+  final _OneRepMaxTrendPoint _self;
+  final $Res Function(_OneRepMaxTrendPoint) _then;
+
+/// Create a copy of OneRepMaxTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? estimated1rm = null,}) {
+  return _then(_OneRepMaxTrendPoint(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as DateTime,estimated1rm: null == estimated1rm ? _self.estimated1rm : estimated1rm // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+/// @nodoc
+mixin _$ExerciseStrengthTrendPoint {
+
+/// Catalog exercise ID.
+ String get exerciseId;/// Exercise name.
+ String get exerciseName;/// Local date (midnight, user timezone).
+ DateTime get date;/// Best working-set weight (kg) in that day.
+ double get maxWeightKg;/// Best estimated 1RM (kg) in that day, rounded to 2 dp.
+ double get estimated1rm;
+/// Create a copy of ExerciseStrengthTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ExerciseStrengthTrendPointCopyWith<ExerciseStrengthTrendPoint> get copyWith => _$ExerciseStrengthTrendPointCopyWithImpl<ExerciseStrengthTrendPoint>(this as ExerciseStrengthTrendPoint, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExerciseStrengthTrendPoint&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&(identical(other.exerciseName, exerciseName) || other.exerciseName == exerciseName)&&(identical(other.date, date) || other.date == date)&&(identical(other.maxWeightKg, maxWeightKg) || other.maxWeightKg == maxWeightKg)&&(identical(other.estimated1rm, estimated1rm) || other.estimated1rm == estimated1rm));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,exerciseId,exerciseName,date,maxWeightKg,estimated1rm);
+
+@override
+String toString() {
+  return 'ExerciseStrengthTrendPoint(exerciseId: $exerciseId, exerciseName: $exerciseName, date: $date, maxWeightKg: $maxWeightKg, estimated1rm: $estimated1rm)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ExerciseStrengthTrendPointCopyWith<$Res>  {
+  factory $ExerciseStrengthTrendPointCopyWith(ExerciseStrengthTrendPoint value, $Res Function(ExerciseStrengthTrendPoint) _then) = _$ExerciseStrengthTrendPointCopyWithImpl;
+@useResult
+$Res call({
+ String exerciseId, String exerciseName, DateTime date, double maxWeightKg, double estimated1rm
+});
+
+
+
+
+}
+/// @nodoc
+class _$ExerciseStrengthTrendPointCopyWithImpl<$Res>
+    implements $ExerciseStrengthTrendPointCopyWith<$Res> {
+  _$ExerciseStrengthTrendPointCopyWithImpl(this._self, this._then);
+
+  final ExerciseStrengthTrendPoint _self;
+  final $Res Function(ExerciseStrengthTrendPoint) _then;
+
+/// Create a copy of ExerciseStrengthTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? exerciseId = null,Object? exerciseName = null,Object? date = null,Object? maxWeightKg = null,Object? estimated1rm = null,}) {
+  return _then(_self.copyWith(
+exerciseId: null == exerciseId ? _self.exerciseId : exerciseId // ignore: cast_nullable_to_non_nullable
+as String,exerciseName: null == exerciseName ? _self.exerciseName : exerciseName // ignore: cast_nullable_to_non_nullable
+as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as DateTime,maxWeightKg: null == maxWeightKg ? _self.maxWeightKg : maxWeightKg // ignore: cast_nullable_to_non_nullable
+as double,estimated1rm: null == estimated1rm ? _self.estimated1rm : estimated1rm // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ExerciseStrengthTrendPoint].
+extension ExerciseStrengthTrendPointPatterns on ExerciseStrengthTrendPoint {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExerciseStrengthTrendPoint value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExerciseStrengthTrendPoint value)  $default,){
+final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExerciseStrengthTrendPoint value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String exerciseId,  String exerciseName,  DateTime date,  double maxWeightKg,  double estimated1rm)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint() when $default != null:
+return $default(_that.exerciseId,_that.exerciseName,_that.date,_that.maxWeightKg,_that.estimated1rm);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String exerciseId,  String exerciseName,  DateTime date,  double maxWeightKg,  double estimated1rm)  $default,) {final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint():
+return $default(_that.exerciseId,_that.exerciseName,_that.date,_that.maxWeightKg,_that.estimated1rm);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String exerciseId,  String exerciseName,  DateTime date,  double maxWeightKg,  double estimated1rm)?  $default,) {final _that = this;
+switch (_that) {
+case _ExerciseStrengthTrendPoint() when $default != null:
+return $default(_that.exerciseId,_that.exerciseName,_that.date,_that.maxWeightKg,_that.estimated1rm);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ExerciseStrengthTrendPoint implements ExerciseStrengthTrendPoint {
+  const _ExerciseStrengthTrendPoint({required this.exerciseId, required this.exerciseName, required this.date, required this.maxWeightKg, required this.estimated1rm});
+  
+
+/// Catalog exercise ID.
+@override final  String exerciseId;
+/// Exercise name.
+@override final  String exerciseName;
+/// Local date (midnight, user timezone).
+@override final  DateTime date;
+/// Best working-set weight (kg) in that day.
+@override final  double maxWeightKg;
+/// Best estimated 1RM (kg) in that day, rounded to 2 dp.
+@override final  double estimated1rm;
+
+/// Create a copy of ExerciseStrengthTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ExerciseStrengthTrendPointCopyWith<_ExerciseStrengthTrendPoint> get copyWith => __$ExerciseStrengthTrendPointCopyWithImpl<_ExerciseStrengthTrendPoint>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExerciseStrengthTrendPoint&&(identical(other.exerciseId, exerciseId) || other.exerciseId == exerciseId)&&(identical(other.exerciseName, exerciseName) || other.exerciseName == exerciseName)&&(identical(other.date, date) || other.date == date)&&(identical(other.maxWeightKg, maxWeightKg) || other.maxWeightKg == maxWeightKg)&&(identical(other.estimated1rm, estimated1rm) || other.estimated1rm == estimated1rm));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,exerciseId,exerciseName,date,maxWeightKg,estimated1rm);
+
+@override
+String toString() {
+  return 'ExerciseStrengthTrendPoint(exerciseId: $exerciseId, exerciseName: $exerciseName, date: $date, maxWeightKg: $maxWeightKg, estimated1rm: $estimated1rm)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ExerciseStrengthTrendPointCopyWith<$Res> implements $ExerciseStrengthTrendPointCopyWith<$Res> {
+  factory _$ExerciseStrengthTrendPointCopyWith(_ExerciseStrengthTrendPoint value, $Res Function(_ExerciseStrengthTrendPoint) _then) = __$ExerciseStrengthTrendPointCopyWithImpl;
+@override @useResult
+$Res call({
+ String exerciseId, String exerciseName, DateTime date, double maxWeightKg, double estimated1rm
+});
+
+
+
+
+}
+/// @nodoc
+class __$ExerciseStrengthTrendPointCopyWithImpl<$Res>
+    implements _$ExerciseStrengthTrendPointCopyWith<$Res> {
+  __$ExerciseStrengthTrendPointCopyWithImpl(this._self, this._then);
+
+  final _ExerciseStrengthTrendPoint _self;
+  final $Res Function(_ExerciseStrengthTrendPoint) _then;
+
+/// Create a copy of ExerciseStrengthTrendPoint
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? exerciseId = null,Object? exerciseName = null,Object? date = null,Object? maxWeightKg = null,Object? estimated1rm = null,}) {
+  return _then(_ExerciseStrengthTrendPoint(
+exerciseId: null == exerciseId ? _self.exerciseId : exerciseId // ignore: cast_nullable_to_non_nullable
+as String,exerciseName: null == exerciseName ? _self.exerciseName : exerciseName // ignore: cast_nullable_to_non_nullable
+as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as DateTime,maxWeightKg: null == maxWeightKg ? _self.maxWeightKg : maxWeightKg // ignore: cast_nullable_to_non_nullable
+as double,estimated1rm: null == estimated1rm ? _self.estimated1rm : estimated1rm // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

@@ -674,6 +674,26 @@ and deleting a `workout_exercises` row cascades to its sets.
 
 **Production gates:** `productionOfflineSyncEnabled` and `productionOfflinePayloadProtectionEnabled` remain `false`. `complete_workout` remains sole server reward authority. No remote migration, deployment, commit, or push.
 
+## D-049 — P4 Progress / Analytics / Utility Parity (COMPLETE)
+
+**Status:** ACCEPTED for additive local/test verification only. Production migration/deployment remains gated; `complete_workout` remains sole PostgreSQL reward authority.
+
+**Context:** P4 deepens GymLvl's progress tracking, analytics and practical user-data utilities using pinned OpenGym behavior as reference, building on the existing analytics/bodyweight/progression implementation. No parallel analytics or measurement systems are created.
+
+**Decision:** P4 extends the existing domains additively:
+1. **Exercise-level progress/history** — pure-Dart `ExerciseProgressEngine` over completed workouts; working sets only (warm-up excluded); Epley 1RM; PR markers; chronological; empty-state safe. No AI recommendations.
+2. **General body measurements** — additive `public.body_measurements` table (body_weight, body_fat_percentage, chest, waist, hips, upper_arm, thigh; explicit kg/cm/percent units; owner-only RLS). Existing `bodyweight_measurements`/`profiles.weight_kg` preserved; no table-per-body-part; no destructive replacement.
+3. **Advanced strength/volume analytics** — extends `AnalyticsEngine` with 1RM trend, exercise-specific strength trend, volume trend, frequency, PR chart; `TimeRange` presets; deterministic; no per-frame recomputation.
+4. **Muscle/structural-balance** — push/pull, upper/lower, anterior/posterior training distribution from completed volume + exercise metadata; deterministic thresholds; fitness analytics only, no medical diagnosis.
+5. **Deterministic recovery/readiness** — days-since-trained classification (recently trained / moderately recovered / long time since trained / no history); documented thresholds; no wearable/HRV/sleep; no physiological certainty.
+6. **CSV export** — RFC 4180 UTF-8 CSV (workouts, workout_exercises, workout_sets, body_measurements); stable columns; correct escaping; owner-only; no secrets.
+7. **Portable backup export** — versioned JSON (`format: gymlvl-backup`, `version: 1`, `exportedAt`, `data`); owner-only, no secrets, deterministic sorted keys; export only, no restore/import.
+8. **Focused tests + regression + security** — focused tests per gate; SQL/ACL for the new table; analyze/format/full suite clean except pre-existing `release_config_test.dart`.
+
+**Boundaries:** No P4 operation awards XP or touches progression/streaks/quests/class. Additive migration only; no production `supabase db push`; no AGPL code/media; no third-party media. OpenGym = behavioral reference only.
+
+**Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`, `OPENGYM_PARITY_MATRIX.md` updated. P4 = COMPLETE; P5 = NEXT / NOT STARTED.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:

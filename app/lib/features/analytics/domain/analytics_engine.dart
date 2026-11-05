@@ -12,6 +12,7 @@ import 'package:app/features/workout/domain/exercise.dart';
 import 'package:app/features/workout/domain/workout.dart';
 import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/workout_set.dart';
+import 'package:app/features/progression/domain/progression_engine.dart';
 import 'analytics_models.dart';
 
 /// Default Asia/Ho_Chi_Minh offset (+7) used to bucket UTC instants into
@@ -252,11 +253,151 @@ class AnalyticsEngine {
     return result;
   }
 
-  /// Aggregates all four metrics over the same inputs and window.
+  /// P4: estimated 1RM trend over time — one point per local day with the best
+  /// estimated 1RM among completed working sets that day.
   ///
-  /// Convenience wrapper around [heatmap], [weightTrend], [prChart] and
-  /// [muscleBalance]. Returns [AnalyticsResult] with empty lists when no data
-  /// exists.
+  /// Each completed working set contributes its Epley estimate (via
+  /// [ProgressionEngine.calculateOneRepMax]); the day's value is the maximum.
+  /// Sets referencing unknown exercises are skipped. Returns an empty list
+  /// when no data exists.
+  List<OneRepMaxTrendPoint> oneRepMaxTrend({
+    required List<WorkoutSet> sets,
+    required List<WorkoutExercise> workoutExercises,
+    required List<Workout> workouts,
+    required List<Exercise> exercises,
+    DateTime? start,
+    DateTime? end,
+    int? timezoneOffsetHours,
+  }) {
+    final offset = timezoneOffsetHours ?? this.timezoneOffsetHours;
+    final validExerciseIds = _validExerciseIds(exercises);
+    final weById = <String, WorkoutExercise>{};
+    for (final we in workoutExercises) {
+      weById[we.id] = we;
+    }
+    final wById = <String, Workout>{};
+    for (final w in workouts) {
+      wById[w.id] = w;
+    }
+
+    final byDay = <DateTime, double>{};
+    for (final s in sets) {
+      if (!s.isCompleted || s.isWarmup) continue;
+      final we = weById[s.workoutExerciseId];
+      if (we == null) continue;
+      if (!validExerciseIds.contains(we.exerciseId)) continue;
+      final w = wById[we.workoutId];
+      if (w == null || w.completedAt == null) continue;
+      if (!_inWindow(w.completedAt!, start: start, end: end)) continue;
+      final estimate = ProgressionEngine.calculateOneRepMax(
+        weightKg: s.weightKg,
+        reps: s.reps,
+      );
+      if (estimate == null) continue;
+      final day = _localDate(w.completedAt!, offset);
+      final current = byDay[day];
+      if (current == null || estimate > current) {
+        byDay[day] = estimate;
+      }
+    }
+
+    return byDay.entries
+        .map(
+          (e) =>
+              OneRepMaxTrendPoint(date: e.key, estimated1rm: _round2(e.value)),
+        )
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  /// P4: exercise-specific strength trend over time — one point per exercise
+  /// per local day with that exercise's best working-set weight and estimated
+  /// 1RM.
+  ///
+  /// Only completed working sets are considered; warm-up sets are excluded.
+  /// Sets referencing unknown exercises are skipped. Results are sorted by
+  /// exercise name then date for deterministic output. Returns an empty list
+  /// when no data exists.
+  List<ExerciseStrengthTrendPoint> exerciseStrengthTrend({
+    required List<WorkoutSet> sets,
+    required List<WorkoutExercise> workoutExercises,
+    required List<Workout> workouts,
+    required List<Exercise> exercises,
+    DateTime? start,
+    DateTime? end,
+    int? timezoneOffsetHours,
+  }) {
+    final offset = timezoneOffsetHours ?? this.timezoneOffsetHours;
+    final validExerciseIds = _validExerciseIds(exercises);
+    final nameById = <String, String>{};
+    for (final e in exercises) {
+      nameById[e.id] = e.name;
+    }
+    final weById = <String, WorkoutExercise>{};
+    for (final we in workoutExercises) {
+      weById[we.id] = we;
+    }
+    final wById = <String, Workout>{};
+    for (final w in workouts) {
+      wById[w.id] = w;
+    }
+
+    // Key: (exerciseId, localDate) -> best (weight, reps).
+    final bestByKey = <String, _BestSet>{};
+    for (final s in sets) {
+      if (!s.isCompleted || s.isWarmup) continue;
+      final we = weById[s.workoutExerciseId];
+      if (we == null) continue;
+      if (!validExerciseIds.contains(we.exerciseId)) continue;
+      final w = wById[we.workoutId];
+      if (w == null || w.completedAt == null) continue;
+      if (!_inWindow(w.completedAt!, start: start, end: end)) continue;
+      final day = _localDate(w.completedAt!, offset);
+      final key = '${we.exerciseId}|${day.millisecondsSinceEpoch}';
+      final current = bestByKey[key];
+      final candidate = _BestSet(weightKg: s.weightKg, reps: s.reps);
+      if (current == null ||
+          candidate.weightKg > current.weightKg ||
+          (candidate.weightKg == current.weightKg &&
+              candidate.reps > current.reps)) {
+        bestByKey[key] = candidate;
+      }
+    }
+
+    final result = <ExerciseStrengthTrendPoint>[];
+    for (final entry in bestByKey.entries) {
+      final parts = entry.key.split('|');
+      final exerciseId = parts.first;
+      final date = DateTime.fromMillisecondsSinceEpoch(int.parse(parts.last));
+      final best = entry.value;
+      final estimate = ProgressionEngine.calculateOneRepMax(
+        weightKg: best.weightKg,
+        reps: best.reps,
+      );
+      if (estimate == null) continue;
+      result.add(
+        ExerciseStrengthTrendPoint(
+          exerciseId: exerciseId,
+          exerciseName: nameById[exerciseId] ?? exerciseId,
+          date: date,
+          maxWeightKg: best.weightKg,
+          estimated1rm: _round2(estimate),
+        ),
+      );
+    }
+    result.sort((a, b) {
+      final c = a.exerciseName.compareTo(b.exerciseName);
+      if (c != 0) return c;
+      return a.date.compareTo(b.date);
+    });
+    return result;
+  }
+
+  /// Aggregates all metrics over the same inputs and window.
+  ///
+  /// Convenience wrapper around [heatmap], [weightTrend], [prChart],
+  /// [muscleBalance], [oneRepMaxTrend] and [exerciseStrengthTrend]. Returns
+  /// [AnalyticsResult] with empty lists when no data exists.
   AnalyticsResult aggregate({
     required List<Workout> workouts,
     required List<WorkoutSet> sets,
@@ -293,8 +434,33 @@ class AnalyticsEngine {
         end: end,
         timezoneOffsetHours: timezoneOffsetHours,
       ),
+      oneRepMaxTrend: oneRepMaxTrend(
+        sets: sets,
+        workoutExercises: workoutExercises,
+        workouts: workouts,
+        exercises: exercises,
+        start: start,
+        end: end,
+        timezoneOffsetHours: timezoneOffsetHours,
+      ),
+      exerciseStrengthTrend: exerciseStrengthTrend(
+        sets: sets,
+        workoutExercises: workoutExercises,
+        workouts: workouts,
+        exercises: exercises,
+        start: start,
+        end: end,
+        timezoneOffsetHours: timezoneOffsetHours,
+      ),
     );
   }
+}
+
+/// The best completed working set observed for an (exercise, day) key.
+class _BestSet {
+  final double weightKg;
+  final int reps;
+  _BestSet({required this.weightKg, required this.reps});
 }
 
 /// Mutable accumulator for volume aggregation within a single day/category.

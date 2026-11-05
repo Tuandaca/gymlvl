@@ -1,71 +1,39 @@
 # GymLvl — Task Board
 
-## Current phase — P3: Workout Core Parity (2026-11-06)
+## Current phase — P4: Progress / Analytics / Utility Parity (2026-11-06)
 
-**Task:** Improve the active workout experience using useful OpenGym behavior while preserving GymLvl's existing workout engine, offline architecture, progression and RPG reward authority. Ten frozen gates: previous-performance hints, active exercise reorder, active exercise replacement, workout notes, warm-up set support, rest timer hardening, active-workout editing, plate calculator, workout-mode/superset/offline/reward compatibility, focused tests + regression.
+**Task:** Deepen GymLvl's progress tracking, analytics and practical user-data utilities using pinned OpenGym behavior as reference. Build on the existing GymLvl analytics/bodyweight/progression implementation. Do NOT create parallel analytics or measurement systems.
 
-**Status:** `COMPLETE` (all ten frozen P3 CORE gates PASS)
+**Execution order (mandatory):** audit → independently design minimal integration → implement → focused tests → regression → context update → stop. Do NOT stop after planning. Do NOT start P5.
 
-**Commit:** `main` @ `21f36361` (P3 baseline); P2 + P3 changes in working tree (uncommitted, awaiting owner approval). P2 remains awaiting owner commit from prior session.
+**Status:** `COMPLETE` (all eight frozen P4 CORE gates PASS)
 
-**Deliverables — COMPLETE:**
-1. **Additive migration:** `supabase/migrations/20261106000100_p2_routine_planning.sql` — creates `routines`, `routine_exercises`, `routine_superset_groups`, `routine_schedules`, `planned_workouts` with RLS policies, indexes, triggers, and 12 RPC functions (create/duplicate/replace/reorder/schedule/start/complete/repeat). Preserves all existing data; no DROP/RENAME/TRUNCATE.
-2. **Domain models:** `app/lib/features/training_plan/routine_models.dart` (+ `.freezed.dart`/`.g.dart`) — `Routine`, `RoutineExercise`, `RoutineSupersetGroup`, `RoutineSchedule` (fixed_week/rotation), `PlannedWorkout`, config types (`RoutineExerciseConfig`, `ScheduleRoutineConfig`, `CreatePlannedWorkoutConfig`, `ReplaceExerciseConfig`, `DuplicateRoutineConfig`, `RepeatWorkoutConfig`, `DateRange`), enums (`WorkoutMode`, `ScheduleMode`, `PlannedWorkoutStatus`). Uses canonical `WorkoutMode` from `workout_mode_contract.dart`.
-3. **Pure Dart engines:** `routine_engine.dart` (create, duplicate, add/remove/reorder/replace exercises, superset groups, from workout session) and `schedule_engine.dart` (fixed-week occurrences, next workout, assign/reschedule, snapshot builder).
-4. **Repository interface:** `routine_repository.dart` — full CRUD + exercise management + scheduling + planned workout operations.
-5. **Supabase implementation:** `supabase_routine_repository.dart` — all operations via SECURITY DEFINER RPCs with ownership validation from `auth.uid()`; `_getRoutineOrThrow` for non-nullable returns.
-6. **Riverpod providers:** `routine_providers.dart` — `routinesProvider`, `routineProvider`, `routineSchedulesProvider`, `plannedWorkoutsProvider`, `nextPlannedWorkoutProvider`, `upcomingPlannedWorkoutsProvider`, engine/repo providers.
-7. **Snapshot isolation (Option B):** Immutable routine snapshot stored in `planned_workouts.routine_snapshot` at scheduling time; `start_planned_workout` creates workout from snapshot — later routine edits never affect active/completed workouts.
-8. **Weekday convention:** Dart `DateTime` convention (1=Monday ... 7=Sunday) used throughout migration, models, engines, and RPCs.
-9. **Historical immutability verified:** Scenario A (edit after start), B (edit after completion), C (scheduled occurrence follows snapshot policy) — all enforced by DB design.
-10. **No second workout engine:** Uses existing `workouts`/`workout_exercises`/`sets` + `complete_workout` RPC for rewards. Planning actions grant **zero XP**.
-11. **UI Screens:** Routine list, editor, weekly schedule, planned workouts — all using `translateText` localization and Candy components (AppBar, CandyButton variants: secondary/danger, isFullWidth, CandyDialog API).
-12. **FirstWeekPlan Adapter:** `first_week_plan_adapter.dart` — converts M5 FirstWeekPlan to P2 Routine/Schedule representation.
-13. **Routing:** GoRouter integration for `/routines`, `/routine/new`, `/routine/:id`, `/schedule`, `/planned`.
-14. **Tests:** Focused P2 automated tests added:
-      - `app/test/training_plan/routine_engine_test.dart` — create, rename, add, remove, reorder, replace (compatible config preserved / incompatible mode config reset), duplicate independence
-      - `app/test/training_plan/schedule_engine_test.dart` — weekday convention (1=Mon..7=Sun), fixed-week assignment, upcoming workout, reschedule, snapshot immutability (edit after schedule), independent snapshots across occurrences
-      - `app/test/training_plan/first_week_plan_adapter_test.dart` — existing FirstWeekPlan → P2 Routine + Schedule, exercise order preserved, Mon/Wed/Fri ([1,3,5]) mapping, canonical WorkoutMode, unique IDs
-      - `supabase/tests/p2_routine_planning.sql` — create/schedule/snapshot/start/repeat/zero-XP/cross-user RLS/weekday constraints/duplicate occurrence
-    `flutter analyze --no-pub` = `No issues found!`. `dart format --set-exit-if-changed .` = stable (0 changed).
-    `flutter test --no-pub` = 587 pass / 1 fail (pre-existing `release_config_test.dart` Gradle 9.7.1 vs 8.13, NOT P2, owner Gradle files untouched).
-    `cd tools/db-tests && npm test` = 25 SQL units PASS, 365 ACL assertions PASS, including `migration 20261106000100_p2_routine_planning.sql` PASS and `SQL regression p2_routine_planning.sql` PASS.
+**Commit:** `main` @ `9b822b62d4e211bb2bd723aa34923231c7c52f73` (baseline); working tree dirty with pre-existing owner P2/P3/M3/M4 work (preserved, untouched). P4 changes are additive new files + edits to non-dirty files only. P4 NOT yet committed (awaiting owner approval).
 
-**Blockers:** None for P2 core.
+**Frozen P4 CORE gates (exactly eight; no new acceptance criteria may be added):**
+1. Exercise-level progress/history — `PASS` (engine + provider + screen + route + 8 focused tests)
+2. General body measurements — `PASS` (additive migration + model + repository + provider + screen + route + SQL/ACL test)
+3. Advanced strength/volume analytics — `PASS` (engine extended + provider + route + 9 focused tests)
+4. Muscle / structural-balance analytics — `PASS` (engine + 7 focused tests)
+5. Deterministic recovery/readiness insight — `PASS` (engine + 7 focused tests)
+6. CSV data export — `PASS` (service + provider + screen + route + 6 focused tests)
+7. Portable user-data backup export — `PASS` (service + provider + screen + route + 6 focused tests)
+8. Focused tests + regression + security — `PASS` (all focused tests + analyze + full suite; sole failure = pre-existing release_config_test.dart)
 
-**Deferred (P2-EXTEND):** Rotation scheduling details, advanced week template vs occurrence separation, FirstWeekPlan full integration (adapter pattern — minimal shim added).
+**P4 = COMPLETE.** `P5 = NEXT / NOT STARTED`. Do not start P5.
 
-**Do NOT do:** Production migration/deployment; commit/push without owner approval; modify protected Gradle files; overwrite pre-existing M3/M4 owner work.
+**Invariants to preserve (do not violate):**
+- Flutter + Dart + Riverpod + GoRouter + Supabase/PostgreSQL; existing workout engine/history/bodyweight/analytics/progression/PR/1RM/Class/XP/Level/Quest/Streak logic.
+- `complete_workout` remains sole authoritative reward path; no P4 operation may directly award XP.
+- Additive DB migrations only; preserve bodyweight/history; maintain RLS + owner scope; no production `supabase db push`.
+- Bold Candy Neubrutalism UI; VI/EN diacritics; no AGPL code/media; no third-party media.
+- OpenGym = behavioral reference only; no code/text/asset copying.
+- `main` is the only development branch; no automatic commit/push/tag.
 
-**Next action:** Owner review of P2 candidate manifest (`git status --short` + `git diff --name-status`); approve commit. P3 — Workout Core Parity is NOT STARTED.
+**Pre-existing owner dirty/untracked files (PRESERVE — do not overwrite, reset, or discard):**
+Modified tracked: `.agents/teamwork/ORIGINAL_REQUEST.md`, `.opencode/opencode.jsonc`, `app/.gitignore`, `app/android/gradle.properties`, `app/android/gradle/wrapper/gradle-wrapper.properties`, `app/lib/features/analytics/domain/analytics_models.dart`, `app/lib/features/bodyweight/domain/bodyweight_trend.dart`, `app/lib/features/bodyweight/presentation/providers/bodyweight_providers.dart`, `app/lib/features/bodyweight/presentation/screens/bodyweight_screen.dart`, `app/lib/features/bodyweight/presentation/widgets/bodyweight_trend_chart.dart`, `app/lib/features/workout/domain/workout.freezed.dart`, `app/lib/features/workout/domain/workout.g.dart`, `app/test/analytics/analytics_engine_test.dart`, `app/test/analytics/analytics_screen_test.dart`, `app/test/bodyweight/bodyweight_measurement_test.dart`, `app/test/bodyweight/bodyweight_screen_test.dart`, `app/test/bodyweight/bodyweight_trend_test.dart`, `app/test/bodyweight/bodyweight_validator_test.dart`, `app/test/exercise_detail_test.dart`, `app/test/training_plan/first_week_plan_test.dart`.
+Untracked: `.agents/teamwork/BRIEFING.md`, `.agents/teamwork/handoff.md`, `.agents/teamwork/interviewer/`, `.agents/teamwork/orchestrator/`, `app/android/run_gradle.bat`, `docs/audit/phases/A8_BATCH_EXECUTION.md`, `docs/planning/M3_1_DECISION_PROPOSAL.md`, `gradle_check.ps1`, `run_gradle_check.bat`.
 
----
+**Known unrelated failure that may remain:** `release_config_test.dart` (Gradle wrapper 9.7.1 vs expected 8.13 — owner Gradle file, do not modify).
 
-## Current product blocker — Onboarding 9/9 submit failure (2026-11-04) — BLOCKED
-
-**Status:** `BLOCKED` — production schema/runtime mismatch; requires explicit owner approval to verify/deploy. Not the current task. Do not deploy migrations.
-
-**Root cause:** Production onboarding 9/9 is blocked by a production schema/runtime mismatch. Read-only inspection showed that expected initialization capability such as `initialize_user` and `profiles.timezone` was absent. The exact unapplied migration set has not yet been established.
-
-**Call chain:** `onboarding_screen.dart:42` → `onboarding_controller.dart:54-101` → `SupabaseClient.rpc('initialize_user', ...)` → PostgREST → PostgreSQL `public.initialize_user(p_profile jsonb)` → INSERT `public.profiles`, `public.user_classes`; UPDATE `public.users`; INSERT `public.streaks`.
-
-**Local verification:** PGlite + all 10 migrations → `initialize_user` PASS (onboarding completes, `onboarding_completed=true`, idempotent retry returns "Onboarding already complete").
-
-**Production verification:** `NOT RUN` — no production Supabase access. Cannot confirm exact production error code.
-
-**Files changed:** None (read-only investigation).
-
-**Blockers:** No production Supabase access; `supabase db push`/remote migration requires explicit owner approval per AGENTS.md §0.3/§8.
-
-**Next action:** Owner to verify production database schema (`public.initialize_user` function, `public.profiles.timezone` column, `public.users` rows) and approve migration deployment if missing.
-
----
-
-## Do not do (constraints)
-
-- Do not start P3+ automatically.
-- AI PT is not the immediate next implementation stage (P6).
-- No production deployment, database migration, or remote Supabase changes.
-- No third-party exercise media.
-- Do not commit/push without explicit owner approval.
-- Do not overwrite pre-existing M3/M4 owner work (6 modified tracked files, 10 untracked files preserved).
+**Next action:** All eight P4 frozen gates PASS. P4 is complete; await owner approval to commit the P4 candidate changes (see `git status --short` / `git diff --name-status`). Do not start P5.

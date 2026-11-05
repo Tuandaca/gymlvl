@@ -341,6 +341,112 @@ const Map<String, Map<String, String>> _dictionary = {
     'vi': 'Xu hướng trọng lượng cơ thể',
     'en': 'Bodyweight trend',
   },
+
+  // P4: Progress / Analytics / Utility
+  'exercise_progress_title': {
+    'vi': 'TIẾN ĐỘ BÀI TẬP',
+    'en': 'EXERCISE PROGRESS',
+  },
+  'exercise_progress_empty': {
+    'vi': 'Chưa có lịch sử tập cho bài tập này.',
+    'en': 'No workout history for this exercise yet.',
+  },
+  'exercise_history_sessions': {
+    'vi': 'Buổi tập đã hoàn thành',
+    'en': 'Completed sessions',
+  },
+  'working_sets': {'vi': 'Tập làm việc', 'en': 'Working sets'},
+  'recent_trend': {'vi': 'Xu hướng gần đây', 'en': 'Recent trend'},
+  'warmup_excluded': {
+    'vi': 'Không tính tập khôi phục',
+    'en': 'Warm-up sets excluded',
+  },
+  'measurements_title': {'vi': 'CHI SỐ CƠ THỂ', 'en': 'BODY MEASUREMENTS'},
+  'add_measurement': {'vi': 'THÊM CHI SỐ', 'en': 'ADD MEASUREMENT'},
+  'measurement_type': {'vi': 'Loại chỉ số', 'en': 'Measurement type'},
+  'measurement_value': {'vi': 'Giá trị', 'en': 'Value'},
+  'measurement_unit': {'vi': 'Đơn vị', 'en': 'Unit'},
+  'measured_at': {'vi': 'Ngày đo', 'en': 'Measured at'},
+  'measurement_notes': {'vi': 'Ghi chú', 'en': 'Notes'},
+  'body_weight': {'vi': 'Cân nặng cơ thể', 'en': 'Body weight'},
+  'body_fat_percentage': {'vi': 'Tỉ lệ mỡ cơ thể', 'en': 'Body fat percentage'},
+  'chest': {'vi': 'Ngực', 'en': 'Chest'},
+  'waist': {'vi': 'Eo', 'en': 'Waist'},
+  'hips': {'vi': 'Mông', 'en': 'Hips'},
+  'upper_arm': {'vi': 'Tay trên', 'en': 'Upper arm'},
+  'thigh': {'vi': 'Đùi', 'en': 'Thigh'},
+  'unit_kg': {'vi': 'kg', 'en': 'kg'},
+  'unit_cm': {'vi': 'cm', 'en': 'cm'},
+  'unit_percent': {'vi': '%', 'en': '%'},
+  'structural_balance_title': {
+    'vi': 'CÂN BẰNG CƠ THỂ',
+    'en': 'STRUCTURAL BALANCE',
+  },
+  'push_pull': {'vi': 'Đẩy / Kéo', 'en': 'Push / Pull'},
+  'upper_lower': {'vi': 'Thân trên / Thân dưới', 'en': 'Upper / Lower'},
+  'anterior_posterior': {'vi': 'Trước / Sau', 'en': 'Anterior / Posterior'},
+  'muscle_group_distribution': {
+    'vi': 'Phân bố nhóm cơ',
+    'en': 'Muscle group distribution',
+  },
+  'readiness_title': {
+    'vi': 'PHỤC HỒI / SẴN SÀNG',
+    'en': 'RECOVERY / READINESS',
+  },
+  'readiness_recently_trained': {
+    'vi': 'Gần đây đã tập',
+    'en': 'Recently trained',
+  },
+  'readiness_moderately_recovered': {
+    'vi': 'Đang phục hồi',
+    'en': 'Moderately recovered',
+  },
+  'readiness_long_since_trained': {
+    'vi': 'Lâu rồi chưa tập',
+    'en': 'Long time since trained',
+  },
+  'readiness_no_history': {
+    'vi': 'Chưa có lịch sử tập.',
+    'en': 'No training history yet.',
+  },
+  'readiness_days_since': {
+    'vi': 'Ngày kể từ lần tập',
+    'en': 'Days since last trained',
+  },
+  'frequency_title': {'vi': 'TẦN SUẤT TẬP', 'en': 'TRAINING FREQUENCY'},
+  'strength_trend_title': {'vi': 'XU HƯỚNG SỨC MẠNH', 'en': 'STRENGTH TREND'},
+  'one_rm_trend': {'vi': 'Xu hướng 1RM', 'en': '1RM trend'},
+  'export_title': {'vi': 'XUẤT DỮ LIỆU', 'en': 'DATA EXPORT'},
+  'export_csv': {'vi': 'Xuất CSV', 'en': 'Export CSV'},
+  'export_backup': {
+    'vi': 'Sao lưu GymLvl (JSON)',
+    'en': 'GymLvl backup (JSON)',
+  },
+  'export_copied': {
+    'vi': 'Đã sao chép vào clipboard',
+    'en': 'Copied to clipboard',
+  },
+  'export_empty': {
+    'vi': 'Chưa có dữ liệu để xuất.',
+    'en': 'No data to export yet.',
+  },
+  'export_no_data': {'vi': 'Chưa có dữ liệu.', 'en': 'No data yet.'},
+
+  // P4: Analytics time ranges
+  'range_4_weeks': {'vi': '4 tuần', 'en': '4 weeks'},
+  'range_12_weeks': {'vi': '12 tuần', 'en': '12 weeks'},
+  'range_6_months': {'vi': '6 tháng', 'en': '6 months'},
+  'range_1_year': {'vi': '1 năm', 'en': '1 year'},
+  'range_all_time': {'vi': 'Tất cả', 'en': 'All time'},
+
+  // P4: Structural balance
+  'range_push_pull': {'vi': 'Đẩy / Kéo', 'en': 'Push / Pull'},
+  'range_upper_lower': {'vi': 'Thân trên / Thân dưới', 'en': 'Upper / Lower'},
+  'range_anterior_posterior': {
+    'vi': 'Trước / Sau',
+    'en': 'Anterior / Posterior',
+  },
+  'range_muscle_group': {'vi': 'Nhóm cơ chính', 'en': 'Muscle group'},
 };
 
 extension StringL10n on String {

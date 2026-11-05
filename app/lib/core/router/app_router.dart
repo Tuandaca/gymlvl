@@ -19,6 +19,9 @@ import '../../features/training_plan/presentation/screens/weekly_schedule_screen
 import '../../features/training_plan/presentation/screens/planned_workouts_screen.dart';
 import '../../features/analytics/presentation/analytics_screen.dart';
 import '../../features/bodyweight/presentation/screens/bodyweight_screen.dart';
+import '../../features/bodyweight/presentation/screens/body_measurements_screen.dart';
+import '../../features/analytics/presentation/screens/data_export_screen.dart';
+import '../../features/analytics/presentation/screens/exercise_progress_screen.dart';
 import '../../features/workout/presentation/screens/workout_screen.dart';
 import '../../features/workout/presentation/screens/exercise_picker_screen.dart';
 import '../../features/workout/presentation/screens/exercise_detail_screen.dart';
@@ -232,6 +235,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/bodyweight',
         builder: (context, state) => const BodyweightScreen(),
+      ),
+      GoRoute(
+        path: '/body-measurements',
+        builder: (context, state) => const BodyMeasurementsScreen(),
+      ),
+      GoRoute(
+        path: '/data-export',
+        builder: (context, state) => const DataExportScreen(),
+      ),
+      // ─── P4: Exercise-level progress / history ───
+      GoRoute(
+        path: '/exercise-progress/:id',
+        builder: (context, state) => ExerciseProgressScreen(
+          exerciseId: state.pathParameters['id'] ?? '',
+          exerciseName: state.extra is String ? state.extra as String : null,
+        ),
       ),
     ],
   );
