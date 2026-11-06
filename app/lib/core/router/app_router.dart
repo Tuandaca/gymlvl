@@ -29,6 +29,10 @@ import '../../features/workout/presentation/screens/active_workout_screen.dart';
 import '../../features/workout/presentation/screens/workout_history_screen.dart';
 import '../../features/workout/presentation/screens/workout_detail_screen.dart';
 import '../../features/quests/presentation/screens/quests_screen.dart';
+import '../../features/achievements/presentation/screens/achievements_screen.dart';
+import '../../features/unlocks/presentation/screens/unlocks_screen.dart';
+import '../../features/post_workout_feedback/presentation/screens/post_workout_feedback_screen.dart';
+import '../../features/ai_trainer/presentation/screens/ai_trainer_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 import '../../features/workout/domain/workout.dart';
@@ -251,6 +255,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           exerciseId: state.pathParameters['id'] ?? '',
           exerciseName: state.extra is String ? state.extra as String : null,
         ),
+      ),
+      // ─── P5: Achievements ───
+      GoRoute(
+        path: '/achievements',
+        builder: (context, state) => const AchievementsScreen(),
+      ),
+      // ─── P5: Unlocks ───
+      GoRoute(
+        path: '/unlocks',
+        builder: (context, state) => const UnlocksScreen(),
+      ),
+      // ─── P5: Post-workout feedback ───
+      GoRoute(
+        path: '/workout/feedback',
+        builder: (context, state) => const PostWorkoutFeedbackScreen(),
+      ),
+      // ─── P6: AI Personal Trainer ───
+      GoRoute(
+        path: '/ai-trainer',
+        builder: (context, state) => const AiTrainerScreen(),
       ),
     ],
   );

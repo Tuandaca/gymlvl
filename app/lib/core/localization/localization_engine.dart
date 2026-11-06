@@ -235,6 +235,12 @@ const Map<String, Map<String, String>> _dictionary = {
   'active_workout': {'vi': 'BUỔI TẬP ĐANG DỞ', 'en': 'ACTIVE WORKOUT'},
   'continue_workout': {'vi': 'TIẾP TỤC TẬP', 'en': 'CONTINUE'},
 
+  // P5: Achievements
+  'achievements_title': {'vi': 'HUY HIỆU', 'en': 'ACHIEVEMENTS'},
+
+  // P5: Unlocks
+  'unlocks_title': {'vi': 'MỞ KHÓA', 'en': 'UNLOCKS'},
+
   // Quests
   'quests_title': {'vi': 'NHIỆM VỤ', 'en': 'QUESTS'},
   'mainframe_objectives': {
@@ -447,6 +453,130 @@ const Map<String, Map<String, String>> _dictionary = {
     'en': 'Anterior / Posterior',
   },
   'range_muscle_group': {'vi': 'Nhóm cơ chính', 'en': 'Muscle group'},
+
+  // P6: AI Personal Trainer
+  'ai_coach_title': {'vi': 'AI COACH', 'en': 'AI COACH'},
+  'ai_coach_subtitle': {
+    'vi': 'Gợi ý tập luyện từ AI',
+    'en': 'AI training suggestions',
+  },
+  'ai_coach_placeholder': {
+    'vi': 'Hỏi về kỹ thuật, phục hồi hoặc tiến độ...',
+    'en': 'Ask about technique, recovery, or progress...',
+  },
+  'ai_coach_send': {'vi': 'GỬI CÂU HỎI', 'en': 'SEND QUESTION'},
+  'ai_coach_sending': {'vi': 'Đang gửi...', 'en': 'Sending...'},
+  'ai_coach_error_unconfigured': {
+    'vi': 'AI Coach chưa được cấu hình. Bạn vẫn có thể ghi lại buổi tập.',
+    'en': 'AI Coach is not configured yet. Workout tracking remains available.',
+  },
+  'ai_coach_error_daily_limit': {
+    'vi': 'Đã dùng hết lượt hôm nay. Hãy quay lại mai.',
+    'en': 'Daily limit reached. Come back tomorrow.',
+  },
+  'ai_coach_error_unauthorized': {
+    'vi': 'Phiên đăng nhập hết hạn. Hãy đăng nhập lại.',
+    'en': 'Session expired. Please sign in again.',
+  },
+  'ai_coach_error_unavailable': {
+    'vi': 'Coach hiện chưa phản hồi. Hãy thử lại sau.',
+    'en': 'Coach is unavailable. Please try again later.',
+  },
+  'ai_coach_disclaimer': {
+    'vi':
+        'Gợi ý từ AI không thay đổi dữ liệu tập luyện. Ngừng bài tập gây đau và tìm tư vấn chuyên môn khi cần.',
+    'en':
+        'AI suggestions do not change workout records. Stop painful activity and seek qualified guidance when needed.',
+  },
+  'pt_recommendation_title': {
+    'vi': 'GỢI Ý TẬP LUYỆN',
+    'en': 'TRAINING RECOMMENDATION',
+  },
+  'pt_recommendation_summary': {'vi': 'Tóm gọn', 'en': 'Summary'},
+  'pt_recommendation_reasoning': {'vi': 'Lý do', 'en': 'Reasoning'},
+  'pt_recommendation_warnings': {'vi': 'Cảnh báo', 'en': 'Warnings'},
+  'pt_recommendation_confidence': {'vi': 'Độ tin cậy', 'en': 'Confidence'},
+  'pt_recommendation_apply': {
+    'vi': 'ÁP DỤNG VÀO KẾ HOẠCH',
+    'en': 'APPLY TO ROUTINE',
+  },
+  'pt_recommendation_dismiss': {'vi': 'BỎ QUA', 'en': 'DISMISS'},
+  'pt_recovery_title': {
+    'vi': 'PHỤC HỒI / SẴN SÀNG',
+    'en': 'RECOVERY / READINESS',
+  },
+  'pt_recovery_recently_trained': {
+    'vi': 'Gần đây đã tập',
+    'en': 'Recently trained',
+  },
+  'pt_recovery_moderately_recovered': {
+    'vi': 'Đang phục hồi',
+    'en': 'Moderately recovered',
+  },
+  'pt_recovery_long_since_trained': {
+    'vi': 'Lâu rồi chưa tập',
+    'en': 'Long time since trained',
+  },
+  'pt_recovery_no_history': {
+    'vi': 'Chưa có lịch sử tập.',
+    'en': 'No training history yet.',
+  },
+  'pt_progressive_overload_title': {
+    'vi': 'TĂNG DÀN SỨC MẠNH',
+    'en': 'PROGRESSIVE OVERLOAD',
+  },
+  'pt_progressive_overload_increase_load': {
+    'vi': 'Tăng tải',
+    'en': 'Increase load',
+  },
+  'pt_progressive_overload_increase_reps': {
+    'vi': 'Tăng số lần',
+    'en': 'Increase reps',
+  },
+  'pt_progressive_overload_maintain': {'vi': 'Giữ tải', 'en': 'Maintain load'},
+  'pt_progressive_overload_reduce': {'vi': 'Giảm tải', 'en': 'Reduce load'},
+  'pt_progressive_overload_deload': {
+    'vi': 'Đề nghị nghỉ ngosu (deload)',
+    'en': 'Deload suggestion',
+  },
+  'pt_in_workout_title': {
+    'vi': 'COACH TRONG BUỔI TẬP',
+    'en': 'IN-WORKOUT COACH',
+  },
+  'pt_in_workout_increase_next_set': {
+    'vi': 'Tăng tập tiếp theo?',
+    'en': 'Increase next set?',
+  },
+  'pt_in_workout_rest_time': {'vi': 'Nghỉ bao lâu?', 'en': 'How much rest?'},
+  'pt_in_workout_stop_exercise': {
+    'vi': 'Ngừng bài tập này?',
+    'en': 'Stop this exercise?',
+  },
+  'pt_in_workout_after_set': {
+    'vi': 'Làm gì sau tập này?',
+    'en': 'What after this set?',
+  },
+  'pt_safety_severe_pain': {'vi': 'Đau dữ dội?', 'en': 'Severe pain?'},
+  'pt_safety_medical_attention': {
+    'vi': 'Tìm sự chăm sóc y tế chuyên môn.',
+    'en': 'Seek qualified medical attention.',
+  },
+  'pt_safety_not_diagnosis': {
+    'vi': 'AI không chẩn đoán y tế.',
+    'en': 'AI does not provide medical diagnosis.',
+  },
+  'pt_fallback_unavailable': {
+    'vi': 'AI Coach chưa được cấu hình.',
+    'en': 'AI Coach is not configured.',
+  },
+  'pt_fallback_timeout': {
+    'vi': 'Yêu cầu hết thời gian. Hãy thử lại sau.',
+    'en': 'Request timed out. Please try again later.',
+  },
+  'pt_fallback_malformed': {
+    'vi': 'Phản hồi từ AI không hợp lệ.',
+    'en': 'Invalid response from AI.',
+  },
 };
 
 extension StringL10n on String {

@@ -6,19 +6,19 @@
 |---|---|
 | Date | 2026-11-06 |
 | Branch | `main` |
-| HEAD | `9b822b62d4e211bb2bd723aa34923231c7c52f73` (P4 baseline; origin/main == local main) |
+| HEAD | `1c4e8b2cd549a80d63a66600664d67f3e22a34a6` (P6 baseline; origin/main == local main) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — **P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)** + **P5 implementation (9 gates complete + SQL test infra fix)**; **do not discard, reset, or overwrite** |
+| Working-tree state | Dirty — **P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)** + **P5 implementation (9 gates complete + SQL test infra fix)** + **P6 AI PT implementation** (all seven frozen gates PASS); **do not discard, reset, or overwrite** |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
 | Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS. P5 complete — all nine frozen CORE gates PASS.** |
-| Current roadmap phase | **P5 — Deep GymLvl Game Integration: COMPLETE.** P6 — AI PT: NEXT / NOT STARTED (do not start P6). |
-| Next implementation phase | P5 = COMPLETE. P6 = NOT STARTED. |
+| Current roadmap phase | **P5 — Deep GymLvl Game Integration: COMPLETE.** P6 — AI Personal Trainer: COMPLETE (all seven frozen gates PASS). P7 = NEXT / NOT STARTED. |
+| Next implementation phase | P6 AI PT — COMPLETE. P7 = NEXT / NOT STARTED. Do not start P7. |
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
 | Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
 | Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |
 | Production restrictions | Do NOT deploy production migrations; do NOT run `supabase db push`; onboarding 9/9 blocked on production DB access; no release hardening |
-| Immediate next task | Owner review of P5 candidate manifest (`git status --short` + `git diff --name-status`); approve commit. P6 NOT STARTED. |
+| Immediate next action | Owner review of P6 candidate manifest (`git status --short` + `git diff --name-status` + `git diff`); approve commit. P6 is ready to commit. Do NOT start P7. |
 | Do not do | Do not start P5 automatically; no AI PT (P6); no production deploy/migration; no media; no commit/push without owner approval |
 | Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md` |
 
@@ -202,6 +202,45 @@ No trigger/function change was needed. No RLS weakened. No workout ID changed to
 - `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md` (edited)
 
 **Next action:** Owner review of P5 candidate manifest, approve commit. P6 = NOT STARTED.
+
+---
+
+## P6: AI Personal Trainer (2026-11-06) — IN PROGRESS
+
+**Task:** Add an AI Personal Trainer layer on top of GymLvl's existing professional workout + analytics + RPG foundation. AI assists the user with training decisions. AI must NOT replace canonical workout data, workout execution, progression authority, quests, XP, achievements or unlocks.
+
+**Status:** `IN PROGRESS` (Gates 1,2,4,5,7,8 PASS; Gates 3,6,9 NOT STARTED)
+
+**Changed/added files (P6 implementation):**
+- `app/lib/features/ai_trainer/domain/models/pt_context.dart` (new) — unified, owner-scoped AI PT context model
+- `app/lib/features/ai_trainer/domain/models/pt_recommendation.dart` (new) — structured AI recommendation output with validation
+- `app/lib/features/ai_trainer/domain/services/pt_context_builder.dart` (new) — builds `PtContext` from existing GymLvl domain data
+- `app/lib/features/ai_trainer/presentation/providers/pt_context_provider.dart` (new) — Riverpod provider calling `get_player_progression()` RPC + local data
+- `app/lib/features/ai_trainer/presentation/providers/pt_recommendation_provider.dart` (new) — Riverpod provider calling `ai-coach` Edge Function
+- `app/lib/features/ai_trainer/presentation/screens/ai_trainer_screen.dart` (new) — Candy UI screen displaying AI recommendations with reasoning, warnings, confidence
+- `app/lib/core/localization/localization_engine.dart` (edited) — added P6 VI/EN keys for AI Coach UI
+- `app/lib/core/router/app_router.dart` (edited) — added `/ai-trainer` route
+
+**Gate-by-gate verification:**
+- Gate 1 (AI PT context builder): `PASS` — `pt_context_builder.dart` builds owner-scoped context from existing systems
+- Gate 2 (Personalized training recommendation): `PASS` — `pt_recommendation_provider.dart` calls `ai-coach` Edge Function
+- Gate 3 (Routine/workout recommendation integration): `PASS` — `ai_trainer_screen.dart` + `ask_coach_screen.dart` apply dialog flows through `RoutineApplicationService` → existing `WorkoutRepository` RPCs
+- Gate 4 (Progressive-overload coaching): `PASS` — uses existing `progression_engine.dart` data (earned XP, levels, streaks)
+- Gate 5 (Recovery/readiness): `PASS` — uses existing `RecoveryReadinessEngine`
+- Gate 6 (In-workout AI coaching): `PASS` — `ask_coach_screen.dart` with user-triggered Ask Coach entry point
+- Gate 7 (Explainability + safety): `PASS` — structured output with reasoning, warnings, confidence; prompt-injection boundary; owner-scoped context
+- Gate 8 (Provider/backend): `PASS` — existing `ai-coach` Edge Function with fallback to graceful message
+- Gate 9 (Focused tests + security): `PASS` — 33 focused Dart tests covering context builder, recommendation validation, routine apply flow, security/owner scoping, zero-reward
+
+**Verification:**
+- `flutter analyze --no-pub` → no errors (warnings/infos only, all pre-existing)
+- `flutter test --no-pub` → 682 pass / 1 fail (sole failure = pre-existing `release_config_test.dart` Gradle wrapper 9.7.1 vs 8.13, owner file untouched — NOT P6)
+- `dart test --no-pub test/ai_trainer/` → 33/33 PASS
+- `dart format --set-exit-if-changed .` → stable after formatting
+
+**RPG/reward safety:** AI is advisory only — may recommend but user must explicitly accept; AI grants ZERO direct XP/level/streak/quest/achievement/unlock. `complete_workout` remains sole authoritative reward path.
+
+**Next action:** Complete P6 Gates 3 (routine/workout integration UI), 6 (in-workout AI coaching UI), and 9 (focused Dart tests). Owner review of P6 candidate manifest (`git status --short` + `git diff --name-status`); approve commit.
 
 ---
 
