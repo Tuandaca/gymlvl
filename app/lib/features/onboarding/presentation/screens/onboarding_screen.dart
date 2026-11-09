@@ -5,7 +5,11 @@ import '../../../../core/theme/candy_colors.dart';
 import '../../../../ui/widgets/system_button.dart';
 import '../../../../ui/widgets/system_panel.dart';
 import '../../../../ui/widgets/system_text_field.dart';
-import '../providers/onboarding_controller.dart';
+import '../providers/onboarding_controller.dart'
+    show
+        onboardingControllerProvider,
+        onboardingDraftProvider,
+        OnboardingFailure;
 import '../../domain/user_profile_draft.dart';
 import '../../domain/class_definitions.dart';
 import '../../../../core/localization/localization_engine.dart';
@@ -61,9 +65,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     ref.listen(onboardingControllerProvider, (previous, next) {
       if (next is AsyncError) {
         if (mounted) {
+          final error = next.error;
+          String messageKey = 'request_failed';
+          if (error is OnboardingFailure) {
+            messageKey = error.messageKey;
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('request_failed'.tr(ref)),
+              content: Text(messageKey.tr(ref)),
               backgroundColor: Colors.redAccent,
               duration: const Duration(seconds: 4),
             ),

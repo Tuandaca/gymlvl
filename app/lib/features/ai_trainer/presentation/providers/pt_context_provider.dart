@@ -47,7 +47,7 @@ final ptContextProvider = FutureProvider<PtContext>((ref) async {
     final aq = progression.activeQuest!;
     activeQuests.add({
       'quest_id': aq['questId'] as String,
-      'title': aq['title'] as String?,
+      'title': aq['questTitle'] as String?,
       'status': aq['status'] as String,
       'expires_at': aq['expiresAt'] as String?,
     });

@@ -20,7 +20,7 @@ import { jsonResponse, corsHeaders } from "../_shared/http.ts";
 export interface DeleteAccountDeps {
   authenticate: (token: string) => Promise<string | null>;
   envGet: (key: string) => string | undefined;
-  rpcDeleteAccount: (uid: string) => Promise<{ error: unknown }>;
+  rpcDeleteAccount: (uid: string, token: string) => Promise<{ error: unknown }>;
   adminDeleteUser: (uid: string) => Promise<{ error: unknown }>;
 }
 
@@ -51,18 +51,9 @@ export async function handleDeleteAccount(req: Request, deps: DeleteAccountDeps)
     );
   }
 
-  const url = deps.envGet("SUPABASE_URL");
-  const anonKey = deps.envGet("SUPABASE_ANON_KEY") ?? deps.envGet("SUPABASE_PUBLISHABLE_KEY");
-  if (!url || !anonKey) {
-    return new Response(
-      JSON.stringify({ code: "service_unavailable", error: "service_temporarily_unavailable" }),
-      { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
   // Remove all user-owned GymLvl data via the owner-scoped RPC. Idempotent:
   // retrying after a partial failure removes nothing additional and is safe.
-  const { error: deleteError } = await deps.rpcDeleteAccount(uid);
+  const { error: deleteError } = await deps.rpcDeleteAccount(uid, token);
   if (deleteError) {
     return new Response(
       JSON.stringify({ code: "deletion_failed", error: "account_deletion_failed" }),
@@ -124,14 +115,14 @@ const realDeps: DeleteAccountDeps = {
     return error || !data.user ? null : data.user.id;
   },
   envGet: (key) => Deno.env.get(key),
-  rpcDeleteAccount: async (uid) => {
+  rpcDeleteAccount: async (uid, token) => {
     const url = Deno.env.get("SUPABASE_URL");
     const key = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
     if (!url || !key) return { error: new Error("service_unavailable") };
     // deno-lint-ignore no-explicit-any
     const { createClient }: any = await import("https://esm.sh/@supabase/supabase-js@2.39.3");
     const client = createClient(url, key, {
-      global: { headers: { Authorization: `Bearer ${key}` } },
+      global: { headers: { Authorization: `Bearer ${token}` } },
       auth: { persistSession: false, autoRefreshToken: false },
     });
     const { error } = await client.rpc("delete_account_data");

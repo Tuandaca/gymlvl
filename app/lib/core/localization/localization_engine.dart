@@ -53,6 +53,30 @@ const Map<String, Map<String, String>> _dictionary = {
     'vi': 'Không thể hoàn tất yêu cầu. Vui lòng thử lại.',
     'en': 'Could not complete your request. Please try again.',
   },
+  'onboarding_validation_error': {
+    'vi': 'Vui lòng điền đầy đủ và chính xác các thông tin bắt buộc.',
+    'en': 'Please fill in all required fields correctly.',
+  },
+  'onboarding_auth_error': {
+    'vi': 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+    'en': 'Your session has expired. Please sign in again.',
+  },
+  'onboarding_backend_error': {
+    'vi': 'Dịch vụ máy chủ tạm thời không khả dụng. Vui lòng thử lại sau.',
+    'en': 'Server service is temporarily unavailable. Please try again later.',
+  },
+  'onboarding_profile_unavailable': {
+    'vi': 'Hồ sơ tài khoản chưa sẵn sàng. Vui lòng đăng ký lại.',
+    'en': 'Account profile is not ready. Please sign up again.',
+  },
+  'onboarding_invalid_class': {
+    'vi': 'Lựa chọn hệ phái không hợp lệ.',
+    'en': 'Invalid class selection.',
+  },
+  'onboarding_invalid_profile': {
+    'vi': 'Thông tin hồ sơ không hợp lệ. Vui lòng kiểm tra lại.',
+    'en': 'Invalid profile information. Please check again.',
+  },
   'login': {'vi': 'Đăng nhập', 'en': 'Sign in'},
   'register': {'vi': 'Tạo tài khoản', 'en': 'Create account'},
   'auth_intro': {
