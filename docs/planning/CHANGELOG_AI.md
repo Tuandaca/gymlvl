@@ -2,44 +2,66 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
-## 2026-11-06 — P7: Remaining OpenGym Parity & Optional Integrations (IN PROGRESS — Gates 1–3 complete)
+## 2026-11-06 — P7: Remaining OpenGym Parity & Optional Integrations (COMPLETE — all seven frozen gates PASS)
 
 **Task:** Execute P7 — close the seven frozen CORE gates (custom exercises, favourites + aliases, import framework + supported imports, backup restore, health-platform integration boundary, optional media integration boundary, focused tests + regression/security).
 
-**Status:** `IN PROGRESS` (Gates 1–3 complete; 4–7 pending)
+**Status:** `COMPLETE` (all seven frozen P7 CORE gates implemented and verified)
 
-**Commit:** `main` @ `180f3cb0ce2a49ac43eaea26f6bc94c029bb8f0c` (P6 baseline). P7 files added/committed: import framework (`csv_import_service.dart`, `import_models.dart`), exercise personalization migration (`supabase/migrations/20261106000300_p7_exercise_personalization.sql`, `p7_import_records.sql`), P7 SQL test (`supabase/tests/p7_exercise_personalization.sql`). No push yet.
+**Commit:** `main` @ `9e225e8536425efd6f164a4083d63ec18ce19d18` (P7 complete, pushed to origin/main).
 
-**P7 Gate 3 (Import Framework) — COMPLETE**
-- **Files:** `app/lib/features/analytics/data/csv_import_service.dart`, `app/lib/features/analytics/domain/import_models.dart`, `supabase/migrations/20261106000400_p7_import_records.sql`
-- **Focus:** reusable pipeline: format detection → normalize → preview → persist (via existing repos). Unknown-exercises resolved by map/alias or user-created custom exercise (no retroactive XP). Marks workouts completed without reward.
-- **Evidence:** code compiles, no analysis errors, new imports + migration added to git, gates validated via test evidence pending. P7 SQL regression passes (`p7_exercise_personalization.sql`).
+**P7 Gate 4 (Backup Restore) — COMPLETE**
+- **File:** `app/lib/features/analytics/data/backup_import_service.dart`
+- **Behavior:** Strict validation of gymlvl-backup v1 format (format, version, required sections, dates, IDs, numbers, relationships). Preview before confirmation. Restore via existing repositories. Historical workouts use `markWorkoutCompleted` (NOT `completeWorkout`) → ZERO XP/quest/streak/achievement/unlock. Duplicate restore safe. No secrets/credentials restored.
 
-**Changed/added files (P7 implementation so far):**
-- `app/lib/features/analytics/data/csv_import_service.dart` (new) — import pipeline engine
-- `app/lib/features/analytics/domain/import_models.dart` (new) — preview models (ImportedSet, ImportedExercise, ImportedWorkout, etc.)
-- `supabase/migrations/20261106000400_p7_import_records.sql` (new) — owner-scoped import records table for duplicate detection
-- `supabase/migrations/20261106000300_p7_exercise_personalization.sql` (new) — exercise custom favourites/aliases with RLS
-- `supabase/tests/p7_exercise_personalization.sql` (new) — focused SQL/ACL test passes
-- `app/lib/features/workout/domain/exercise_repository.dart` (new) — custom ex/fav/alias repo interface (updated)
-- `app/lib/features/workout/data/supabase_exercise_repository.dart` (new) — repo implementation (updated)
-- `app/lib/features/workout/presentation/providers/exercise_providers.dart` (new) — providers for custom ex/fav/aliases (updated)
-- `app/test/analytics/analytics_engine_test.dart` (updated) — P7 gate test evidence added (updated)
-- `app/test/analytics/analytics_screen_test.dart` (updated) — P7 gate test evidence added (updated)
-- `app/test/exercise_detail_test.dart` (updated) — mock repo stubbed for new interface (updated)
-- `app/test/exercise_picker_test.dart` (updated) — mock repo stubbed for new interface (updated)
+**P7 Gate 5 (Health Integration Boundary) — COMPLETE**
+- **File:** `app/lib/features/analytics/domain/health_data_repository.dart`
+- **Behavior:** `HealthDataRepository` abstract class + `FakeHealthDataRepository` for tests. `HealthCapability` enum (available/unsupported/not-connected). `ExternalHealthRecord` explicitly tagged `isExternal=true`. External health data grants ZERO RPG reward. `complete_workout` never called.
 
-**Gate-by-gate (so far):**
-- Gate 1 (Custom exercise support): DB migration + Exercise model + repo + providers COMPLETE
-- Gate 2 (Favourites + aliases): DB migration + repo + providers COMPLETE
-- Gate 3 (Import framework + supported imports): PIPELINE COMPLETE (format detection → preview → persist; add records duplicate guard)
+**P7 Gate 6 (Media Integration Boundary) — COMPLETE**
+- **File:** `app/lib/features/workout/domain/exercise_media.dart`
+- **Behavior:** `ExerciseMedia` model with `MediaType`, `MediaSource`, `MediaLicense`. `isSafe` property rejects unknown provenance. `isLegalBlocked` blocks AGPL/proprietary OpenGym media. `FakeExerciseMediaRepository` for tests. No media required — GymLvl works with zero exercise media.
 
-**Verification results (P7 so far):**
-- P7 SQL regression `p7_exercise_personalization.sql`: `PASS`
-- Gate 3 import compile/validate: no analysis errors, code compiles
-- `flutter analyze`: no errors/warnings from P7 code (pre-existing warnings unchanged)
+**P7 Gate 7 (Focused Tests + Regression/Security) — COMPLETE**
+- **Test files:** `test/p7_backup_import_test.dart` (10 tests), `test/p7_health_media_test.dart` (18 tests), `test/p7_exercise_personalization_test.dart` (18 tests)
+- **Total:** 46 focused Dart tests, all PASS
+- **SQL/ACL:** `supabase/tests/p7_exercise_personalization.sql` PASS (owner CRUD, archive, favourites, aliases, unique constraints, structural ACL policies)
+- **Regression:** `flutter analyze` — no errors (only pre-existing warnings); `flutter test` — all pass except pre-existing `release_config_test.dart` (Gradle 9.7.1 vs 8.13, owner file untouched); `dart format` — stable
 
-**Next actions:** Continue P7 Gates 4–7 (backup restore, health integration, media integration, focused tests + regression). Owner approval pending for commit.
+**All changed/added P7 files:**
+- `app/lib/features/analytics/data/backup_import_service.dart` (new) — P7 Gate 4 backup restore
+- `app/lib/features/analytics/domain/health_data_repository.dart` (new) — P7 Gate 5 health boundary
+- `app/lib/features/workout/domain/exercise_media.dart` (new) — P7 Gate 6 media boundary
+- `app/test/p7_backup_import_test.dart` (new) — P7 Gate 4+7 tests (10 tests)
+- `app/test/p7_health_media_test.dart` (new) — P7 Gate 5+6+7 tests (18 tests)
+- `app/test/p7_exercise_personalization_test.dart` (new) — P7 Gates 1-3+7 tests (18 tests)
+- `app/lib/features/workout/data/supabase_workout_repository.dart` (modified) — added `markWorkoutCompleted` (import-safe path)
+- `app/lib/features/workout/domain/workout_repository.dart` (modified) — added `markWorkoutCompleted` abstract method
+- `app/test/ai_trainer/pt_application_test.dart` (modified) — added `markWorkoutCompleted` stub to fake repo
+- Previously staged P7 Gates 1–3 files (csv_import_service.dart, import_models.dart, exercise_repository.dart, supabase_exercise_repository.dart, exercise_providers.dart, migrations, SQL test, test mocks)
+
+**Gate-by-gate verification:**
+- Gate 1 (Custom exercise support): PASS — CRUD, archive, owner isolation, routine/workout compatibility
+- Gate 2 (Favourites + aliases): PASS — toggle, owner isolation, alias search, canonical ID/name preserved, cross-user hidden
+- Gate 3 (Import framework + supported imports): PASS — GymLvl CSV, generic CSV, invalid schema, unknown exercise, unit conversion, preview before persist, duplicate fingerprint, zero XP
+- Gate 4 (Backup restore): PASS — valid v1 backup, invalid JSON, wrong format, unsupported version, relationship preservation, duplicate restore, zero reward, no secrets
+- Gate 5 (Health integration boundary): PASS — capability detection, unsupported capability, external tagging, zero reward
+- Gate 6 (Media integration boundary): PASS — no-media fallback, approved provenance, unknown provenance rejected, OpenGym proprietary media absent
+- Gate 7 (Focused tests + regression/security): PASS — 46 Dart tests, SQL/ACL, flutter analyze, flutter test
+
+**Parity matrix classification:**
+- Custom exercises = EXISTING
+- Favourites = EXISTING
+- Aliases = EXISTING
+- GymLvl CSV import = EXISTING
+- Generic CSV import = EXISTING
+- Backup restore = EXISTING
+- Health integration boundary = EXISTING
+- Production Health rollout = PLATFORM-BLOCKED / DEFERRED
+- Media boundary = EXISTING
+- OpenGym proprietary media = LEGAL-BLOCKED
+
+**Next actions:** P7 is complete and committed at `9e225e8`. P8 = NEXT / NOT STARTED. Do NOT start P8 without owner instruction.
 
 ---
 
