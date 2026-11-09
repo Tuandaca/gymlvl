@@ -13,8 +13,7 @@ import 'package:go_router/go_router.dart';
 
 const _id = '11111111-1111-4111-8111-111111111111';
 
-const sourceRevision =
-    'e6a95c28a6e3067bdd9b1188d5f37f448d528bd2';
+const sourceRevision = 'e6a95c28a6e3067bdd9b1188d5f37f448d528bd2';
 
 const _exercise = Exercise(
   id: _id,
@@ -54,6 +53,32 @@ class _Repository implements ExerciseRepository {
 
   @override
   Future<List<Exercise>> getExercisesByCategory(String category) => load();
+
+  // P7: custom exercises / favourites / aliases (stubbed for this test).
+  @override
+  Future<List<Exercise>> getCustomExercises(String userId) async => [];
+  @override
+  Future<List<Exercise>> getArchivedCustomExercises(String userId) async => [];
+  @override
+  Future<Exercise> createCustomExercise(Exercise exercise) => throw UnimplementedError();
+  @override
+  Future<Exercise> updateCustomExercise(Exercise exercise) => throw UnimplementedError();
+  @override
+  Future<void> archiveCustomExercise(String exerciseId) async {}
+  @override
+  Future<bool> isExerciseFavourite(String userId, String exerciseId) async => false;
+  @override
+  Future<bool> toggleExerciseFavourite(String userId, String exerciseId) async => false;
+  @override
+  Future<List<String>> favouriteExerciseIds(String userId) async => [];
+  @override
+  Future<List<ExerciseAlias>> getExerciseAliases(String userId) async => [];
+  @override
+  Future<void> setExerciseAlias(String userId, String exerciseId, String alias) async {}
+  @override
+  Future<void> removeExerciseAlias(String userId, String alias) async {}
+  @override
+  Future<String?> resolveExerciseAlias(String userId, String alias) async => null;
 }
 
 class _Launcher extends StatelessWidget {

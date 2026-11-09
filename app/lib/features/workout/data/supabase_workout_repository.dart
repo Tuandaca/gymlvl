@@ -158,6 +158,30 @@ class SupabaseWorkoutRepository
       );
 
   @override
+  Future<Workout> markWorkoutCompleted(
+    String workoutId, {
+    DateTime? completedAt,
+    int? durationSeconds,
+    String? notes,
+  }) async {
+    final response = await _supabase
+        .from('workouts')
+        .update({
+          'status': 'completed',
+          if (completedAt != null)
+            'completed_at': completedAt.toUtc().toIso8601String(),
+          if (durationSeconds != null) 'duration_seconds': durationSeconds,
+          if (notes != null) 'notes': notes,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', workoutId)
+        .eq('user_id', _userId)
+        .select(_detail)
+        .single();
+    return decodeWorkout(response);
+  }
+
+  @override
   Future<void> cancelWorkout(String workoutId) async {
     await _supabase.rpc('cancel_workout', params: {'p_workout_id': workoutId});
   }

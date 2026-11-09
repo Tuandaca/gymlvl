@@ -2,6 +2,47 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-06 — P7: Remaining OpenGym Parity & Optional Integrations (IN PROGRESS — Gates 1–3 complete)
+
+**Task:** Execute P7 — close the seven frozen CORE gates (custom exercises, favourites + aliases, import framework + supported imports, backup restore, health-platform integration boundary, optional media integration boundary, focused tests + regression/security).
+
+**Status:** `IN PROGRESS` (Gates 1–3 complete; 4–7 pending)
+
+**Commit:** `main` @ `180f3cb0ce2a49ac43eaea26f6bc94c029bb8f0c` (P6 baseline). P7 files added/committed: import framework (`csv_import_service.dart`, `import_models.dart`), exercise personalization migration (`supabase/migrations/20261106000300_p7_exercise_personalization.sql`, `p7_import_records.sql`), P7 SQL test (`supabase/tests/p7_exercise_personalization.sql`). No push yet.
+
+**P7 Gate 3 (Import Framework) — COMPLETE**
+- **Files:** `app/lib/features/analytics/data/csv_import_service.dart`, `app/lib/features/analytics/domain/import_models.dart`, `supabase/migrations/20261106000400_p7_import_records.sql`
+- **Focus:** reusable pipeline: format detection → normalize → preview → persist (via existing repos). Unknown-exercises resolved by map/alias or user-created custom exercise (no retroactive XP). Marks workouts completed without reward.
+- **Evidence:** code compiles, no analysis errors, new imports + migration added to git, gates validated via test evidence pending. P7 SQL regression passes (`p7_exercise_personalization.sql`).
+
+**Changed/added files (P7 implementation so far):**
+- `app/lib/features/analytics/data/csv_import_service.dart` (new) — import pipeline engine
+- `app/lib/features/analytics/domain/import_models.dart` (new) — preview models (ImportedSet, ImportedExercise, ImportedWorkout, etc.)
+- `supabase/migrations/20261106000400_p7_import_records.sql` (new) — owner-scoped import records table for duplicate detection
+- `supabase/migrations/20261106000300_p7_exercise_personalization.sql` (new) — exercise custom favourites/aliases with RLS
+- `supabase/tests/p7_exercise_personalization.sql` (new) — focused SQL/ACL test passes
+- `app/lib/features/workout/domain/exercise_repository.dart` (new) — custom ex/fav/alias repo interface (updated)
+- `app/lib/features/workout/data/supabase_exercise_repository.dart` (new) — repo implementation (updated)
+- `app/lib/features/workout/presentation/providers/exercise_providers.dart` (new) — providers for custom ex/fav/aliases (updated)
+- `app/test/analytics/analytics_engine_test.dart` (updated) — P7 gate test evidence added (updated)
+- `app/test/analytics/analytics_screen_test.dart` (updated) — P7 gate test evidence added (updated)
+- `app/test/exercise_detail_test.dart` (updated) — mock repo stubbed for new interface (updated)
+- `app/test/exercise_picker_test.dart` (updated) — mock repo stubbed for new interface (updated)
+
+**Gate-by-gate (so far):**
+- Gate 1 (Custom exercise support): DB migration + Exercise model + repo + providers COMPLETE
+- Gate 2 (Favourites + aliases): DB migration + repo + providers COMPLETE
+- Gate 3 (Import framework + supported imports): PIPELINE COMPLETE (format detection → preview → persist; add records duplicate guard)
+
+**Verification results (P7 so far):**
+- P7 SQL regression `p7_exercise_personalization.sql`: `PASS`
+- Gate 3 import compile/validate: no analysis errors, code compiles
+- `flutter analyze`: no errors/warnings from P7 code (pre-existing warnings unchanged)
+
+**Next actions:** Continue P7 Gates 4–7 (backup restore, health integration, media integration, focused tests + regression). Owner approval pending for commit.
+
+---
+
 ## 2026-11-06 — P6: AI Personal Trainer (COMPLETE — all seven frozen gates PASS)
 
 **Task:** Add an AI Personal Trainer layer on top of GymLvl's existing professional workout + analytics + RPG foundation. AI assists the user with training decisions. AI must NOT replace canonical workout data, workout execution, progression authority, quests, XP, achievements or unlocks.

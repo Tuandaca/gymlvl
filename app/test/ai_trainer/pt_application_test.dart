@@ -89,6 +89,22 @@ class _FakeWorkoutRepository implements WorkoutRepository {
   }
 
   @override
+  Future<Workout> markWorkoutCompleted(String workoutId, {
+    DateTime? completedAt,
+    int? durationSeconds,
+    String? notes,
+  }) async {
+    final w = _workouts[workoutId];
+    if (w == null) throw Exception('Workout not found');
+    return w.copyWith(
+      status: WorkoutStatus.completed,
+      completedAt: completedAt,
+      durationSeconds: durationSeconds ?? w.durationSeconds,
+      notes: notes,
+    );
+  }
+
+  @override
   Future<void> cancelWorkout(String workoutId) async {
     _workouts[workoutId] = _workouts[workoutId]!.copyWith(
       status: WorkoutStatus.cancelled,

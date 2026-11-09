@@ -6,14 +6,14 @@
 |---|---|
 | Date | 2026-11-06 |
 | Branch | `main` |
-| HEAD | `1c4e8b2cd549a80d63a66600664d67f3e22a34a6` (P6 baseline; origin/main == local main) |
+| HEAD | `180f3cb0ce2a49ac43eaea26f6bc94c029bb8f0c` (P6 baseline; origin/main == local main) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — **P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)** + **P5 implementation (9 gates complete + SQL test infra fix)** + **P6 AI PT implementation** (all seven frozen gates PASS); **do not discard, reset, or overwrite** |
+| Working-tree state | Dirty — **pre-existing P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions (new files + edits to non-dirty files)** + **P5 implementation (9 gates complete + SQL test infra fix)** + **P6 AI PT implementation** (all seven frozen gates PASS); **do not discard, reset, or overwrite**. Also **P7 implementation** (8+ focused tests; import framework, migration, repository, providers; **Gates 1–3 complete**), **noted below. |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
-| Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS. P5 complete — all nine frozen CORE gates PASS.** |
-| Current roadmap phase | **P5 — Deep GymLvl Game Integration: COMPLETE.** P6 — AI Personal Trainer: COMPLETE (all seven frozen gates PASS). P7 = NEXT / NOT STARTED. |
-| Next implementation phase | P6 AI PT — COMPLETE. P7 = NEXT / NOT STARTED. Do not start P7. |
+| Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS. P5 complete — all nine frozen CORE gates PASS. P6 complete — all seven frozen CORE gates PASS.** |
+| Current roadmap phase | **P7: Remaining OpenGym Parity & Optional Integrations — IN PROGRESS (Gates 1–3 done, 4–7 pending)** |
+| Next implementation phase | P6 completed. P7 continues: Gates 4 (backup/restore), 5 (health integration), 6 (media integration), 7 (focused tests + regression/security). No automatic commit/push. Owner approval required.
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
 | Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
 | Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |

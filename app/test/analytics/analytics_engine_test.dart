@@ -7,48 +7,54 @@ import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/workout_set.dart';
 
 Exercise exercise(String id, String category) => Exercise(
-      id: id,
-      name: 'Exercise $id',
-      category: category,
-      equipment: 'Barbell',
-    );
+  id: id,
+  name: 'Exercise $id',
+  category: category,
+  equipment: 'Barbell',
+);
 
 Workout workout(String id, DateTime completedAt) => Workout(
-      id: id,
-      userId: 'user',
-      status: WorkoutStatus.completed,
-      completedAt: completedAt,
-    );
+  id: id,
+  userId: 'user',
+  status: WorkoutStatus.completed,
+  completedAt: completedAt,
+);
 
-WorkoutExercise workoutExercise(String id, String workoutId, String exerciseId) =>
-      WorkoutExercise(
-        id: id,
-        workoutId: workoutId,
-        exerciseId: exerciseId,
-      );
+WorkoutExercise workoutExercise(
+  String id,
+  String workoutId,
+  String exerciseId,
+) => WorkoutExercise(id: id, workoutId: workoutId, exerciseId: exerciseId);
 
-WorkoutSet workoutSet(String id, String workoutExerciseId,
-        {int reps = 10, double weightKg = 20, bool isCompleted = true,
-        int durationSeconds = 0}) =>
-      WorkoutSet(
-        id: id,
-        workoutExerciseId: workoutExerciseId,
-        reps: reps,
-        weightKg: weightKg,
-        isCompleted: isCompleted,
-        durationSeconds: durationSeconds,
-      );
+WorkoutSet workoutSet(
+  String id,
+  String workoutExerciseId, {
+  int reps = 10,
+  double weightKg = 20,
+  bool isCompleted = true,
+  int durationSeconds = 0,
+}) => WorkoutSet(
+  id: id,
+  workoutExerciseId: workoutExerciseId,
+  reps: reps,
+  weightKg: weightKg,
+  isCompleted: isCompleted,
+  durationSeconds: durationSeconds,
+);
 
-PrRecord prRecord(String exerciseId,
-        {double maxWeightKg = 20, int maxReps = 10,
-        double estimated1rm = 26.67, DateTime? updatedAt}) =>
-      PrRecord(
-        exerciseId: exerciseId,
-        maxWeightKg: maxWeightKg,
-        maxReps: maxReps,
-        estimated1rm: estimated1rm,
-        updatedAt: updatedAt ?? DateTime.utc(2026, 11, 1),
-      );
+PrRecord prRecord(
+  String exerciseId, {
+  double maxWeightKg = 20,
+  int maxReps = 10,
+  double estimated1rm = 26.67,
+  DateTime? updatedAt,
+}) => PrRecord(
+  exerciseId: exerciseId,
+  maxWeightKg: maxWeightKg,
+  maxReps: maxReps,
+  estimated1rm: estimated1rm,
+  updatedAt: updatedAt ?? DateTime.utc(2026, 11, 1),
+);
 
 final kChest = 'chest-exercise';
 final kBack = 'back-exercise';
@@ -188,13 +194,17 @@ void main() {
       final prRecords = [prRecord(kChest)];
 
       final a = engine.aggregate(
-        workouts: workouts, sets: sets,
-        workoutExercises: [we], exercises: exercises,
+        workouts: workouts,
+        sets: sets,
+        workoutExercises: [we],
+        exercises: exercises,
         prRecords: prRecords,
       );
       final b = engine.aggregate(
-        workouts: workouts, sets: sets,
-        workoutExercises: [we], exercises: exercises,
+        workouts: workouts,
+        sets: sets,
+        workoutExercises: [we],
+        exercises: exercises,
         prRecords: prRecords,
       );
       expect(a, b);
@@ -210,10 +220,7 @@ void main() {
         workoutSet('s1', 'we1', reps: 10, weightKg: 20),
         workoutSet('s2', 'we2', reps: 10, weightKg: 20),
       ];
-      final workouts = [
-        workout('w1', inside),
-        workout('w2', outside),
-      ];
+      final workouts = [workout('w1', inside), workout('w2', outside)];
       final weList = [
         workoutExercise('we1', 'w1', kChest),
         workoutExercise('we2', 'w2', kChest),
@@ -253,8 +260,14 @@ void main() {
         workoutSet('s1', 'we1', reps: 10, weightKg: 20, isCompleted: true),
         workoutSet('s2', 'we1', reps: 10, weightKg: 20, isCompleted: false),
         // timed/cardio: reps 0, weight 0, duration > 0 -> 0 volume but a set
-        workoutSet('s3', 'we1', reps: 0, weightKg: 0,
-            isCompleted: true, durationSeconds: 60),
+        workoutSet(
+          's3',
+          'we1',
+          reps: 0,
+          weightKg: 0,
+          isCompleted: true,
+          durationSeconds: 60,
+        ),
       ];
       final workouts = [workout('w1', completedAt)];
       final exercises = [exercise(kChest, 'Chest')];
@@ -312,10 +325,20 @@ void main() {
     test('prChart comes from exercise_prs, never recalculated', () {
       final engine = AnalyticsEngine();
       final prRecords = [
-        prRecord(kBack, maxWeightKg: 100, maxReps: 5,
-            estimated1rm: 116.67, updatedAt: DateTime.utc(2026, 11, 5)),
-        prRecord(kChest, maxWeightKg: 60, maxReps: 10,
-            estimated1rm: 80.0, updatedAt: DateTime.utc(2026, 11, 4)),
+        prRecord(
+          kBack,
+          maxWeightKg: 100,
+          maxReps: 5,
+          estimated1rm: 116.67,
+          updatedAt: DateTime.utc(2026, 11, 5),
+        ),
+        prRecord(
+          kChest,
+          maxWeightKg: 60,
+          maxReps: 10,
+          estimated1rm: 80.0,
+          updatedAt: DateTime.utc(2026, 11, 4),
+        ),
       ];
       final exercises = [exercise(kChest, 'Chest'), exercise(kBack, 'Back')];
 

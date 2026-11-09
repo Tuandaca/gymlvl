@@ -255,6 +255,168 @@ final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
   return SupabaseWorkoutRepository(SupabaseConfig.client);
 });
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// P7 Gate 1: custom exercise providers (owner-scoped).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/// Owner's non-archived custom exercises.
+final customExercisesProvider = FutureProvider.family<List<Exercise>, String>(
+  (ref, userId) async {
+    final repository = ref.watch(exerciseRepositoryProvider);
+    return repository.getCustomExercises(userId);
+  },
+);
+
+/// Owner's archived custom exercises (history-preserving soft delete).
+final archivedCustomExercisesProvider =
+    FutureProvider.family<List<Exercise>, String>(
+  (ref, userId) async {
+    final repository = ref.watch(exerciseRepositoryProvider);
+    return repository.getArchivedCustomExercises(userId);
+  },
+);
+
+class CustomExerciseNotifier extends Notifier<AsyncValue<Exercise?>> {
+  @override
+  AsyncValue<Exercise?> build() => const AsyncData(null);
+
+  Future<void> create(Exercise exercise) async {
+    state = const AsyncLoading();
+    final repository = ref.read(exerciseRepositoryProvider);
+    try {
+      final created = await repository.createCustomExercise(exercise);
+      state = AsyncData(created);
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+    }
+  }
+
+  Future<void> update(Exercise exercise) async {
+    state = const AsyncLoading();
+    final repository = ref.read(exerciseRepositoryProvider);
+    try {
+      final updated = await repository.updateCustomExercise(exercise);
+      state = AsyncData(updated);
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+    }
+  }
+
+  Future<void> archive(String exerciseId) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    await repository.archiveCustomExercise(exerciseId);
+    state = const AsyncData(null);
+  }
+}
+
+final customExerciseProvider =
+    NotifierProvider.autoDispose<CustomExerciseNotifier, AsyncValue<Exercise?>>(
+  CustomExerciseNotifier.new,
+);
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// P7 Gate 2: favourites + aliases providers (owner-scoped).
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/// Exercise IDs favourited by [userId].
+final favouriteExerciseIdsProvider =
+    FutureProvider.family<List<String>, String>(
+  (ref, userId) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    return repository.favouriteExerciseIds(userId);
+  },
+);
+
+/// Whether [exerciseId] is favourited by [userId].
+final isExerciseFavouriteProvider =
+    FutureProvider.family<bool, _FavouriteKey>((ref, key) async {
+  final repository = ref.read(exerciseRepositoryProvider);
+  return repository.isExerciseFavourite(key.userId, key.exerciseId);
+});
+
+/// Key for [isExerciseFavouriteProvider].
+class _FavouriteKey {
+  final String userId;
+  final String exerciseId;
+  const _FavouriteKey({required this.userId, required this.exerciseId});
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _FavouriteKey &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId &&
+          exerciseId == other.exerciseId;
+  @override
+  int get hashCode => Object.hash(userId, exerciseId);
+}
+
+class ExerciseFavouriteNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  Future<bool> toggle(String userId, String exerciseId) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    final next = await repository.toggleExerciseFavourite(userId, exerciseId);
+    state = next;
+    return next;
+  }
+}
+
+final exerciseFavouriteProvider = NotifierProvider.autoDispose<
+    ExerciseFavouriteNotifier, bool>(ExerciseFavouriteNotifier.new);
+
+/// All aliases for [userId].
+final exerciseAliasesProvider = FutureProvider.family<List<ExerciseAlias>, String>(
+  (ref, userId) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    return repository.getExerciseAliases(userId);
+  },
+);
+
+class ExerciseAliasNotifier
+    extends Notifier<AsyncValue<List<ExerciseAlias>>> {
+  /// Riverpod passes the family key (owner user id) to the constructor.
+  ExerciseAliasNotifier(this._userId);
+
+  final String _userId;
+
+  @override
+  AsyncValue<List<ExerciseAlias>> build() {
+    _load();
+    return const AsyncLoading();
+  }
+
+  Future<void> _load() async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    try {
+      final aliases = await repository.getExerciseAliases(_userId);
+      state = AsyncData(aliases);
+    } catch (error, stack) {
+      state = AsyncError(error, stack);
+    }
+  }
+
+  Future<void> set(String exerciseId, String alias) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    await repository.setExerciseAlias(_userId, exerciseId, alias);
+    await _load();
+  }
+
+  Future<void> remove(String alias) async {
+    final repository = ref.read(exerciseRepositoryProvider);
+    await repository.removeExerciseAlias(_userId, alias);
+    await _load();
+  }
+}
+
+/// Notifier family for exercise aliases keyed by owner user id.
+final exerciseAliasNotifierProvider =
+    NotifierProvider.autoDispose.family<
+      ExerciseAliasNotifier,
+      AsyncValue<List<ExerciseAlias>>,
+      String
+    >(ExerciseAliasNotifier.new);
+
 final activeWorkoutControllerProvider =
     NotifierProvider<ActiveWorkoutController, ActiveWorkoutState>(
       ActiveWorkoutController.new,

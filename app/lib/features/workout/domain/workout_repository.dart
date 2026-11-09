@@ -125,6 +125,17 @@ abstract class WorkoutRepository {
 
   /// Tính toán XP và Level cho Workout đã hoàn thành qua Edge Function
   Future<Map<String, dynamic>> calculateXP(String workoutId);
+
+  /// Đánh dấu một workout nhập từ lịch sử là hoàn thành KHÔNG tặng XP.
+  ///
+  /// Chỉ dùng cho pipeline nhập dữ liệu. `complete_workout` vẫn là đường
+  /// dẫn thưởng duy nhất; nhập file không kích hoạt RPG.
+  Future<Workout> markWorkoutCompleted(
+    String workoutId, {
+    DateTime? completedAt,
+    int? durationSeconds,
+    String? notes,
+  });
 }
 
 class WorkoutCompletion {

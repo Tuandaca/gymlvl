@@ -64,9 +64,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       ProviderScope(
-        child: MaterialApp(
-          home: AnalyticsScreen(result: _result()),
-        ),
+        child: MaterialApp(home: AnalyticsScreen(result: _result())),
       ),
     );
 
@@ -84,7 +82,9 @@ void main() {
     expect(find.text('Legs'), findsOneWidget);
   });
 
-  testWidgets('provider integration shows real data', (WidgetTester tester) async {
+  testWidgets('provider integration shows real data', (
+    WidgetTester tester,
+  ) async {
     final overrides = [
       analyticsProvider.overrideWithValue(AsyncData(_result())),
     ];
@@ -118,8 +118,10 @@ void main() {
 
     expect(find.byType(CandyEmptyState), findsOneWidget);
     expect(find.textContaining('Chưa có hồ sơ dữ liệu.'), findsOneWidget);
-    expect(find.textContaining('Chưa có dữ liệu tập luyện để hiển thị.'),
-        findsOneWidget);
+    expect(
+      find.textContaining('Chưa có dữ liệu tập luyện để hiển thị.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('error state with retry', (WidgetTester tester) async {
