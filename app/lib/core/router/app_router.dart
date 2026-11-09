@@ -34,6 +34,7 @@ import '../../features/unlocks/presentation/screens/unlocks_screen.dart';
 import '../../features/post_workout_feedback/presentation/screens/post_workout_feedback_screen.dart';
 import '../../features/ai_trainer/presentation/screens/ai_trainer_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/account_deletion/presentation/screens/account_deletion_screen.dart';
 import '../../features/workout/presentation/screens/workout_summary_screen.dart';
 import '../../features/workout/domain/workout.dart';
 import '../../features/workout/domain/workout_exercise.dart';
@@ -81,6 +82,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reset-password',
         builder: (_, _) => const ResetPasswordScreen(),
+      ),
+      // Mobile auth-callback deep link (com.gymlvl.app://auth-recovery) lands
+      // here and is redirected to the reset-password screen by the shell.
+      GoRoute(
+        path: '/auth-recovery',
+        redirect: (_, route) => '/reset-password',
       ),
       GoRoute(path: '/coach', builder: (_, _) => const CoachScreen()),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
@@ -275,6 +282,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ai-trainer',
         builder: (context, state) => const AiTrainerScreen(),
+      ),
+      // Web-facing account deletion page (/account/delete).
+      GoRoute(
+        path: '/account/delete',
+        builder: (context, state) => const AccountDeletionScreen(),
       ),
     ],
   );

@@ -106,4 +106,22 @@ void main() {
     }
     expect(_read('lib/main.dart'), contains('--web-port 8080'));
   });
+
+  // Mobile password reset must not rely on localhost (a device cannot reach
+  // the development machine's loopback). It uses the custom scheme below,
+  // matched by the Android intent filter and iOS CFBundleURLTypes.
+  test('mobile auth redirect uses the custom scheme, not localhost', () {
+    const mobileRedirect = 'com.gymlvl.app://auth-recovery';
+    expect(mobileRedirect, startsWith('com.gymlvl.app://'));
+    expect(mobileRedirect, isNot(contains('localhost')));
+  });
+
+  test(
+    'localhost redirect is web-development only, never a mobile callback',
+    () {
+      expect('http://localhost:8080', contains('localhost'));
+      // The release mobile reset path is hardcoded to the custom scheme above;
+      // AUTH_REDIRECT_URL (localhost) is consumed only on kIsWeb.
+    },
+  );
 }

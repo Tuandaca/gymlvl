@@ -284,6 +284,9 @@ Do not assume any of these exist:
 - **No production deployment is authorized.**
 - Migrations are applied manually or through the existing Supabase workflow; no automated
   production migration step exists in this repository.
+- Edge Functions deployed: `ai-coach`, `calculate-xp`, `get-user-stats`, `initialize-user`,
+  `switch-class`, `sync-daily-data`, `delete-account` (P8; `verify_jwt = true`; server-side
+  `SUPABASE_SERVICE_ROLE_KEY` only for privileged Auth removal, never in client bundle).
 
 ## 10. Architecture change process
 

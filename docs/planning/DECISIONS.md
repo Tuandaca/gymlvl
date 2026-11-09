@@ -800,6 +800,49 @@ These remain unresolved and block later milestones:
 **Decision:** P1 is marked COMPLETE. P2 — Routine & Planning Parity is COMPLETE (Gate 1–5 all PASS). P3 — Workout Core Parity is the next implementation phase and is NOT STARTED. P6 (AI PT) is not the immediate next stage. No P3+ implementation has been started.
 **Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md` reflect P1 complete / P2 complete / P3 next. Historical M0–M9 milestone labels no longer govern execution.
 
+## D-049 — P8 account-deletion server/data boundary (COMPLETE)
+
+**Status:** ACCEPTED (P8 release hardening, 2026-11-09; local/test verification only).
+
+**Context:** GymLvl supports account creation. Store policy (Apple and Google Play) requires an
+app supporting account creation to allow users to initiate deletion of their account within the
+app, and Google Play additionally requires an external web resource where deletion can be
+requested. No production deployment is authorized by this decision.
+
+**Decision:** Implement the smallest secure server-side deletion boundary compatible with the
+existing Supabase architecture:
+
+1. Additive migration `supabase/migrations/20261109000200_p8_delete_account.sql` creates
+   `public.delete_account_data()` (`SECURITY DEFINER`, owner-scoped via `auth.uid()`). It deletes
+   only the authenticated caller's user-owned GymLvl rows (workouts, sets, exercises, routines,
+   schedules, planned workouts, body measurements, xp_logs, streaks, exercise PRs, quest
+   instances, user classes, workout rewards, user achievements, coach usage, users). Shared
+   catalogue, class/quest definitions, and other users' rows are never touched. The
+   `auth.users` row is NOT removed by the RPC (requires service_role); it is removed by the Edge
+   Function.
+2. Edge Function `delete-account` (`supabase/functions/delete-account/index.ts`,
+   `verify_jwt = true`) verifies the caller JWT, derives the target identity exclusively from the
+   authenticated session (never accepts a client-supplied `user_id`), invokes `delete_account_data`,
+   then removes the `auth.users` row via `SUPABASE_SERVICE_ROLE_KEY` (server-side runtime only,
+   never in client bundle). Public-data deletion is idempotent and retry-safe; Auth deletion has no
+   distributed transaction with PostgreSQL, so a deferred 202 advisory is returned when Auth
+   deletion cannot complete.
+3. Profile/Settings UI exposes a clearly labelled deletion confirmation dialog (VI/EN, Candy
+   design), signs out the user on success, and shows sanitized errors on failure. Zero XP/reward is
+   awarded.
+4. SQL/ACL tests in `supabase/tests/p8_delete_account.sql` verify owner deletion, cross-user
+   isolation, catalogue preservation, and idempotency. Edge Function tests in
+   `supabase/functions/delete-account/delete-account_test.ts` verify unauthenticated/invalid-token
+   denial, self-only deletion, RPC failure, admin deletion failure, and idempotent retry.
+
+**Boundaries:** No production deployment (`supabase db push` / Edge Function deploy remains gated).
+The public Google Play external deletion web URL remains OWNER INPUT REQUIRED (hosting/domain/deployment
+by the owner). Privacy-policy URL, support email, and age rating remain OWNER INPUT REQUIRED.
+
+**Consequences:** `docs/audit/P8_RELEASE_HARDENING_REPORT.md`, `docs/planning/ARCHITECTURE.md`,
+`docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`
+reflect P8 account-deletion implementation.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:

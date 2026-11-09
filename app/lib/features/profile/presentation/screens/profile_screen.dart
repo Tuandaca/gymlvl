@@ -8,6 +8,8 @@ import '../../../../core/theme/candy_colors.dart';
 import '../../../../core/config/supabase_config.dart';
 import '../../../../core/localization/localization_engine.dart';
 import '../../../../ui/candy/candy_button.dart';
+import '../../../account_deletion/account_deletion_notifier.dart';
+import '../../../account_deletion/account_deletion_service.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../dashboard/presentation/providers/class_providers.dart';
 import '../../../onboarding/domain/class_definitions.dart';
@@ -570,6 +572,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
                       if (_isEditing) _buildEditActions(),
                       if (!_isEditing) _buildLogoutButton(),
+                      if (!_isEditing) _buildDeleteAccountButton(),
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -1260,6 +1263,114 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         icon: const Icon(Icons.logout_rounded, size: 18),
         label: Text(
           'logout'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            fontSize: 12,
+            letterSpacing: 1,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppTheme.dangerOrange,
+          side: BorderSide(color: AppTheme.dangerOrange.withValues(alpha: 0.5)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.panelBackground,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: AppTheme.dangerOrange.withValues(alpha: 0.8)),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'delete_account_title'.tr(ref),
+          style: const TextStyle(
+            fontFamily: CandyFonts.display,
+            color: AppTheme.dangerOrange,
+            fontSize: 16,
+          ),
+        ),
+        content: Text(
+          'delete_account_desc'.tr(ref),
+          style: const TextStyle(color: AppTheme.textMain),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'cancel'.tr(ref),
+              style: const TextStyle(color: AppTheme.textDim),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'delete_account_confirm'.tr(ref),
+              style: const TextStyle(color: AppTheme.dangerOrange),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _deleteAccount();
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    await ref.read(accountDeletionNotifierProvider.notifier).deleteAccount();
+    if (!mounted) return;
+    final outcome = ref.read(accountDeletionNotifierProvider);
+    switch (outcome.value?.result) {
+      case AccountDeletionResult.success:
+        await ref.read(authControllerProvider.notifier).signOut();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('account_deleted'.tr(ref)),
+              backgroundColor: AppTheme.cyanNeon,
+            ),
+          );
+        }
+      case AccountDeletionResult.deferred:
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('account_delete_deferred'.tr(ref)),
+              backgroundColor: AppTheme.warningYellow,
+            ),
+          );
+        }
+      case AccountDeletionResult.failed:
+      case null:
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('account_delete_failed'.tr(ref)),
+              backgroundColor: AppTheme.dangerOrange,
+            ),
+          );
+        }
+    }
+  }
+
+  Widget _buildDeleteAccountButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: ref.watch(accountDeletionNotifierProvider).isLoading
+            ? null
+            : _confirmDeleteAccount,
+        icon: const Icon(Icons.delete_forever_rounded, size: 18),
+        label: Text(
+          'delete_account_title'.tr(ref),
           style: const TextStyle(
             fontFamily: CandyFonts.display,
             fontSize: 12,

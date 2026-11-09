@@ -4,23 +4,23 @@
 
 | Field | Value |
 |---|---|
-| Date | 2026-11-06 |
+| Date | 2026-11-09 |
 | Branch | `main` |
-| HEAD | `9e225e8536425efd6f164a4083d63ec18ce19d18` (P7 complete; origin/main == local main) |
+| HEAD | `1ee11e316775d4dbb9a304fabb31c0df5b08425b` (P7 complete + docs sync; origin/main == local main) |
 | Remote | `origin/main` == local `main` |
-| Working-tree state | Dirty — **pre-existing P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions** + **P5 implementation** + **P6 AI PT implementation** + **P7 complete** (all seven frozen CORE gates committed at `9e225e8`); **do not discard, reset, or overwrite**. |
+| Working-tree state | Dirty — **pre-existing P2 + P3 + M3/M4/M5 changes (implementation + focused tests + SQL test)** + pre-existing owner work preserved (modified tracked files + untracked owner files) + **P4 additions** + **P5 implementation** + **P6 AI PT implementation** + **P7 complete** (all seven frozen CORE gates committed at `9e225e8`) + **P8 GAP CLOSURE COMPLETE** (P8-FINAL-HYGIENE files: `supabase/migrations/20261109000100_p8_complete_workout_mode_validation.sql`, `supabase/migrations/20261109000200_p8_delete_account.sql`, `supabase/functions/delete-account/index.ts`, `supabase/functions/delete-account/delete-account_test.ts`, `supabase/config.toml`, `supabase/tests/p8_delete_account.sql`, `supabase/tests/p2_routine_planning.sql`, `app/lib/features/profile/presentation/screens/profile_screen.dart`, `app/lib/core/localization/localization_engine.dart`, `app/lib/core/router/app_router.dart`, `app/lib/features/auth/data/supabase_auth_repository.dart`, `app/test/auth_redirect_config_test.dart`, `app/android/app/src/main/AndroidManifest.xml`, `app/ios/Runner/Info.plist`; updated `docs/audit/P8_RELEASE_HARDENING_REPORT.md`, `docs/planning/ARCHITECTURE.md`, `docs/planning/DECISIONS.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`); **do not discard, reset, or overwrite**. |
 | Product | GymLvl — mobile-first fitness RPG (Flutter + Riverpod + GoRouter + Supabase/PostgreSQL + Edge Functions), Candy Neubrutalism UI, VI/EN |
 | Current architecture | Existing GymLvl Flutter/Supabase architecture preserved; OpenGym is behavioral reference only (AGPL, no code reuse) |
 | Completed foundation | M1–M5 foundation complete. P1 complete (parity matrix, legal-safe exercisedb import pipeline, provenance migration). P2 complete (Routine & Planning Parity). P3 complete (Workout Core Parity). **P4 complete — all eight frozen CORE gates PASS. P5 complete — all nine frozen CORE gates PASS. P6 complete — all seven frozen CORE gates PASS. P7 complete — all seven frozen CORE gates PASS (committed at `9e225e8`).** |
-| Current roadmap phase | **P7: Remaining OpenGym Parity & Optional Integrations — ALL SEVEN GATES IMPLEMENTED AND VERIFIED** |
-| Next implementation phase | P7 complete. P8 = NEXT / NOT STARTED. No automatic commit/push. Owner approval required for commit.
+| Current roadmap phase | **P8: Release Hardening & Quality Audit — VERIFICATION CLEAN (all repository-controlled P0/P1 resolved; environment/owner-dependent items BLOCKED/NOT RUN)** |
+| Next implementation phase | P8 verification complete. No post-P8 feature phase authorized. Owner review of `docs/audit/P8_RELEASE_HARDENING_REPORT.md` and candidate commit manifest; decide on commit/push authorization. |
 | OpenGym pin | `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL, reference only) |
 | Exercise dataset pin | `hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd` (MIT text/data, media excluded). **Import source: direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.** Verified 1,324 records. |
 | Legal restrictions | No AGPL code/prompts/catalogue-text/assets; no third-party media; MIT text only with notice; media excluded |
 | Production restrictions | Do NOT deploy production migrations; do NOT run `supabase db push`; onboarding 9/9 blocked on production DB access; no release hardening |
-| Immediate next action | Owner review of P7 documentation sync; P7 is complete and committed at `9e225e8`. P8 = NEXT / NOT STARTED. Do NOT start P8 without owner instruction. |
-| Do not do | Do not start P5 automatically; no AI PT (P6); no production deploy/migration; no media; no commit/push without owner approval |
-| Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md` |
+| Immediate next action | Owner review of P8 report (`docs/audit/P8_RELEASE_HARDENING_REPORT.md`) and candidate commit manifest; decide on commit/push authorization. P8 = GAP CLOSURE COMPLETE; do NOT start any post-P8 feature. |
+| Do not do | Do not start post-P8 features; no production deploy/migration; no media; no commit/push/tag without owner approval; do not overwrite owner dirty files (esp. `app/android/gradle/wrapper/gradle-wrapper.properties`, `app/android/gradle.properties`). |
+| Read first | `docs/planning/MASTER_PLAN.md`, `docs/planning/PROJECT_CONTEXT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/DECISIONS.md`, `docs/planning/OPENGYM_PARITY_MATRIX.md`, `docs/audit/P8_RELEASE_HARDENING_REPORT.md` |
 
 ---
 

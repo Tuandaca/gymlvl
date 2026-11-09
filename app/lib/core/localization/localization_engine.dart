@@ -270,6 +270,55 @@ const Map<String, Map<String, String>> _dictionary = {
   },
   'confirm': {'vi': 'Đồng ý', 'en': 'Confirm'},
 
+  // Account deletion
+  'delete_account_title': {'vi': 'XÓA TÀI KHOẢN', 'en': 'DELETE ACCOUNT'},
+  'delete_account_desc': {
+    'vi':
+        'Tất cả dữ liệu tập luyện, thành tựu, classes và hồ sơ của bạn sẽ bị xóa vĩnh viễn. Hành động này không thể đảo ngược.',
+    'en':
+        'All your workout data, achievements, classes, and profile will be permanently deleted. This action cannot be undone.',
+  },
+  'delete_account_confirm': {'vi': 'XÓA TÀI KHOẢN', 'en': 'DELETE ACCOUNT'},
+  'account_deleted': {'vi': 'Đã xóa tài khoản.', 'en': 'Account deleted.'},
+  'account_delete_deferred': {
+    'vi':
+        'Đã xóa dữ liệu của bạn. Xóa tài khoản xác thực đang chờ xử lý; vui lòng thử lại sau.',
+    'en':
+        'Your data has been deleted. Auth account cleanup is pending; please try again later.',
+  },
+  'account_delete_failed': {
+    'vi': 'Không thể xóa tài khoản. Vui lòng thử lại sau.',
+    'en': 'Could not delete account. Please try again later.',
+  },
+  'account_delete_sign_in_first': {
+    'vi': 'Vui lòng đăng nhập trước khi xóa tài khoản.',
+    'en': 'Please sign in before deleting your account.',
+  },
+  'account_delete_in_progress': {
+    'vi': 'Đang xóa tài khoản…',
+    'en': 'Deleting your account…',
+  },
+  'account_delete_success_desc': {
+    'vi':
+        'Tất cả dữ liệu của bạn đã được xóa vĩnh viễn. Tài khoản xác thực cũng đã bị xóa.',
+    'en':
+        'All your data has been permanently deleted. Your auth account has also been removed.',
+  },
+  'account_delete_deferred_title': {
+    'vi': 'Xóa dữ liệu hoàn tất',
+    'en': 'Data deletion complete',
+  },
+  'account_delete_deferred_desc': {
+    'vi':
+        'Dữ liệu tập luyện và hồ sơ của bạn đã bị xóa. Xóa tài khoản xác thực đang chờ xử lý; vui lòng thử lại sau để hoàn tất.',
+    'en':
+        'Your workout data and profile have been deleted. Auth account cleanup is pending; please try again later to finish.',
+  },
+  'account_delete_failed_desc': {
+    'vi': 'Không thể xóa tài khoản. Vui lòng thử lại sau.',
+    'en': 'Could not delete account. Please try again later.',
+  },
+
   // Progression / RPG class bridge
   'progression_title': {'vi': 'TIẾN ĐỘ TẬP LUYỆN', 'en': 'PROGRESSION'},
   'class_progress': {'vi': 'TIẾN ĐỘ HỆ PHÁI', 'en': 'CLASS PROGRESS'},

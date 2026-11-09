@@ -72,11 +72,11 @@ SELECT pg_temp.p2_denied(
 -- create_planned_workout captures immutable snapshot
 SELECT public.create_planned_workout(
   (SELECT id FROM public.routines WHERE name='Push Day' AND user_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
-  '2026-11-09'
+  (CURRENT_DATE + 1)
 );
 
 SELECT pg_temp.p2_assert(
-  (SELECT count(*) FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id WHERE r.name='Push Day' AND pw.scheduled_date='2026-11-09')=1,
+  (SELECT count(*) FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id WHERE r.name='Push Day' AND pw.scheduled_date=(CURRENT_DATE + 1))=1,
   'planned workout occurrence created'
 );
 
@@ -84,13 +84,13 @@ SELECT pg_temp.p2_assert(
 SELECT pg_temp.p2_assert(
   (SELECT jsonb_array_length(pw.routine_snapshot->'routine'->'exercises')
    FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-   WHERE r.name='Push Day' AND pw.scheduled_date='2026-11-09')=2,
+   WHERE r.name='Push Day' AND pw.scheduled_date=(CURRENT_DATE + 1))=2,
   'snapshot contains two exercises'
 );
 SELECT pg_temp.p2_assert(
   (SELECT (pw.routine_snapshot->'routine'->'exercises'->>1)::jsonb->>'weight_kg'
    FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-   WHERE r.name='Push Day' AND pw.scheduled_date='2026-11-09')='0',
+   WHERE r.name='Push Day' AND pw.scheduled_date=(CURRENT_DATE + 1))='0',
   'snapshot preserves bodyweight weight_kg=0'
 );
 
@@ -103,26 +103,26 @@ WHERE name='Push Day' AND user_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 SELECT pg_temp.p2_assert(
   (SELECT (pw.routine_snapshot->'routine'->>'name')
    FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-   WHERE r.name='Push Day v2' AND pw.scheduled_date='2026-11-09')='Push Day',
+   WHERE r.name='Push Day v2' AND pw.scheduled_date=(CURRENT_DATE + 1))='Push Day',
   'existing occurrence snapshot unchanged after routine rename'
 );
 
 -- Second occurrence scheduled after the edit keeps its own snapshot
 SELECT public.create_planned_workout(
   (SELECT id FROM public.routines WHERE name='Push Day v2' AND user_id='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'),
-  '2026-11-16'
+  (CURRENT_DATE + 8)
 );
 
 SELECT pg_temp.p2_assert(
   (SELECT (pw.routine_snapshot->'routine'->>'name')
    FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-   WHERE r.name='Push Day v2' AND pw.scheduled_date='2026-11-16')='Push Day v2',
+   WHERE r.name='Push Day v2' AND pw.scheduled_date=(CURRENT_DATE + 8))='Push Day v2',
   'new occurrence captures edited routine name'
 );
 SELECT pg_temp.p2_assert(
   (SELECT (pw.routine_snapshot->'routine'->'exercises'->>1)::jsonb->>'weight_kg'
    FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-   WHERE r.name='Push Day v2' AND pw.scheduled_date='2026-11-16')='0',
+   WHERE r.name='Push Day v2' AND pw.scheduled_date=(CURRENT_DATE + 8))='0',
   'new occurrence snapshot reflects edited exercise config'
 );
 
@@ -131,7 +131,7 @@ SELECT pg_temp.p2_assert(
   (SELECT count(*) FROM (
     SELECT DISTINCT pw.routine_snapshot
     FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id
-    WHERE r.name ILIKE 'Push Day%' AND pw.scheduled_date IN ('2026-11-09','2026-11-16')
+    WHERE r.name ILIKE 'Push Day%' AND pw.scheduled_date IN ((CURRENT_DATE + 1),(CURRENT_DATE + 8))
   ) s)=2,
   'two occurrences have independent snapshots'
 );
@@ -140,15 +140,15 @@ SELECT pg_temp.p2_assert(
 -- 3. start_planned_workout creates NEW workout identity from snapshot
 -- ==============================================================================
 SELECT public.start_planned_workout(
-  (SELECT pw.id FROM public.planned_workouts pw WHERE pw.scheduled_date='2026-11-09')
+  (SELECT pw.id FROM public.planned_workouts pw WHERE pw.scheduled_date=(CURRENT_DATE + 1))
 );
 
 SELECT pg_temp.p2_assert(
-  (SELECT pw.status FROM public.planned_workouts pw WHERE pw.scheduled_date='2026-11-09')='started',
+  (SELECT pw.status FROM public.planned_workouts pw WHERE pw.scheduled_date=(CURRENT_DATE + 1))='started',
   'planned workout marked started'
 );
 SELECT pg_temp.p2_assert(
-  (SELECT pw.workout_id IS NOT NULL FROM public.planned_workouts pw WHERE pw.scheduled_date='2026-11-09'),
+  (SELECT pw.workout_id IS NOT NULL FROM public.planned_workouts pw WHERE pw.scheduled_date=(CURRENT_DATE + 1)),
   'planned workout linked to new workout identity'
 );
 SELECT pg_temp.p2_assert(
@@ -156,7 +156,7 @@ SELECT pg_temp.p2_assert(
   'new active workout created from planned occurrence'
 );
 SELECT pg_temp.p2_assert(
-  (SELECT count(*) FROM public.workout_exercises we JOIN public.planned_workouts pw ON pw.workout_id=we.workout_id WHERE pw.scheduled_date='2026-11-09')=2,
+  (SELECT count(*) FROM public.workout_exercises we JOIN public.planned_workouts pw ON pw.workout_id=we.workout_id WHERE pw.scheduled_date=(CURRENT_DATE + 1))=2,
   'workout_exercises derived from snapshot (two exercises)'
 );
 
@@ -165,15 +165,15 @@ SELECT pg_temp.p2_assert(
 -- ==============================================================================
 -- Mark the started workout as completed
 UPDATE public.workouts SET status='completed', completed_at=now()
-WHERE id=(SELECT pw.workout_id FROM public.planned_workouts pw WHERE pw.scheduled_date='2026-11-09');
+WHERE id=(SELECT pw.workout_id FROM public.planned_workouts pw WHERE pw.scheduled_date=(CURRENT_DATE + 1));
 
 SELECT pg_temp.p2_assert(
-  (SELECT w.status='completed' FROM public.workouts w JOIN public.planned_workouts pw ON pw.workout_id=w.id WHERE pw.scheduled_date='2026-11-09'),
+  (SELECT w.status='completed' FROM public.workouts w JOIN public.planned_workouts pw ON pw.workout_id=w.id WHERE pw.scheduled_date=(CURRENT_DATE + 1)),
   'completed workout is completed'
 );
 
 SELECT public.repeat_workout(
-  (SELECT w.id FROM public.workouts w JOIN public.planned_workouts pw ON pw.workout_id=w.id WHERE pw.scheduled_date='2026-11-09')
+  (SELECT w.id FROM public.workouts w JOIN public.planned_workouts pw ON pw.workout_id=w.id WHERE pw.scheduled_date=(CURRENT_DATE + 1))
 );
 
 SELECT pg_temp.p2_assert(
@@ -185,7 +185,7 @@ SELECT pg_temp.p2_assert(
   'repeat creates new routine identity'
 );
 SELECT pg_temp.p2_assert(
-  (SELECT count(*) FROM public.workouts w WHERE w.id=(SELECT pw.workout_id FROM public.planned_workouts pw WHERE pw.scheduled_date='2026-11-09') AND w.status='completed')=1,
+  (SELECT count(*) FROM public.workouts w WHERE w.id=(SELECT pw.workout_id FROM public.planned_workouts pw WHERE pw.scheduled_date=(CURRENT_DATE + 1)) AND w.status='completed')=1,
   'old completed workout unchanged after repeat'
 );
 
@@ -213,7 +213,7 @@ SELECT pg_temp.p2_assert(
 
 -- Other user cannot start owner's planned workout
 SELECT pg_temp.p2_denied(
-  $q$SELECT public.start_planned_workout((SELECT pw.id FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id WHERE r.name='Push Day v2' AND pw.scheduled_date='2026-11-09'))$q$,
+  $q$SELECT public.start_planned_workout((SELECT pw.id FROM public.planned_workouts pw JOIN public.routines r ON r.id=pw.routine_id WHERE r.name='Push Day v2' AND pw.scheduled_date=(CURRENT_DATE + 1)))$q$,
   '42501'
 );
 
