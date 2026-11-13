@@ -1,6 +1,8 @@
-# GymLevel implementation status and verification
+# GymLevel historical implementation audit and verification
 
-Date: 2026-10-26 (Asia/Saigon). This is the single authoritative audit and milestone checklist. Local `plan/` files refer here instead of maintaining competing completion claims.
+**Historical snapshot:** 2026-10-26 (Asia/Saigon), from the earlier `codex/supabase-product-audit` work. The commands, failures, branch names and counts below describe that snapshot; they are not current verification results.
+
+**Current authority:** [Task board](planning/TASK_BOARD.md), [session handoff](planning/SESSION_HANDOFF.md), [master plan](planning/MASTER_PLAN.md), and [accepted decisions](planning/DECISIONS.md). P0–P9 implementation is complete in committed history, and P9 was published with remote CI passing; P9 production migration/live parity is still gated. Do not use this October audit as a current release decision.
 
 **Release gate: implementation and verification in progress. No production release or complete end-to-end verification is claimed.**
 

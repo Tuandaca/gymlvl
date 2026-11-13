@@ -1,17 +1,17 @@
 # GymLvl — Architecture (Planning Memory)
 
 **Status:** Durable planning record
-**Last verified:** 2026-10-28 at `56c1122`
+**Last verified:** 2026-11-13 at pre-task `main` `13c2744121aa4267f689526081813eb87351e5a0`
 **Related:** [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) (existing runtime documentation),
 [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md), [`DECISIONS.md`](DECISIONS.md)
 
-> **Read this distinction first.** Sections 1–4 describe the production runtime. Sections 5–8
-> describe the target. D-039/D-041 approve Drift/SQLite and the M3 Superset, mode, and
-> offline lifecycle contracts for local/test implementation. Production offline storage,
-> replay, and the new remote schema remain disabled pending encryption/security evidence,
-> genuine PostgreSQL concurrency verification, and separate deployment approval.
+> **Read this distinction first.** Sections 1–4 map current source ownership; P8 production
+> remediation was performed, while the published P9 migrations/RPCs are not deployed there.
+> Section 5 preserves the original target sketch; some parts, including Drift/SQLite and the M3
+> contracts, were approved and implemented for local/test use under D-039–D-042. Local security
+> and two-connection evidence does not itself activate production offline/sync/mode gates.
 
-## P9.2 staged historical import contract (local only, 2026-11-13)
+## P9.2 published historical import contract (production gated, 2026-11-13)
 
 D-051 approves a same-account restore with one authenticated PostgreSQL transaction
 per historical workout. The staged `import_historical_workout_v1` RPC owns the
@@ -21,10 +21,10 @@ Separate owner-scoped RPCs and ledgers import custom definitions and body
 measurements. The client records a file fingerprint only after all acknowledged
 items succeed; a retry resumes at item boundaries. Backup v2 exports supported
 custom text, workout mode/set details, and measurements with explicit unsupported
-sections. Production still runs the earlier schema until a separately authorized
-migration and live validation; this section describes the uncommitted local state.
+sections. This source is committed in P9, but production migration and live
+validation require a separate authorization and preflight.
 
-## P9.3 staged progression contract (local only, 2026-11-13)
+## P9.3 published progression contract (production gated, 2026-11-13)
 
 D-052 makes the D-043 cumulative class threshold authoritative for future
 `complete_workout` awards and class switches. A private `class_level_floors`
@@ -33,7 +33,7 @@ or reward history is rewritten. The view uses the primary class's XP for its
 next-level estimate. D-053 adds a server-only unlock sync triggered by a new
 `workout_rewards` row and backfills missing unlocks from verified achievements,
 global levels, and class graduation. Clients retain read-only owner-scoped
-unlock access. These changes are staged locally and are not deployed.
+unlock access. These changes are committed but are not deployed to production.
 
 ---
 
@@ -76,10 +76,10 @@ app/lib/
     progression/     # display-only XP estimate + class math
     quests/          # daily quests
     profile/         # preferences, class, locale
-    coach/           # chat-only AI proxy client
+    coach/           # advisory AI Coach client; P9 consent gate is server-owned
   ui/
     candy/           # 16+ Candy Neubrutalism primitives
-app/test/            # 126 tests, including responsive UI regression
+app/test/            # Flutter unit, widget, contract and UI regression suites
 ```
 
 ## 3. Current data ownership
@@ -88,13 +88,14 @@ app/test/            # 126 tests, including responsive UI regression
 |---|---|---|
 | Identity | `auth.users`, `public.users` | Supabase Auth; server-managed progression fields |
 | Profile | `profiles` | User-editable allowlisted columns |
-| Catalog | `exercises` | Seeded; read-only to clients |
+| Catalog | `exercises` | Seeded shared rows plus owner-scoped custom definitions; protected by RLS |
 | Workout session | `workouts`, `workout_exercises`, `workout_sets` | User owns active session; completion is server-controlled |
 | Rewards | `workout_rewards`, `xp_logs`, `streaks`, `quest_instances`, `exercise_prs`, `user_achievements` | PostgreSQL RPC only |
 | RPG classes | `class_definitions`, `class_synergies`, `user_classes` | Seeded definitions; server-managed assignment/progress |
 | Coach quota | `coach_daily_usage` | Server only |
 
-There are **17 tables** in total.
+This ownership map is not a table census. The earlier 17-table count predates
+later migrations; the versioned SQL is the source inventory.
 
 ## 4. Current invariants
 
@@ -117,12 +118,12 @@ These are load-bearing. Do not weaken them.
    mode; the legacy dark theme must not become the default.
 9. **Core training works without AI.** The coach is optional and cannot block logging.
 
-## 5. Target architecture (proposed — not implemented)
+## 5. Original target sketch (partly implemented locally)
 
 ```mermaid
 flowchart LR
   UI[Flutter features] --> Ctrl[Riverpod controllers]
-  Ctrl --> Local[(Local store - Drift proposed)]
+  Ctrl --> Local[(Drift local store - local/test implemented)]
   Ctrl --> Repo[Repository layer]
   Local --> Sync[Sync / outbox]
   Sync --> Repo
@@ -158,18 +159,19 @@ app/lib/
 **Status:** proposed. Moving existing code is a refactor and requires its own approved task. Do not
 rename or relocate existing modules as a side effect of a feature task.
 
-### 5.2 Local-first storage (proposed: Drift)
+### 5.2 Local-first storage (approved for local/test; production gate closed)
 
 - Mature SQLite, migrations, testable.
 - Mobile-first; web/WASM is not a release requirement.
 - Use `shared_preferences` only for lightweight settings.
-- Proposed tables: `cached_exercises`, `cached_instructions`, `active_workout_draft`,
-  `pending_mutations`, `sync_state`, `catalog_version`.
+- The original table list (`cached_exercises`, `cached_instructions`, `active_workout_draft`,
+  `pending_mutations`, `sync_state`, `catalog_version`) is a design sketch, not the implemented
+  Drift schema inventory.
 - Every mutation gets a client-generated idempotency key; replay must be safe.
 - Server remains authoritative; the outbox is a delivery mechanism, not a second source of truth.
 
-**Approval state:** proposed in M0, not approved. Do not add the dependency until `DECISIONS.md`
-records approval.
+**Approval state:** D-039–D-042 accepted the local/test implementation and verification.
+Production activation still requires a separate owner decision and live preflight.
 
 ### 5.3 Catalog schema (proposed, additive)
 
@@ -242,7 +244,7 @@ plan only, never workout history.
 
 ## 6. AI Coach boundary
 
-### Current local P9.4 contract
+### Published P9.4 contract (production deployment pending)
 
 The authenticated `ai-coach` Edge Function owns the seven-day profile/workout
 context query. A request requires explicit `consent: true` before quota, context
@@ -282,7 +284,7 @@ Hard rules:
 
 Keep and extend the existing design:
 
-### P9.5 interactive workout mutation boundary (local)
+### P9.5 interactive workout mutation boundary (published, production gated)
 
 Exercise reorder and add-with-default-sets use authenticated PostgreSQL RPCs
 `reorder_workout_exercises_v1` and `add_workout_exercise_with_sets_v1`. Each
@@ -293,7 +295,7 @@ Reorder retains existing superset positions. Add derives append order on the
 server and writes no completion or reward rows. The Flutter controller fails
 closed without the atomic repository capability, retains operation ID and
 payload across uncertain retries, and adopts only an authoritative owner-scoped
-workout read. This is a local migration contract; production use requires the
+workout read. This migration is committed; production use requires the
 existing M3 ledger and mode-column migration chain plus separate preflight and
 authorization.
 
@@ -313,28 +315,22 @@ client completes sets
 - Client previews are advisory and must be labelled as estimates.
 - New workout modes must be validated server-side before they can earn XP.
 
-## 8. Explicitly not implemented
+## 8. Remaining deployment and product limits
 
-Do not assume any of these exist:
-
-- Drift or any local SQL database.
-- Offline mutation queue or conflict resolution.
-- Weekly plans, routines, scheduling, or rotations.
-- Progression policies, deload, 1RM, RPE/RIR, PR display.
-- Supersets, warm-up/drop/rest-pause set types, per-side work, plate math.
-- Bodyweight trend, muscle map, heatmap, PR analytics.
-- Typed AI proposals, consent records, apply/revert, audit.
-- Exercise media pipeline.
-- Android release CI build, iOS build, device smoke automation.
-- Health/watch integrations.
+- P9 migrations, new RPCs and live Auth/gateway parity have not been deployed or validated in production.
+- Production offline sync, Superset and workout-mode gates remain closed despite local/test implementations.
+- AI Coach currently returns advisory text. Validated structured proposals, persisted consent records and atomic AI apply/revert are not part of the published P9 contract.
+- No third-party exercise media pipeline, health/watch integration, iOS build or device smoke automation is claimed.
+- Android CI verifies a debug APK and the merged release manifest; it does not produce a signed release.
 
 ## 9. Deployment and environments
 
 - Local development: Flutter + local or remote Supabase configured via `--dart-define`.
-- CI: `.github/workflows/verify.yml` runs SQL units, Edge checks/tests, Flutter analyze/test, and a
-  web release build with placeholder Supabase values.
-- **No Android APK build in CI today.**
-- **No production deployment is authorized.**
+- CI: `.github/workflows/verify.yml` runs SQL units, disposable two-connection PostgreSQL
+  concurrency, Edge checks/tests, Flutter analyze/test, a web release build with placeholder
+  Supabase values, and Android debug/merged-release-manifest verification. The concurrency
+  step is configured locally in this documentation/CI task; its remote execution awaits publication.
+- P9 production deployment remains separately gated; earlier P8 remediation is historical fact.
 - Migrations are applied manually or through the existing Supabase workflow; no automated
   production migration step exists in this repository.
 - Edge Functions deployed: `ai-coach`, `calculate-xp`, `get-user-stats`, `initialize-user`,

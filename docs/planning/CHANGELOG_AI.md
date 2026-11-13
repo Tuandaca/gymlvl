@@ -2,6 +2,18 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-13 — Post-P9 documentation truth sync and concurrency CI gate (local PASS)
+
+**Task:** Reconcile canonical documentation with published P9 and add the missing disposable PostgreSQL concurrency check to the existing `database-and-edge` job. No product behavior, migration, dependency or production change.
+
+**Changes:** `README.md` now points to current planning authorities; `docs/IMPLEMENTATION_STATUS.md` is explicitly the October historical audit. `PROJECT_CONTEXT.md`, `ARCHITECTURE.md`, and `MASTER_PLAN.md` distinguish P8 production remediation from published but undeployed P9, remove stale counts/statuses, and retain closed production gates. Board/handoff now put this task first and label the earlier P9 entries as completed checkpoints. `.github/workflows/verify.yml` adds `npm run test:concurrency` after `npm test`. No new `DECISIONS.md` entry was needed.
+
+**Verification at pre-task `main` `13c2744121aa4267f689526081813eb87351e5a0`:** Git HEAD/main/remote matched; verified external backup matched the bundle HEAD, 841 tracked archive paths and 79 dirty file hashes; `gh run list --branch main --limit 2` showed remote CI success for published P9 commits `db4bb6a` and `13c2744`. PyYAML workflow parse/order assertion `PASS`. `cd tools/db-tests; npm run test:concurrency` `PASS`, 8/8 genuine two-connection scenarios, isolated data directory removed and port closed. `git diff --check` `PASS`; `git diff --name-only` plus pre-task status comparison identified only nine new scoped paths and preserved 79/79 dirty-file hashes. Flutter, SQL single-connection, Edge and builds `NOT RUN` in this documentation/CI task; their P9 publication evidence remains historical. New remote concurrency step `NOT RUN` until commit/push authorization.
+
+**Next action:** Keep the nine-file local change unstaged until owner authorization for a scoped commit/push, then verify the new remote job. P9 production preflight is a separate gated task; do not start P10.
+
+---
+
 ## 2026-11-13 — P9 scoped GitHub publication (PASS)
 
 **Task:** Prepare the owner-approved GitHub publication of P9 plus required application code, excluding unrelated infrastructure, backups, local logs and agent work.

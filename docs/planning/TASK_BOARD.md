@@ -1,5 +1,19 @@
 # GymLvl — Task Board
 
+## Current task — Post-P9 documentation truth sync and concurrency CI gate (2026-11-13)
+
+**Status:** `PASS` for the scoped documentation correction, local YAML gate and disposable PostgreSQL concurrency test. The new workflow step is configured locally; remote execution is `NOT RUN` until a separately authorized commit/push. P9 production migration/live parity is `NOT RUN`.
+
+**Commit:** `main` @ `13c2744121aa4267f689526081813eb87351e5a0`; `git ls-remote origin refs/heads/main` returned the same SHA before edits. The pre-task tree had 46 collapsed dirty paths / 79 individual owner files. Verified backup: `D:\Projects\gymlvl_postp9_truth_backup_20261113` (bundle HEAD, 841 Git archive paths and 79 dirty-file hashes matched).
+
+**Changed files:** `.github/workflows/verify.yml`; `README.md`; `docs/IMPLEMENTATION_STATUS.md`; `docs/planning/PROJECT_CONTEXT.md`, `ARCHITECTURE.md`, `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`. No application source, migration, dependency, decision or production state changed.
+
+**Evidence:** Published P9 implementation `db4bb6a` and publication follow-up `13c2744` each have remote CI `success` (`gh run list --branch main --limit 2`). Existing `tools/db-tests/package.json` maps `test:concurrency` to the disposable two-connection PostgreSQL harness. `npm run test:concurrency` → `PASS`, 8/8 scenarios; temporary data directory removed and port 55432 closed. PyYAML workflow parse/order assertion → `PASS`, `npm ci` → `npm test` → `npm run test:concurrency` → Edge checks/tests, with `tools/db-tests` as the working directory. `git diff --check` → `PASS`; `git diff --name-only` and verified pre-task status comparison identified the nine scoped paths; all 79 prior dirty-file hashes still match the backup. Historical P9 candidate Flutter 822/822, SQL 53/365, Edge 58/58 and builds are evidence from the publication session, not rerun here.
+
+**Blockers:** No commit/push authorization for this task, so the added remote gate has not executed in GitHub Actions. P9 production preflight/live validation requires separate owner authorization; legacy duration-only `mode=NULL` records need owner correction or an approved policy. The pinned `EXERCISEDB_SOURCE_DIR` is needed for dataset assertions. Typography correction under D-056 and release signing/legal owner inputs remain separate.
+
+**Next action:** Publish only these nine scoped paths if separately authorized, then confirm the remote concurrency job; otherwise keep this local checkpoint unstaged. P9 production preflight remains the next gated product task, not P10.
+
 ## Completed checkpoint — P9 scoped GitHub publication (2026-11-13)
 
 **Status:** `PASS` for the isolated candidate, exact staged scope, commit, GitHub push and remote CI. Production deployment remains `NOT RUN`.
@@ -14,7 +28,7 @@
 
 **Next action:** Production preflight remains a separately authorized task; typography correction remains separate under D-056.
 
-## Current task — P9 local closeout and gated follow-up (2026-11-13)
+## Completed checkpoint — P9 local closeout and gated follow-up (2026-11-13)
 
 **Status:** `PASS` for the local P9 hardening and final verification scope. D-056 is `ACCEPTED`: keep current typography for P9 and correct it in a separate task. Production migration, live gateway/Auth checks and remote CI are `NOT RUN`.
 

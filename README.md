@@ -2,13 +2,14 @@
 
 GymLvl is a Flutter fitness app with an RPG-style dashboard, workout logging, class progression, daily quests, and Vietnamese/English interfaces. Supabase Auth and PostgreSQL are the source of truth; authenticated Edge Functions and database transactions own progression and rewards.
 
-The project is undergoing a product and security verification pass. See [implementation status and test evidence](docs/IMPLEMENTATION_STATUS.md) for the current release gate. Features in older design documents are not necessarily implemented.
+P0–P9 implementation is complete in committed history; P9 is published and its remote CI passed. P9 production migrations and live validation remain gated. See the [current task board](docs/planning/TASK_BOARD.md), [handoff](docs/planning/SESSION_HANDOFF.md), and [roadmap](docs/planning/MASTER_PLAN.md) for the current state. The [October implementation audit](docs/IMPLEMENTATION_STATUS.md) is preserved as historical evidence.
 
 ## Start here
 
 - [Run and test the app locally](docs/DEVELOPMENT.md)
 - [Architecture and security boundaries](docs/ARCHITECTURE.md)
-- [Implementation checklist, evidence, and acceptance tests](docs/IMPLEMENTATION_STATUS.md)
+- [Current implementation and release state](docs/planning/TASK_BOARD.md)
+- [Historical October implementation audit](docs/IMPLEMENTATION_STATUS.md)
 - [Progression rules](docs/PROGRESSION_GUIDE.md)
 - [Historical debugging record](ERRORS.md)
 

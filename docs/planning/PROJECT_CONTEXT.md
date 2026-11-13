@@ -1,9 +1,9 @@
 # GymLvl — Project Context
 
 **Status:** Durable project memory
-**Last verified:** 2026-11-05
-**Baseline:** branch `main` (sole development branch), `planning_rebase_base_head` `da21eb742aeac1266a3aa1df9d043ec2602a843f` (GymLvl HEAD at P0 audit time; mutable — re-verify with `git rev-parse HEAD` each session)
-**Remote:** `origin/main` == local `main` (verified at P0 audit time; re-verify with `git rev-parse origin/main` each session)
+**Last verified:** 2026-11-13, before the post-P9 documentation/CI edit, at `main` `13c2744121aa4267f689526081813eb87351e5a0`
+**Historical P0 baseline:** `planning_rebase_base_head` `da21eb742aeac1266a3aa1df9d043ec2602a843f`; this is not current HEAD.
+**Remote:** `git ls-remote origin refs/heads/main` matched local `main` at `13c2744121aa4267f689526081813eb87351e5a0` before this task.
 **Owner:** GymLvl project
 
 This file answers: what is GymLvl, what is true now, what must not change, and which source wins when documents disagree. It is intentionally model-independent.
@@ -25,17 +25,19 @@ GymLvl should use OpenGym as the comprehensive reference for fitness functionali
 
 ---
 
-## 2. Repository and current baseline
+## 2. Repository and current state
 
 | Item | Value |
 |---|---|
 | Repository | `https://github.com/Tuandaca/gymlvl` |
 | Development branch | `main` (only) |
-| `planning_rebase_base_head` | `da21eb742aeac1266a3aa1df9d043ec2602a843f` (mutable; re-verify each session) |
-| Remote | `origin/main` == local `main` |
+| Pre-task HEAD | `13c2744121aa4267f689526081813eb87351e5a0` on `main`; run `git rev-parse HEAD` for the current value |
+| Remote at pre-task check | `origin/main` matched `13c2744121aa4267f689526081813eb87351e5a0` via `git ls-remote` |
 | Tags | None |
-| Working tree | **Dirty** — pre-existing M3/M4 work preserved (6 modified tracked files, 10 untracked files); no source/application changes made in P0 |
+| Working tree at pre-task check | **Dirty** — 46 collapsed status paths / 79 individual files of preserved owner work. Verified external backup: `D:\Projects\gymlvl_postp9_truth_backup_20261113`. This is a snapshot, not a live count. |
 | `.gitignore` protects | `app/config.local.json` (never committed) |
+
+**Implementation state:** P0–P8 are complete in committed history. P9.0–P9.6 were published in `db4bb6a61641c5010da4c4da27fa49f9bfdb6ef8`; the documentation follow-up is `13c2744121aa4267f689526081813eb87351e5a0`. Both commits passed remote CI. P9 production migrations and live Auth/gateway/schema validation have not run. Earlier P8 production remediation was performed; its result must not be conflated with P9 production parity. See `MASTER_PLAN.md` and `TASK_BOARD.md` for the current gate.
 
 ---
 
@@ -60,24 +62,17 @@ GymLvl should use OpenGym as the comprehensive reference for fitness functionali
 | Capability | Status | Evidence |
 |---|---|---|
 | Architecture/Foundation | COMPLETE | `app/lib/`, `supabase/migrations/`, `supabase/functions/` |
-| Exercise Catalogue | STRONG PARTIAL | 150 curated exercises, search/filter, detail screen; legal-safe import pipeline built (1,324 exercisedb MIT records), not yet applied to any database |
-| Workout Core | STRONG PARTIAL | Workout logging, active session, sets, rest timer, history, modes, supersets |
+| Exercise Catalogue | IMPLEMENTED, bounded | 150 curated exercises, search/filter/detail and owner-scoped custom definitions; the 1,324-record MIT import pipeline exists but its dataset assertion gate remains open and the bulk import has not been applied to production |
+| Workout Core | IMPLEMENTED locally; P9 live parity gated | Workout logging, active session, sets, timer and history; P9 atomic mutations and import contracts are published but their new RPCs are not deployed to production |
 | Offline | PARTIAL (local/test only) | Drift store, encrypted payload, sync coordinator — production gate closed |
-| Progression | PARTIAL | Epley 1RM, PR detection, RPE/RIR, RPG bridge — server authority preserved |
-| RPG | PARTIAL | Classes A–F, XP, levels, quests, streaks |
-| Planning | PARTIAL | First-Week plan, newcomer journey |
-| Analytics | PARTIAL | Heatmap, weight trend, PR chart, muscle balance |
-| Bodyweight | PARTIAL | Weigh-in trend, external-load semantics |
-| AI | NOT STARTED | Chat-only proxy, no typed proposals/approval/apply-revert |
-| OpenGym parity | PARTIAL (pipeline ready) | Parity matrix populated; legal-safe import pipeline implemented and tested; additive provenance migration verified on PGlite; catalogue data import not yet applied to any database |
-| Production activation | BLOCKED | No production DB access; onboarding 9/9 blocked by production schema/runtime mismatch (read-only inspection showed expected initialization capability such as `initialize_user` and `profiles.timezone` was absent; exact unapplied migration set not yet established) |
-| Release readiness | NOT STARTED | No Android/iOS release build, signing keys absent |
+| Progression / RPG | IMPLEMENTED in P0–P9 track | Epley 1RM, PR, RPE/RIR, classes A–F, XP, quests, streaks and P9 class/unlock corrections; PostgreSQL remains reward authority, with P9 live validation pending |
+| Planning / analytics / bodyweight | IMPLEMENTED in P0–P9 track | Routines, plans, trends and import/export paths have local/CI verification; production parity for new P9 paths is unverified |
+| AI Coach | IMPLEMENTED as advisory text | P6/P9 server-owned context, explicit per-request consent and bounded egress; no validated structured apply/revert or live provider verification is claimed |
+| OpenGym parity | BOUNDED IMPLEMENTATION COMPLETE | P1–P7 scope is recorded in `MASTER_PLAN.md`; third-party media remains excluded and the bulk dataset import is still gated |
+| Production | P8 REMEDIATED; P9 NOT DEPLOYED | Earlier P8 production remediation was performed. P9 migrations, new RPCs and live Auth/gateway/schema parity need a separately authorized preflight and validation |
+| Release readiness | NOT VERIFIED | P8 release hardening, Android debug build and manifest CI exist; signed release, iOS/device smoke and legal owner inputs remain separate gates |
 
-**17 tables:** `users`, `profiles`, `exercises`, `workouts`, `workout_exercises`, `workout_sets`, `xp_logs`, `streaks`, `exercise_prs`, `quests`, `quest_instances`, `user_classes`, `class_definitions`, `class_synergies`, `workout_rewards`, `user_achievements`, `coach_daily_usage`.
-
-**10 migrations:** baseline, authoritative_progression, exercise_catalog_metadata, effective_progression_acl, prevent_legacy_double_award, m3_offline_foundation, m3_superset_modes, m4_progression_rpe_rir, m5_analytics_indexes, m5_bodyweight_measurements.
-
-**7 Edge Functions:** ai-coach, calculate-xp, get-user-stats, initialize-user, switch-class, sync-daily-data.
+The older 17-table / 10-migration / 7-function counts were a P0 snapshot, not the post-P9 inventory. The versioned files under `supabase/migrations/` and `supabase/functions/` own the current source inventory; deployed production state must be checked separately.
 
 `complete_workout` is the authoritative completion/reward path: transactional, row-locked, idempotent via `workout_rewards`, with suspicious-pace clamping. Clients cannot write XP, levels, streaks, quests, or PRs.
 
@@ -125,14 +120,11 @@ Never resolve a conflict by silently editing the lower-precedence document. Reco
 
 ---
 
-## 8. Current production restrictions (recorded clearly)
+## 8. Current production boundary
 
-- **Do NOT deploy production migrations.**
-- **Do NOT run production `supabase db push`.**
-- **Do NOT treat onboarding production failure as a reason to deploy.**
-- **Do NOT start release hardening.**
-- Production onboarding 9/9 is currently blocked by a production schema/runtime mismatch. Read-only inspection showed that expected initialization capability such as `initialize_user` and `profiles.timezone` was absent. The exact unapplied migration set has not yet been established.
-- This is a known production-environment blocker, not the current implementation task. The owner is currently testing UI. Do not deploy migrations or run `supabase db push` unless explicitly requested later.
+- P8 production remediation was performed before P9; the older missing-`initialize_user`/`profiles.timezone` onboarding diagnosis is historical, not a current production claim.
+- P9 migrations and live parity checks are **NOT RUN**. Do not run `supabase db push`, deploy Edge Functions, or infer live P9 behavior from local/CI tests without separate authorization and preflight.
+- Production offline sync, Superset and workout-mode gates remain closed. The next gated task is P9 production preflight/live-parity validation, not automatic P10 implementation.
 
 ---
 

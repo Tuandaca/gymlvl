@@ -1,6 +1,17 @@
 # GymLvl — Session Handoff
 
-## NEW SESSION START HERE — P9 scoped GitHub publication (2026-11-13)
+## NEW SESSION START HERE — Post-P9 documentation truth sync and concurrency CI gate (2026-11-13)
+
+- **Task:** Correct stale post-P9 canonical documentation and configure the missing two-connection PostgreSQL CI step; no product implementation or production operation.
+- **Status:** `PASS` for local documentation and CI-configuration verification; remote execution of the new step `NOT RUN` until a separately authorized commit/push. P9 production migration/live parity `NOT RUN`.
+- **Commit:** `main` @ `13c2744121aa4267f689526081813eb87351e5a0`, matching `origin/main` before edits. Pre-task dirty owner work: 46 collapsed status paths / 79 individual files, preserved in verified `D:\Projects\gymlvl_postp9_truth_backup_20261113` (bundle HEAD, 841 archive paths, 79 hashes).
+- **Changed files:** `.github/workflows/verify.yml`; `README.md`; `docs/IMPLEMENTATION_STATUS.md`; `docs/planning/PROJECT_CONTEXT.md`, `ARCHITECTURE.md`, `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`. Existing owner paths remain untouched and unstaged.
+- **Verification:** `git status --short`, `git rev-parse HEAD/main`, `git ls-remote origin refs/heads/main` → `PASS`, baseline `13c2744`; `gh run list --branch main --limit 2` → `PASS`, both published P9 commits have remote CI `success`; PyYAML workflow parse/order assertion → `PASS`; `cd tools/db-tests; npm run test:concurrency` → `PASS`, 8/8 with disposable PostgreSQL 17.5, removed data directory and closed port; `git diff --check` → `PASS`; `git diff --name-only` plus backup-status comparison → `PASS`, nine scoped paths and 79/79 owner dirty-file hashes preserved. Historical candidate test/build counts remain previous-session evidence. Flutter/Edge suites and production checks `NOT RUN` for this documentation/CI edit.
+- **Decisions:** No new decision; D-050–D-057 remain in force. Prior P9 Git approval does not authorize this task's commit/push.
+- **Blockers:** New remote CI gate cannot execute until the scoped change is published with owner authorization. P9 production migration/live validation requires separate preflight/approval. Legacy duration-only `mode=NULL` data, `EXERCISEDB_SOURCE_DIR`, D-056 typography and signing/legal owner inputs remain separate.
+- **Next action:** Commit/push only these nine paths if separately authorized and verify remote concurrency; then consider P9 production preflight under separate authorization. Do not start P10.
+
+## Previous checkpoint — P9 scoped GitHub publication (2026-11-13)
 
 - **Task:** P9 scoped GitHub publication, owner authorized P9 plus application dependencies and excluded infrastructure/backup paths.
 - **Status:** `PASS` for isolated candidate verification, exact staged scope, P9 implementation commit, verified GitHub push and remote CI. Production deployment `NOT RUN`.
@@ -11,7 +22,7 @@
 - **Blockers:** No blocker to the scoped Git publication. Dataset importer tests still require `EXERCISEDB_SOURCE_DIR`; production migration/live Auth/gateway checks require separate authorization and preflight.
 - **Next action:** Prepare production preflight only with separate authorization; typography correction is separate under D-056.
 
-## NEW SESSION START HERE — P9 local closeout (2026-11-13)
+## Previous checkpoint — P9 local closeout (2026-11-13)
 
 - **Task:** P9.6 low-severity cleanup and section 30 final verification; local P9 hardening is complete.
 - **Status:** `PASS` for local P9.0–P9.6/quality acceptance. D-056 accepts current typography for P9; correction is a separate task. Remote CI, production migrations and live Auth/gateway validation `NOT RUN`; catalogue importer dataset assertions `BLOCKED` without `EXERCISEDB_SOURCE_DIR`.

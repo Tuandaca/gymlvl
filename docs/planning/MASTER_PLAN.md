@@ -54,28 +54,28 @@ The target is conceptually:
 
 ## 4. Current phase and status
 
-**2026-11-10 update (D-050):** The table below is refreshed against `main` @ `c68e577`. P9 is the owner-authorized reliability hardening phase. It adds no product feature or production deployment authorization. Earlier narrative in this document about P1–P8 being upcoming is historical planning context.
+**2026-11-13 post-P9 update:** P0–P8 are complete in committed history. P9.0–P9.6 were published in `db4bb6a61641c5010da4c4da27fa49f9bfdb6ef8` with a documentation follow-up at `13c2744121aa4267f689526081813eb87351e5a0`; remote CI passed for both. P9 production migrations and live parity remain `NOT RUN`. Earlier narrative about P1–P8 being upcoming is historical planning context.
 
 | Phase | Scope | Status |
 |---|---|---|
 | **P0** | Planning Rebase & Context Consolidation | **COMPLETE** — accurate truth established, contradictions removed, one canonical roadmap |
 | **P1** | OpenGym Parity Baseline + Legal-Safe Exercise Catalogue | **COMPLETE** — parity matrix populated; legal-safe ExerciseDB import pipeline (1,324 MIT records from pinned `hasaneyldrm/exercises-dataset`) implemented and tested; additive provenance migration verified on PGlite; Flutter catalogue model updated |
-| **P2** | Routine & Planning Parity | COMPLETE (awaiting owner commit) |
+| **P2** | Routine & Planning Parity | COMPLETE in committed history |
 | **P3** | Workout Core Parity | COMPLETE |
 | **P4** | Progress / Analytics / Utility Parity | COMPLETE |
 | **P5** | Deep GymLvl Game Integration | COMPLETE in committed history; P9 found consistency defects |
 | **P6** | AI Personal Trainer | COMPLETE in committed history; P9 found correctness/privacy gaps |
 | **P7** | Authorized parity and utility gates; media remains excluded | COMPLETE in committed history; media still deferred |
-| **P8** | Release hardening and production remediation | COMPLETE in committed history; current CI at `c68e577` failed |
-| **P9** | Reliability and consistency hardening (no new feature milestone) | LOCAL COMPLETE — P9.0–P9.6 and quality gates verified; production deployment/live parity remain gated |
+| **P8** | Release hardening and production remediation | COMPLETE in committed history; production remediation previously performed |
+| **P9** | Reliability and consistency hardening (no new feature milestone) | COMPLETE / PUBLISHED / REMOTE CI PASS; production P9 migration and live parity `NOT RUN` |
 
-**Current critical path:** P9 local hardening → separately authorized production migration/live-schema preflight. Typography correction is a separate task under D-056. Git writes require explicit owner authorization; the 2026-11-13 request authorizes the scoped P9 push.
+**Current critical path:** Post-P9 documentation truth sync and remote concurrency CI gate → separately authorized P9 production preflight/live-parity validation. This does not start P10. Typography correction remains a separate task under D-056. The prior scoped P9 Git approval does not authorize a commit or push for this task.
 
 **Do NOT continue automatically to old M6 merely because previous documents say M6 is next. AI PT is not the immediate next implementation stage.**
 
-## 5. Foundation work already completed (pre-parity)
+## 5. Capability status after P9
 
-M1–M5 work implemented before the OpenGym parity migration track must NOT be discarded. It is considered **foundation work already completed**. Summary by capability (see `PROJECT_CONTEXT.md` §4 for evidence):
+M1–M5 foundation work remains preserved. The table describes current capability boundaries after P9; it does not imply production deployment of P9 (see `PROJECT_CONTEXT.md` §4).
 
 | Capability | Status | Evidence |
 |---|---|---|
@@ -88,10 +88,10 @@ M1–M5 work implemented before the OpenGym parity migration track must NOT be d
 | Planning | PARTIAL | First-Week plan, newcomer journey |
 | Analytics | PARTIAL | Heatmap, weight trend, PR chart, muscle balance |
 | Bodyweight | PARTIAL | Weigh-in trend, external-load semantics |
-| AI | NOT STARTED | Chat-only proxy, no typed proposals/approval/apply-revert |
-| OpenGym parity | NOT STARTED | No catalogue import, no routine/planning parity |
-| Production activation | BLOCKED | No production DB access; onboarding 9/9 blocked by production schema/runtime mismatch (read-only inspection showed expected initialization capability such as `initialize_user` and `profiles.timezone` was absent; exact unapplied migration set not yet established) |
-| Release readiness | NOT STARTED | No Android/iOS release build, signing keys absent |
+| AI | ADVISORY IMPLEMENTED | P6/P9 Coach uses explicit consent and server-owned bounded context; structured apply/revert and live provider validation remain open |
+| OpenGym parity | BOUNDED IMPLEMENTATION COMPLETE | P1–P7 scope is in committed history; third-party media remains excluded and bulk catalogue import remains gated |
+| Production activation | P8 REMEDIATED; P9 GATED | Earlier P8 remediation was performed; P9 migration/live Auth/gateway parity is `NOT RUN` |
+| Release readiness | NOT VERIFIED | P8 hardening and Android debug/manifest CI exist; signed release, iOS/device smoke and owner legal inputs remain open |
 
 ## 6. Corrections to the original plan
 
