@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../placement/presentation/placement_providers.dart';
 import '../../../../core/config/supabase_config.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 
@@ -37,6 +38,10 @@ class ClassController extends AsyncNotifier<void> {
         params: {'p_new_class_id': newClassId, 'p_slot': slot},
       );
       ref.invalidate(userClassesProvider);
+      // Class changes supersede pending placement attempts and alter plan
+      // routing context. Refresh profile-backed consumers after the RPC.
+      ref.invalidate(currentUserProfileProvider);
+      ref.invalidate(placementStateProvider);
     });
     if (state.hasError) throw state.error!;
   }

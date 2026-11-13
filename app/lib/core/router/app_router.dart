@@ -235,7 +235,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // ─── M5: Newcomer journey (first-week plan) ───
       GoRoute(
         path: '/plan',
-        builder: (context, state) => const NewcomerJourneyScreen(),
+        builder: (context, state) => const PlanEntryScreen(),
       ),
       // ─── M5: Analytics ───
       GoRoute(

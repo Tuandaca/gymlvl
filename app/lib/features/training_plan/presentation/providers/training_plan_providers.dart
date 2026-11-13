@@ -32,18 +32,34 @@ final completedWorkoutCountProvider = FutureProvider<int>((ref) async {
 
 // ─── Beginner profile ───
 
-/// Beginner profile reconstructed from the authenticated user and the
-/// server-owned completed-workout count. Experience level is 'beginner' for the
-/// first-week flow; non-beginners and returning users receive an empty plan at
-/// the engine level, so existing history is never overwritten.
+/// Beginner profile reconstructed from the authenticated user's saved profile
+/// and the server-owned completed-workout count. Never infer experience from
+/// the absence of history: persisted `experience_level` is the source of truth.
 final beginnerProfileProvider = FutureProvider<BeginnerProfile>((ref) async {
   final userId = ref.watch(currentUserIdProvider);
-  final count = await ref.read(completedWorkoutCountProvider.future);
+  final profile = await ref.watch(currentUserProfileProvider.future);
+  final count = await ref.watch(completedWorkoutCountProvider.future);
+  final rawExperience =
+      profile?['experience_level'] ?? profile?['experienceLevel'];
+  final experience = rawExperience is String && rawExperience.trim().isNotEmpty
+      ? rawExperience.trim().toLowerCase()
+      : 'beginner';
   return BeginnerProfile(
     userId: userId,
-    experienceLevel: 'beginner',
+    experienceLevel: experience,
     completedWorkoutCount: count,
   );
+});
+
+/// Existing routine selection is the destination for experienced users. This
+/// provider does not invent prescriptions or automatic loads.
+enum PlanRoute { firstWeek, routineSelection }
+
+final planRouteProvider = FutureProvider<PlanRoute>((ref) async {
+  final profile = await ref.watch(beginnerProfileProvider.future);
+  return profile.isBeginner && !profile.isReturningUser
+      ? PlanRoute.firstWeek
+      : PlanRoute.routineSelection;
 });
 
 // ─── First-week plan ───

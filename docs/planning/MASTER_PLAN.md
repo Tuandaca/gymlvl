@@ -68,8 +68,15 @@ The target is conceptually:
 | **P7** | Authorized parity and utility gates; media remains excluded | COMPLETE in committed history; media still deferred |
 | **P8** | Release hardening and production remediation | COMPLETE in committed history; production remediation previously performed |
 | **P9** | Reliability and consistency hardening (no new feature milestone) | COMPLETE / PUBLISHED / REMOTE CI PASS; production P9 migration and live parity `NOT RUN` |
+| **P10.0** | Pinned OpenGym capability re-baseline and newer-upstream delta | COMPLETE locally — 88-row source-level matrix and 31 scoped backlog tasks; production/device parity is separate |
+| **P10.1** | Read-only P9 production preflight | BOUNDED AUDIT COMPLETE / ROLLOUT BLOCKED — live read-only findings recorded; owner deferred current backup/restore under D-061; P9 objects, provenance, legacy data and Auth gates remain open |
+| **P10.2** | Pinned MIT catalogue local rehearsal | COMPLETE LOCALLY — 1,324 media-free rows imported twice in an isolated database, 150 curated rows/history preserved, Flutter full-catalogue pagination verified; production import NOT RUN |
+| **P10.3a** | Versioned placement benchmark policy | COMPLETE LOCALLY — D-060 accepted for local/test |
+| **P10.3b** | Placement ledger, confirmation, readiness and consumer wiring | COMPLETE LOCALLY — Tasks 1–5 pass in isolated SQL/Flutter/two-connection checks; production/pilot activation NOT RUN |
+| **P10.4** | End-to-end RPG loop audit and integration | COMPLETE LOCALLY — onboarding, plan routing, authoritative reward path and RPG consumers verified; production/device/live acceptance NOT RUN |
+| **P10.5** | Scoped fitness parity gaps | QUEUED — select one workout/planning gap from the P10.0 matrix |
 
-**Current critical path:** Post-P9 documentation truth sync and remote concurrency CI gate → separately authorized P9 production preflight/live-parity validation. This does not start P10. Typography correction remains a separate task under D-056. The prior scoped P9 Git approval does not authorize a commit or push for this task.
+**Current critical path:** The owner authorized the staged P10 roadmap under D-058 after the P9 remote concurrency gate passed. P10.0 re-baselined pinned OpenGym source; P10.1 recorded bounded read-only findings, then D-061 deferred the current backup/restore gate so P10.2 could proceed locally. P10.2 catalogue replay, P10.3a policy, P10.3b local placement/readiness implementation and P10.4 RPG-loop audit now pass their isolated checks. P10.5 is next; production migrations, imports, pilot collection, Git writes and release operations remain separately gated. Typography correction remains a separate task under D-056.
 
 **Do NOT continue automatically to old M6 merely because previous documents say M6 is next. AI PT is not the immediate next implementation stage.**
 

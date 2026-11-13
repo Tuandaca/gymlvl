@@ -13,6 +13,8 @@ import '../providers/onboarding_controller.dart'
 import '../../domain/user_profile_draft.dart';
 import '../../domain/class_definitions.dart';
 import '../../../../core/localization/localization_engine.dart';
+import '../../../placement/domain/placement_models.dart';
+import '../../../placement/presentation/placement_providers.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -32,7 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage < 8) {
+    if (_currentPage < 9) {
       if (MediaQuery.of(context).disableAnimations) {
         _pageController.jumpToPage(_currentPage + 1);
         return;
@@ -109,7 +111,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     child: Column(
                       children: [
                         Text(
-                          '${'step'.tr(ref)} ${_currentPage + 1}/9',
+                          '${'step'.tr(ref)} ${_currentPage + 1}/10',
                           style: const TextStyle(
                             color: AppTheme.cyanNeon,
                             fontSize: 12,
@@ -126,7 +128,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
-                            widthFactor: (_currentPage + 1) / 9,
+                            widthFactor: (_currentPage + 1) / 10,
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppTheme.cyanNeon,
@@ -165,6 +167,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   _StepSecondaryClass(),
                   _StepExperience(),
                   _StepBiometrics(),
+                  _StepPlacementAssessment(),
                   _StepScheduling(),
                   _StepClassConfirmation(),
                 ],
@@ -215,6 +218,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       break;
                     case 7:
                       canNext =
+                          ref.read(placementOnboardingDraftProvider).input !=
+                          null;
+                      break;
+                    case 8:
+                      canNext =
                           draft.preferredDays.isNotEmpty &&
                           draft.weeklyGymDays + draft.weeklyHomeDays > 0 &&
                           draft.weeklyGymDays + draft.weeklyHomeDays <= 7;
@@ -222,7 +230,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   }
 
                   return SystemButton(
-                    text: (_currentPage == 8 ? 'awaken' : 'continue').tr(ref),
+                    text: (_currentPage == 9 ? 'awaken' : 'continue').tr(ref),
                     isLoading: isSubmitting,
                     onPressed: canNext ? _nextPage : null,
                   );
@@ -938,6 +946,70 @@ class _StepBiometricsState extends ConsumerState<_StepBiometrics> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StepPlacementAssessment extends ConsumerWidget {
+  const _StepPlacementAssessment();
+  void _set(
+    WidgetRef ref,
+    UserProfileDraft draft, {
+    required bool trained,
+    required bool skip,
+  }) {
+    ref
+        .read(placementOnboardingDraftProvider.notifier)
+        .setInput(
+          PlacementInput(
+            classId: draft.primaryClassId ?? 'A',
+            hasTrainingExperience: trained,
+            skip: skip,
+            age: draft.age,
+            bodyMassKg: draft.weightKg,
+          ),
+        );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final draft = ref.watch(onboardingDraftProvider);
+    final placement = ref.watch(placementOnboardingDraftProvider).input;
+    return _buildStepContainer(
+      title: translateText(
+        ref,
+        vi: 'ĐÁNH GIÁ BAN ĐẦU',
+        en: 'STARTING ASSESSMENT',
+      ),
+      child: Column(
+        children: [
+          Text(
+            translateText(
+              ref,
+              vi: 'Chọn tình trạng hiện tại. Bạn không nhận XP từ bước này.',
+              en: 'Choose your starting point. This step never awards XP.',
+            ),
+          ),
+          const SizedBox(height: 24),
+          _NeonChoiceTile(
+            label: translateText(ref, vi: 'Chưa từng tập', en: 'Never trained'),
+            isSelected: placement?.hasTrainingExperience == false,
+            onTap: () => _set(ref, draft, trained: false, skip: false),
+          ),
+          const SizedBox(height: 12),
+          _NeonChoiceTile(
+            label: translateText(
+              ref,
+              vi: 'Đã tập — bỏ qua bài đánh giá',
+              en: 'Experienced — skip assessment',
+            ),
+            isSelected:
+                placement?.hasTrainingExperience == true &&
+                placement?.skip == true,
+            onTap: () => _set(ref, draft, trained: true, skip: true),
+          ),
+        ],
       ),
     );
   }

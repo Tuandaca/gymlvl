@@ -5,11 +5,13 @@
   "scripts": {
     "test": "node run.mjs",
     "test:legacy": "node legacy-adoption.mjs",
+    "test:catalogue": "node catalogue-import.mjs",
     "test:live": "node live-e2e.mjs",
     "test:edge": "node edge-tests.mjs",
     "check:edge": "node edge-tests.mjs --check",
     "test:web": "node browser-smoke.mjs",
-    "test:concurrency": "node concurrency/m3-idempotency.mjs"
+    "test:concurrency": "node concurrency/m3-idempotency.mjs",
+    "test:concurrency:p10": "node concurrency/p10-placement.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.4.6",

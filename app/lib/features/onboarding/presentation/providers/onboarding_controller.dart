@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/config/supabase_config.dart';
 import '../../domain/user_profile_draft.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../placement/presentation/placement_providers.dart';
 
 // ==============================
 // Draft Notifier (thay thế StateProvider đã bị xoá ở Riverpod 3.x)
@@ -186,31 +187,37 @@ class OnboardingController extends AsyncNotifier<void> {
       }
 
       // Identity and every progression value are assigned by the transaction.
+      final placement = ref.read(placementOnboardingDraftProvider);
+      final profile = <String, dynamic>{
+        'environment': draft.environment,
+        'goals': draft.goals,
+        'experience_level': draft.experienceLevel,
+        'age': draft.age,
+        'gender': draft.gender,
+        'height_cm': draft.heightCm,
+        'weight_kg': draft.weightKg,
+        'weekly_gym_days': draft.weeklyGymDays,
+        'weekly_home_days': draft.weeklyHomeDays,
+        'preferred_training_days': draft.preferredDays,
+        'primary_class_id': draft.primaryClassId,
+        'secondary_class_id': draft.secondaryClassId,
+        'timezone': 'Asia/Ho_Chi_Minh',
+      };
+      if (placement.input != null && placement.operationId != null) {
+        profile['placement'] = placement.input!.toEnvelope(
+          placement.operationId!,
+        );
+      }
       await SupabaseConfig.client.rpc(
         'initialize_user',
-        params: {
-          'p_profile': {
-            'environment': draft.environment,
-            'goals': draft.goals,
-            'experience_level': draft.experienceLevel,
-            'age': draft.age,
-            'gender': draft.gender,
-            'height_cm': draft.heightCm,
-            'weight_kg': draft.weightKg,
-            'weekly_gym_days': draft.weeklyGymDays,
-            'weekly_home_days': draft.weeklyHomeDays,
-            'preferred_training_days': draft.preferredDays,
-            'primary_class_id': draft.primaryClassId,
-            'secondary_class_id': draft.secondaryClassId,
-            'timezone': 'Asia/Ho_Chi_Minh',
-          },
-        },
+        params: {'p_profile': profile},
       );
       if (!ref.mounted || generation != _generation) return;
       ref.invalidate(currentUserProfileProvider);
 
       // 6. Force refresh the user session so the router detects onboarding_completed = true
       ref.invalidate(currentUserProvider);
+      ref.invalidate(placementStateProvider);
     });
     // Classify any error so the UI can show a specific, user-safe message.
     if (result.hasError) {

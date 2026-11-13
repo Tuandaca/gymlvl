@@ -8,6 +8,8 @@ import '../../../quests/domain/quest_instance.dart';
 import '../../../quests/presentation/providers/quest_providers.dart';
 import '../../../progression/presentation/providers/player_progression_view_provider.dart';
 import '../../../progression/domain/player_progression.dart';
+import '../../../placement/presentation/placement_providers.dart';
+import '../../../placement/presentation/placement_readiness_card.dart';
 import '../../../achievements/domain/achievement.dart';
 import '../../../workout/presentation/controllers/workout_history_controller.dart';
 import '../../../workout/presentation/providers/exercise_providers.dart';
@@ -68,6 +70,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final statsAsync = ref.watch(dashboardStatsControllerProvider);
     final recentWorkoutsAsync = ref.watch(recentWorkoutsProvider);
     final progressionAsync = ref.watch(playerProgressionViewProvider);
+    final placementAsync = ref.watch(placementStateProvider);
 
     return CandyScaffold(
       gridBackground: true,
@@ -96,6 +99,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ref.invalidate(currentUserProvider);
           ref.invalidate(userClassesProvider);
           ref.invalidate(recentWorkoutsProvider);
+          ref.invalidate(placementStateProvider);
           await Future.wait([
             ref.read(activeQuestControllerProvider.notifier).refresh(),
             ref.read(dashboardStatsControllerProvider.notifier).refresh(),
@@ -220,7 +224,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 const SizedBox(height: 24),
 
-                // 8. Unified progression (Class, Level, XP, Streak, Quest, Unlock)
+                // 8. Placement readiness is a separate lane from earned RPG progression.
+                placementAsync.when(
+                  data: (placement) {
+                    final progression = progressionAsync.asData?.value;
+                    ClassProgress? primaryClass;
+                    for (final item
+                        in progression?.classes ?? const <ClassProgress>[]) {
+                      if (item.slot == 'primary') {
+                        primaryClass = item;
+                        break;
+                      }
+                    }
+                    return PlacementReadinessCard(
+                      state: placement,
+                      earnedGlobalLevel: progression?.level,
+                      earnedClassLevel: primaryClass?.level,
+                    );
+                  },
+                  loading: () =>
+                      const CandySkeleton(height: 190, borderRadius: 18),
+                  error: (_, _) => const SizedBox.shrink(),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 9. Unified progression (Class, Level, XP, Streak, Quest, Unlock)
                 progressionAsync.when(
                   data: (progression) =>
                       _buildProgressionSection(ref, progression),
@@ -235,7 +264,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 const SizedBox(height: 24),
 
-                // 9. Achievements & Streak Milestones
+                // 10. Achievements & Streak Milestones
                 _buildSectionHeader(
                   context,
                   title: 'biometric_analysis'.tr(ref),

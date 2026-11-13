@@ -2,6 +2,9 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 import { loadExercisedbExercises, emitSql, slugify } from './import.mjs';
 
@@ -46,6 +49,8 @@ test('all slugs are unique among imported rows', () => {
   const slugs = rows.map((r) => r.slug);
   const unique = new Set(slugs);
   assert.strictEqual(unique.size, slugs.length, 'duplicate slug detected');
+  assert.ok(slugs.every((slug) => slug.startsWith('exercisedb-')), 'source namespace avoids curated slug collisions');
+  assert.strictEqual(new Set(rows.map((r) => `${r.source}:${r.externalId}`)).size, rows.length);
 });
 
 test('duplicate names are disambiguated with external id', () => {
@@ -75,7 +80,32 @@ test('media fields are stripped (image_url null, no media links)', () => {
   const { rows } = loadExercisedbExercises(SOURCE_DIR);
   for (const row of rows) {
     assert.strictEqual(row.imageUrl, null);
+    assert.doesNotMatch(JSON.stringify(row), /https?:\/\/|\.(gif|png|jpe?g|webp|mp4)\b/i);
   }
+});
+
+test('direct CLI invocation writes output even when paths contain spaces', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'gymlvl import '));
+  const output = path.join(directory, 'catalogue output.sql');
+  try {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL('./import.mjs', import.meta.url)), '--source', SOURCE_DIR, '--output', output], { encoding: 'utf8' });
+    assert.strictEqual(result.status, 0, result.stderr);
+    assert.ok(fs.existsSync(output), `CLI exited ${result.status} without creating output; stderr: ${result.stderr}`);
+    assert.match(fs.readFileSync(output, 'utf8'), /INSERT INTO public.exercises/);
+    assert.strictEqual(result.stdout, '');
+    assert.doesNotMatch(result.stderr, /INSERT INTO public.exercises/);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('emitSql preserves text array items and SQL quoting', () => {
+  const { rows } = loadExercisedbExercises(SOURCE_DIR);
+  const row = { ...rows[0], instructions: ["Don't stop, breathe.", 'Keep "neutral" posture.', String.raw`Back\slash`], secondaryMuscles: ['upper back', 'triceps'] };
+  const sql = emitSql([row]);
+  assert.ok(sql.includes(String.raw`ARRAY['Don''t stop, breathe.', 'Keep "neutral" posture.', 'Back\slash']::text[]`));
+  assert.ok(sql.includes("ARRAY['upper back', 'triceps']::text[]"));
+  assert.ok(sql.includes('ARRAY[]::text[]'));
 });
 
 test('MIT dataset fields mapped correctly', () => {
@@ -118,6 +148,16 @@ test('emitSql references pinned MIT dataset revision', () => {
   const { rows } = loadExercisedbExercises(SOURCE_DIR);
   const sql = emitSql(rows);
   assert.ok(sql.includes(SOURCE_REVISION));
+});
+
+test('generated SQL retains the complete upstream MIT notice without media links', () => {
+  const notice = fs.readFileSync(path.join(SOURCE_DIR, 'LICENSE'), 'utf8')
+    .split(/\r?\n-{10,}/)[0].trim();
+  const sql = emitSql([]);
+  const comments = sql.split('\n').filter((line) => line.startsWith('-- '))
+    .map((line) => line.slice(3)).join('\n');
+  assert.ok(comments.includes(notice.replace(/\r\n/g, '\n')));
+  assert.doesNotMatch(sql, /https?:\/\//i);
 });
 
 test('every SQL INSERT lists provenance columns', () => {

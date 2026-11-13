@@ -9,12 +9,20 @@ class SupabaseExerciseRepository implements ExerciseRepository {
 
   @override
   Future<List<Exercise>> getExercises() async {
-    final response = await _supabase
-        .from('exercises')
-        .select()
-        .order('name', ascending: true);
-
-    return (response as List).map((json) => Exercise.fromJson(json)).toList();
+    // Keep each request within Supabase's default 1,000-row response cap.
+    // The UUID tie-breaker keeps equal names stable between pages.
+    const pageSize = 1000;
+    final exercises = <Exercise>[];
+    for (var offset = 0; ; offset += pageSize) {
+      final page = await _supabase
+          .from('exercises')
+          .select()
+          .order('name', ascending: true)
+          .order('id', ascending: true)
+          .range(offset, offset + pageSize - 1);
+      exercises.addAll(page.map((json) => Exercise.fromJson(json)));
+      if (page.length < pageSize) return exercises;
+    }
   }
 
   @override

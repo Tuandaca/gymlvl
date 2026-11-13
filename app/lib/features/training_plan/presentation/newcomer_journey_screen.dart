@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:app/features/training_plan/first_week_plan_models.dart';
+import 'package:app/features/training_plan/presentation/providers/training_plan_providers.dart';
+import 'package:app/features/training_plan/presentation/screens/routine_list_screen.dart';
 import 'package:app/features/training_plan/newcomer_journey.dart';
 import 'package:app/features/training_plan/newcomer_journey_models.dart';
 import 'package:app/features/workout/domain/workout_mode_contract.dart';
@@ -11,6 +13,27 @@ import '../../../../ui/candy/candy_card.dart';
 import '../../../../ui/candy/candy_empty_state.dart';
 import '../../../../ui/candy/candy_error_state.dart';
 import '../../../../ui/candy/candy_scaffold.dart';
+
+/// Plan entry point that keeps first-week and experienced routing explicit.
+/// Experienced users enter the existing routine selector; this widget never
+/// creates prescriptions or assigns starter loads.
+class PlanEntryScreen extends ConsumerWidget {
+  const PlanEntryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final route = ref.watch(planRouteProvider);
+    return route.when(
+      loading: () =>
+          const CandyScaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, _) =>
+          CandyScaffold(body: Center(child: Text(error.toString()))),
+      data: (destination) => destination == PlanRoute.routineSelection
+          ? const RoutineListScreen()
+          : const NewcomerJourneyScreen(),
+    );
+  }
+}
 
 /// Newcomer journey screen: first-week plan + journey state machine UI.
 ///

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { execSync } from 'node:child_process';
 
 /**
@@ -45,14 +46,7 @@ function sqlEscape(value) {
 }
 
 function sqlArray(values) {
-  if (!Array.isArray(values) || values.length === 0) return "'{}'";
-  const items = values
-    .map((v) => {
-      const s = String(v).replace(/'/g, "''");
-      return `"${s}"`;
-    })
-    .join(',');
-  return `ARRAY[${items}]`;
+  return `ARRAY[${values.map(sqlEscape).join(', ')}]::text[]`;
 }
 
 /**
@@ -105,6 +99,7 @@ export function loadExercisedbExercises(sourceDir) {
 
   const rows = [];
   const seenSlug = new Map();
+  const seenIds = new Set();
 
   for (const ex of parsed) {
     // Required field validation per MIT schema
@@ -114,6 +109,8 @@ export function loadExercisedbExercises(sourceDir) {
     if (!ex.name || typeof ex.name !== 'string' || !ex.name.trim()) {
       throw new Error(`Missing or empty name for id ${ex.id}`);
     }
+    if (seenIds.has(ex.id)) throw new Error(`Duplicate source id: ${ex.id}`);
+    seenIds.add(ex.id);
     if (!ex.instructions || typeof ex.instructions !== 'object') {
       throw new Error(`Missing instructions for id ${ex.id}`);
     }
@@ -121,7 +118,7 @@ export function loadExercisedbExercises(sourceDir) {
       throw new Error(`Missing instruction_steps for id ${ex.id}`);
     }
 
-    const baseSlug = slugify(ex.name);
+    const baseSlug = `exercisedb-${slugify(ex.name)}`;
     let slug = baseSlug;
     if (seenSlug.has(slug)) {
       slug = `${baseSlug}-${ex.id}`;
@@ -170,17 +167,33 @@ export function loadExercisedbExercises(sourceDir) {
 export function emitSql(rows) {
   const lines = [];
   lines.push('-- Legal-safe exercisedb exercise import (P1)');
-  console.error('-- Legal-safe exercisedb exercise import (P1)');
   lines.push('-- Source: hasaneyldrm/exercises-dataset (MIT text/data, media excluded)');
-  console.error('-- Source: hasaneyldrm/exercises-dataset (MIT text/data, media excluded)');
   lines.push(`-- Dataset revision: ${SOURCE_REVISION}`);
-  console.error(`-- Dataset revision: ${SOURCE_REVISION}`);
   lines.push('-- Imported records: source=exercisedb, external_id=<MIT 4-digit id>');
-  console.error('-- Imported records: source=exercisedb, external_id=<MIT 4-digit id>');
   lines.push('-- Idempotent: ON CONFLICT (source, external_id) DO NOTHING');
-  console.error('-- Idempotent: ON CONFLICT (source, external_id) DO NOTHING');
+  const mitNotice = `MIT License
+
+Copyright (c) 2026 Hasan Emir Yıldırım
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation and data files (the "Software"),
+to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.`;
+  lines.push(...mitNotice.split('\n').map((line) => `-- ${line}`));
   lines.push('');
-  console.error('');
 
   const columns = [
     'name', 'name_vi', 'name_en', 'category', 'equipment', 'force_type',
@@ -198,11 +211,10 @@ export function emitSql(rows) {
         r.mechanic, r.instructions, r.imageUrl, r.slug, r.secondaryMuscles,
         r.movementPattern, r.difficulty, r.formCues, r.commonMistakes,
         r.alternativeExerciseSlugs, r.source, r.externalId, r.sourceRevision,
-      ].map(sqlEscape);
+      ].map((value) => Array.isArray(value) ? sqlArray(value) : sqlEscape(value));
       return `(${vals.join(', ')})`;
     });
     const sql = `INSERT INTO public.exercises (${columns.join(', ')})\nVALUES\n${values.join(',\n')}\nON CONFLICT (source, external_id) DO NOTHING;`;
-    console.error(sql);
     lines.push(sql);
     lines.push('');
   }
@@ -298,6 +310,6 @@ function main() {
 }
 
 // Only run main when executed directly, not when imported
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   main();
 }

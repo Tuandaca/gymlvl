@@ -2,6 +2,168 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-13 — P10.4 end-to-end RPG loop audit (PASS local/test)
+
+**Task:** Verify and complete the onboarding → plan → workout → authoritative reward → XP/class XP → quest/streak → achievement/unlock loop using the approved P10.3b placement/readiness lane.
+
+**Changes:** Added `supabase/tests/p10_4_rpg_loop.sql` to assert that `complete_workout` and the placement receipt trigger exist, protected ledgers cannot be forged by the client, readiness is readable and placement evidence writing is private. Audited onboarding so experienced users can explicitly skip placement without fabricated anchors or earned progression. Audited `/plan` routing so new beginners use the first-week plan while experienced/returning users use the existing routine selector, and completion refreshes plan/profile/progression providers. Added the refresh contract regression and invalidated readiness after onboarding completion, class switch and dashboard pull-to-refresh. Dashboard readiness remains a separate lane from earned RPG progression.
+
+**Verification:** `tools/db-tests npm test` → `PASS`, 61 SQL units / 365 ACL assertions against isolated PostgreSQL 17.5, including the P10.4 contract and existing P5 RPG regressions; `npm run test:concurrency:p10` → `PASS`, six two-connection scenarios; focused P10 Flutter tests → `PASS`, 84 tests; full `flutter test --reporter compact` → `PASS`, 910 tests; `dart analyze` → `PASS`, no issues; independent re-review → `PASS`, no Critical/Important findings after refresh invalidations; `git diff --check` → `PASS` (CRLF normalization warnings only). Production/live Supabase/device/pilot `psql` checks and Git writes → `NOT RUN`.
+
+**Decision:** No new schema or progression decision. D-060/D-062 remain local/test approvals and `complete_workout` remains the sole authoritative award path.
+
+**Next action:** P10.5 — choose one scoped workout/planning parity gap from the P10.0 matrix, write its behavior contract, then implement and verify it as a separate task.
+
+## 2026-11-13 — P10.3b Tasks 3–5 local verification checkpoint
+
+**Task:** Complete the receipt-backed readiness projection review, wire the approved placement lane into onboarding/plan/dashboard, and verify the two-connection/pilot closeout.
+
+**Changes:** Final Task 3 SQL review confirms class-switch gating and literal `confirmed` status. Task 4 adds an explicit placement choice in onboarding, routes `/plan` through `planRouteProvider` (beginner/no history to first-week, experienced/returning to routine selection), and mounts `PlacementReadinessCard` separately from earned RPG progression. Task 5 adds a real two-connection placement harness and a read-only pilot aggregate artifact with a rollback-scoped synthetic fixture. The first race exposed a deadlock from upgrading the `users` foreign-key lock; evidence now serializes on the primary `user_classes` row. No earned XP/reward path or production state was changed.
+
+**Verification:** `tools/db-tests npm test` → `PASS`, 60 SQL verification units / 365 ACL assertions; `npm run test:concurrency:p10` → `PASS`, two real PostgreSQL connections including forced transaction rollback and two concurrent rewards; existing `npm run test:concurrency` → `PASS`, 8/8; focused Flutter placement/onboarding/plan/navigation tests → `PASS`, 29 tests; full `flutter test --reporter compact` → `PASS`, 907 tests; full `dart analyze` → `PASS`, no issues; `git diff --check` → `PASS` (CRLF normalization warnings only). Standalone pilot report via `psql`, device/live Supabase/production migration checks → `NOT RUN`. No commit/push/deploy.
+
+**Next action:** P10.4 — audit and complete the end-to-end RPG loop using the verified placement/readiness lane.
+
+## 2026-11-13 — P10.3b Task 1 implementation / review checkpoint
+
+**Authorization:** Owner explicitly approved D-062 for local/test. New external backup `D:\Projects\gymlvl_p10_3b_impl_backup_20261113_200409` verified100 dirty-file hashes,841 archive paths and cloned HEAD equal to `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`.
+
+**Changes:** Added the pure Dart placement policy/models/test and additive SQL assessment tables/private scorer/normalized owner submission path with policy/security tests. No earned state or production change. Plan/ledger record accepted authorization and sequential execution.
+
+**Verification:** Parent focused Flutter → `PASS`42/42; parent `npm test` in `tools/db-tests` → `PASS`56 SQL units/365 ACL assertions. Independent Task1 review → `FAIL`, exact barbell threshold suffers floating division in Flutter and explicit invalid body-mass preview differs. Fix round1 dispatched; remaining Tasks2–5 `NOT RUN`. This is an implementation checkpoint, not feature completion.
+
+**Task1 closure:** Fix round1 addresses both findings through exact serialized-decimal comparisons and consistent malformed-profile guards. Independent scoped re-review reran Flutter72/72 → `PASS`; SQL remains parent56/365. Task1 is closed before Task2 begins. No production/Git action.
+
+**Task2 review status:** The migration now parses and the enrollment path passes inside the broader SQL runner (`57` units/`365` ACL assertions before the expanded fixture). After adding two canonical-anchor rewarded workouts on distinct dates, the focused SQL regression fails at `two-date confirmation missing`. Task2 remains incomplete; Task3 is blocked. No production/Git action.
+
+---
+
+## 2026-11-13 — P10.3b.0 consumer audit and concrete persistence contract
+
+**Task:** Begin P10.3b after owner approval of the revised v0.1 numeric policy. Complete the required consumer audit and specify the new schema/progress contract before implementation.
+
+**Changes:** D-060 records the owner's “okay bắt đầu làm đi” as local numeric-policy approval; P10.3a is closed. Added source-level consumer inventory, separate three-table/RPC/readiness contract and five-task implementation plan. D-062 is the concrete material schema/progression-display proposal. Independent review corrected terminal-state retry ordering, explicit onboarding enrollment/state transitions, honest pilot denominators/recommendation fields and confirmation FK compatibility with P8 workout-first deletion. Class-switch reconstructed XP cannot advance readiness; only new reward receipt deltas can. No application source, SQL migration, production state, dependency or Git ref changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** External backup script → `PASS`, 97 dirty-file hashes and 841 HEAD archive paths verified; `git bundle verify` and external bundle-clone `rev-parse HEAD` → `PASS`, complete bundle and identical HEAD. Current `rg` and effective-function/source inspection → bounded consumer inventory, not a runtime test. Independent design re-review → `PASS` for four corrected findings; added explicit first-session/next-distinct-date pair selection. Python scope/contract assertion → `PASS`, five existing docs plus three new docs, other 92 dirty files preserved, seven numeric rows unchanged. `git diff --check` → `PASS`, exit 0 with LF/CRLF warnings only. Flutter/SQL/device/live tests → `NOT RUN`, no runtime change.
+
+**Decisions:** D-060 local/test v0.1 policy `ACCEPTED`; D-062 exact local schema/readiness contract `PROPOSED`. Existing production rollout gate remains closed.
+
+**Next action:** P10.3b Task 1 after concrete D-062 approval, followed by the saved plan's remaining tasks without re-requesting numeric approval.
+
+---
+
+## 2026-11-13 — P10.3a four-point owner-review revision (BLOCKED for numeric approval)
+
+**Task:** Apply the owner's design review to the existing `placement-v0.1` proposal without authorizing numerical placement code.
+
+**Changes:** Clarified 18–64 as automatic-placement coverage rather than a finding that other ages cannot train; added an internal, privacy-conscious pilot telemetry and recalibration contract; required a complete global/class-level consumer inventory before implementing the placement floor; and defined B/F results as training-readiness placement, not hypertrophy/bodybuilding mastery. D-060 records that architecture feedback was accepted while numeric policy remains pending. Board/handoff updated. No source code, SQL, production data or Git ref changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff` plus uncommitted documentation:** `git status --porcelain=v1` → expected dirty owner/P10 tree; external backup script → `PASS`, 97 dirty files verified by SHA-256 and 841 archive paths equal to Git tree; `git bundle verify` → `PASS`, complete HEAD bundle. Local `rg` → dashboard class-level display at `app/lib/features/dashboard/presentation/widgets/dashboard_header.dart`; this confirms one consumer, not a full audit. Python scope/proposal assertion → `PASS`, exactly five planning docs changed, other 92 dirty files match backup, seven numeric rows unchanged and all four review clauses present. `git diff --check` → `PASS`, exit 0 with LF/CRLF warnings only. Flutter/SQL/device/live checks → `NOT RUN`, no runtime change.
+
+**Decision:** D-060 remains `PARTIALLY_APPROVED`. The owner accepted the P10.3a design direction but did not approve any numerical row or global mapping for implementation.
+
+**Next action:** P10.3a — owner reviews the revised table; P10.3b starts only after explicit numeric-policy approval.
+
+---
+
+## 2026-11-13 — P10.3a placement benchmark proposal (BLOCKED for owner approval)
+
+**Task:** Research public strength/endurance evidence and propose the versioned experienced-user placement table approved for design work under D-060.
+
+**Changes:** Added `docs/planning/P10_3A_PLACEMENT_THRESHOLDS_V0_1.md` with source/license matrix, seven proposed numeric anchors, six class mappings, eligibility/equipment limits and worked examples. Distinguished original GymLvl product calibration from published norms, excluded the CC BY-NC-ND numerical table, and recorded age/sex/variant limitations. Updated D-060 and the board/handoff. No application code, SQL migration, production data, Git ref or cloud project changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff` plus scoped uncommitted documentation:** `git status --porcelain=v1` → expected pre-existing dirty owner/P10 paths; external backup script → `PASS`, 96 dirty files verified by SHA-256 and 841 archive paths identical to Git tree; `git bundle verify` → `PASS`, complete HEAD bundle. Primary-source web review → `PASS` for population, licensing and test-protocol boundaries, not for numerical-band validity. Local `rg`/seed inspection → seven curated slugs and D-043 Epley convention present. Python proposal/scope assertion → `PASS`, exactly four existing planning docs and one new proposal changed after backup, seven curated anchors, worked-example arithmetic. `git diff --check` → `PASS`, exit 0 with LF/CRLF warnings only. Flutter/SQL/device/live tests → `NOT RUN`, no runtime change.
+
+**Decision:** `placement-v0.1` is `PROPOSED`. D-060 remains `PARTIALLY_APPROVED`; owner review of numerical bands and mappings is still required before P10.3b.
+
+**Next action:** P10.3a — owner accepts or edits the concrete table, then record the accepted version and start P10.3b separately. Production rollout remains gated by P10.1.
+
+---
+
+## 2026-11-13 — P10.2 pinned MIT catalogue local rehearsal (PASS)
+
+**Task:** Continue the P10 roadmap locally after the owner explicitly deferred current production backup work. Preserve the 150 curated exercises and history while preparing the 1,324-record MIT text/metadata import.
+
+**Changes:** D-061 records the local-only sequencing decision and keeps production rollout blocked. The importer now runs correctly on Windows, emits PostgreSQL `text[]` literals and the complete pinned MIT notice, rejects duplicate source IDs and uses source-prefixed unique slugs. An isolated database rehearsal applies generated SQL twice. The Flutter exercise repository loads bounded pages ordered by `name,id` so the catalogue is not cut off at the default 1,000-row API cap. Added focused tests, a P10.2 plan/audit, and updated board/handoff/master status. No production database, Git ref or cloud project was changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff` plus scoped uncommitted changes:** Pinned importer `npm test` → `PASS`, 14/14; `npm run test:catalogue` → `PASS`, two imports each 1,474 total/1,324 source rows, all 150 curated rows and synthetic workout FK history unchanged; focused Flutter tests → `PASS`, 6/6 including 1,474/2,000-row cases and VI/EN fallback; targeted `dart analyze` → `PASS`, no issues; Dart format → `PASS`, 2 files/0 changed; SQL baseline `npm test` → `PASS`, 53 units/365 ACL in the implementer run. Verified external repository backup: `D:\Projects\gymlvl_p10_catalogue_backup_20261113_184248`, bundle clone HEAD and 841 Git-tree paths plus 890 worktree hashes. Production import/live Auth/device/full Flutter suite `NOT RUN`. See `docs/audit/P10_2_MIT_CATALOGUE_REHEARSAL.md`.
+
+**Next action:** P10.3a — propose a versioned, source-backed placement threshold table for owner review. P10.3b code and P9/P10 production rollout remain gated.
+
+---
+
+## 2026-11-13 — P10.1 backup/restore feasibility (BLOCKED)
+
+**Task:** Record read-only backup/restore capability findings without exporting user data or changing production.
+
+**Changes:** Updated `docs/audit/P10_PRODUCTION_PREFLIGHT.md`, `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md` and this changelog only. No new decision.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** `git bundle verify` → `PASS`, existing external bundle okay; bundle-check clone `rev-parse HEAD` → `PASS`, current HEAD; Python ZIP/Git-tree comparison → `PASS`, 841 identical paths. Read-only Supabase MCP tool-metadata inspection found no backup/download/clone/restore/project-management tool. `Get-Command` reported `supabase`, `pg_dump`, `pg_restore`, `psql`, `docker` absent on PATH; process DB-credential environment-name inspection returned 0 matches without reading values. `tools/db-tests/package.json` inspection found existing `embedded-postgres`/`pg`, a potential isolated target only. No authenticated complete consistent current production export route is configured. `git diff --check` → `PASS`, exit 0 (existing LF/CRLF warnings only). Current backup/restore `BLOCKED`; historical JSON is not current/full proof and a custom MCP row export would expose user data without proving backup completeness/consistency. Backup/restore execution, dependency installation, cloud project creation/cost and production/Git writes `NOT RUN`.
+
+**Next action:** P10.1 — owner coordinates a private current snapshot with scope/time and authorized transfer, then confirm a disposable target and verify restore before full P8-equivalence checks. P10.2 remains queued.
+
+---
+
+## 2026-11-13 — P10.1 live migration reconciliation (bounded PASS; rollout BLOCKED)
+
+**Task:** Continue the approved read-only P9 production preflight by mapping all 28 local migration files to live schema markers and classifying remaining rollout gates.
+
+**Changes:** Added `docs/audit/P10_MIGRATION_RECONCILIATION.md`; refined the P10.1 preflight, board and handoff. No application code, local migration, production data/schema, Git ref or MCP configuration changed in this checkpoint.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** External Git bundle verified against HEAD and the archive contained 841 tracked files. `cd tools/db-tests; npm test` → `PASS`, 28 migrations, 53 SQL verification units and 365 synthetic ACL assertions. Read-only MCP catalog/aggregate SQL → `PASS` for the bounded observations: 21 pre-P9 files have representative live markers but cannot be certified as applied because `supabase_migrations.schema_migrations` has zero rows; all seven P9 files have missing/conflicting markers. P9.0 broad exercise policy/client DELETE and P9.3 client unlock INSERT remain, while current custom-exercise and unlock row counts are zero. Of 79 `mode=NULL` workout exercises, one cancelled and one completed/unawarded workout each has a zero-rep completed set; the completed workout has no reward/XP ledger or other valid completed set. P8 `complete_workout` body token comparison found one title-literal drift (`Chiến Bình` live versus `Chiến Binh` local); `delete_account_data` body tokens matched. Current backup/restore and signed-in Auth smoke remain `BLOCKED`/`NOT RUN`.
+
+**Next action:** P10.1 — obtain and restore a current consistent backup to a disposable database, then prove full P8 schema/function/ACL equivalence before any history repair or P9 migration proposal.
+
+---
+
+## 2026-11-13 — P10.1 live read-only MCP preflight (BLOCKED)
+
+**Task:** Configure project-scoped Supabase MCP access and resume the read-only production preflight.
+
+**Changes:** Added two Codex MCP connections outside the repository: `supabase` with `read_only=true` and `supabase-write` for later, separately approved operations; both are scoped to the linked GymLvl project and authenticated by OAuth. Updated the P10.1 audit, board, handoff and master index. No production write, migration, import, application-code change, commit or push.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** `codex mcp list` → `PASS`, both connections enabled/OAuth; read-only `execute_sql` → `PASS`, `current_user=supabase_read_only_user`, `transaction_read_only=on`; `list_tables(public)` → `PASS`, live tables returned. `list_migrations` and ledger count → `FAIL` for migration provenance, zero versions; catalog query → `FAIL` for P9 parity, checked P9 tables/RPCs absent. Aggregate SQL → `FAIL` for legacy validation readiness: 79/79 workout exercises have `mode=NULL`; two completed zero-rep sets affect two workouts/one user. Current backup, disposable restore and signed-in Auth smoke remain `BLOCKED`/`NOT RUN`.
+
+**Next action:** P10.1 — reconcile live schema and migration order without writes, then review the two legacy zero-rep records and backup/restore prerequisites before any production proposal.
+
+---
+
+## 2026-11-13 — P10.1 read-only P9 production preflight (BLOCKED)
+
+**Task:** Inspect P9 production rollout prerequisites without a production write.
+
+**Changes:** Added `docs/audit/P10_PRODUCTION_PREFLIGHT.md` with per-gate evidence and exact unblock conditions. Updated board, handoff and master index; no app source, migration or production data changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** `cd tools/db-tests; npm test` → `PASS`, 28 migrations, 53 SQL units/365 synthetic ACL assertions; read-only Auth health GET → `PASS`, HTTP 200. Read-only PostgREST root and table GETs → `BLOCKED`, HTTP 401 (secret API key required / table permission denied). Historical backup artifact exists (33 files dated 2026-11-09); current backup consistency and restore were `BLOCKED`/`NOT RUN`. No privileged live query or production write was attempted.
+
+**Next action:** Obtain a least-privilege live inspection route, intended project/test account and current backup/restore target; rerun P10.1. The one-task rule keeps P10.2 queued.
+
+---
+
+## 2026-11-13 — P10.0 pinned OpenGym capability re-baseline (source PASS)
+
+**Task:** Reconcile the P1 OpenGym parity matrix with post-P9 GymLvl source and define scoped follow-up tasks, without product or production changes.
+
+**Changes:** Classified 88 pinned-reference capabilities, corrected stale P1 labels, recorded 31 scoped backlog tasks and a separate v1.4.4 upstream delta, and updated the master plan/decision log for the owner-approved P10 roadmap. D-059 accepts the 1,324 MIT text/metadata target; D-060 records placement behavior while holding numerical thresholds for review. Closed the previously published P9 remote CI checkpoint in board/handoff.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** Verified external backup bundle clone matched HEAD, archive matched 841 Git paths, and 79 dirty-file hashes matched. Python audit assertion → `PASS`, 88 matrix rows, pinned OpenGym/MIT SHAs and 1,324 MIT records. `git ls-remote origin refs/heads/main` → `PASS`, same SHA; `gh run view 43387332928` → `PASS`, remote CI `success` with concurrency step. Production/device/Flutter/SQL runtime checks `NOT RUN` for this documentation task.
+
+**Next action:** P10.1 read-only production preflight, stopping before a production write.
+
+---
+
+## 2026-11-13 — Post-P9 remote CI gate verified
+
+**Task:** Close the published documentation/CI checkpoint before starting the owner-authorized P10 roadmap.
+
+**Changes:** Recorded the remote execution outcome in the task board and handoff. No application code, migration, or production state changed.
+
+**Verification at `main` `7e21abb7649d108bf9b54ae59e874e816f2b54ff`:** `git ls-remote origin refs/heads/main` → `PASS`, same SHA; `gh run view 43387332928 --json jobs,headSha,conclusion` → `PASS`, overall `success` and `npm run test:concurrency` step `success`. Production parity `NOT RUN`.
+
+**Next action:** P10.0 capability re-baseline, one scoped task.
+
+---
+
 ## 2026-11-13 — Post-P9 documentation truth sync and concurrency CI gate (local PASS)
 
 **Task:** Reconcile canonical documentation with published P9 and add the missing disposable PostgreSQL concurrency check to the existing `database-and-edge` job. No product behavior, migration, dependency or production change.

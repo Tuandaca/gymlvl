@@ -25,7 +25,7 @@ Status values:
 | D-003 | Third-party exercise media postponed | ACCEPTED | 2026-10-27 |
 | D-004 | Re-baseline M1 to release-critical stabilization | SUPERSEDED by D-038 | 2026-10-28 |
 | D-005 | Drift as the local offline store | PARTIALLY_APPROVED by D-039 | 2026-11-03 |
-| D-006 | Import all 1,324 MIT text records | PROPOSED | 2026-10-27 |
+| D-006 | Import all 1,324 MIT text records | SUPERSEDED by D-059 | 2026-10-27 |
 | D-007 | AI proposes; user approves; server applies | ACCEPTED (product contract); implementation pending | 2026-10-27 |
 | D-008 | PostgreSQL remains authoritative for XP/rewards | ACCEPTED | Existing invariant |
 | D-009 | No automatic commits, pushes, or tags | ACCEPTED | 2026-10-28 |
@@ -44,6 +44,11 @@ Status values:
 
 | D-055 | P9.5 transactional workout reorder and add-with-default-sets RPCs | ACCEPTED for local implementation only | 2026-11-13 |
 | D-056 | Retain current typography for P9; correct it in a separate task | ACCEPTED | 2026-11-13 |
+| D-058 | P10 staged OpenGym parity, catalogue, placement and RPG roadmap | ACCEPTED for scoped local work; production writes separately gated | 2026-11-13 |
+| D-059 | Import all 1,324 pinned MIT text/metadata records before broader catalogue work | ACCEPTED for local implementation; production import separately gated | 2026-11-13 |
+| D-060 | Experienced-user provisional placement with workout confirmation | ACCEPTED for revised v0.1 local/test numeric policy; production gated | 2026-11-13 |
+| D-061 | Defer managed/current production backup and advance local P10.2 only | ACCEPTED for local sequencing; production rollout gate remains closed | 2026-11-13 |
+| D-062 | Separate placement ledger, receipt-backed readiness progress and consumer contract | ACCEPTED for additive local/test implementation only | 2026-11-13 |
 
 > Rows D-015–D-021 are missing from this summary; their sections exist below. The gap is recorded as
 > evidence for `FND-GOV-002` in `docs/audit/MASTER_FINDINGS.md` and is repaired in W4, not here.
@@ -108,7 +113,7 @@ a release requirement. Real user data and production replay remain blocked by D-
 
 ## D-006 — Catalog import scope
 
-**Status:** PROPOSED
+**Status:** SUPERSEDED by D-059 on 2026-11-13; the text below records the original proposal.
 **Context:** The dataset has 1,324 MIT text records; GymLvl has 150 curated exercises. OpenGym B's
 6,554-record catalogue is AGPL and cannot be imported.
 **Decision:** Import all 1,324 MIT text/metadata records in M2, behind a reviewable ETL, preserving
@@ -767,6 +772,52 @@ and deleting a `workout_exercises` row cascades to its sets.
 
 **Consequences:** The current Git publication approval supersedes the Git-write restriction in D-050 only for this scoped push. It does not approve future Git writes or production operations. D-056's typography decision is unchanged.
 
+## D-058 — P10 staged capability roadmap
+
+**Status:** ACCEPTED for scoped local work by the owner on 2026-11-13. Git writes and production operations remain separately gated.
+
+**Context:** The prior execution index said not to start P10 after P9, while the owner subsequently requested implementation of the explicit P10.0–P10.5 roadmap. This later request changes milestone scope and takes precedence over the stale next-action line.
+
+**Decision:** Re-baseline the pinned OpenGym capability map first, audit the newer upstream delta separately, then perform a read-only P9 production preflight, a legal-safe catalogue import, experienced-user placement design and implementation, RPG end-to-end verification, and gap closure one scoped task at a time. Preserve Flutter/Supabase, RPG identity, user history, Candy UI, and all AGPL/media restrictions. No production migration or import is authorized by this decision.
+
+## D-059 — Legal-safe catalogue target
+
+**Status:** ACCEPTED for local implementation by the owner on 2026-11-13; production import requires a separately approved rollout.
+
+**Decision:** Keep the 150 curated exercise identities and add the 1,324 text/metadata records from pinned `hasaneyldrm/exercises-dataset` under its MIT notice. Strip all media and links. The 6,554-entry pinned OpenGym catalogue remains behavioral reference only; do not import its AGPL/proprietary content.
+
+## D-060 — New-user and experienced-user placement policy
+
+**Status:** ACCEPTED for local/test implementation of the revised `placement-v0.1` numeric policy on 2026-11-13. The owner said “okay bắt đầu làm đi” after the four-point revision and explicit request to approve the remaining numerical policy. Production/broad rollout is not approved. The exact new schema and readiness-progress details are separately proposed in D-062.
+
+**Decision:** Never-trained users start global/class level 1. Experienced users answer a short, equipment- and class-sensitive assessment (weight/reps, bodyweight reps, or duration as appropriate). Self-reports produce only a provisional estimate and plan choice. Verified workouts may confirm placement through the existing authoritative completion transaction, capped at global level 10/100 and class level 5/20; self-reports award no XP, quests, streaks, achievements or unlocks. Existing users and history must not be re-levelled silently. Benchmark sources must be public, reliable and legally usable, with a versioned threshold table approved before P10.3b.
+
+**Historical pending P10.3a review (superseded by approval below):** `docs/planning/P10_3A_PLACEMENT_THRESHOLDS_V0_1.md` proposed seven GymLvl-authored numerical rows, six class mappings and eligibility/cap rules. The values remain product hypotheses, not externally validated population norms. At that checkpoint, approval to perform P10.3a had not approved these values or authorized P10.3b code.
+
+**Historical owner review, 2026-11-13:** The owner accepted the P10.3a architecture for revision, but explicitly withheld approval of the numerical thresholds and mapping at that point. Required revisions: describe 18–64 as automatic-placement coverage rather than a safety finding; add a pilot telemetry/recalibration contract; audit every global/class-level consumer before P10.3b implementation so placement is never silently treated as earned progression; and label B/F as training-readiness placement rather than hypertrophy/bodybuilding mastery. These revisions are reflected in the approved local policy below.
+
+**Subsequent owner approval:** After those revisions, the owner's “okay bắt đầu làm đi” accepts the seven threshold rows, class/equipment/age rules, class caps and global mapping as version `placement-v0.1` for local/test use. The preceding pending-review paragraphs preserve chronology; they are no longer the current numeric-policy gate. Do not ask for those numbers again. No third-party standard table is imported or represented as validated fitness percentiles.
+
+## D-061 — Defer production backup work while continuing local P10
+
+**Status:** ACCEPTED for local task sequencing on 2026-11-13 by the owner's explicit instruction, “bỏ qua backup này đi, tiến hành phần tiếp theo.”
+
+**Context:** The owner uses Supabase Free without managed Project Backups and does not want to configure a current production export for this checkpoint. P10.1 read-only findings have already been recorded, including the absent P9 markers, empty migration ledger and legacy zero-rep data.
+
+**Decision:** Close P10.1 as a bounded read-only audit with rollout readiness `BLOCKED`, defer the current backup/restore rehearsal, and proceed to P10.2 local-only catalogue work under D-059. This does not classify the historical 2026-11-09 JSON as a current backup, establish full P8 equivalence, repair migration history, or authorize a production migration, import or deploy. Revisit the safety/data gates before any production rollout proposal.
+
+## D-062 — Placement ledger and receipt-backed readiness progress
+
+**Status:** ACCEPTED for local/test implementation on 2026-11-13 by the owner's explicit answer, “Phê duyệt D-062 cho local/test”. Concrete approved artifact: `docs/planning/P10_3B_PLACEMENT_CONTRACT.md`. Numeric policy D-060 is already approved locally. Production and Git writes remain unapproved.
+
+**Context:** The P10.3b consumer audit finds that `complete_workout` recomputes earned global level from XP, P9 persists class levels into legacy floors, and unlock synchronization reads `users.level` directly. Reusing existing level columns for placement would overwrite or contaminate earned state. The approved v0.1 spec requires separate review of the exact schema/ledger contract; AGENTS.md §0(3) requires approval for this material schema/progression-display choice.
+
+**Proposal:** Three additive owner-scoped tables (`placement_assessments`, `placement_workout_evidence`, `placement_confirmations`); initial enrollment through atomic new onboarding; idempotent provisional submission RPC and separate readiness read RPC; evidence/confirmation only on a new `complete_workout` reward insert. Confirm from the lower of two qualifying session scores on distinct snapshot-timezone dates. Preserve all existing earned/legacy columns and consumers. Post-confirmation readiness advances from new immutable reward receipts using existing threshold differences, with no synthetic XP or reward unlocks. Store canonical IDs/version/snapshots; preserve terminal-state submission replay; class switches add no retrospective readiness XP. The proposed internal report suppresses groups below 20 and does not collect/analyze gender. Existing P8 account erasure must succeed through specified cascade/SET NULL actions.
+
+**Concurrency implementation note (local/test):** The first two-connection placement race exposed a deadlock when the reward foreign key held a key-share lock on `users` and the evidence trigger attempted to upgrade that same row with `FOR UPDATE`. The additive implementation now serializes evidence on the user's primary `user_classes` row before locking the pending assessment; no earned column or reward path changes. The regression harness reproduces two concurrent reward receipts and asserts two evidence rows with exactly one confirmation.
+
+**Approval boundary:** Approve the exact contract for local SQL/Flutter implementation and tests only. This does not authorize production migration, pilot collection, broad rollout, Git writes, new dependencies, legacy enrollment/backfill or demographic data use. Once approved, execute the saved P10.3b plan without reopening the accepted numeric policy.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:
@@ -935,7 +986,6 @@ These remain unresolved and block later milestones:
 | O-01 | GymLvl's own license and contributor rights | M8 / distribution | Project owner + legal |
 | O-02 | AGPL posture (stay proprietary vs adopt AGPL) | Any OpenGym-derived reuse | Project owner + legal |
 | O-03 | Drift and real-data policy; production activation gate remains closed | M3 production activation | Project owner |
-| O-04 | Approval of full 1,324 import vs curated subset | M2/P1 | Project owner |
 | O-05 | AI provider and cost policy | P6 | Project owner |
 | O-06 | Android SDK/device availability | M8 | Project owner |
 | O-07 | Live Supabase project and credential ownership | P1+ verification, onboarding 9/9 | Project owner |

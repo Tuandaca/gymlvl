@@ -19,6 +19,8 @@ import 'package:app/features/dashboard/presentation/providers/stats_providers.da
 import 'package:app/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:app/features/onboarding/domain/user_profile_draft.dart';
 import 'package:app/features/onboarding/presentation/providers/onboarding_controller.dart';
+import 'package:app/features/placement/domain/placement_models.dart';
+import 'package:app/features/placement/presentation/placement_providers.dart';
 import 'package:app/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:app/features/progression/presentation/widgets/level_up_overlay.dart';
@@ -576,13 +578,18 @@ void main() {
           ),
         );
     await tester.pumpAndSettle();
-    for (var step = 1; step < 9; step++) {
-      expect(find.text('Step $step/9'), findsOneWidget);
+    container
+        .read(placementOnboardingDraftProvider.notifier)
+        .setInput(
+      PlacementInput(classId: 'B', hasTrainingExperience: false),
+        );
+    for (var step = 1; step < 10; step++) {
+      expect(find.text('Step $step/10'), findsOneWidget);
       await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }
-    expect(find.text('Step 9/9'), findsOneWidget);
+    expect(find.text('Step 10/10'), findsOneWidget);
     expect(
       find.widgetWithText(FilledButton, 'Begin your journey'),
       findsOneWidget,
@@ -889,8 +896,8 @@ void main() {
             ),
           );
 
-          // Step 8 (index 7) — preferred-day FilterChips.
-          pages.controller!.jumpToPage(7);
+          // Step 9 (index 8) — preferred-day FilterChips.
+          pages.controller!.jumpToPage(8);
           await tester.pumpAndSettle();
           expect(find.text(s.tue), findsOneWidget);
           expectPaintedContrast(

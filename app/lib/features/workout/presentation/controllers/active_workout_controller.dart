@@ -21,6 +21,8 @@ import '../../../quests/domain/quest_instance.dart';
 import '../../../quests/presentation/providers/quest_providers.dart';
 import '../../../dashboard/presentation/providers/stats_providers.dart';
 import '../../../dashboard/presentation/providers/class_providers.dart';
+import '../../../training_plan/presentation/providers/training_plan_providers.dart'
+    hide completedWorkoutCountProvider;
 
 part 'active_workout_controller.freezed.dart';
 
@@ -1371,6 +1373,9 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     ref.invalidate(dashboardStatsControllerProvider);
     ref.invalidate(activeQuestControllerProvider);
     ref.invalidate(userClassesProvider);
+    ref.invalidate(beginnerProfileProvider);
+    ref.invalidate(firstWeekPlanProvider);
+    ref.invalidate(planRouteProvider);
   }
 
   void _cleanup() {

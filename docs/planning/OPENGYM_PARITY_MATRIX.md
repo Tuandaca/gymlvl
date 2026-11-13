@@ -1,8 +1,8 @@
 # GymLvl — OpenGym Parity Matrix
 
-**Status:** Populated (P1 COMPLETE)
-**Phase:** P1 — OpenGym Parity Baseline + Legal-Safe Exercise Catalogue (COMPLETE)
-**Purpose:** Authoritative capability map: OpenGym capability vs GymLvl implementation status. Populated during P1; drives P2–P7 scoping.
+**Status:** P10.0 source re-baseline complete; this matrix originated in P1 and is not production validation.
+**Phase:** P10.0 — pinned OpenGym capability re-baseline after P9.
+**Purpose:** Capability map for the pinned OpenGym source against GymLvl source. Runtime and production parity are separate gates.
 
 **Reference:** `DuarteSantos8/openGym` @ `e6a95c28a6e3067bdd9b1188d5f37f448d528bd2` (AGPL-3.0, behavioral reference only — no code/text/asset copying)
 **Local checkout:** `D:\Projects\opengym-reference` (verified HEAD matches pinned SHA)
@@ -11,8 +11,8 @@
 **Import source:** Direct from pinned MIT dataset (`data/exercises.json`), NOT from OpenGym catalogue.
 **Verified:** 1,324 records, schema validated, media excluded per LICENSE.
 
-**Status values:** EXISTING / PARTIAL / MISSING / DEFERRED / EXCLUDED_LICENSE / NOT_APPLICABLE
-**P1 action values:** reuse / adapt / import / defer / exclude
+**Status values:** EXISTING (source path present) / PARTIAL (source or user flow incomplete) / MISSING / EXCLUDED_LICENSE / EXCLUDED_SCOPE / NOT_APPLICABLE. None of these imply live production validation.
+**P1 action values:** Historical P1 annotations, not current task status.
 
 ---
 
@@ -24,13 +24,13 @@
 | Exercise search | `frontend/src/lib/exercises.js`, debounce | `app/lib/features/workout/presentation/providers/exercise_providers.dart` (300ms debounce, `normalizeSearchText`) | PARTIAL | adapt | P1 | None | GymLvl debounces 300ms and filters client-side; must remain valid at ~1k+ scale. |
 | Exercise filters (muscle/equipment/category) | `catalogue/browse/*.md` (body part pages), `validate.mjs` BODY_PARTS/EQUIPMENT/CATEGORIES | `selectedCategoryProvider`/`selectedEquipmentProvider`/`selectedMuscleProvider` + `filteredExercisesProvider` | PARTIAL | adapt | P1 | None | OpenGym uses controlled vocabularies. GymLvl derives distinct options from data. |
 | Exercise detail | `frontend/src/views/`, `exercise-view.test.jsx` | `app/lib/features/workout/presentation/screens/exercise_detail_screen.dart` | PARTIAL | adapt | P1 | None | GymLvl detail shows name, category, equipment, muscles, instructions, VI/EN. |
-| Exercise favourites | `frontend/src/lib/favourites.js` | None | MISSING | defer | P3 | None | Not in P1 scope. |
-| Custom exercises | `frontend/src/lib/exercises.custom.test.js` | None | MISSING | defer | P3 | None | User-created exercises. |
-| Exercise aliases | `frontend/src/lib/exercise-aliases.js` | None | MISSING | defer | P3 | None | Alias→canonical mapping. |
+| Exercise favourites | `frontend/src/lib/favourites.js` | `supabase/migrations/20261106000300_p7_exercise_personalization.sql`, `exercise_providers.dart` | PARTIAL | defer | P3 | None | P7 owner-scoped persistence/provider exists; no verified user-facing toggle flow. |
+| Custom exercises | `frontend/src/lib/exercises.custom.test.js` | `supabase_exercise_repository.dart`, `exercise_providers.dart` | PARTIAL | defer | P3 | None | Owner-scoped CRUD/archive exists; no verified user-facing creation/edit flow. |
+| Exercise aliases | `frontend/src/lib/exercise-aliases.js` | `supabase_exercise_repository.dart`, `exercise_providers.dart` | PARTIAL | defer | P3 | None | Owner-scoped alias storage/provider exists; no verified user-facing alias flow. |
 | Similar exercises | `frontend/src/lib/similar-exercises.js` | None | MISSING | defer | P3 | None | Muscle-based similarity. |
 | Exercise history | `frontend/src/lib/exercise-history.js` | `app/lib/features/workout/presentation/screens/workout_history_screen.dart` | PARTIAL | reuse | P2 | None | GymLvl tracks workout history per exercise. |
 | Exercise media | `catalogue/media/still/`, `media/clip/` | None (`imageUrl` nullable) | EXCLUDED_LICENSE | exclude | P7 | Gym visual proprietary media | GymLvl: `imageUrl` nullable, no-media graceful state. No media import. |
-| Catalogue metadata | `validate.mjs` controlled vocabularies | `supabase/migrations/20261027000100_exercise_catalog_metadata.sql`, `seed_exercises.sql` (150) | PARTIAL | import | P1 | MIT text only | P1 imports 1,324 MIT `exercisedb` records with provenance. |
+| Catalogue metadata | `validate.mjs` controlled vocabularies | `supabase/migrations/20261027000100_exercise_catalog_metadata.sql`, `seed_exercises.sql` (150), `tools/catalogue-import/import.mjs` | PARTIAL | import | P1 | MIT text only | P1 built the 1,324-record import pipeline; bulk data has not been applied. |
 
 ### Routine / planning
 
@@ -40,9 +40,9 @@
 | Routine editing | `routines.update.test.js`, `routines.replace.test.js` | `app/lib/features/training_plan/routine_engine.dart` (rename/replace/reset incompatible fields) | EXISTING | adapt | P2 | None | Verified by focused Dart tests; rename via copyWith, replace with compatible/incompatible mode config. |
 | Exercise ordering | `session-routines.js`, day assignment | `app/lib/features/training_plan/routine_engine.dart` (add/remove/reorder reindex) | EXISTING | adapt | P2 | None | Verified by focused Dart tests (reorderExercises closes ordering gaps). |
 | Day assignment | `frontend/src/lib/day-notes.js`, `session-routines.js` | `app/lib/features/training_plan/schedule_engine.dart` (fixed_week, weekday 1=Mon..7=Sun) | EXISTING | adapt | P2 | None | Verified by focused Dart tests; weekday convention 1..7 enforced. |
-| Weekly schedules | `rotation.js` | `app/lib/features/training_plan/schedule_engine.dart`, `routine_schedules` table (fixed_week) | EXISTING | adapt | P2 | None | Fixed-week schedule assignment verified; rotation remains P2-EXTEND/DEFERRED. |
+| Weekly schedules | `rotation.js` | `app/lib/features/training_plan/schedule_engine.dart`, `weekly_schedule_screen.dart`, `routine_schedules` | PARTIAL | adapt | P2 | None | Fixed-week persistence exists, but `_getRoutinesForWeekday` returns an empty list in the current screen. |
 | Repeat session | `sheets.repeat-workout.test.jsx` | `app/lib/features/training_plan/routine_engine.dart` (fromWorkoutSession), `repeat_workout` RPC, `planned_workouts` for CURRENT_DATE | EXISTING | adapt | P2 | None | Verified by SQL test: new planned-workout identity, old completed workout unchanged, rejects empty workout. |
-| Plan rotation | `rotation.js` | None | MISSING | defer | P2 | None | |
+| Plan rotation | `rotation.js` | `schedule_engine.dart`, `supabase_routine_repository.dart` | PARTIAL | defer | P2 | None | Rotation model/RPC exists; occurrence expansion currently returns empty. |
 | Exercise replacement | `sheets.replace.test.jsx`, `sheets.swap.test.jsx` | `app/lib/features/training_plan/routine_engine.dart` (replaceExercise preserves compatible config, resets incompatible mode fields) | EXISTING | adapt | P2 | None | Verified by focused Dart tests (compatible preserved, incompatible mode resets weight/reps/duration). |
 | Routine persistence | `routines.js` | `app/lib/features/training_plan/routine_repository.dart`, `supabase_routine_repository.dart`, `routine_providers.dart` | EXISTING | adapt | P2 | None | Repository + Riverpod providers + SECURITY DEFINER RPCs with ownership validation. |
 | Program management | None found | None | NOT_APPLICABLE | exclude | — | None | No OpenGym "program" concept found beyond routines. |
@@ -86,9 +86,9 @@
 | Unit handling | `units.js` | `body_measurement.dart` (type-canonical units), `p4_body_measurements.sql` | PARTIAL | implement | P4 | None | Explicit kg/cm/percent per measurement type; values never silently converted. |
 | Bodyweight | `bodyweight.js` | `bodyweight_measurement.dart`, `bodyweight_trend.dart`, M5 migration + `body_measurements` table (P4) | PARTIAL | reuse | P4 | None | M5 bodyweight trend preserved; P4 adds normalized general measurements. |
 | Measurements | `measurements.js` | `body_measurement.dart`, `body_measurements` table (P4), owner-scoped RLS | PARTIAL | implement | P4 | None | Normalized body_weight, body_fat_percentage, chest, waist, hips, upper_arm, thigh. |
-| Exports | `export-csv.js` | `csv_export_service.dart`, `/data-export` screen | PARTIAL | implement | P4 | None | One-way CSV export: workouts, workout_exercises, workout_sets, body_measurements. UTF-8, RFC 4180 escaping. No import. |
-| Imports (Strong/Hevy/FitNotes/GymMane) | `import-csv.js`, `import-hevy.js` | None | MISSING | defer | P4 | None | CSV import. |
-| Backup/restore | `backup-media.js`, `sync-merge.js` | `backup_export_service.dart` (P4), `/data-export` screen | PARTIAL | implement | P4 | None | Versioned JSON backup export (format gymlvl-backup, version 1). Export only; no restore/import, no secrets. |
+| Exports | `export-csv.js` | `csv_export_service.dart`, `/data-export` screen | PARTIAL | implement | P4 | None | Owner-scoped CSV and versioned backup export source exists; file/share UX and live parity are unverified. |
+| Imports (Strong/Hevy/FitNotes/GymMane) | `import-csv.js`, `import-hevy.js` | `csv_import_service.dart` | PARTIAL | defer | P4 | None | GymLvl and generic CSV parsing/import service exists; dedicated vendor format contracts and user-facing flow are not verified. |
+| Backup/restore | `backup-media.js`, `sync-merge.js` | `backup_export_service.dart`, `backup_import_service.dart`, P9 historical import RPCs | PARTIAL | implement | P4 | None | Same-account v2 restore service and transactional RPC source exist; user-facing restore and production P9 migration remain unverified. |
 
 ### Analytics
 
@@ -107,9 +107,9 @@
 
 | Capability | OpenGym evidence/path | GymLvl evidence/path | Status | P1 action | Target phase | License/data concern | Notes / behavioral contract |
 |---|---|---|---|---|---|---|---|
-| Health Connect | `health-connect.js` | None | MISSING | defer | P7 | External integration | P7, legal authorization required. |
-| HealthKit | `MOBILE.md` | None | MISSING | defer | P7 | External integration | iOS, not on Windows host. |
-| Watch | `watch-sync.js` | None | MISSING | defer | P7 | None | |
+| Health Connect | `health-connect.js` | None | EXCLUDED_SCOPE | defer | P7 | External integration | Requires a separate owner-approved platform/integration scope. |
+| HealthKit | `MOBILE.md` | None | EXCLUDED_SCOPE | defer | P7 | External integration | Requires a separate owner-approved iOS integration scope. |
+| Watch | `watch-sync.js` | None | EXCLUDED_SCOPE | defer | P7 | None | Wearables are outside the approved roadmap. |
 | Mobile sync | `sync-merge.js`, `sync-changes.js` | `offline_sync_coordinator.dart` (local/test, gate closed) | PARTIAL | defer | P4 | None | Offline sync not activated. |
 | Durable sync | `sync-merge.js` | `offline_sync_coordinator.dart` | PARTIAL | defer | P4 | None | Gate closed. |
 | Offline behavior | `sw-offline-launch.test.js`, `mobile.js` | `offline_workout_store.dart` (Drift, local/test) | PARTIAL | defer | P4 | None | Production gate closed. |
@@ -122,23 +122,23 @@
 |---|---|---|---|---|---|---|---|
 | Auth | `password.js`, `device-auth.js` | `app/lib/features/auth/` (Supabase Auth) | EXISTING | reuse | — | None | |
 | Passkeys | `passkeys-store.js` | None | MISSING | defer | P7 | None | |
-| Deletion | `recover.js` | None | MISSING | defer | P7 | None | |
+| Deletion | `recover.js` | `app/lib/features/account_deletion/`, P8 deletion RPC/Edge Function | PARTIAL | defer | P7 | None | Account deletion flow exists; public external deletion URL and release validation remain owner inputs. |
 | Settings | `coach-consent.js` | `profile_screen.dart` | PARTIAL | reuse | — | None | |
-| Sync/account behavior | `sync-stamps.js` | None | MISSING | defer | P4 | None | |
+| Sync/account behavior | `sync-stamps.js` | `offline_sync_coordinator.dart`, `offline_security_session.dart` | PARTIAL | defer | P4 | None | Owner-scoped local/test lifecycle exists; production offline/sync activation remains closed. |
 
 ### Coach / AI
 
 | Capability | OpenGym evidence/path | GymLvl evidence/path | Status | P1 action | Target phase | License/data concern | Notes / behavioral contract |
 |---|---|---|---|---|---|---|---|
 | Coach chat | `coach.js`, `coach-api.js` | `app/lib/features/coach/` (chat-only proxy) | PARTIAL | defer | P6 | None | AI not in P1. |
-| Intake | `coach-context.js` | None | MISSING | defer | P6 | None | |
-| Context | `coach-context.js` | None | MISSING | defer | P6 | None | |
-| Consent | `coach-consent.js` | None | MISSING | defer | P6 | None | |
-| Plans | `coach.js` plan proposals | None | MISSING | defer | P6 | None | AI not in P1. |
+| Intake | `coach-context.js` | `pt_context_builder.dart`, onboarding profile | PARTIAL | defer | P6 | None | Profile inputs exist; no verified end-to-end coach intake contract. |
+| Context | `coach-context.js` | `supabase/functions/ai-coach/service.ts` | PARTIAL | defer | P6 | None | P9 uses bounded server-owned facts; broader OpenGym context parity is unverified. |
+| Consent | `coach-consent.js` | `supabase/functions/ai-coach/service.ts`, AI screens | PARTIAL | defer | P6 | None | Per-request consent gate exists; persistent/OpenGym consent parity is unverified. |
+| Plans | `coach.js` plan proposals | `pt_recommendation_provider.dart`, `routine_application_service.dart` | PARTIAL | defer | P6 | None | Current Edge response is advisory text; validated structured apply/revert is absent. |
 | Insights | `coach-insights.js` | None | MISSING | defer | P6 | None | |
 | Cadence | `coach-schedule.js` | None | MISSING | defer | P6 | None | |
 | Scheduled jobs | `api/coach/jobs.js` | None | MISSING | defer | P6 | None | |
-| Proposal/apply behavior | `coach.js` apply/revert, consent | None | MISSING | defer | P6 | None | AI advisory only, never writes rewards. |
+| Proposal/apply behavior | `coach.js` apply/revert, consent | `routine_application_service.dart`, `supabase/functions/ai-coach/service.ts` | PARTIAL | defer | P6 | None | Client helper exists, but current Edge wire contract is text-only and offers no validated apply/revert. |
 
 ### Other
 
@@ -146,10 +146,10 @@
 |---|---|---|---|---|---|---|---|
 | Check-in | `gym-reminder.js` | None | MISSING | defer | P7 | None | |
 | QR flows | `qr.js` | None | MISSING | defer | P7 | None | |
-| Progress photos | `day-photos.js` | None | MISSING | defer | P7 | Media | Media excluded. |
-| Onboarding | `onboarding-perms.js` | `app/lib/features/onboarding/` (9-step) | EXISTING | reuse | — | None | |
+| Progress photos | `day-photos.js` | None | EXCLUDED_SCOPE | defer | P7 | User media/privacy | User-media storage and privacy policy require separate approval. |
+| Onboarding | `onboarding-perms.js` | `app/lib/features/onboarding/` (9-step), `initialize_user` RPC | PARTIAL | reuse | — | None | New users start level 1; experienced-user strength placement is absent and first-week provider hardcodes beginner. |
 | Reminders | `gym-reminder.js` | None | MISSING | defer | P7 | None | |
-| CSV import | `import-csv.js` | None | MISSING | defer | P4 | None | Strong/Hevy/FitNotes/GymMane. |
+| CSV import | `import-csv.js` | `csv_import_service.dart`, P9 historical import RPC | PARTIAL | defer | P4 | None | GymLvl/generic CSV parser and owner-scoped server import exist; end-user import flow is not verified. |
 | Hevy import | `import-hevy.js`, `hevy-id-map.js` | None | MISSING | defer | P4 | None | |
 | Strong import | `import-csv.strong.test.js` | None | MISSING | defer | P4 | None | |
 | GymMane import | `import-csv.gymmane.test.js` | None | MISSING | defer | P4 | None | |
@@ -173,7 +173,7 @@
 
 ---
 
-## P1 import scope (legal-safe)
+## Approved P10 catalogue target (D-059)
 
 - Import exactly the **1,324 records** from the pinned MIT dataset (`hasaneyldrm/exercises-dataset` @ `7455efae41b330c265e7cd4b78dfa848e7ce5ebd`, `data/exercises.json`).
 - Source is the pinned MIT dataset directly, NOT OpenGym catalogue.
@@ -187,20 +187,20 @@
 
 ---
 
-## Classification summary
+## P10.0 source classification summary
 
 | Classification | Count | Examples |
 |---|---|---|
-| EXISTING | ~14 | Auth, workout logging, active workout, set logging, rest timer, finish-workout, onboarding, search, filters, detail, history, 1RM, PR, progression, RPE/RIR, RPG |
-| PARTIAL | ~24 | Exercise browsing/search/detail, routine/planning, timed holds, cardio, warmups, supersets, notes, bodyweight, measurements, analytics, offline, mobile sync |
-| MISSING | ~20 | Favourites, custom exercises, aliases, similar exercises, weekly schedules, repeat session, exercise replacement, warmups, session editing, plate calculator, dumbbell utils, unit handling, exports, imports, backup/restore, structural balance, recovery, passkeys, deletion, Health Connect/Kit, watch, background timer, wake lock, coach/AI, check-in, QR, photos, reminders, CSV imports |
-| DEFERRED | ~40 | All MISSING items mapped to P2–P7 |
-| EXCLUDED_LICENSE | 3 | Exercise media, AGPL catalogue text, OpenGym code/UI |
-| NOT_APPLICABLE | 1 | Program management |
+| EXISTING | 15 | Source paths for core workout, routines, auth and plate calculations; live parity still unverified |
+| PARTIAL | 54 | Catalogue scale, personalization UI, schedule screen, rotation, import/restore, offline, analytics and Coach |
+| MISSING | 13 | Similar-exercise flow, dumbbell utility, wake lock, passkeys, Coach jobs, reminders and vendor-specific imports |
+| EXCLUDED_LICENSE | 1 | Proprietary exercise media; AGPL code/text/UI remain prohibited outside this row count |
+| EXCLUDED_SCOPE | 4 | Health Connect, HealthKit, watch and user progress photos need separate scope approval |
+| NOT_APPLICABLE | 1 | No program-management concept in pinned v1.4.3; v1.4.4 adds programmes in the separate delta |
 
 ---
 
-## Next phase mapping (P1 does NOT implement these)
+## Historical P1 phase mapping (not the active task queue)
 
 - **P2 — Routine & Planning Parity:** routine CRUD, day assignment, weekly schedules, repeat session, exercise replacement, plan rotation
 - **P3 — Workout Core Parity:** warmups, timed holds, cardio, session editing, exercise swap, previous-performance hints, plate/dumbbell utilities, wake lock
