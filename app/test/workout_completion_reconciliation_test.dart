@@ -6,6 +6,7 @@ import 'package:app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:app/features/workout/data/supabase_workout_repository.dart';
 import 'package:app/features/workout/domain/workout.dart';
 import 'package:app/features/workout/domain/workout_repository.dart';
+import 'package:app/features/workout/presentation/controllers/active_workout_controller.dart';
 import 'package:app/features/workout/presentation/providers/exercise_providers.dart';
 import 'package:app/features/workout/presentation/screens/active_workout_screen.dart';
 import 'package:app/features/workout/presentation/screens/workout_summary_screen.dart';
@@ -59,6 +60,23 @@ class PendingUiRepository extends workout_fixture.FakeRepository {
         durationSeconds: 7,
       ),
       receipt.rewards,
+    );
+  }
+}
+
+class RecoveryTestController extends ActiveWorkoutController {
+  void injectLegacyDurationOnlySet() {
+    final exercise = state.exercises.first;
+    final set = exercise.sets.first.copyWith(
+      reps: 0,
+      weightKg: 0,
+      durationSeconds: 30,
+      isCompleted: true,
+    );
+    state = state.copyWith(
+      exercises: [
+        exercise.copyWith(sets: [set]),
+      ],
     );
   }
 }
@@ -170,6 +188,9 @@ void main() {
       overrides: [
         authStateStreamProvider.overrideWith((ref) => events.stream),
         workoutRepositoryProvider.overrideWithValue(repository),
+        activeWorkoutControllerProvider.overrideWith(
+          RecoveryTestController.new,
+        ),
         localizationModeProvider.overrideWith(
           () => FixedLanguage(AppLangMode.en),
         ),
@@ -223,6 +244,26 @@ void main() {
       },
     );
   }
+
+  test('pending receipt reconciles despite invalid local legacy set', () async {
+    final controller =
+        container.read(activeWorkoutControllerProvider.notifier)
+            as RecoveryTestController;
+    await controller.startWorkout();
+    detailError = true;
+    expect(await controller.completeWorkout(), isNull);
+    expect(controller.completionNeedsRecovery, isTrue);
+    expect(rpcCalls, 1);
+
+    controller.injectLegacyDurationOnlySet();
+    detailError = false;
+    final result = await controller.completeWorkout();
+
+    expect(result?['workout'], detail);
+    expect(rpcCalls, 1);
+    expect(detailCalls, 2);
+    expect(controller.completionNeedsRecovery, isFalse);
+  });
 
   test(
     'hydrated server duration wins over the 120-second local timer',

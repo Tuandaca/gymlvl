@@ -10,6 +10,8 @@
 ///   - zero reward (historical workout restore)
 ///   - no secrets restored
 
+library;
+
 import 'dart:convert';
 
 import 'package:app/features/analytics/data/backup_import_service.dart';
@@ -131,12 +133,65 @@ class _FakeExerciseRepository implements ExerciseRepository {
   void addCatalogueExercise(Exercise ex) => _catalogue.add(ex);
 }
 
-class _FakeWorkoutRepository implements WorkoutRepository {
+class _FakeWorkoutRepository
+    implements
+        WorkoutRepository,
+        HistoricalWorkoutImportRepository,
+        HistoricalMeasurementImportRepository,
+        HistoricalImportIdentity {
+  @override
+  String get authenticatedUserId => 'test-user-123';
   final List<Workout> _workouts = [];
   bool markWorkoutCompletedCalledWithoutRewards = false;
   int startWorkoutCallCount = 0;
   int addExerciseToWorkoutCallCount = 0;
   int addSetCallCount = 0;
+  int historicalWorkoutImportCallCount = 0;
+  int historicalMeasurementImportCallCount = 0;
+  final Map<String, String> _workoutImports = {};
+  final Map<String, String> _measurementImports = {};
+
+  @override
+  Future<HistoricalWorkoutImportReceipt> importHistoricalWorkout({
+    required String importKey,
+    required Map<String, dynamic> payload,
+  }) async {
+    historicalWorkoutImportCallCount++;
+    final prior = _workoutImports[importKey];
+    if (prior != null) {
+      return HistoricalWorkoutImportReceipt(
+        workoutId: prior,
+        alreadyImported: true,
+      );
+    }
+    final id = 'restored-${_workoutImports.length + 1}';
+    _workoutImports[importKey] = id;
+    return HistoricalWorkoutImportReceipt(
+      workoutId: id,
+      alreadyImported: false,
+    );
+  }
+
+  @override
+  Future<HistoricalMeasurementImportReceipt> importHistoricalMeasurement({
+    required String importKey,
+    required Map<String, dynamic> payload,
+  }) async {
+    historicalMeasurementImportCallCount++;
+    final prior = _measurementImports[importKey];
+    if (prior != null) {
+      return HistoricalMeasurementImportReceipt(
+        measurementId: prior,
+        alreadyImported: true,
+      );
+    }
+    final id = 'measurement-${_measurementImports.length + 1}';
+    _measurementImports[importKey] = id;
+    return HistoricalMeasurementImportReceipt(
+      measurementId: id,
+      alreadyImported: false,
+    );
+  }
 
   @override
   Future<Workout> startWorkout() async {
@@ -310,9 +365,9 @@ void main() {
 
     final DateTime now = DateTime(2026, 11, 6, 12, 0, 0);
 
-    String _buildValidBackup() {
+    String buildValidBackup() {
       final w = Workout(
-        id: 'w-original-1',
+        id: '97000000-0000-4000-8000-000000000001',
         userId: kTestUserId,
         status: WorkoutStatus.completed,
         durationSeconds: 1800,
@@ -357,7 +412,7 @@ void main() {
     }
 
     test('valid backup v1 validates and previews successfully', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final preview = importService.preview(json);
 
       expect(preview.validationResult.isValid, isTrue);
@@ -379,7 +434,7 @@ void main() {
     });
 
     test('wrong format is rejected', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final modified = jsonDecode(json) as Map<String, dynamic>;
       modified['format'] = 'wrong-format';
       final preview = importService.preview(jsonEncode(modified));
@@ -395,7 +450,7 @@ void main() {
     });
 
     test('unsupported version is rejected', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final modified = jsonDecode(json) as Map<String, dynamic>;
       modified['version'] = 999;
       final preview = importService.preview(jsonEncode(modified));
@@ -410,8 +465,8 @@ void main() {
       expect(preview.canRestore, isFalse);
     });
 
-    test('restore uses markWorkoutCompleted (zero XP, no rewards)', () async {
-      final json = _buildValidBackup();
+    test('restore uses atomic historical RPC (zero XP, no rewards)', () async {
+      final json = buildValidBackup();
       final result = await importService.restore(
         jsonContent: json,
         currentUserId: kTestUserId,
@@ -420,16 +475,19 @@ void main() {
       );
 
       expect(result.success, isTrue);
-      expect(workoutRepo.markWorkoutCompletedCalledWithoutRewards, isTrue);
+      expect(workoutRepo.historicalWorkoutImportCallCount, 1);
+      expect(workoutRepo.historicalMeasurementImportCallCount, 1);
+      expect(workoutRepo.markWorkoutCompletedCalledWithoutRewards, isFalse);
       expect(result.restoredWorkoutCount, 1);
       expect(result.restoredExerciseCount, 1);
       expect(result.restoredSetCount, 1);
+      expect(result.restoredMeasurementCount, 1);
     });
 
     test(
       'restore does not call completeWorkout (no retroactive rewards)',
       () async {
-        final json = _buildValidBackup();
+        final json = buildValidBackup();
         await importService.restore(
           jsonContent: json,
           currentUserId: kTestUserId,
@@ -437,12 +495,13 @@ void main() {
           recordImported: _recordImported,
         );
 
-        expect(workoutRepo.markWorkoutCompletedCalledWithoutRewards, isTrue);
+        expect(workoutRepo.historicalWorkoutImportCallCount, 1);
+        expect(workoutRepo.markWorkoutCompletedCalledWithoutRewards, isFalse);
       },
     );
 
     test('duplicate restore (same backup twice) is idempotent', () async {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
 
       // First restore: creates records
       final result1 = await importService.restore(
@@ -455,9 +514,11 @@ void main() {
       expect(result1.restoredWorkoutCount, 1);
       expect(result1.restoredExerciseCount, 1);
       expect(result1.restoredSetCount, 1);
-      expect(workoutRepo.startWorkoutCallCount, 1);
-      expect(workoutRepo.addExerciseToWorkoutCallCount, 1);
-      expect(workoutRepo.addSetCallCount, 1);
+      expect(workoutRepo.historicalWorkoutImportCallCount, 1);
+      expect(workoutRepo.historicalMeasurementImportCallCount, 1);
+      expect(workoutRepo.startWorkoutCallCount, 0);
+      expect(workoutRepo.addExerciseToWorkoutCallCount, 0);
+      expect(workoutRepo.addSetCallCount, 0);
 
       // Second restore: same backup content → detected as duplicate,
       // no new records created
@@ -474,13 +535,15 @@ void main() {
       expect(result2.skippedDuplicateCount, 1);
       expect(result2.warnings.any((w) => w.code == 'already_imported'), isTrue);
       // No additional mutation calls on second restore
-      expect(workoutRepo.startWorkoutCallCount, 1);
-      expect(workoutRepo.addExerciseToWorkoutCallCount, 1);
-      expect(workoutRepo.addSetCallCount, 1);
+      expect(workoutRepo.historicalWorkoutImportCallCount, 1);
+      expect(workoutRepo.historicalMeasurementImportCallCount, 1);
+      expect(workoutRepo.startWorkoutCallCount, 0);
+      expect(workoutRepo.addExerciseToWorkoutCallCount, 0);
+      expect(workoutRepo.addSetCallCount, 0);
     });
 
     test('no secrets or credentials restored', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final parsed = jsonDecode(json) as Map<String, dynamic>;
 
       expect(parsed.containsKey('password'), isFalse);
@@ -491,7 +554,7 @@ void main() {
     });
 
     test('invalid dates are rejected', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final modified = jsonDecode(json) as Map<String, dynamic>;
       final data = modified['data'] as Map<String, dynamic>;
       final workouts = data['workouts'] as List;
@@ -506,7 +569,7 @@ void main() {
     });
 
     test('invalid numeric values are rejected', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final modified = jsonDecode(json) as Map<String, dynamic>;
       final data = modified['data'] as Map<String, dynamic>;
       final workouts = data['workouts'] as List;
@@ -517,7 +580,7 @@ void main() {
     });
 
     test('duplicate IDs within backup are rejected', () {
-      final json = _buildValidBackup();
+      final json = buildValidBackup();
       final modified = jsonDecode(json) as Map<String, dynamic>;
       final data = modified['data'] as Map<String, dynamic>;
       final workouts = data['workouts'] as List;

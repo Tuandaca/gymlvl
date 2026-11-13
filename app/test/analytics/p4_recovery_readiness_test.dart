@@ -28,7 +28,7 @@ void main() {
   );
   final exercises = [chest, back, legs];
 
-  Workout _completed(
+  Workout completed(
     String id,
     DateTime completedAt, {
     required String exerciseId,
@@ -71,7 +71,7 @@ void main() {
     test('recently trained (0-1 days)', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(hours: 10)),
           exerciseId: 'ex_bench',
@@ -99,7 +99,7 @@ void main() {
     test('moderately recovered (2-7 days)', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(days: 4)),
           exerciseId: 'ex_bench',
@@ -120,7 +120,7 @@ void main() {
     test('long time since trained (8+ days)', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(days: 10)),
           exerciseId: 'ex_bench',
@@ -156,13 +156,13 @@ void main() {
     test('per muscle group: different days per group', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(days: 1)),
           exerciseId: 'ex_bench',
           sets: [working('s1', 10, 50)],
         ),
-        _completed(
+        completed(
           'w2',
           ref.subtract(const Duration(days: 12)),
           exerciseId: 'ex_squat',
@@ -191,7 +191,7 @@ void main() {
     test('warm-up sets do not count as training', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(days: 1)),
           exerciseId: 'ex_bench',
@@ -222,7 +222,7 @@ void main() {
     test('deterministic replay with same reference date', () {
       final engine = RecoveryReadinessEngine();
       final workouts = [
-        _completed(
+        completed(
           'w1',
           ref.subtract(const Duration(days: 3)),
           exerciseId: 'ex_bench',

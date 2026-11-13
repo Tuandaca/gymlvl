@@ -54,6 +54,8 @@ The target is conceptually:
 
 ## 4. Current phase and status
 
+**2026-11-10 update (D-050):** The table below is refreshed against `main` @ `c68e577`. P9 is the owner-authorized reliability hardening phase. It adds no product feature or production deployment authorization. Earlier narrative in this document about P1–P8 being upcoming is historical planning context.
+
 | Phase | Scope | Status |
 |---|---|---|
 | **P0** | Planning Rebase & Context Consolidation | **COMPLETE** — accurate truth established, contradictions removed, one canonical roadmap |
@@ -61,13 +63,13 @@ The target is conceptually:
 | **P2** | Routine & Planning Parity | COMPLETE (awaiting owner commit) |
 | **P3** | Workout Core Parity | COMPLETE |
 | **P4** | Progress / Analytics / Utility Parity | COMPLETE |
-| **P5** | Deep GymLvl Game Integration | IN PROGRESS |
-| **P6** | AI Personal Trainer | Planned (after P1–P5) |
-| **P7** | Media, Optional Integrations & Expansion | Deferred (legal authorization required) |
-| **P8** | Release Hardening | Planned (after product core complete) |
+| **P5** | Deep GymLvl Game Integration | COMPLETE in committed history; P9 found consistency defects |
+| **P6** | AI Personal Trainer | COMPLETE in committed history; P9 found correctness/privacy gaps |
+| **P7** | Authorized parity and utility gates; media remains excluded | COMPLETE in committed history; media still deferred |
+| **P8** | Release hardening and production remediation | COMPLETE in committed history; current CI at `c68e577` failed |
+| **P9** | Reliability and consistency hardening (no new feature milestone) | LOCAL COMPLETE — P9.0–P9.6 and quality gates verified; production deployment/live parity remain gated |
 
-**Critical path:** P0 → P1 → P2 → P3 → P4 → P5 → P6 → P8.
-P7 must never block P8.
+**Current critical path:** P9 local hardening → separately authorized production migration/live-schema preflight. Typography correction is a separate task under D-056. Git writes require explicit owner authorization; the 2026-11-13 request authorizes the scoped P9 push.
 
 **Do NOT continue automatically to old M6 merely because previous documents say M6 is next. AI PT is not the immediate next implementation stage.**
 

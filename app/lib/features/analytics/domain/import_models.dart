@@ -3,9 +3,15 @@
 /// These models are the canonical in-memory representation of a parsed
 /// workout file, independent of the source format. They are validated before
 /// persistence and never written directly to XP/reward tables.
+library;
 
-import 'package:app/features/workout/domain/workout_mode_contract.dart';
-import 'package:collection/collection.dart';
+bool _sameImportedSets(List<ImportedSet> left, List<ImportedSet> right) {
+  if (left.length != right.length) return false;
+  for (var index = 0; index < left.length; index++) {
+    if (left[index] != right[index]) return false;
+  }
+  return true;
+}
 
 /// A single normalized set from an imported source.
 class ImportedSet {
@@ -16,6 +22,7 @@ class ImportedSet {
     required this.durationSeconds,
     this.unit, // 'kg' | 'lb' | null; null = no weight (bodyweight/timed/cardio)
     this.notes,
+
     /// Raw source value preserved for audit/debugging (never canonical).
     this.rawWeight,
     this.rawUnit,
@@ -73,7 +80,7 @@ class ImportedSet {
 class ImportedExercise {
   const ImportedExercise({
     required this.sourceName, // name as it appeared in the source file
-    required this.exerciseId, // resolved canonical/custom exercise id (null if unresolved)
+    this.exerciseId, // resolved canonical/custom exercise id (null if unresolved)
     this.matchedExerciseId, // canonical exercise id when matched to catalogue
     this.customExerciseId, // user-owned custom exercise id when created/mapped
     this.resolution, // how the exercise was resolved
@@ -91,6 +98,28 @@ class ImportedExercise {
   final String? notes;
   final int? orderIndex;
 
+  ImportedExercise copyWith({
+    String? sourceName,
+    String? exerciseId,
+    String? matchedExerciseId,
+    String? customExerciseId,
+    ImportExerciseResolution? resolution,
+    List<ImportedSet>? sets,
+    String? notes,
+    int? orderIndex,
+  }) {
+    return ImportedExercise(
+      sourceName: sourceName ?? this.sourceName,
+      exerciseId: exerciseId ?? this.exerciseId,
+      matchedExerciseId: matchedExerciseId ?? this.matchedExerciseId,
+      customExerciseId: customExerciseId ?? this.customExerciseId,
+      resolution: resolution ?? this.resolution,
+      sets: sets ?? this.sets,
+      notes: notes ?? this.notes,
+      orderIndex: orderIndex ?? this.orderIndex,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -98,7 +127,7 @@ class ImportedExercise {
           runtimeType == other.runtimeType &&
           sourceName == other.sourceName &&
           exerciseId == other.exerciseId &&
-          const DeepCollectionEquality().equals(sets, other.sets);
+          _sameImportedSets(sets, other.sets);
 
   @override
   int get hashCode => Object.hash(sourceName, exerciseId, sets);

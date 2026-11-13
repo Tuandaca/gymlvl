@@ -38,6 +38,88 @@ abstract interface class ModeAwareWorkoutRepository {
   );
 }
 
+/// Multi-row workout edits must be acknowledged by one server transaction.
+/// The request ID and payload are reused after an uncertain response.
+abstract interface class AtomicWorkoutMutationRepository {
+  Future<Workout> addExerciseWithDefaultSets({
+    required String operationId,
+    required String workoutId,
+    required String exerciseId,
+    required WorkoutMode? mode,
+    required List<Map<String, Object>> sets,
+  });
+
+  Future<Workout> reorderWorkoutExercisesAtomically({
+    required String operationId,
+    required String workoutId,
+    required List<String> exerciseIds,
+  });
+}
+
+/// A server-acknowledged historical import. It never awards workout rewards.
+class HistoricalWorkoutImportReceipt {
+  final String workoutId;
+  final bool alreadyImported;
+  final List<String> createdCustomExerciseIds;
+
+  const HistoricalWorkoutImportReceipt({
+    required this.workoutId,
+    required this.alreadyImported,
+    this.createdCustomExerciseIds = const [],
+  });
+}
+
+/// Optional capability so interactive workout operations cannot be used as an
+/// accidental fallback for historical imports.
+abstract interface class HistoricalWorkoutImportRepository {
+  Future<HistoricalWorkoutImportReceipt> importHistoricalWorkout({
+    required String importKey,
+    required Map<String, dynamic> payload,
+  });
+}
+
+class HistoricalMeasurementImportReceipt {
+  final String measurementId;
+  final bool alreadyImported;
+
+  const HistoricalMeasurementImportReceipt({
+    required this.measurementId,
+    required this.alreadyImported,
+  });
+}
+
+abstract interface class HistoricalMeasurementImportRepository {
+  Future<HistoricalMeasurementImportReceipt> importHistoricalMeasurement({
+    required String importKey,
+    required Map<String, dynamic> payload,
+  });
+}
+
+/// Authenticated owner observed by the repository adapter, independently of
+/// any owner ID supplied by an imported file or the caller.
+abstract interface class HistoricalImportIdentity {
+  String get authenticatedUserId;
+}
+
+class HistoricalCustomExerciseImportReceipt {
+  final String exerciseId;
+  final bool alreadyImported;
+  final bool created;
+
+  const HistoricalCustomExerciseImportReceipt({
+    required this.exerciseId,
+    required this.alreadyImported,
+    required this.created,
+  });
+}
+
+abstract interface class HistoricalCustomExerciseImportRepository {
+  Future<HistoricalCustomExerciseImportReceipt> importCustomExercise({
+    required String importKey,
+    required Map<String, dynamic> payload,
+  });
+}
+
 abstract class WorkoutRepository {
   /// Tạo workout mới (status: active)
   Future<Workout> startWorkout();
@@ -128,8 +210,9 @@ abstract class WorkoutRepository {
 
   /// Đánh dấu một workout nhập từ lịch sử là hoàn thành KHÔNG tặng XP.
   ///
-  /// Chỉ dùng cho pipeline nhập dữ liệu. `complete_workout` vẫn là đường
-  /// dẫn thưởng duy nhất; nhập file không kích hoạt RPG.
+  /// Legacy compatibility path. Historical imports use
+  /// [HistoricalWorkoutImportRepository] instead; `complete_workout` remains
+  /// the only reward path.
   Future<Workout> markWorkoutCompleted(
     String workoutId, {
     DateTime? completedAt,

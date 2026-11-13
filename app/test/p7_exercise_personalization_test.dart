@@ -10,6 +10,8 @@
 ///           unit conversion, preview before persist, duplicate fingerprint,
 ///           retry safe, zero XP
 
+library;
+
 import 'package:app/features/analytics/data/csv_import_service.dart';
 import 'package:app/features/analytics/domain/import_models.dart';
 import 'package:app/features/workout/domain/exercise.dart';
@@ -461,7 +463,6 @@ void main() {
   group('P7 Gate 3 - Import Framework', () {
     late CsvImportService importService;
     late _FakeExerciseRepository exerciseRepo;
-    late _FakeWorkoutRepository workoutRepo;
 
     setUp(() {
       importService = CsvImportService();
@@ -475,7 +476,6 @@ void main() {
           source: 'gymlvl_curated',
         ),
       );
-      workoutRepo = _FakeWorkoutRepository();
     });
 
     test('generic CSV format detected and parsed', () {

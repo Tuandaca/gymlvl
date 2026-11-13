@@ -171,7 +171,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
             const SizedBox(height: 8.0),
 
             // Session list (chronological, oldest first).
-            ...sessions.map((s) => _sessionRow(ref, s)).toList(),
+            ...sessions.map((s) => _sessionRow(ref, s)),
             const SizedBox(height: 24.0),
           ],
         ),
@@ -250,7 +250,7 @@ class ExerciseProgressScreen extends ConsumerWidget {
               children: [
                 Text(
                   s.estimated1rm != null
-                      ? '${s.estimated1rm!.toStringAsFixed(1)}'
+                      ? s.estimated1rm!.toStringAsFixed(1)
                       : '—',
                   style: const TextStyle(
                     fontFamily: CandyFonts.display,

@@ -10,6 +10,8 @@
 ///   - Unknown provenance rejected/unavailable
 ///   - OpenGym proprietary media absent
 
+library;
+
 import 'package:app/features/analytics/domain/health_data_repository.dart';
 import 'package:app/features/workout/domain/exercise_media.dart';
 import 'package:flutter_test/flutter_test.dart';

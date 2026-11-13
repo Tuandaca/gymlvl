@@ -260,21 +260,20 @@ final workoutRepositoryProvider = Provider<WorkoutRepository>((ref) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 /// Owner's non-archived custom exercises.
-final customExercisesProvider = FutureProvider.family<List<Exercise>, String>(
-  (ref, userId) async {
-    final repository = ref.watch(exerciseRepositoryProvider);
-    return repository.getCustomExercises(userId);
-  },
-);
+final customExercisesProvider = FutureProvider.family<List<Exercise>, String>((
+  ref,
+  userId,
+) async {
+  final repository = ref.watch(exerciseRepositoryProvider);
+  return repository.getCustomExercises(userId);
+});
 
 /// Owner's archived custom exercises (history-preserving soft delete).
 final archivedCustomExercisesProvider =
-    FutureProvider.family<List<Exercise>, String>(
-  (ref, userId) async {
-    final repository = ref.watch(exerciseRepositoryProvider);
-    return repository.getArchivedCustomExercises(userId);
-  },
-);
+    FutureProvider.family<List<Exercise>, String>((ref, userId) async {
+      final repository = ref.watch(exerciseRepositoryProvider);
+      return repository.getArchivedCustomExercises(userId);
+    });
 
 class CustomExerciseNotifier extends Notifier<AsyncValue<Exercise?>> {
   @override
@@ -311,8 +310,8 @@ class CustomExerciseNotifier extends Notifier<AsyncValue<Exercise?>> {
 
 final customExerciseProvider =
     NotifierProvider.autoDispose<CustomExerciseNotifier, AsyncValue<Exercise?>>(
-  CustomExerciseNotifier.new,
-);
+      CustomExerciseNotifier.new,
+    );
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // P7 Gate 2: favourites + aliases providers (owner-scoped).
@@ -320,16 +319,16 @@ final customExerciseProvider =
 
 /// Exercise IDs favourited by [userId].
 final favouriteExerciseIdsProvider =
-    FutureProvider.family<List<String>, String>(
-  (ref, userId) async {
-    final repository = ref.read(exerciseRepositoryProvider);
-    return repository.favouriteExerciseIds(userId);
-  },
-);
+    FutureProvider.family<List<String>, String>((ref, userId) async {
+      final repository = ref.read(exerciseRepositoryProvider);
+      return repository.favouriteExerciseIds(userId);
+    });
 
 /// Whether [exerciseId] is favourited by [userId].
-final isExerciseFavouriteProvider =
-    FutureProvider.family<bool, _FavouriteKey>((ref, key) async {
+final isExerciseFavouriteProvider = FutureProvider.family<bool, _FavouriteKey>((
+  ref,
+  key,
+) async {
   final repository = ref.read(exerciseRepositoryProvider);
   return repository.isExerciseFavourite(key.userId, key.exerciseId);
 });
@@ -362,19 +361,19 @@ class ExerciseFavouriteNotifier extends Notifier<bool> {
   }
 }
 
-final exerciseFavouriteProvider = NotifierProvider.autoDispose<
-    ExerciseFavouriteNotifier, bool>(ExerciseFavouriteNotifier.new);
+final exerciseFavouriteProvider =
+    NotifierProvider.autoDispose<ExerciseFavouriteNotifier, bool>(
+      ExerciseFavouriteNotifier.new,
+    );
 
 /// All aliases for [userId].
-final exerciseAliasesProvider = FutureProvider.family<List<ExerciseAlias>, String>(
-  (ref, userId) async {
-    final repository = ref.read(exerciseRepositoryProvider);
-    return repository.getExerciseAliases(userId);
-  },
-);
+final exerciseAliasesProvider =
+    FutureProvider.family<List<ExerciseAlias>, String>((ref, userId) async {
+      final repository = ref.read(exerciseRepositoryProvider);
+      return repository.getExerciseAliases(userId);
+    });
 
-class ExerciseAliasNotifier
-    extends Notifier<AsyncValue<List<ExerciseAlias>>> {
+class ExerciseAliasNotifier extends Notifier<AsyncValue<List<ExerciseAlias>>> {
   /// Riverpod passes the family key (owner user id) to the constructor.
   ExerciseAliasNotifier(this._userId);
 
@@ -410,12 +409,10 @@ class ExerciseAliasNotifier
 }
 
 /// Notifier family for exercise aliases keyed by owner user id.
-final exerciseAliasNotifierProvider =
-    NotifierProvider.autoDispose.family<
-      ExerciseAliasNotifier,
-      AsyncValue<List<ExerciseAlias>>,
-      String
-    >(ExerciseAliasNotifier.new);
+final exerciseAliasNotifierProvider = NotifierProvider.autoDispose
+    .family<ExerciseAliasNotifier, AsyncValue<List<ExerciseAlias>>, String>(
+      ExerciseAliasNotifier.new,
+    );
 
 final activeWorkoutControllerProvider =
     NotifierProvider<ActiveWorkoutController, ActiveWorkoutState>(

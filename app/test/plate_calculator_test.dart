@@ -173,4 +173,20 @@ void main() {
     expect(r1.toString(), contains('60'));
     expect(r1.toString(), contains('20'));
   });
+
+  test('diagnostic text reports plate denomination without rounding', () {
+    final multiple = calc.calculate(
+      targetWeight: 100,
+      barWeight: 20,
+      denominations: [20],
+    );
+    final fractional = calc.calculate(
+      targetWeight: 22.5,
+      barWeight: 20,
+      denominations: [1.25],
+    );
+
+    expect(multiple.toString(), contains('perSide=2x 20.0kg'));
+    expect(fractional.toString(), contains('perSide=1x 1.25kg'));
+  });
 }

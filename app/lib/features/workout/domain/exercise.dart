@@ -36,6 +36,14 @@ abstract class Exercise with _$Exercise {
     @Default('gymlvl_curated') String source,
     @JsonKey(name: 'external_id') String? externalId,
     @JsonKey(name: 'source_revision') String? sourceRevision,
+
+    /// Owner of a user-created custom exercise (`source == 'user'`). `null` for
+    /// curated / imported catalogue exercises that every authenticated user may view.
+    @JsonKey(name: 'user_id') String? userId,
+
+    /// Soft-delete flag. Archived custom exercises are hidden from browse/search but
+    /// remain referenced by historical workouts so history is never destroyed.
+    @Default(false) @JsonKey(name: 'is_archived') bool isArchived,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Exercise;

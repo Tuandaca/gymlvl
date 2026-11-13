@@ -128,8 +128,8 @@ class UnlockCard extends StatelessWidget {
             CandyBadge(
               label: translateText(
                 ref,
-                vi: '${unlock.rewardValue}',
-                en: '${unlock.rewardValue}',
+                vi: unlock.rewardValue,
+                en: unlock.rewardValue,
               ),
               variant: CandyBadgeVariant.yellow,
               fontSize: 10,

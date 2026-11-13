@@ -11,6 +11,30 @@
 > replay, and the new remote schema remain disabled pending encryption/security evidence,
 > genuine PostgreSQL concurrency verification, and separate deployment approval.
 
+## P9.2 staged historical import contract (local only, 2026-11-13)
+
+D-051 approves a same-account restore with one authenticated PostgreSQL transaction
+per historical workout. The staged `import_historical_workout_v1` RPC owns the
+workout graph write, records an owner-scoped idempotency receipt, and marks the
+result `is_imported`. It does not invoke `complete_workout` or write progression.
+Separate owner-scoped RPCs and ledgers import custom definitions and body
+measurements. The client records a file fingerprint only after all acknowledged
+items succeed; a retry resumes at item boundaries. Backup v2 exports supported
+custom text, workout mode/set details, and measurements with explicit unsupported
+sections. Production still runs the earlier schema until a separately authorized
+migration and live validation; this section describes the uncommitted local state.
+
+## P9.3 staged progression contract (local only, 2026-11-13)
+
+D-052 makes the D-043 cumulative class threshold authoritative for future
+`complete_workout` awards and class switches. A private `class_level_floors`
+table preserves previously stored levels and graduation across switches; no XP
+or reward history is rewritten. The view uses the primary class's XP for its
+next-level estimate. D-053 adds a server-only unlock sync triggered by a new
+`workout_rewards` row and backfills missing unlocks from verified achievements,
+global levels, and class graduation. Clients retain read-only owner-scoped
+unlock access. These changes are staged locally and are not deployed.
+
 ---
 
 ## 1. Current runtime
@@ -216,7 +240,21 @@ Proposals are **inert**. Application is a transactional RPC that verifies owners
 and plan hash, snapshots the previous plan, applies approved items, and audits. Revert affects the
 plan only, never workout history.
 
-## 6. AI Coach boundary (proposed)
+## 6. AI Coach boundary
+
+### Current local P9.4 contract
+
+The authenticated `ai-coach` Edge Function owns the seven-day profile/workout
+context query. A request requires explicit `consent: true` before quota, context
+access, or external provider egress. Client-supplied context is rejected. The
+Edge payload uses bounded allowlisted profile, workout and completed-set facts
+without internal account/workout/exercise IDs; those facts are sent as untrusted
+data, separate from the system instruction. Chat Send and PT Generate follow a
+visible disclosure. The current response is free-form advice only: the client
+cannot treat it as a validated proposal, show a confidence score, or apply it
+to routines or workout history. Core workouts do not depend on AI availability.
+
+### Proposed structured proposal contract
 
 | Layer | Owns |
 |---|---|
@@ -243,6 +281,21 @@ Hard rules:
 ## 7. Completion and rewards boundary
 
 Keep and extend the existing design:
+
+### P9.5 interactive workout mutation boundary (local)
+
+Exercise reorder and add-with-default-sets use authenticated PostgreSQL RPCs
+`reorder_workout_exercises_v1` and `add_workout_exercise_with_sets_v1`. Each
+request locks the account then the active owner workout, validates the complete
+desired order or default-set batch, writes within one transaction, and records
+an exact-replay receipt in the private `workout_write_operations` ledger.
+Reorder retains existing superset positions. Add derives append order on the
+server and writes no completion or reward rows. The Flutter controller fails
+closed without the atomic repository capability, retains operation ID and
+payload across uncertain retries, and adopts only an authoritative owner-scoped
+workout read. This is a local migration contract; production use requires the
+existing M3 ledger and mode-column migration chain plus separate preflight and
+authorization.
 
 ```text
 client completes sets

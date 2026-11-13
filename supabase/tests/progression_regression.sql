@@ -57,10 +57,14 @@ SELECT pg_temp.assert_true((SELECT count(*)=(SELECT log_count FROM fnd_data_001_
 SELECT pg_temp.assert_true((SELECT count(*)=(SELECT class_count FROM fnd_data_001_before) FROM public.user_classes),'blocked retries change no class progress');
 SELECT pg_temp.assert_true(NOT EXISTS(SELECT 1 FROM public.workout_rewards WHERE workout_id IN('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee','ffffffff-ffff-ffff-ffff-ffffffffffff')),'no reward row is fabricated for legacy evidence');
 SELECT pg_temp.assert_true(NOT EXISTS(SELECT 1 FROM public.workouts WHERE id='eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee' AND is_xp_calculated),'legacy is_xp_calculated flag is not fabricated');
--- At a class threshold the stored level and the client formula agree.
-UPDATE public.user_classes SET current_xp=130,level=1 WHERE user_id=auth.uid() AND class_id='C';
+-- D-043 cumulative threshold for class C level 2 is floor(130 * 2^1.55) = 380.
+UPDATE public.user_classes SET current_xp=379,level=1 WHERE user_id=auth.uid() AND class_id='C';
 SET LOCAL ROLE authenticated;
-SELECT pg_temp.assert_true((public.switch_class('C','secondary')->>'level')::integer=2,'class level2 threshold is xp_base');
+SELECT pg_temp.assert_true((public.switch_class('C','secondary')->>'level')::integer=1,'class level stays 1 below the D-043 level2 boundary');
+RESET ROLE;
+UPDATE public.user_classes SET current_xp=380,level=1 WHERE user_id=auth.uid() AND class_id='C';
+SET LOCAL ROLE authenticated;
+SELECT pg_temp.assert_true((public.switch_class('C','secondary')->>'level')::integer=2,'class level2 threshold matches D-043');
 RESET ROLE;
 SELECT set_config('request.jwt.claim.sub','',true);
 SELECT set_config('request.jwt.claims','{}',true);

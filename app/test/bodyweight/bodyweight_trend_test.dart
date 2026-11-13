@@ -41,9 +41,7 @@ void main() {
 
   group('single measurement', () {
     test('first and last are the same; no net change', () {
-      final trend = BodyweightTrend([
-        m('m1', 75.0, day: 1),
-      ]);
+      final trend = BodyweightTrend([m('m1', 75.0, day: 1)]);
 
       expect(trend.first?.weightKg, 75.0);
       expect(trend.last?.weightKg, 75.0);

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/core/localization/localization_engine.dart';
 import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/theme/candy_theme.dart';
 import 'package:app/ui/candy/candy_button.dart';
 import 'package:app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:app/features/auth/presentation/screens/login_screen.dart';
@@ -161,7 +162,8 @@ Future<ProviderContainer> pumpFixture(
       child: RepaintBoundary(
         key: const ValueKey('capture'),
         child: MaterialApp(
-          theme: theme ?? AppTheme.darkTheme,
+          theme: theme ?? CandyTheme.lightTheme,
+          themeMode: ThemeMode.light,
           debugShowCheckedModeBanner: false,
           locale: Locale(language == AppLangMode.en ? 'en' : 'vi'),
           supportedLocales: const [Locale('en'), Locale('vi')],
@@ -434,8 +436,9 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
     for (final font in {
-      'Inter': 'assets/fonts/InterVariable.ttf',
-      'Orbitron': 'assets/fonts/OrbitronVariable.ttf',
+      'Archivo': 'assets/fonts/ArchivoVariable.ttf',
+      'Space Grotesk': 'assets/fonts/SpaceGroteskVariable.ttf',
+      'Space Mono': 'assets/fonts/SpaceMono-Regular.ttf',
     }.entries) {
       final loader = FontLoader(font.key)
         ..addFont(
@@ -443,11 +446,32 @@ void main() {
             ByteData.sublistView(await File(font.value).readAsBytes()),
           ),
         );
+      if (font.key == 'Space Mono') {
+        loader.addFont(rootBundle.load('assets/fonts/SpaceMono-Bold.ttf'));
+      }
       await loader.load();
     }
     final icons = FontLoader('MaterialIcons')
       ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'));
     await icons.load();
+  });
+
+  testWidgets('default fixture uses the production light theme', (
+    tester,
+  ) async {
+    await pumpFixture(tester, const Scaffold(body: Text('Theme probe')));
+    final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
+    expect(app.themeMode, ThemeMode.light);
+    final theme = Theme.of(tester.element(find.text('Theme probe')));
+    expect(theme.brightness, Brightness.light);
+    expect(
+      theme.scaffoldBackgroundColor,
+      CandyTheme.lightTheme.scaffoldBackgroundColor,
+    );
+    expect(
+      theme.textTheme.bodyMedium?.fontFamily,
+      CandyTheme.lightTheme.textTheme.bodyMedium?.fontFamily,
+    );
   });
 
   final screens = <String, Widget>{

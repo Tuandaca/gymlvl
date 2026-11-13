@@ -57,8 +57,10 @@ void validateWorkoutSetForMode({
       }
       return;
     case null:
-      if (isCompleted && reps == 0 && durationSeconds == 0) {
-        throw ArgumentError('invalid_measurements');
+      if (isCompleted && reps == 0) {
+        throw ArgumentError(
+          durationSeconds == 0 ? 'invalid_measurements' : 'invalid_reps',
+        );
       }
       return;
   }

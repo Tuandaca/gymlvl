@@ -1,6 +1,7 @@
-/// AI Personal Trainer screen: structured recommendation display.
+/// AI Personal Trainer screen: advisory text from the configured coach.
 ///
-/// Displays AI PT recommendations as actionable cards with explainability.
+/// Displays advisory text; structured actions require a separate validated
+/// server response before this screen may expose an Apply control.
 /// AI is advisory: the user must explicitly accept any action that modifies
 /// plans/routines. No direct XP/level/streak/quest/achievement/unlock
 /// mutations from AI.
@@ -11,12 +12,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/localization/localization_engine.dart';
 import '../../../../../ui/candy/candy.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../workout/presentation/providers/exercise_providers.dart';
-import '../../../workout/domain/workout_set.dart';
 import '../../domain/models/pt_context.dart';
 import '../../domain/models/pt_recommendation.dart';
 import '../../domain/services/routine_application_service.dart';
-import '../providers/pt_context_provider.dart';
 import '../providers/pt_recommendation_provider.dart';
 
 /// AI Personal Trainer screen: shows recommendations with reasoning and
@@ -30,30 +30,70 @@ class AiTrainerScreen extends ConsumerStatefulWidget {
 }
 
 class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
+  String? _consentedForUserId;
+
   @override
   Widget build(BuildContext context) {
-    final ptxAsync = ref.watch(ptContextProvider);
+    final userId = ref.watch(authStateStreamProvider).value?.session?.user.id;
+    return _buildBody(context, userId);
+  }
 
-    return ptxAsync.when(
-      data: (ptx) => _buildBody(context, ptx),
+  Widget _buildBody(BuildContext context, String? userId) {
+    if (userId == null) return _buildError();
+    if (_consentedForUserId != userId) return _buildConsentPrompt(userId);
+    final recommendationAsync = ref.watch(ptRecommendationProvider);
+
+    return recommendationAsync.when(
+      data: (recommendation) => _buildContent(context, null, recommendation),
       loading: () => const CandySkeleton(height: 300, borderRadius: 18),
-      error: (error, _) => _buildError(context, error.toString()),
+      error: (error, _) => _buildError(),
     );
   }
 
-  Widget _buildBody(BuildContext context, PtContext ptx) {
-    final recommendationAsync = ref.watch(ptRecommendationProvider(ptx));
-
-    return recommendationAsync.when(
-      data: (recommendation) => _buildContent(context, ptx, recommendation),
-      loading: () => const CandySkeleton(height: 300, borderRadius: 18),
-      error: (error, _) => _buildError(context, error.toString()),
+  Widget _buildConsentPrompt(String userId) {
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: CandyCard(
+            shadow: CandyCardShadow.small,
+            padding: const EdgeInsets.all(16),
+            backgroundColor: CandyColors.canvas,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  translateText(
+                    ref,
+                    vi: 'Khi bấm Tạo gợi ý, dịch vụ AI đã cấu hình sẽ nhận môi trường tập, mục tiêu, mức kinh nghiệm, số ngày tập ở phòng gym và ở nhà mỗi tuần; tối đa 7 buổi đã hoàn thành trong 7 ngày gần đây, gồm thời điểm, thời lượng, tên/nhóm bài tập, số lần lặp và mức tạ của các hiệp hoàn thành. Gợi ý chỉ để tham khảo và không thay đổi dữ liệu tập luyện.',
+                    en: 'Generate shares your training environment, goals, experience, weekly gym and home days, and up to 7 completed workouts from the past 7 days with the configured AI service. Workout facts include time, duration, exercise names/categories, and completed-set reps and weights. Advice does not change workout records.',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                CandyButton(
+                  label: translateText(
+                    ref,
+                    vi: 'TẠO GỢI Ý',
+                    en: 'GENERATE ADVICE',
+                  ),
+                  variant: CandyButtonVariant.primary,
+                  onPressed: () {
+                    ref.invalidate(ptRecommendationProvider);
+                    setState(() => _consentedForUserId = userId);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildContent(
     BuildContext context,
-    PtContext ptx,
+    PtContext? ptx,
     PtRecommendation recommendation,
   ) {
     return SingleChildScrollView(
@@ -219,62 +259,67 @@ class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Confidence
-          Text(
-            translateText(ref, vi: 'ĐỘ TIN CẬY', en: 'CONFIDENCE'),
-            style: const TextStyle(
-              fontFamily: CandyFonts.display,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: CandyColors.ink,
+          // A text-only answer has no measured confidence score.
+          if (recommendation.isValidated) ...[
+            Text(
+              translateText(ref, vi: 'ĐỘ TIN CẬY', en: 'CONFIDENCE'),
+              style: const TextStyle(
+                fontFamily: CandyFonts.display,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: CandyColors.ink,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          CandyProgressBar(
-            progress: recommendation.confidence.clamp(0.0, 1.0),
-            height: 10,
-            fillColor: CandyColors.mintGreen,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${(recommendation.confidence * 100).round()}%',
-            style: const TextStyle(
-              fontFamily: CandyFonts.mono,
-              fontSize: 12,
-              color: CandyColors.charcoal,
+            const SizedBox(height: 8),
+            CandyProgressBar(
+              progress: recommendation.confidence.clamp(0.0, 1.0),
+              height: 10,
+              fillColor: CandyColors.mintGreen,
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              '${(recommendation.confidence * 100).round()}%',
+              style: const TextStyle(
+                fontFamily: CandyFonts.mono,
+                fontSize: 12,
+                color: CandyColors.charcoal,
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
 
           // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: CandyButton(
-                  label: translateText(
-                    ref,
-                    vi: 'ÁP DỤNG VÀO KẾ HOẠCH',
-                    en: 'APPLY TO ROUTINE',
+          if (ptx != null &&
+              recommendation.isValidated &&
+              recommendation.hasActionable)
+            Row(
+              children: [
+                Expanded(
+                  child: CandyButton(
+                    label: translateText(
+                      ref,
+                      vi: 'ÁP DỤNG VÀO KẾ HOẠCH',
+                      en: 'APPLY TO ROUTINE',
+                    ),
+                    variant: CandyButtonVariant.primary,
+                    size: CandyButtonSize.large,
+                    icon: Icons.edit_calendar,
+                    onPressed: () =>
+                        _showApplyDialog(context, ptx, recommendation),
                   ),
-                  variant: CandyButtonVariant.primary,
-                  size: CandyButtonSize.large,
-                  icon: Icons.edit_calendar,
-                  onPressed: () =>
-                      _showApplyDialog(context, ptx, recommendation),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CandyButton(
-                  label: translateText(ref, vi: 'BỎ QUA', en: 'DISMISS'),
-                  variant: CandyButtonVariant.secondary,
-                  size: CandyButtonSize.large,
-                  icon: Icons.close,
-                  onPressed: () {},
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CandyButton(
+                    label: translateText(ref, vi: 'BỎ QUA', en: 'DISMISS'),
+                    variant: CandyButtonVariant.secondary,
+                    size: CandyButtonSize.large,
+                    icon: Icons.close,
+                    onPressed: () {},
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -377,7 +422,7 @@ class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
     );
   }
 
-  Widget _buildError(BuildContext context, String error) {
+  Widget _buildError() {
     return CandyScaffold(
       appBar: AppBar(
         title: Text(translateText(ref, vi: 'AI COACH', en: 'AI COACH')),
@@ -388,7 +433,11 @@ class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
       body: Center(
         child: CandyErrorState(
           title: translateText(ref, vi: 'LỖI', en: 'ERROR'),
-          message: error,
+          message: translateText(
+            ref,
+            vi: 'AI Coach hiện chưa phản hồi. Bạn vẫn có thể tập luyện và thử lại sau.',
+            en: 'AI Coach is unavailable. Workouts remain available; try again later.',
+          ),
           retryLabel: translateText(ref, vi: 'THỬ LẠI', en: 'RETRY'),
           onRetry: () => ref.invalidate(ptRecommendationProvider),
         ),
@@ -462,7 +511,7 @@ class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
     // Get the active workout to apply changes to.
     final active = await repo.getActiveWorkout();
     if (active == null) {
-      if (!mounted) return;
+      if (!mounted || !context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -479,7 +528,7 @@ class _AiTrainerScreenState extends ConsumerState<AiTrainerScreen> {
 
     final result = await service.applyRecommendation(active.id, item);
 
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (result.applied) {
       ScaffoldMessenger.of(context).showSnackBar(

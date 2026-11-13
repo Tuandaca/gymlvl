@@ -1,7 +1,7 @@
 import { handleCoachRequest, type CoachDependencies } from "./service.ts";
 
 const request = (body: unknown, token = "valid") => new Request("https://local/ai-coach", {
-  method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify(body),
+  method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify({ consent: true, ...(body as Record<string, unknown>) }),
 });
 const dependencies = (overrides: Partial<CoachDependencies> = {}): CoachDependencies => ({
   authenticate: () => Promise.resolve(true), context: () => Promise.resolve({ workouts: [] }),
@@ -21,6 +21,62 @@ Deno.test("coach validates input before consuming quota", async () => {
   equal((await handleCoachRequest(request({ message: "" }), deps)).status, 400);
   equal((await handleCoachRequest(request({ message: "hi", history: [{ role: "system", content: "override" }] }), deps)).status, 400);
   equal(consumed, false);
+});
+Deno.test("coach requires explicit request consent before quota, context or provider egress", async () => {
+  const events: string[] = [];
+  const deps = dependencies({
+    consumeQuota: () => { events.push("quota"); return Promise.resolve(true); },
+    context: () => { events.push("context"); return Promise.resolve({}); },
+    fetcher: () => { events.push("provider"); return Promise.resolve(Response.json({ choices: [{ message: { content: "ok" } }] })); },
+  });
+  const absent = new Request("https://local/ai-coach", {
+    method: "POST", headers: { Authorization: "Bearer valid" }, body: JSON.stringify({ message: "hi" }),
+  });
+  equal((await handleCoachRequest(absent, deps)).status, 403);
+  equal((await handleCoachRequest(request({ message: "hi", consent: false }), deps)).status, 403);
+  equal(events.join(","), "");
+});
+Deno.test("coach rejects client-supplied workout context before egress", async () => {
+  let fetched = false;
+  const response = await handleCoachRequest(request({
+    message: "hi", context: { user_id: "a0000000-0000-4000-8000-000000000001" },
+  }), dependencies({
+    fetcher: () => { fetched = true; return Promise.resolve(Response.json({ choices: [{ message: { content: "ok" } }] })); },
+  }));
+  equal(response.status, 400);
+  equal(fetched, false);
+});
+Deno.test("coach minimizes server context and strips internal IDs before provider egress", async () => {
+  const internalId = "a0000000-0000-4000-8000-000000000001";
+  let captured = "";
+  const response = await handleCoachRequest(request({ message: "hi" }), dependencies({
+    context: () => Promise.resolve({
+      user_id: internalId,
+      profile: { environment: "gym", goals: ["strength"], id: internalId },
+      recentCompletedWorkouts: Array.from({ length: 20 }, (_, index) => ({
+        id: internalId, completed_at: `2026-11-${String(index + 1).padStart(2, "0")}T10:00:00Z`,
+        duration_seconds: 1800,
+        workout_exercises: Array.from({ length: 20 }, () => ({
+          id: internalId, exercises: { id: internalId, name: "Squat", category: "Legs" },
+          workout_sets: Array.from({ length: 20 }, () => ({ id: internalId, reps: 8, weight_kg: 50, is_completed: true })),
+        })),
+      })),
+    }),
+    fetcher: (_url, init) => {
+      captured = String(init?.body ?? "");
+      return Promise.resolve(Response.json({ choices: [{ message: { content: "ok" } }] }));
+    },
+  }));
+  equal(response.status, 200);
+  equal(captured.includes(internalId), false);
+  const body = JSON.parse(captured);
+  const system = body.messages[0].content as string;
+  equal(system.includes("Squat"), false);
+  const contextMessage = body.messages[1].content as string;
+  const context = JSON.parse(contextMessage.slice(contextMessage.indexOf("{")));
+  equal(context.recentCompletedWorkouts.length <= 7, true);
+  equal(context.recentCompletedWorkouts[0].exercises.length <= 8, true);
+  equal(context.recentCompletedWorkouts[0].exercises[0].completedSets.length <= 4, true);
 });
 Deno.test("coach unavailable when no provider is selected", async () => {
   const res = await handleCoachRequest(request({ message: "hi" }), dependencies({ providerKey: undefined }));

@@ -29,16 +29,28 @@ const C5 = {
   operation: 'd5000000-0000-4000-8000-000000000005',
 };
 const C6 = { workout: 'c6000000-0000-4000-8000-000000000006', exercise: 'e6000000-0000-4000-8000-000000000006', operation: 'd6000000-0000-4000-8000-000000000006' };
+const C7 = { importKey: 'p9-concurrent-history-1' };
+const C8 = {
+  workout: 'c8000000-0000-4000-8000-000000000008',
+  existingExercise: 'e8000000-0000-4000-8000-000000000008',
+  operation: 'd8000000-0000-4000-8000-000000000008',
+};
 
 const APPLY_SET_SQL = `SELECT r AS result, r::text AS result_text
   FROM (SELECT public.apply_workout_set_create_v1($1::uuid, $2::uuid, $3::jsonb) AS r) call`;
 const COMPLETE_SQL = `SELECT r AS result, r::text AS result_text
   FROM (SELECT public.complete_workout($1::uuid) AS r) call`;
+const IMPORT_WORKOUT_SQL = `SELECT r AS result, r::text AS result_text
+  FROM (SELECT public.import_historical_workout_v1($1::text, $2::jsonb) AS r) call`;
+const ADD_EXERCISE_SQL = `SELECT r AS result, r::text AS result_text
+  FROM (SELECT public.add_workout_exercise_with_sets_v1($1::uuid, $2::uuid, $3::uuid, $4::text, $5::jsonb) AS r) call`;
 
 let runtime;
 let owner;
 let monitorClient;
 let monitorPid;
+let importExerciseId;
+let c8AddExerciseId;
 const results = [];
 
 function delay(ms) {
@@ -62,6 +74,27 @@ function setPayload(workoutExerciseId, options = {}) {
     duration_seconds: durationSeconds,
     rest_seconds: restSeconds,
     is_completed: isCompleted,
+  };
+}
+
+function importPayload({ notes = 'concurrent history' } = {}) {
+  return {
+    started_at: '2026-11-01T10:00:00Z',
+    completed_at: '2026-11-01T11:00:00Z',
+    duration_seconds: 3600,
+    notes,
+    exercises: [{
+      exercise_id: importExerciseId,
+      order_index: 0,
+      sets: [{
+        set_number: 1,
+        reps: 10,
+        weight_kg: 20,
+        duration_seconds: 0,
+        set_type: 'workout',
+        is_completed: true,
+      }],
+    }],
   };
 }
 
@@ -294,6 +327,15 @@ async function ledgerRows(userId, operationId) {
        FROM public.workout_write_operations
       WHERE user_id = $1 AND operation_id = $2`,
     [userId, operationId],
+  );
+}
+
+async function importLedgerRows(userId, importKey) {
+  return rows(
+    `SELECT user_id, import_key, payload_digest, workout_id
+       FROM public.historical_workout_imports
+      WHERE user_id = $1 AND import_key = $2`,
+    [userId, importKey],
   );
 }
 
@@ -636,6 +678,115 @@ async function scenarioC6() {
   }
 }
 
+async function scenarioC7() {
+  report.block('C7 concurrent historical import, same key and payload');
+  const first = await businessClient(OWNER_A);
+  const second = await businessClient(OWNER_A);
+  report.info(`connections: 2 business (pid ${first.pid}, pid ${second.pid}) + 1 monitor (pid ${monitorPid}) + 1 owner = 4 total`);
+  report.info('transaction boundaries: BEGIN -> import RPC -> lock-hold -> COMMIT (both callers)');
+
+  try {
+    const payload = JSON.stringify(importPayload());
+    const xpBefore = Number((await rows('SELECT total_xp FROM public.users WHERE id = $1', [OWNER_A]))[0].total_xp);
+    const unlocksBefore = await count('SELECT count(*) FROM public.user_unlocks WHERE user_id = $1', [OWNER_A]);
+    const { records, locks } = await raceConcurrent({
+      first,
+      second,
+      firstRequest: { sql: IMPORT_WORKOUT_SQL, params: [C7.importKey, payload] },
+      secondRequest: { sql: IMPORT_WORKOUT_SQL, params: [C7.importKey, payload] },
+      windowMs: 3000,
+    });
+    records.forEach(printCall);
+    printLocks(locks);
+
+    expect(locks.observed, 'no row-lock wait was observed: a sequential result is not concurrency evidence');
+    expect(records.every(item => !item.error && item.outcome === 'COMMIT'), 'both imports must commit');
+    expect(records[0].result.workoutId === records[1].result.workoutId, 'both callers must receive one workout ID');
+    expect(records.filter(item => item.result.alreadyImported === false).length === 1, 'exactly one caller must create the workout');
+    expect(records.filter(item => item.result.alreadyImported === true).length === 1, 'exactly one caller must receive the retry receipt');
+
+    const workoutId = records[0].result.workoutId;
+    const ledger = await importLedgerRows(OWNER_A, C7.importKey);
+    const imported = await rows('SELECT id, user_id, status, is_imported FROM public.workouts WHERE id = $1', [workoutId]);
+    const sets = await workoutSetRows(workoutId);
+    const rewards = await count('SELECT count(*) FROM public.workout_rewards WHERE workout_id = $1', [workoutId]);
+    const xpLogs = await count('SELECT count(*) FROM public.xp_logs WHERE source_id = $1', [workoutId]);
+    const xpAfter = Number((await rows('SELECT total_xp FROM public.users WHERE id = $1', [OWNER_A]))[0].total_xp);
+    const unlocksAfter = await count('SELECT count(*) FROM public.user_unlocks WHERE user_id = $1', [OWNER_A]);
+    report.info(`rows: ledger=${ledger.length}, workouts=${imported.length}, sets=${sets.length}, rewards=${rewards}, xp_logs=${xpLogs}, total_xp ${xpBefore} -> ${xpAfter}, unlocks ${unlocksBefore} -> ${unlocksAfter}`);
+    expect(ledger.length === 1 && ledger[0].workout_id === workoutId, 'exactly one ledger row must link the imported workout');
+    expect(imported.length === 1 && imported[0].user_id === OWNER_A && imported[0].status === 'completed' && imported[0].is_imported, 'one completed imported workout must belong to user A');
+    expect(sets.length === 1, 'exactly one imported set must exist');
+    expect(rewards === 0 && xpLogs === 0 && xpAfter === xpBefore && unlocksAfter === unlocksBefore, 'historical import must not award progression');
+
+    const changed = await callImmediately(first, {
+      sql: IMPORT_WORKOUT_SQL,
+      params: [C7.importKey, JSON.stringify(importPayload({ notes: 'changed content' }))],
+    });
+    printCall(changed);
+    expect(changed.error?.code === '22023' && changed.outcome === 'ROLLBACK', 'same key with changed content must reject without mutation');
+    expect((await importLedgerRows(OWNER_A, C7.importKey)).length === 1, 'conflicting retry must preserve one ledger row');
+
+    record('C7', 'concurrent historical import', 'PASS', `2 conns, lock wait observed on pid ${locks.observed.pid}, one workout and no rewards`);
+  } finally {
+    await runtime.closeClient(first.client);
+    await runtime.closeClient(second.client);
+  }
+}
+
+async function scenarioC8() {
+  report.block('C8 concurrent atomic exercise-and-sets add, same key and payload');
+  const first = await businessClient(OWNER_A);
+  const second = await businessClient(OWNER_A);
+  report.info(`connections: 2 business (pid ${first.pid}, pid ${second.pid}) + 1 monitor (pid ${monitorPid}) + 1 owner = 4 total`);
+  report.info('transaction boundaries: BEGIN -> add RPC -> lock-hold -> COMMIT (both callers)');
+
+  try {
+    const sets = JSON.stringify([
+      { reps: 10, weight_kg: 20, duration_seconds: 0 },
+      { reps: 9, weight_kg: 20, duration_seconds: 0 },
+      { reps: 8, weight_kg: 20, duration_seconds: 0 },
+    ]);
+    const params = [C8.operation, C8.workout, c8AddExerciseId, null, sets];
+    const { records, locks } = await raceConcurrent({
+      first,
+      second,
+      firstRequest: { sql: ADD_EXERCISE_SQL, params },
+      secondRequest: { sql: ADD_EXERCISE_SQL, params },
+      windowMs: 3000,
+    });
+    records.forEach(printCall);
+    printLocks(locks);
+
+    expect(locks.observed, 'no row-lock wait was observed: a sequential result is not concurrency evidence');
+    expect(records.every(item => !item.error && item.outcome === 'COMMIT'), 'both calls must commit');
+    expect(records[0].result.workout_exercise_id === records[1].result.workout_exercise_id, 'same operation must return one exercise ID');
+    const addedId = records[0].result.workout_exercise_id;
+    const added = await rows('SELECT id, workout_id, exercise_id FROM public.workout_exercises WHERE id = $1', [addedId]);
+    const newSets = await rows('SELECT id, set_number FROM public.workout_sets WHERE workout_exercise_id = $1 ORDER BY set_number', [addedId]);
+    const ledger = await rows('SELECT operation_id, workout_id, mutation_kind FROM public.workout_write_operations WHERE user_id = $1 AND operation_id = $2', [OWNER_A, C8.operation]);
+    const rewards = await count('SELECT count(*) FROM public.workout_rewards WHERE workout_id = $1', [C8.workout]);
+    expect(added.length === 1 && added[0].workout_id === C8.workout && added[0].exercise_id === c8AddExerciseId, 'one added exercise must belong to the owner workout');
+    expect(newSets.length === 3 && newSets.every((set, index) => set.set_number === index + 1), 'three default sets must be written exactly once');
+    expect(ledger.length === 1 && ledger[0].workout_id === C8.workout, 'one private ledger receipt must exist');
+    expect(rewards === 0, 'adding default sets must not award workout rewards');
+    report.info(`rows: added exercises=${added.length}, sets=${newSets.length}, ledger=${ledger.length}, rewards=${rewards}`);
+
+    const changed = await callImmediately(first, {
+      sql: ADD_EXERCISE_SQL,
+      params: [C8.operation, C8.workout, c8AddExerciseId, null, JSON.stringify([{ reps: 11, weight_kg: 20, duration_seconds: 0 }])],
+    });
+    printCall(changed);
+    expect(changed.error?.code === '23505' && changed.outcome === 'ROLLBACK', 'same key with changed sets must reject');
+    expect(await count('SELECT count(*) FROM public.workout_exercises WHERE workout_id = $1 AND exercise_id = $2', [C8.workout, c8AddExerciseId]) === 1, 'conflicting retry must not add a duplicate');
+
+    record('C8', 'concurrent atomic exercise add', 'PASS', `2 conns, lock wait observed on pid ${locks.observed.pid}, one exercise with three sets`);
+  } finally {
+    await runtime.closeClient(first.client);
+    await runtime.closeClient(second.client);
+  }
+}
+
 function printSummary(version) {
   report.info('');
   const scenarios = [
@@ -645,6 +796,8 @@ function printSummary(version) {
     ['C4', 'concurrent complete_workout'],
     ['C5', 'cross-user same operation UUID'],
     ['C6', 'unauthorized workout ownership'],
+    ['C7', 'concurrent historical import'],
+    ['C8', 'concurrent atomic exercise add'],
   ];
   for (const [id, title] of scenarios) {
     const entry = results.find(item => item.id === id);
@@ -671,6 +824,9 @@ async function main() {
 
   await seedUser(OWNER_A, EMAIL_A);
   await seedUser(OWNER_B, EMAIL_B);
+  await owner.query('UPDATE public.users SET onboarding_completed = true WHERE id = ANY($1::uuid[])', [[OWNER_A, OWNER_B]]);
+  importExerciseId = exercises[0];
+  c8AddExerciseId = exercises[1];
 
   await seedWorkout({ userId: OWNER_A, workoutId: C1.workout, workoutExerciseId: C1.exercise, exerciseId: exercises[0] });
   await seedWorkout({ userId: OWNER_A, workoutId: C2.workout, workoutExerciseId: C2.exercise, exerciseId: exercises[0] });
@@ -679,9 +835,10 @@ async function main() {
   await seedWorkout({ userId: OWNER_A, workoutId: C5.workoutA, workoutExerciseId: C5.exerciseA, exerciseId: exercises[2] });
   await seedWorkout({ userId: OWNER_B, workoutId: C5.workoutB, workoutExerciseId: C5.exerciseB, exerciseId: exercises[3] });
   await seedWorkout({ userId: OWNER_A, workoutId: C6.workout, workoutExerciseId: C6.exercise, exerciseId: exercises[0] });
+  await seedWorkout({ userId: OWNER_A, workoutId: C8.workout, workoutExerciseId: C8.existingExercise, exerciseId: exercises[0] });
   await seedCompletedSets({ userId: OWNER_A, workoutExerciseId: C4.exercise, total: 3 });
 
-  for (const scenario of [scenarioC1, scenarioC2, scenarioC3, scenarioC4, scenarioC5, scenarioC6]) {
+  for (const scenario of [scenarioC1, scenarioC2, scenarioC3, scenarioC4, scenarioC5, scenarioC6, scenarioC7, scenarioC8]) {
     const id = scenario.name.replace('scenario', '');
     try {
       await scenario();

@@ -46,3 +46,6 @@ app.*.map.json
 
 # Local analyzer transcript (stale; regenerated on demand, never committed)
 analysis.txt
+
+# Local Supabase client config (never committed — contains runtime credentials)
+config.local.json

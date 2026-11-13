@@ -149,8 +149,12 @@ SELECT public.p7_assert(
   'ACL: exercises UPDATE policy present'
 );
 SELECT public.p7_assert(
-  EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exercises' AND policyname='Users can delete own custom exercises'),
-  'ACL: exercises DELETE policy present'
+  NOT EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exercises' AND cmd='DELETE'),
+  'ACL: exercise DELETE policy absent; custom exercises use archive'
+);
+SELECT public.p7_assert(
+  NOT has_table_privilege('authenticated', 'public.exercises', 'DELETE'),
+  'ACL: authenticated exercise DELETE privilege absent'
 );
 SELECT public.p7_assert(
   EXISTS(SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename='exercise_favourites' AND policyname='Users can view own exercise favourites'),

@@ -14,7 +14,7 @@ void main() {
     exerciseB: 'Bench Press',
   };
 
-  Workout _completedWorkout(
+  Workout completedWorkout(
     String id,
     DateTime completedAt, {
     required String exerciseId,
@@ -43,7 +43,7 @@ void main() {
     );
   }
 
-  WorkoutSet _workingSet(String id, int reps, double weightKg) => WorkoutSet(
+  WorkoutSet workingSet(String id, int reps, double weightKg) => WorkoutSet(
     id: id,
     workoutExerciseId: 'we',
     setNumber: 1,
@@ -53,7 +53,7 @@ void main() {
     setType: WorkoutSetType.workout,
   );
 
-  WorkoutSet _warmupSet(String id, int reps, double weightKg) => WorkoutSet(
+  WorkoutSet warmupSet(String id, int reps, double weightKg) => WorkoutSet(
     id: id,
     workoutExerciseId: 'we',
     setNumber: 1,
@@ -99,23 +99,23 @@ void main() {
       final d2 = DateTime.utc(2026, 10, 3);
       final d3 = DateTime.utc(2026, 10, 2); // out of order input
       final workouts = [
-        _completedWorkout(
+        completedWorkout(
           'w3',
           d3,
           exerciseId: exerciseA,
-          sets: [_workingSet('s1', 10, 50)],
+          sets: [workingSet('s1', 10, 50)],
         ),
-        _completedWorkout(
+        completedWorkout(
           'w1',
           d1,
           exerciseId: exerciseA,
-          sets: [_workingSet('s2', 10, 40)],
+          sets: [workingSet('s2', 10, 40)],
         ),
-        _completedWorkout(
+        completedWorkout(
           'w2',
           d2,
           exerciseId: exerciseA,
-          sets: [_workingSet('s3', 10, 60)],
+          sets: [workingSet('s3', 10, 60)],
         ),
       ];
       final result = engine.progressForExercise(
@@ -134,17 +134,17 @@ void main() {
       final engine = ExerciseProgressEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completedWorkout(
+        completedWorkout(
           'w1',
           d,
           exerciseId: exerciseA,
-          sets: [_workingSet('s1', 10, 50)],
+          sets: [workingSet('s1', 10, 50)],
         ),
-        _completedWorkout(
+        completedWorkout(
           'w2',
           d,
           exerciseId: exerciseB,
-          sets: [_workingSet('s2', 10, 100)],
+          sets: [workingSet('s2', 10, 100)],
         ),
       ];
       final result = engine.progressForExercise(
@@ -160,14 +160,14 @@ void main() {
       final engine = ExerciseProgressEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completedWorkout(
+        completedWorkout(
           'w1',
           d,
           exerciseId: exerciseA,
           sets: [
-            _warmupSet('wu', 10, 20), // warm-up: excluded
-            _workingSet('w1', 10, 50), // working: counted
-            _workingSet('w2', 8, 60), // working: best weight
+            warmupSet('wu', 10, 20), // warm-up: excluded
+            workingSet('w1', 10, 50), // working: counted
+            workingSet('w2', 8, 60), // working: best weight
           ],
         ),
       ];
@@ -190,17 +190,17 @@ void main() {
       final d1 = DateTime.utc(2026, 10, 1);
       final d2 = DateTime.utc(2026, 10, 2);
       final workouts = [
-        _completedWorkout(
+        completedWorkout(
           'w1',
           d1,
           exerciseId: exerciseA,
-          sets: [_workingSet('s1', 10, 50)],
+          sets: [workingSet('s1', 10, 50)],
         ),
-        _completedWorkout(
+        completedWorkout(
           'w2',
           d2,
           exerciseId: exerciseA,
-          sets: [_workingSet('s2', 5, 100)],
+          sets: [workingSet('s2', 5, 100)],
         ),
       ];
       final result = engine.progressForExercise(
@@ -222,29 +222,29 @@ void main() {
         final d3 = DateTime.utc(2026, 10, 3);
         final d4 = DateTime.utc(2026, 10, 4);
         final workouts = [
-          _completedWorkout(
+          completedWorkout(
             'w1',
             d1,
             exerciseId: exerciseA,
-            sets: [_workingSet('s1', 10, 50)],
+            sets: [workingSet('s1', 10, 50)],
           ), // first: weight PR
-          _completedWorkout(
+          completedWorkout(
             'w2',
             d2,
             exerciseId: exerciseA,
-            sets: [_workingSet('s2', 8, 60)],
+            sets: [workingSet('s2', 8, 60)],
           ), // heavier: weight PR
-          _completedWorkout(
+          completedWorkout(
             'w3',
             d3,
             exerciseId: exerciseA,
-            sets: [_workingSet('s3', 10, 60)],
+            sets: [workingSet('s3', 10, 60)],
           ), // same weight, more reps: reps PR
-          _completedWorkout(
+          completedWorkout(
             'w4',
             d4,
             exerciseId: exerciseA,
-            sets: [_workingSet('s4', 5, 40)],
+            sets: [workingSet('s4', 5, 40)],
           ), // lighter, fewer reps: none
         ];
         final result = engine.progressForExercise(
@@ -273,11 +273,11 @@ void main() {
         final engine = ExerciseProgressEngine();
         final d = DateTime.utc(2026, 10, 1);
         final workouts = [
-          _completedWorkout(
+          completedWorkout(
             'w1',
             d,
             exerciseId: exerciseA,
-            sets: [_workingSet('s1', 10, 50)],
+            sets: [workingSet('s1', 10, 50)],
           ),
         ];
         final a = engine.progressForExercise(

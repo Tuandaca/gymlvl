@@ -1,8 +1,7 @@
-/// Structured AI Personal Trainer recommendation output.
+/// AI Personal Trainer response model.
 ///
-/// The AI must return a structured response that the client validates before
-/// displaying or applying. Free-form prose alone is not sufficient for
-/// actionable recommendations.
+/// The current Edge contract returns advisory text only. A future structured
+/// response must pass validation before any action becomes available.
 library;
 
 /// A single recommendation item with a validated target.

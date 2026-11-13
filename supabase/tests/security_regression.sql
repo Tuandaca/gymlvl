@@ -107,7 +107,10 @@ RESET ROLE;
 UPDATE public.workouts SET training_started_at=now()-interval '30 minutes' WHERE id=(SELECT (value->>'id')::uuid FROM checks_context WHERE key='quest_workout');
 SET LOCAL ROLE authenticated;
 INSERT INTO checks_context VALUES('quest_reward',public.complete_workout((SELECT (value->>'id')::uuid FROM checks_context WHERE key='quest_workout')));
-SELECT pg_temp.assert_true((SELECT (value->>'isQuest')::boolean AND (value->>'earnedXP')::integer>=300 FROM checks_context WHERE key='quest_reward'),'quest exact targets earn server template reward');
+-- The reward must equal the server-side quest template value (streak multiplier is 1
+-- on a first-day streak), not an arbitrary client-side floor. This keeps the XP
+-- economy authoritative to the `quests` catalogue row rather than to the test.
+SELECT pg_temp.assert_true((SELECT (value->>'isQuest')::boolean AND (value->>'earnedXP')::integer=(SELECT q.base_xp FROM public.quest_instances qi JOIN public.quests q ON q.id=qi.quest_id WHERE qi.status='completed') FROM checks_context WHERE key='quest_reward'),'quest exact targets earn the server template reward');
 SELECT pg_temp.assert_true((SELECT status='completed' FROM public.quest_instances),'quest completion persisted');
 SELECT pg_temp.assert_true((SELECT current_streak=1 FROM public.streaks),'same-day workouts do not increment streak');
 SELECT pg_temp.assert_true(jsonb_array_length(public.get_user_stats()->'volume_trend')=7,'stats always contain seven local days');

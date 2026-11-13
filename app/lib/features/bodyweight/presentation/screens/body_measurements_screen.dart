@@ -95,7 +95,7 @@ class _BodyMeasurementsScreenState
               children: [
                 // Type dropdown.
                 DropdownButtonFormField<BodyMeasurementType>(
-                  value: _selectedType,
+                  initialValue: _selectedType,
                   decoration: InputDecoration(
                     labelText: 'measurement_type'.tr(ref),
                     border: const OutlineInputBorder(),
@@ -103,7 +103,7 @@ class _BodyMeasurementsScreenState
                   items: BodyMeasurementType.values.map((t) {
                     return DropdownMenuItem(
                       value: t,
-                      child: Text('${t.labelKey}'.tr(ref)),
+                      child: Text(t.labelKey.tr(ref)),
                     );
                   }).toList(),
                   onChanged: (v) {
@@ -276,7 +276,7 @@ class _BodyMeasurementsScreenState
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
                 child: CandyStatTile(
-                  label: '${m.type.labelKey}'.tr(ref),
+                  label: m.type.labelKey.tr(ref),
                   value:
                       '${_valueText(m.value)} ${m.unit.wireValue.toUpperCase()}',
                   subtitle:
@@ -284,7 +284,7 @@ class _BodyMeasurementsScreenState
                   accentColor: CandyColors.hotPink,
                 ),
               );
-            }).toList(),
+            }),
             const SizedBox(height: 20),
             // History list (chronological newest first).
             Padding(
@@ -299,7 +299,7 @@ class _BodyMeasurementsScreenState
               ),
             ),
             const SizedBox(height: 8),
-            ...measurements.map((m) => _historyRow(m)).toList(),
+            ...measurements.map((m) => _historyRow(m)),
             const SizedBox(height: 24),
           ],
         ),
@@ -320,7 +320,7 @@ class _BodyMeasurementsScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${m.type.labelKey}'.tr(ref),
+                  m.type.labelKey.tr(ref),
                   style: const TextStyle(
                     fontFamily: CandyFonts.display,
                     fontSize: 14,

@@ -15,22 +15,23 @@ import 'package:app/features/auth/presentation/providers/auth_providers.dart';
 /// mass). Returns an empty list when no profile weight is recorded.
 final bodyweightMeasurementsProvider =
     FutureProvider<List<BodyweightMeasurement>>((ref) async {
-  final profile = await ref.read(currentUserProfileProvider.future);
-  final auth = ref.watch(authStateStreamProvider);
-  final userId = auth.value?.session?.user.id ?? '';
-  final weightKg = (profile?['weight_kg'] as num?)?.toDouble();
-  if (weightKg == null || weightKg <= 0) return const [];
-  return [
-    BodyweightMeasurement.fromProfile(
-      userId: userId,
-      profileWeightKg: weightKg,
-    ),
-  ];
-});
+      final profile = await ref.read(currentUserProfileProvider.future);
+      final auth = ref.watch(authStateStreamProvider);
+      final userId = auth.value?.session?.user.id ?? '';
+      final weightKg = (profile?['weight_kg'] as num?)?.toDouble();
+      if (weightKg == null || weightKg <= 0) return const [];
+      return [
+        BodyweightMeasurement.fromProfile(
+          userId: userId,
+          profileWeightKg: weightKg,
+        ),
+      ];
+    });
 
 /// Bodyweight trend points (date, weightKg) sorted ascending, for chart consumption.
-final bodyweightTrendProvider =
-    FutureProvider<List<BodyweightTrendPoint>>((ref) async {
+final bodyweightTrendProvider = FutureProvider<List<BodyweightTrendPoint>>((
+  ref,
+) async {
   final measurements = await ref.read(bodyweightMeasurementsProvider.future);
   return BodyweightTrend(measurements).toChartPoints();
 });

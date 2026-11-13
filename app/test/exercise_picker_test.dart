@@ -100,25 +100,36 @@ class _FakeExerciseRepository implements ExerciseRepository {
   @override
   Future<List<Exercise>> getArchivedCustomExercises(String userId) async => [];
   @override
-  Future<Exercise> createCustomExercise(Exercise exercise) => throw UnimplementedError();
+  Future<Exercise> createCustomExercise(Exercise exercise) =>
+      throw UnimplementedError();
   @override
-  Future<Exercise> updateCustomExercise(Exercise exercise) => throw UnimplementedError();
+  Future<Exercise> updateCustomExercise(Exercise exercise) =>
+      throw UnimplementedError();
   @override
   Future<void> archiveCustomExercise(String exerciseId) async {}
   @override
-  Future<bool> isExerciseFavourite(String userId, String exerciseId) async => false;
+  Future<bool> isExerciseFavourite(String userId, String exerciseId) async =>
+      false;
   @override
-  Future<bool> toggleExerciseFavourite(String userId, String exerciseId) async => false;
+  Future<bool> toggleExerciseFavourite(
+    String userId,
+    String exerciseId,
+  ) async => false;
   @override
   Future<List<String>> favouriteExerciseIds(String userId) async => [];
   @override
   Future<List<ExerciseAlias>> getExerciseAliases(String userId) async => [];
   @override
-  Future<void> setExerciseAlias(String userId, String exerciseId, String alias) async {}
+  Future<void> setExerciseAlias(
+    String userId,
+    String exerciseId,
+    String alias,
+  ) async {}
   @override
   Future<void> removeExerciseAlias(String userId, String alias) async {}
   @override
-  Future<String?> resolveExerciseAlias(String userId, String alias) async => null;
+  Future<String?> resolveExerciseAlias(String userId, String alias) async =>
+      null;
 }
 
 class _ErrorExerciseRepository implements ExerciseRepository {
@@ -154,8 +165,10 @@ class _ErrorExerciseRepository implements ExerciseRepository {
   Future<bool> isExerciseFavourite(String userId, String exerciseId) async =>
       throw Exception('Network error');
   @override
-  Future<bool> toggleExerciseFavourite(String userId, String exerciseId) async =>
-      throw Exception('Network error');
+  Future<bool> toggleExerciseFavourite(
+    String userId,
+    String exerciseId,
+  ) async => throw Exception('Network error');
   @override
   Future<List<String>> favouriteExerciseIds(String userId) async =>
       throw Exception('Network error');
@@ -163,8 +176,11 @@ class _ErrorExerciseRepository implements ExerciseRepository {
   Future<List<ExerciseAlias>> getExerciseAliases(String userId) async =>
       throw Exception('Network error');
   @override
-  Future<void> setExerciseAlias(String userId, String exerciseId, String alias) async =>
-      throw Exception('Network error');
+  Future<void> setExerciseAlias(
+    String userId,
+    String exerciseId,
+    String alias,
+  ) async => throw Exception('Network error');
   @override
   Future<void> removeExerciseAlias(String userId, String alias) async =>
       throw Exception('Network error');
@@ -1221,25 +1237,36 @@ class _SlowExerciseRepository implements ExerciseRepository {
   @override
   Future<List<Exercise>> getArchivedCustomExercises(String userId) async => [];
   @override
-  Future<Exercise> createCustomExercise(Exercise exercise) => throw UnimplementedError();
+  Future<Exercise> createCustomExercise(Exercise exercise) =>
+      throw UnimplementedError();
   @override
-  Future<Exercise> updateCustomExercise(Exercise exercise) => throw UnimplementedError();
+  Future<Exercise> updateCustomExercise(Exercise exercise) =>
+      throw UnimplementedError();
   @override
   Future<void> archiveCustomExercise(String exerciseId) async {}
   @override
-  Future<bool> isExerciseFavourite(String userId, String exerciseId) async => false;
+  Future<bool> isExerciseFavourite(String userId, String exerciseId) async =>
+      false;
   @override
-  Future<bool> toggleExerciseFavourite(String userId, String exerciseId) async => false;
+  Future<bool> toggleExerciseFavourite(
+    String userId,
+    String exerciseId,
+  ) async => false;
   @override
   Future<List<String>> favouriteExerciseIds(String userId) async => [];
   @override
   Future<List<ExerciseAlias>> getExerciseAliases(String userId) async => [];
   @override
-  Future<void> setExerciseAlias(String userId, String exerciseId, String alias) async {}
+  Future<void> setExerciseAlias(
+    String userId,
+    String exerciseId,
+    String alias,
+  ) async {}
   @override
   Future<void> removeExerciseAlias(String userId, String alias) async {}
   @override
-  Future<String?> resolveExerciseAlias(String userId, String alias) async => null;
+  Future<String?> resolveExerciseAlias(String userId, String alias) async =>
+      null;
 }
 
 class _CountingErrorRepository implements ExerciseRepository {
@@ -1280,8 +1307,10 @@ class _CountingErrorRepository implements ExerciseRepository {
   Future<bool> isExerciseFavourite(String userId, String exerciseId) async =>
       throw Exception('error');
   @override
-  Future<bool> toggleExerciseFavourite(String userId, String exerciseId) async =>
-      throw Exception('error');
+  Future<bool> toggleExerciseFavourite(
+    String userId,
+    String exerciseId,
+  ) async => throw Exception('error');
   @override
   Future<List<String>> favouriteExerciseIds(String userId) async =>
       throw Exception('error');
@@ -1289,8 +1318,11 @@ class _CountingErrorRepository implements ExerciseRepository {
   Future<List<ExerciseAlias>> getExerciseAliases(String userId) async =>
       throw Exception('error');
   @override
-  Future<void> setExerciseAlias(String userId, String exerciseId, String alias) async =>
-      throw Exception('error');
+  Future<void> setExerciseAlias(
+    String userId,
+    String exerciseId,
+    String alias,
+  ) async => throw Exception('error');
   @override
   Future<void> removeExerciseAlias(String userId, String alias) async =>
       throw Exception('error');

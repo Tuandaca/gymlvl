@@ -89,7 +89,8 @@ class _FakeWorkoutRepository implements WorkoutRepository {
   }
 
   @override
-  Future<Workout> markWorkoutCompleted(String workoutId, {
+  Future<Workout> markWorkoutCompleted(
+    String workoutId, {
     DateTime? completedAt,
     int? durationSeconds,
     String? notes,

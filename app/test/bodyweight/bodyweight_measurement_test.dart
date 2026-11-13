@@ -10,14 +10,13 @@ BodyweightMeasurement baseline({
   required double weightKg,
   required DateTime measuredAt,
   BodyweightSource source = BodyweightSource.profileBaseline,
-}) =>
-    BodyweightMeasurement(
-      id: id,
-      userId: userId,
-      weightKg: weightKg,
-      measuredAt: measuredAt,
-      source: source,
-    );
+}) => BodyweightMeasurement(
+  id: id,
+  userId: userId,
+  weightKg: weightKg,
+  measuredAt: measuredAt,
+  source: source,
+);
 
 void main() {
   group('BodyweightMeasurement.fromProfile', () {
@@ -108,11 +107,19 @@ void main() {
     test('different weightKg is not equal', () {
       expect(
         baseline(
-          id: 'm1', userId: kUserId, weightKg: 70.0, measuredAt: kMeasuredAt,
+          id: 'm1',
+          userId: kUserId,
+          weightKg: 70.0,
+          measuredAt: kMeasuredAt,
         ),
-        isNot(baseline(
-          id: 'm1', userId: kUserId, weightKg: 75.0, measuredAt: kMeasuredAt,
-        )),
+        isNot(
+          baseline(
+            id: 'm1',
+            userId: kUserId,
+            weightKg: 75.0,
+            measuredAt: kMeasuredAt,
+          ),
+        ),
       );
     });
 
@@ -124,13 +131,15 @@ void main() {
           weightKg: 75.0,
           measuredAt: kMeasuredAt,
         ),
-        isNot(baseline(
-          id: 'm1',
-          userId: kUserId,
-          weightKg: 75.0,
-          measuredAt: kMeasuredAt,
-          source: BodyweightSource.scale,
-        )),
+        isNot(
+          baseline(
+            id: 'm1',
+            userId: kUserId,
+            weightKg: 75.0,
+            measuredAt: kMeasuredAt,
+            source: BodyweightSource.scale,
+          ),
+        ),
       );
     });
   });
@@ -166,19 +175,21 @@ void main() {
       );
     });
 
-    test('the same numeric value as a set load is not confused with body mass',
-        () {
-      final setLoadKg = 20.0; // e.g. weighted vest
-      final bodyMassKg = 75.0;
+    test(
+      'the same numeric value as a set load is not confused with body mass',
+      () {
+        final setLoadKg = 20.0; // e.g. weighted vest
+        final bodyMassKg = 75.0;
 
-      final measurement = BodyweightMeasurement.fromProfile(
-        userId: kUserId,
-        profileWeightKg: bodyMassKg,
-      );
+        final measurement = BodyweightMeasurement.fromProfile(
+          userId: kUserId,
+          profileWeightKg: bodyMassKg,
+        );
 
-      expect(measurement.weightKg, bodyMassKg);
-      expect(measurement.weightKg, isNot(setLoadKg));
-      expect(measurement.isBaseline, isTrue);
-    });
+        expect(measurement.weightKg, bodyMassKg);
+        expect(measurement.weightKg, isNot(setLoadKg));
+        expect(measurement.isBaseline, isTrue);
+      },
+    );
   });
 }

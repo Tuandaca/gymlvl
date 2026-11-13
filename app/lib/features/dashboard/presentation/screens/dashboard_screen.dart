@@ -6,6 +6,9 @@ import '../../../../ui/candy/candy.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../quests/domain/quest_instance.dart';
 import '../../../quests/presentation/providers/quest_providers.dart';
+import '../../../progression/presentation/providers/player_progression_view_provider.dart';
+import '../../../progression/domain/player_progression.dart';
+import '../../../achievements/domain/achievement.dart';
 import '../../../workout/presentation/controllers/workout_history_controller.dart';
 import '../../../workout/presentation/providers/exercise_providers.dart';
 import '../providers/class_providers.dart';
@@ -64,6 +67,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final questAsync = ref.watch(activeQuestControllerProvider);
     final statsAsync = ref.watch(dashboardStatsControllerProvider);
     final recentWorkoutsAsync = ref.watch(recentWorkoutsProvider);
+    final progressionAsync = ref.watch(playerProgressionViewProvider);
 
     return CandyScaffold(
       gridBackground: true,
@@ -216,7 +220,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
                 const SizedBox(height: 24),
 
-                // 8. Achievements & Streak Milestones
+                // 8. Unified progression (Class, Level, XP, Streak, Quest, Unlock)
+                progressionAsync.when(
+                  data: (progression) =>
+                      _buildProgressionSection(ref, progression),
+                  loading: () =>
+                      const CandySkeleton(height: 220, borderRadius: 18),
+                  error: (_, _) => _buildErrorCard(
+                    message: 'load_failed'.tr(ref),
+                    onRetry: () =>
+                        ref.invalidate(playerProgressionViewProvider),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // 9. Achievements & Streak Milestones
                 _buildSectionHeader(
                   context,
                   title: 'biometric_analysis'.tr(ref),
@@ -515,6 +534,376 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 );
               }).toList(),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressionSection(
+    WidgetRef ref,
+    PlayerProgression? progression,
+  ) {
+    if (progression == null) {
+      return CandyCard(
+        shadow: CandyCardShadow.small,
+        padding: const EdgeInsets.all(18),
+        backgroundColor: CandyColors.card,
+        child: Center(
+          child: Text(
+            'no_class_data'.tr(ref),
+            style: const TextStyle(
+              fontFamily: CandyFonts.body,
+              color: CandyColors.muted,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final primary = progression.classes.isNotEmpty
+        ? progression.classes.firstWhere(
+            (c) => c.slot == 'primary',
+            orElse: () => progression.classes.first,
+          )
+        : null;
+    final recentAchievement = progression.achievements.isNotEmpty
+        ? progression.achievements.last
+        : null;
+    final nextUnlock = progression.nextUnlock;
+
+    return CandyCard(
+      shadow: CandyCardShadow.small,
+      padding: const EdgeInsets.all(18),
+      backgroundColor: CandyColors.card,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: CandyColors.softLilac,
+                  shape: BoxShape.circle,
+                  border: CandyColors.standardBorder(width: 1.5),
+                ),
+                child: const Icon(
+                  Icons.trending_up_rounded,
+                  size: 14,
+                  color: CandyColors.ink,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  translateText(
+                    ref,
+                    vi: 'Tiến độ người chơi',
+                    en: 'Player progression',
+                  ),
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.display,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: CandyColors.ink,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Class + level row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: primary != null
+                      ? CandyColors.mintGreen.withValues(alpha: 0.15)
+                      : CandyColors.muted.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                  border: CandyColors.standardBorder(),
+                  boxShadow: CandyColors.shadowPressed(),
+                ),
+                child: Center(
+                  child: Text(
+                    primary != null ? '${primary.level}' : '—',
+                    style: const TextStyle(
+                      fontFamily: CandyFonts.mono,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: CandyColors.ink,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      primary != null
+                          ? '${primary.className} · ${translateText(ref, vi: 'Hệ phái', en: 'Class')}'
+                          : translateText(
+                              ref,
+                              vi: 'Chưa chọn hệ phái',
+                              en: 'No class selected',
+                            ),
+                      style: const TextStyle(
+                        fontFamily: CandyFonts.display,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: CandyColors.ink,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${translateText(ref, vi: 'Cấp độ', en: 'Level')} ${progression.level}  ·  ${translateText(ref, vi: 'Tổng XP', en: 'Total XP')} ${progression.totalXP}',
+                      style: const TextStyle(
+                        fontFamily: CandyFonts.body,
+                        fontSize: 12,
+                        color: CandyColors.charcoal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (primary != null)
+                CandyBadge(
+                  label: primary.isGraduated
+                      ? translateText(ref, vi: 'Hoàn thành', en: 'Graduated')
+                      : translateText(ref, vi: 'Đang học', en: 'Active'),
+                  variant: primary.isGraduated
+                      ? CandyBadgeVariant.mint
+                      : CandyBadgeVariant.yellow,
+                  fontSize: 10,
+                  hasShadow: true,
+                ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // XP progress bar
+          if (primary != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'xp_to_next'.tr(ref),
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.body,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: CandyColors.charcoal,
+                  ),
+                ),
+                Text(
+                  '${progression.xpToNextLevel} XP',
+                  style: const TextStyle(
+                    fontFamily: CandyFonts.mono,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: CandyColors.ink,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            CandyProgressBar(
+              progress: progression.level >= 20
+                  ? 1.0
+                  : (progression.xpToNextLevel <= 0
+                        ? 1.0
+                        : 0.0), // client estimate; server is authoritative
+              height: 10,
+              fillColor: CandyColors.mintGreen,
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // Streak + active quest + recent achievement + next unlock (compact grid)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Streak
+              Expanded(
+                child: CandyStatTile(
+                  label: translateText(ref, vi: 'Chuỗi', en: 'Streak'),
+                  value: progression.streak?.currentStreak.toString() ?? '0',
+                  unit: 'ngày',
+                  icon: Icons.local_fire_department_rounded,
+                  accentColor: CandyColors.coral,
+                  subtitle: progression.streak != null
+                      ? translateText(
+                          ref,
+                          vi: 'Kỷ lục ${progression.streak!.longestStreak}',
+                          en: 'Best ${progression.streak!.longestStreak}',
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Active quest
+              Expanded(
+                child: CandyStatTile(
+                  label: translateText(ref, vi: 'Nhiệm vụ', en: 'Quest'),
+                  value: progression.activeQuest != null ? '1' : '0',
+                  unit: 'active',
+                  icon: Icons.flag_rounded,
+                  accentColor: CandyColors.canaryYellow,
+                  subtitle: progression.activeQuest != null
+                      ? translateText(
+                          ref,
+                          vi: 'Đang diễn ra',
+                          en: 'In progress',
+                        )
+                      : translateText(ref, vi: 'Hôm nay nghỉ', en: 'Rest day'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Recent achievement + next unlock
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: CandyCard(
+                  shadow: CandyCardShadow.none,
+                  padding: const EdgeInsets.all(12),
+                  backgroundColor: CandyColors.canvas,
+                  borderColor: CandyColors.muted,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        translateText(
+                          ref,
+                          vi: 'Huy hiệu gần nhất',
+                          en: 'Recent achievement',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: CandyFonts.body,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CandyColors.charcoal,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      if (recentAchievement != null)
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.emoji_events_rounded,
+                              size: 16,
+                              color: CandyColors.mintGreen,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                AchievementCatalog.titleOf(
+                                  recentAchievement.achievementId,
+                                ),
+                                style: const TextStyle(
+                                  fontFamily: CandyFonts.display,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: CandyColors.ink,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          translateText(ref, vi: 'Chưa có', en: 'None yet'),
+                          style: const TextStyle(
+                            fontFamily: CandyFonts.body,
+                            fontSize: 12,
+                            color: CandyColors.muted,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: CandyCard(
+                  shadow: CandyCardShadow.none,
+                  padding: const EdgeInsets.all(12),
+                  backgroundColor: CandyColors.canvas,
+                  borderColor: CandyColors.muted,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        translateText(
+                          ref,
+                          vi: 'Mốc tiếp theo',
+                          en: 'Next milestone',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: CandyFonts.body,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: CandyColors.charcoal,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      if (nextUnlock != null)
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_outline_rounded,
+                              size: 16,
+                              color: CandyColors.coral,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                nextUnlock['title']?.toString() ?? '',
+                                style: const TextStyle(
+                                  fontFamily: CandyFonts.display,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: CandyColors.ink,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Text(
+                          translateText(ref, vi: 'Không có', en: 'None'),
+                          style: const TextStyle(
+                            fontFamily: CandyFonts.body,
+                            fontSize: 12,
+                            color: CandyColors.muted,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

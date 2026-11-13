@@ -73,6 +73,34 @@ abstract class ActiveWorkoutState with _$ActiveWorkoutState {
   );
 }
 
+class _PendingExerciseAdd {
+  final String operationId;
+  final String workoutId;
+  final String exerciseId;
+  final WorkoutMode? mode;
+  final List<Map<String, Object>> sets;
+
+  const _PendingExerciseAdd({
+    required this.operationId,
+    required this.workoutId,
+    required this.exerciseId,
+    required this.mode,
+    required this.sets,
+  });
+}
+
+class _PendingExerciseReorder {
+  final String operationId;
+  final String workoutId;
+  final List<String> exerciseIds;
+
+  const _PendingExerciseReorder({
+    required this.operationId,
+    required this.workoutId,
+    required this.exerciseIds,
+  });
+}
+
 class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   static const String backupKey = 'gymlvl_active_workout_backup';
 
@@ -83,6 +111,11 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
   Future<Map<String, dynamic>?>? _completion;
   int _generation = 0;
   bool _mutationFailed = false;
+  bool _otherMutationFailed = false;
+  final Set<String> _unresolvedAtomicOperations = {};
+  String? _failedAtomicOperation;
+  final Map<String, _PendingExerciseAdd> _pendingExerciseAdds = {};
+  _PendingExerciseReorder? _pendingExerciseReorder;
   WorkoutReceipt? _pendingReceipt;
   bool _completionUncertain = false;
 
@@ -91,6 +124,67 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
 
   WorkoutRepository get _repository => ref.read(workoutRepositoryProvider);
   DateTime get _restNow => ref.read(restClockProvider)().toUtc();
+
+  void _clearMutationFailures() {
+    _mutationFailed = false;
+    _otherMutationFailed = false;
+    _unresolvedAtomicOperations.clear();
+    _failedAtomicOperation = null;
+  }
+
+  void _confirmAtomicOperation(String operationId) {
+    if (_unresolvedAtomicOperations.remove(operationId)) {
+      _mutationFailed =
+          _otherMutationFailed || _unresolvedAtomicOperations.isNotEmpty;
+    }
+  }
+
+  static String _newOperationId() {
+    final random = math.Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final hex = bytes
+        .map((value) => value.toRadixString(16).padLeft(2, '0'))
+        .join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
+        '${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
+  }
+
+  static bool _sameIds(List<String> left, List<String> right) {
+    if (left.length != right.length) return false;
+    for (var index = 0; index < left.length; index++) {
+      if (left[index] != right[index]) return false;
+    }
+    return true;
+  }
+
+  static bool _hasSavedAdd(
+    List<WorkoutExercise> exercises,
+    _PendingExerciseAdd pending,
+  ) {
+    for (final exercise in exercises) {
+      if (exercise.workoutId != pending.workoutId ||
+          exercise.exerciseId != pending.exerciseId ||
+          exercise.sets.length < pending.sets.length) {
+        continue;
+      }
+      var matches = true;
+      for (var index = 0; index < pending.sets.length; index++) {
+        final saved = exercise.sets[index];
+        final expected = pending.sets[index];
+        if (saved.setNumber != index + 1 ||
+            saved.reps != expected['reps'] ||
+            saved.weightKg != expected['weight_kg'] ||
+            saved.durationSeconds != expected['duration_seconds']) {
+          matches = false;
+          break;
+        }
+      }
+      if (matches) return true;
+    }
+    return false;
+  }
 
   static int _secondsUntil(DateTime target, DateTime now) {
     final milliseconds = target.difference(now).inMilliseconds;
@@ -113,7 +207,9 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     _cleanup();
     _pending = Future.value();
     _completion = null;
-    _mutationFailed = false;
+    _clearMutationFailures();
+    _pendingExerciseAdds.clear();
+    _pendingExerciseReorder = null;
     _pendingReceipt = null;
     _completionUncertain = false;
     ref.onDispose(_cleanup);
@@ -138,6 +234,11 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     Map<String, dynamic>? localBackup,
   }) {
     if (!_isCurrent(generation)) return;
+    if (state.workout?.id != workout.id ||
+        workout.status != WorkoutStatus.active) {
+      _pendingExerciseAdds.clear();
+      _pendingExerciseReorder = null;
+    }
     if (state.workout?.id != workout.id ||
         workout.status != WorkoutStatus.active ||
         localBackup != null) {
@@ -166,15 +267,23 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     final next = _pending.then((_) async {
       if (!ref.mounted || generation != _generation) return;
       state = state.copyWith(isLoading: true, errorMessage: null);
+      _failedAtomicOperation = null;
       try {
         await action(generation);
       } catch (_) {
         if (ref.mounted && generation == _generation) {
+          final failedOperation = _failedAtomicOperation;
+          if (failedOperation == null) {
+            _otherMutationFailed = true;
+          } else {
+            _unresolvedAtomicOperations.add(failedOperation);
+          }
           _mutationFailed = true;
           state = state.copyWith(errorMessage: 'save_failed');
         }
       } finally {
         if (ref.mounted && generation == _generation) {
+          _failedAtomicOperation = null;
           state = state.copyWith(isLoading: false);
         }
       }
@@ -370,7 +479,6 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       final workoutMap = backup['workout'] as Map<String, dynamic>?;
       if (workoutMap == null) return;
       final workout = Workout.fromJson(workoutMap);
-      _mutationFailed = false;
       _adopt(workout, generation, localBackup: backup);
 
       // Verify and synchronize with remote active workout if available
@@ -381,6 +489,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
             remote.userId == owner) {
           if (remote.status == WorkoutStatus.active) {
             // Keep the timer only when the server confirms the same workout.
+            _clearMutationFailures();
             _adopt(remote, generation);
           } else {
             _clearRestTimer();
@@ -428,7 +537,6 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
             if (workoutMap != null) {
               try {
                 final localWorkout = Workout.fromJson(workoutMap);
-                _mutationFailed = false;
                 _adopt(localWorkout, generation, localBackup: backup);
               } catch (_) {}
             }
@@ -438,9 +546,9 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           try {
             final workout = await _repository.getActiveWorkout();
             if (!_isCurrent(generation)) return;
-            _mutationFailed = false;
             if (workout != null && (owner == null || workout.userId == owner)) {
               if (workout.status == WorkoutStatus.active) {
+                _clearMutationFailures();
                 _adopt(workout, generation);
               } else {
                 _clearRestTimer();
@@ -454,6 +562,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
               _clearRestTimer();
               _saveLocalBackup();
             } else if (backup == null) {
+              _clearMutationFailures();
               _cleanup();
               state = const ActiveWorkoutState();
             }
@@ -471,7 +580,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     if (state.hasActiveWorkout) return;
     final workout = await _repository.startWorkout();
     if (!_isCurrent(generation)) return;
-    _mutationFailed = false;
+    _clearMutationFailures();
     _adopt(workout, generation);
   });
 
@@ -500,8 +609,6 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       state = state.copyWith(errorMessage: 'mode_unavailable');
       return;
     }
-    final order =
-        state.exercises.fold<int>(-1, (v, e) => math.max(v, e.orderIndex)) + 1;
     final isTimedCatalog =
         exercise.forceType?.toLowerCase() == 'static' ||
         exercise.movementPattern == 'carry' ||
@@ -515,25 +622,22 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
             : exercise.equipment.toLowerCase().contains('body')
             ? WorkoutMode.bodyweight
             : WorkoutMode.repsWeight);
-    final item =
-        productionWorkoutModesEnabled &&
-            _repository is ModeAwareWorkoutRepository
-        ? await (_repository as ModeAwareWorkoutRepository)
-              .addExerciseToWorkoutWithMode(
-                state.workout!.id,
-                exercise.id,
-                order,
-                selectedMode,
-              )
-        : await _repository.addExerciseToWorkout(
-            state.workout!.id,
-            exercise.id,
-            order,
-          );
-    if (!_isCurrent(generation)) return;
-    try {
-      // Existing logged loads are suggestions only. No load is invented for a new exercise.
-      final previous = await _repository.getLastSetForExercise(exercise.id);
+    if (!productionWorkoutModesEnabled &&
+        (selectedMode == WorkoutMode.timed ||
+            selectedMode == WorkoutMode.cardio)) {
+      state = state.copyWith(errorMessage: 'mode_unavailable');
+      return;
+    }
+    final repository = _repository;
+    if (repository is! AtomicWorkoutMutationRepository) {
+      throw StateError('atomic_workout_mutation_unavailable');
+    }
+    final atomic = repository as AtomicWorkoutMutationRepository;
+    final workoutId = state.workout!.id;
+    var pending = _pendingExerciseAdds[exercise.id];
+    if (pending == null || pending.workoutId != workoutId) {
+      // Suggestions are read before the first write and frozen with the retry key.
+      final previous = await repository.getLastSetForExercise(exercise.id);
       if (!_isCurrent(generation)) return;
       final weight =
           selectedMode == WorkoutMode.bodyweight ||
@@ -547,40 +651,65 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
       final isTimed =
           selectedMode == WorkoutMode.timed ||
           selectedMode == WorkoutMode.cardio;
-      final sets = <WorkoutSet>[];
       final count = prescription?.sets ?? 3;
+      if (count < 1 || count > 100) throw ArgumentError('invalid_set_count');
       final defaultReps = isTimed
           ? 0
           : (prescription?.reps ?? previous?.reps ?? 10);
       final defaultDuration = isTimed ? 30 : 0;
-
-      for (var i = 1; i <= count; i++) {
-        sets.add(
-          await _repository.addSet(
-            item.id,
-            i,
-            defaultReps,
-            weight,
-            durationSeconds: defaultDuration,
-          ),
-        );
-        if (!_isCurrent(generation)) return;
+      if (!isTimed && defaultReps == 0) {
+        throw ArgumentError('invalid_reps');
       }
-      state = state.copyWith(
-        exercises: [
-          ...state.exercises,
-          item.copyWith(exercise: exercise, sets: sets),
-        ],
+      final persistedMode = productionWorkoutModesEnabled ? selectedMode : null;
+      validateWorkoutSetForMode(
+        mode: persistedMode,
+        reps: defaultReps,
+        weightKg: weight,
+        durationSeconds: defaultDuration,
+        isCompleted: false,
       );
-      _updatePreviewXP();
-      _saveLocalBackup();
+      pending = _PendingExerciseAdd(
+        operationId: _newOperationId(),
+        workoutId: workoutId,
+        exerciseId: exercise.id,
+        mode: persistedMode,
+        sets: List<Map<String, Object>>.unmodifiable(
+          List.generate(
+            count,
+            (_) => Map<String, Object>.unmodifiable({
+              'reps': defaultReps,
+              'weight_kg': weight,
+              'duration_seconds': defaultDuration,
+            }),
+          ),
+        ),
+      );
+      _pendingExerciseAdds[exercise.id] = pending;
+    }
+    try {
+      final workout = await atomic.addExerciseWithDefaultSets(
+        operationId: pending.operationId,
+        workoutId: pending.workoutId,
+        exerciseId: pending.exerciseId,
+        mode: pending.mode,
+        sets: pending.sets,
+      );
+      if (!_isCurrent(generation)) return;
+      _adopt(workout, generation);
+      _pendingExerciseAdds.remove(exercise.id);
+      _confirmAtomicOperation(pending.operationId);
     } catch (_) {
       if (!_isCurrent(generation)) return;
-      // Do not leave a half-created exercise hidden from the screen.
       try {
-        await _repository.removeExerciseFromWorkout(item.id);
+        await _reload();
       } catch (_) {}
-      await _reload();
+      if (!_isCurrent(generation)) return;
+      if (_hasSavedAdd(state.exercises, pending)) {
+        _pendingExerciseAdds.remove(exercise.id);
+        _confirmAtomicOperation(pending.operationId);
+        return;
+      }
+      _failedAtomicOperation = pending.operationId;
       rethrow;
     }
   }
@@ -663,11 +792,51 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
           reordered.add(updated[i].copyWith(orderIndex: i));
         }
 
-        state = state.copyWith(exercises: reordered);
-        _saveLocalBackup();
-
         final ids = reordered.map((e) => e.id).toList();
-        await _repository.reorderExercises(state.workout!.id, ids);
+        final repository = _repository;
+        if (repository is! AtomicWorkoutMutationRepository) {
+          throw StateError('atomic_workout_mutation_unavailable');
+        }
+        final atomic = repository as AtomicWorkoutMutationRepository;
+        final workoutId = state.workout!.id;
+        var pending = _pendingExerciseReorder;
+        if (pending == null ||
+            pending.workoutId != workoutId ||
+            !_sameIds(pending.exerciseIds, ids)) {
+          pending = _PendingExerciseReorder(
+            operationId: _newOperationId(),
+            workoutId: workoutId,
+            exerciseIds: List.unmodifiable(ids),
+          );
+          _pendingExerciseReorder = pending;
+        }
+        try {
+          final workout = await atomic.reorderWorkoutExercisesAtomically(
+            operationId: pending.operationId,
+            workoutId: pending.workoutId,
+            exerciseIds: pending.exerciseIds,
+          );
+          if (!_isCurrent(generation)) return;
+          _adopt(workout, generation);
+          _pendingExerciseReorder = null;
+          _confirmAtomicOperation(pending.operationId);
+        } catch (_) {
+          if (!_isCurrent(generation)) return;
+          try {
+            await _reload();
+          } catch (_) {}
+          if (!_isCurrent(generation)) return;
+          if (_sameIds(
+            state.exercises.map((item) => item.id).toList(),
+            pending.exerciseIds,
+          )) {
+            _pendingExerciseReorder = null;
+            _confirmAtomicOperation(pending.operationId);
+            return;
+          }
+          _failedAtomicOperation = pending.operationId;
+          rethrow;
+        }
       });
 
   Future<void> removeExercise(String id) => _enqueue((generation) async {
@@ -1040,12 +1209,30 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
         return null;
       }
       if (state.errorMessage != null) return null;
-      if (state.completedSets == 0 || state.isSetupPhase) {
-        state = state.copyWith(errorMessage: 'completed_set_required');
-        return null;
-      }
       final requested = state.workout!;
       final receipt = _pendingReceipt;
+      if (receipt == null) {
+        if (state.completedSets == 0 || state.isSetupPhase) {
+          state = state.copyWith(errorMessage: 'completed_set_required');
+          return null;
+        }
+        for (final exercise in state.exercises) {
+          for (final set in exercise.sets.where((set) => set.isCompleted)) {
+            try {
+              validateWorkoutSetForMode(
+                mode: exercise.mode,
+                reps: set.reps,
+                weightKg: set.weightKg,
+                durationSeconds: set.durationSeconds,
+                isCompleted: true,
+              );
+            } on ArgumentError {
+              state = state.copyWith(errorMessage: 'mode_measurements_invalid');
+              return null;
+            }
+          }
+        }
+      }
       final result = receipt == null
           ? await _repository.finishWorkout(requested.id, notes: notes)
           : await _repository.reconcileCompletion(receipt);
@@ -1118,7 +1305,7 @@ class ActiveWorkoutController extends Notifier<ActiveWorkoutState> {
     if (!state.hasActiveWorkout) return;
     await _repository.cancelWorkout(state.workout!.id);
     if (!_isContextCurrent(generation, owner)) return;
-    _mutationFailed = false;
+    _clearMutationFailures();
     _restTimer?.cancel();
     await _clearLocalBackup();
     if (!_isContextCurrent(generation, owner)) return;

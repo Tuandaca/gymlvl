@@ -2,6 +2,150 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
+## 2026-11-13 — P9 scoped GitHub publication checkpoint
+
+**Task:** Prepare the owner-approved GitHub publication of P9 plus required application code, excluding unrelated infrastructure, backups, local logs and agent work.
+
+**Changes:** Verified a complete bundle, a path-matching 803-file Git archive, and SHA-256 equality for all 175 existing dirty files in `D:\Projects\gymlvl_p9_push_backup_20261113_112704`. Prepared an isolated candidate from the bundle using an explicit 126-path manifest; 50 other dirty paths remain excluded. Updated `MASTER_PLAN.md` to label P9 local completion and separate production preflight. D-057 records the approved Git scope. No Git or production write had occurred when this checkpoint was authored.
+
+**Verification at `main` base `c68e577`:** Candidate `flutter test --reporter expanded` → `PASS`, 822/822; `flutter analyze` → `PASS`, `No issues found!`; Dart format → `PASS`, 308/0; generated-code guard → `PASS`, 39 outputs; Node guard tests → `PASS`, 7/7; SQL `npm test` → `PASS`, 53 units/365 ACL; concurrency → `PASS`, 8/8; Edge check/tests → `PASS`, 58/58; web release and Android debug builds → `PASS`, artifacts built; candidate `git diff --check` → `PASS`. Android emitted a non-fatal Kotlin cache warning. Remote CI and live production checks → `NOT RUN` at this checkpoint.
+
+**Next action:** Inspect the exact staged diff, commit and push `main`, then verify the remote SHA. Production migration/deployment remains separately gated.
+
+---
+
+## 2026-11-13 — D-056 typography disposition (ACCEPTED)
+
+**Decision:** The owner chose to retain current font binaries and runtime mapping for P9, with the already documented Inter-derived provenance, and handle typography correction in a separate task. No font, mapping, source or test change was made for this decision.
+
+**Verification at `main` `c68e577`:** `git status --porcelain=v1` confirmed the existing dirty planning/font-provenance paths; `git diff --check` is the scoped documentation check. Prior P9 runtime results below remain evidence from the unchanged code state. Production and remote CI remain `NOT RUN`; no commit, push, tag or deployment.
+
+**Next action:** Separately authorized production preflight if requested; future typography correction requires its own reviewed decision.
+
+---
+
+## 2026-11-13 — P9.6 cleanup and final local verification (PASS)
+
+**Task:** Investigate confirmed low-severity P9.6 candidates, repair narrow defects, and verify the converged P9 tree under the same final state.
+
+**Changes:** A RED plate test exposed count-as-denomination debug text and 1.25 kg rounding; `PlateCalculationResult.toString()` now prints the exact denomination. UI/adversarial harnesses now use the production Candy light theme and load registered current fonts, with a focused theme assertion. Backup/import comments were corrected, and the private FNV-1a fingerprint helper was renamed while preserving legacy recognition. Provenance now discloses that four named font assets carry Inter glyphs/metrics; binaries and app typography were not changed. Production mode/Superset flags remained closed. Independent reviewers found no confirmed regression in final code paths.
+
+**Verification at `main` `c68e577`:** Plate suite `PASS` 12/12 after intentional RED; UI/accessibility `PASS` 105/105; final `flutter test --reporter expanded` `PASS` 822/822; Dart format `PASS` 308/0; `flutter analyze` `PASS`, `No issues found!`; isolated generated-code guard `PASS` 39/39; web release and Android debug builds `PASS`; SQL `npm test` `PASS` 53 units/365 ACL; true two-connection concurrency `PASS` 8/8; Edge checks/tests `PASS` 58/58; local catalogue e2e `PASS` 4/4 with 150 stable exercise identities; Node guard tests `PASS` 7/7; `git diff --check` `PASS`. Dataset importer tests `BLOCKED` by missing `EXERCISEDB_SOURCE_DIR`; remote CI/production live checks `NOT RUN`. `origin/main` matches local HEAD, while 163 dirty paths remain uncommitted. No commit, push, tag or deployment.
+
+**Next action:** Await the owner typography choice under proposed D-056; any production migration/live validation still needs separate authorization and preflight.
+
+---
+
+## 2026-11-13 — P9 analyzer quality (local PASS)
+
+**Task:** Clear 60 analyzer diagnostics without global suppression, preserve behavior and test coverage.
+
+**Changes:** Four owners fixed diagnostics in distinct analytics, AI, UI, workout and test files. Unused imports/locals/dead helpers and redundant syntax were removed; one transitive `collection` import became ordered `ImportedSet` comparison without a dependency change. A new RED test exposed the generic CSV `workout`-column fallback bug, then the source fix made it GREEN. The workout update payload now uses null-aware map entries with equivalent omission behavior. An independent static review found no confirmed regression.
+
+**Verification at `main` `c68e577`:** `flutter analyze` initially `FAIL` with 60 issues, then `PASS` with `No issues found!`; generic CSV RED expected `Squat` but got empty, then focused import suite `PASS` 42/42; `flutter test --reporter expanded` → `PASS` 820/820; Dart format → `PASS` 308/0; full isolated codegen guard → `PASS` 39/39; `git diff --check` → `PASS`. Remote CI and production validation `NOT RUN`. No commit, push, tag or deployment.
+
+**Next action:** P9.6 lower-priority cleanup — investigate named candidates and fix confirmed defects only.
+
+---
+
+## 2026-11-13 — P9 generated-code drift guard (local PASS)
+
+**Task:** Gate committed generated output against source models without touching the dirty checkout during regeneration.
+
+**Changes:** Added an isolated Node guard and seven focused tests, then wired both into the Flutter CI job with pinned Node 22. The guard copies source/config only to a fresh OS temporary directory, runs locked dependency resolution and full unfiltered `build_runner` there, checks source/lockfile stability, and compares all generated path/content. Initial isolated generation found two Riverpod provider hash-only differences; their reviewed generated output was copied into the checkout. No generator ran in the shared tree. Independent mapping explained the prior 37-file filtered-run deletion and QA reviewed paths/CI/safety.
+
+**Verification at `main` `c68e577`:** `node --test tools/generated-code/check.test.mjs` → `PASS` 7/7; `node tools/generated-code/check.mjs` → `PASS` 39/39 after fresh generation; canonical external copy → `PASS` 39/39; external source-only `WorkoutSet.setNumber` mutation → intentional `FAIL` exit 1 identifying both stale generated parts; SHA-256 inventory for all 39 repository generated files stayed identical; `flutter test --reporter compact` → `PASS` 819/819; Dart format → `PASS` 307/0; `git diff --check` → `PASS`. Remote CI `NOT RUN` because no commit/push; full analyzer `NOT RUN` at this checkpoint, with prior 60-issue failure. No Git or production write.
+
+**Next action:** P9 analyzer quality — classify and fix warnings without global suppression.
+
+---
+
+## 2026-11-13 — P9.5 transactional workout mutations (local PASS)
+
+**Task:** Make workout exercise reorder and add-with-default-sets atomic while preserving truthful client recovery.
+
+**Changes:** Agent E's RED tests reproduced partial writes and optimistic reorder divergence. The owner approved D-055 for local implementation. Agent C added authenticated transactional reorder and add-with-default-sets RPCs using the existing private write ledger, owner/workout locks, full permutation and bounded set validation, and exact same-key replay. Agent B replaced the interactive multi-write client path with a fail-closed atomic capability, immutable retry payloads, authoritative reload, account-generation fence, and per-operation failure recovery. Agent E expanded Flutter/SQL tests for lost ACK, duplicate RPC, partial rollback, unrelated failure fence, account switch, local backup, malformed receipt, completed-workout replay, anon ACL and numeric canonicalization. Lead added genuine two-connection C8 and updated architecture/planning. Independent SQL, Flutter and final read-only reviews found no confirmed defect.
+
+**Verification at `main` `c68e577`:** Pre-implementation Agent E Flutter 5/5 intentional RED and SQL missing-RPC RED; final focused P3/P9 Flutter → `PASS`, 24/24. Lead `flutter test --reporter expanded` → `PASS`, 819/819; Dart format → `PASS`, 307/0; `flutter analyze` → `FAIL`, 60 issues; web release and Android debug builds → `PASS`; `npm test` → `PASS`, 53 SQL units/365 ACL assertions; `npm run test:concurrency` → `PASS`, 8/8 with a sampled two-connection lock wait and one C8 ledger/exercise/three sets; Edge checks/tests → `PASS`, 58/58; `git diff --check` → `PASS`. Production P9 migration/gateway/live-account validation → `NOT RUN`. No commit, push, tag or deployment.
+
+**Next action:** P9 quality gates — implement a non-destructive generated-code drift guard and reduce analyzer warnings.
+
+---
+
+## 2026-11-13 — P9.4 AI consent and advice boundary (local PASS)
+
+**Task:** Prevent AI context egress before explicit consent; remove duplicate synthetic PT context and internal UUIDs from provider requests; keep the current text response advisory.
+
+**Changes:** D-054 accepted. The Edge handler now checks per-request consent before quota/context/provider work, rejects client context, minimizes authenticated server context to bounded allowlisted facts without internal IDs, and sends those facts separately from system instructions. The chat Send action supplies consent. PT screens show a VI/EN disclosure and Generate action, bind consent to the signed-in account, and render sanitized retry UI. The runtime synthetic context provider was removed. PT requests omit account UUID/context, await persisted locale restoration, and treat the text response as unvalidated advice without Apply or confidence. Independent review found incomplete pre-egress disclosures, a first-request locale race, and stale post-response copy; all were corrected. The expanded chat disclosure exposed a small bilingual viewport overflow; a bounded scrollable disclosure resolved it. Edge and Flutter regressions cover consent, account switch, locale, request payload, provider errors, responsive fallback and the text-only action boundary.
+
+**Lead verification at `main` `c68e577`:** `flutter test --reporter expanded` → `PASS`, 803/803 after responsive fix; focused adversarial viewport suite → `PASS`, 29/29; `dart format --output=none --set-exit-if-changed lib test` → `PASS`, 306/0; `flutter analyze` → `FAIL`, 60 issues; final-state web release and Android debug builds → `PASS`; `npm run check:edge; npm run test:edge` → `PASS`, 58/58; `git diff --check` → `PASS`. Independent read-only copy recheck → `PASS` by static inspection. Production Edge deployment and live provider validation → `NOT RUN`. No commit, push, tag or deployment.
+
+**Next action:** P9.5 fault-inject sequential workout mutations and add transactional server operations where required.
+
+---
+
+## 2026-11-13 — P9.3 class progression and unlock ownership (local PASS)
+
+**Task:** Align future class thresholds with D-043/Dart while retaining stored levels; correct class XP display; grant only verified unlocks.
+
+**Changes:** The owner approved D-052 and D-053. A RED Flutter test showed global XP wrongly subtracted from the primary class threshold; the provider now uses class XP and returns zero at graduation. A RED SQL boundary test showed level 2 at 210/211 XP was wrong. An additive migration snapshots a private per-class level floor, adds a server-only threshold helper, and updates `complete_workout`/`switch_class` without rewriting XP or rewards. A second migration restricts unlock writes to the server, backfills missing unlocks from verified achievements/levels/graduation, and syncs after a new completion reward is inserted. P5 and P9 SQL regressions cover exactly-once awards, ownership, idempotency and no XP change. The P9 import concurrency scenario also checks unlocks remain unchanged.
+
+**Lead verification at `main` `c68e577`:** `flutter test --reporter compact` → `PASS`, 793/793; `dart format --output=none --set-exit-if-changed lib test` → `PASS`, 305/0; `flutter analyze` → `FAIL`, 69 issues; `npm test` → `PASS`, 51 SQL units/365 ACL assertions; `npm run test:concurrency` → `PASS`, 7/7 true two-connection scenarios after the final SQL helper; `git diff --check` → `PASS`. Production migration/gateway/live backfill → `NOT RUN`. No commit, push, tag, or deployment.
+
+**Next action:** P9.4 AI trainer consent, fallback, and application-boundary tests.
+
+---
+
+## 2026-11-13 — P9.2 historical import and backup integrity (local PASS)
+
+**Task:** Replace false-success client history imports with a same-account, per-workout authenticated transaction and preserve supported backup data on restore.
+
+**Changes:** The owner accepted D-051. Agent C added three additive import RPC/ledger migrations for workouts, custom definitions, and body measurements, with `is_imported` and reward exclusion. Agent B moved CSV and backup restore to idempotent RPCs, added v2 export/restore validation and partial retry semantics. Agent A refreshed export data on demand and localized status/error UI. Agent D audited provenance and identified retry/UUID/media issues, which were fixed. Agent E wrote SQL, Flutter, HTTP adapter, and harness regression tests. Lead corrected the body-fat unit and completed the P9 two-connection scenario after Agent E reached a tool usage limit.
+
+**Lead verification at `main` `c68e577`:** `flutter test --reporter expanded` → `PASS`, 791/791; `dart format --output=none --set-exit-if-changed lib test` → `PASS`, 304/0; `flutter analyze` → `FAIL`, 69 issues; `npm test` → `PASS`, 47 SQL units/365 ACL assertions; `npm run test:concurrency` → `PASS`, 7/7 including concurrent same-key import (one workout, one ledger, no rewards/XP change); `npm run check:edge` → `PASS`; `npm run test:edge` → `PASS`, 55/55. Earlier P9.2 web release and Android debug builds passed before the final test formatting/concurrency-harness change. Production P9 migration/gateway/live-account validation → `NOT RUN`. No commit, push, tag, or deployment.
+
+**Next action:** P9.3 progression threshold and class XP boundary regressions.
+
+---
+
+## 2026-11-10 — P9.1 workout mode and warm-up contract (local PASS)
+
+**Task:** Prevent unfinishable timed/cardio workouts while production mode gates are closed; align legacy `NULL` set validation with authoritative completion; preserve pending-receipt reconciliation; decode Supabase `set_type` correctly.
+
+**Changes:** Agent E wrote RED tests for three inferred timed/cardio selections, duration-only `NULL` validation and completion, pending-receipt recovery, and warm-up JSON round-trip. Agent B added the pre-insert gate, fresh-completion validation, and `@JsonKey(name: 'set_type')` with generated parts. Agent C reviewed the effective SQL contract. No migration, RPC, reward rule, feature-gate, or production change was made in P9.1.
+
+**Lead verification at `main` `c68e577`:** `dart format --output=none --set-exit-if-changed lib test` → `PASS`, 299/0; `flutter test --no-pub --reporter expanded` → `PASS`, 753/753; `flutter analyze` → `FAIL`, 71 issues; web release build and Android debug APK → `PASS`; `npm test` → `PASS`, 40 SQL units/365 ACL assertions; `npm run test:concurrency` → `PASS`, 6/6 two-connection scenarios; Edge checks/tests → `PASS`, 55/55; `git diff --check` → `PASS`. Agent E's independent focused suite → `PASS`, 60/60. Live production validation → `NOT RUN`.
+
+**Safety and generator incident:** A filtered `build_runner` invocation deleted 37 unrelated tracked generated files. Lead reconstructed the pre-P9 dirty state from the verified bundle and patch, copied only absent files, and matched SHA-256 for all 37; no tracked files remain deleted. Only `workout_set` generated parts differ from the pre-P9 generated backup. No commit, push, tag, or deployment. Next scoped task: P9.2 historical import/backup integrity.
+
+---
+
+## 2026-11-10 — P9.0 exercise contract hardening (local PASS)
+
+**Task:** Resolve cross-user custom exercise visibility and reference integrity, prevent client hard delete from cascading workout history, and allow SQL to set non-null timestamps for custom creation/update.
+
+**Changes:** Agent C created `20261110000100_p9_exercise_contract.sql` with owner/source-scoped SELECT, archive-only client privilege, scoped quest selector, cross-owner workout-child guard, and fail-closed existing-reference preflight. Agent B changed only `supabase_exercise_repository.dart` to omit server-managed timestamps from custom INSERT/UPDATE. Agent E wrote `p9_exercise_contract.sql` and `p9_custom_exercise_repository_test.dart` RED regressions and updated the P7 DELETE expectation. Agent D reviewed catalogue/UUID semantics. Lead synchronized the P9 defect graph, decision, plan, board, and handoff.
+
+**Verification at `main` `c68e577`:** `dart format --output=none --set-exit-if-changed lib test` → `PASS`, 299 files/0 changed; `flutter test --reporter expanded` → `PASS`, 746/746; `npm test` → `PASS`, 40 SQL units/365 ACL assertions; `npm run test:concurrency` → `PASS`, 6/6 real two-connection scenarios; `npm run check:edge` → `PASS`; `npm run test:edge` → `PASS`, 55/55; web release build and Android debug APK → `PASS`. `flutter analyze` → `FAIL`, 71 warnings/info issues. The new SQL and HTTP-boundary tests failed for the expected behavior before the fixes and passed afterward. Production migration/gateway validation → `NOT RUN` (separate authorization required).
+
+**Safety:** Owner dirty files, curated UUIDs, and workout history preserved. No production operation, commit, push, or tag. Next scoped task: P9.1 workout mode/completion integrity.
+
+---
+
+## 2026-11-10 — P9.0 read-only audit and baseline checkpoint
+
+**Task:** Start repository-native P9 reliability hardening with Lead and Agents A–E. Preserve the existing dirty owner work, characterize the local and committed CI baselines, and build the dependency graph before implementation.
+
+**Status:** `FAIL` — current working-tree analyzer exits 1 with 71 warnings/info issues; no P9 application or SQL fix was applied at this checkpoint. CI run 42659715642 for committed `c68e577` failed format (16 files) and Android compile (`Exercise.userId` absent); the dirty local tree contains owner changes that resolve those two gates locally.
+
+**Verification:** `flutter pub get` PASS; Dart format PASS (298 files, 0 changed); `flutter analyze` FAIL (71 issues); Flutter tests PASS (744/744); web release build PASS; Android debug APK PASS; SQL harness PASS (38 units, 365 ACL assertions); Edge checks/tests PASS (55/55); Android manifest tests and merged release manifest PASS (internet=1, duplicates=0). All commands ran on `main` @ `c68e577`; see `docs/audit/P9_DEFECT_GRAPH.md` for exact commands and limits.
+
+**Safety:** External backup `D:\Projects\gymlvl_p9_backup_20261110_125948` verified bundle clone HEAD, archive 803/803 files, and 46/46 untracked files. No production operation, commit, push, tag, or owner-file cleanup occurred. D-050 records the P9 scope/planning conflict. Five repository-native read-only agent audits were consolidated in the defect graph.
+
+**Next action:** P9.0 — implement additive exercise privacy migration and independent two-user regression locally.
+
+---
+
 ## 2026-11-09 — Full-system production remediation (COMPLETE — all mandatory acceptance criteria PASS)
 
 **Task:** Remediate production backend/schema so onboarding 9/9 and critical app flows work end-to-end against the live Supabase project `shulhhxdebsfbsxcborq`. This supersedes the stale P8 planning state.

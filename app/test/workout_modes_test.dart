@@ -1,6 +1,7 @@
 import 'package:app/core/localization/localization_engine.dart';
 import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/workout_mode_contract.dart';
+import 'package:app/features/workout/domain/workout_set.dart';
 import 'package:app/features/workout/presentation/widgets/set_row_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +19,26 @@ void main() {
     expect(productionWorkoutModesEnabled, isFalse);
     expect(productionSupersetEnabled, isFalse);
   });
+
+  test(
+    'Supabase set_type warm-up round-trips and missing type stays workout',
+    () {
+      final warmup = WorkoutSet.fromJson({
+        'id': 'warmup-set',
+        'workout_exercise_id': 'exercise',
+        'set_type': 'warmup',
+      });
+      expect(warmup.isWarmup, isTrue);
+      expect(warmup.toJson()['set_type'], 'warmup');
+      expect(warmup.toJson().containsKey('setType'), isFalse);
+
+      final legacy = WorkoutSet.fromJson({
+        'id': 'legacy-set',
+        'workout_exercise_id': 'exercise',
+      });
+      expect(legacy.setType, WorkoutSetType.workout);
+    },
+  );
 
   test(
     'persisted mode values round-trip and legacy NULL remains unspecified',
@@ -137,6 +158,29 @@ void main() {
         );
       }
     }
+  });
+
+  test('completed legacy NULL mode requires reps even with duration', () {
+    expect(
+      () => validateWorkoutSetForMode(
+        mode: null,
+        reps: 0,
+        weightKg: 0,
+        durationSeconds: 30,
+        isCompleted: true,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => validateWorkoutSetForMode(
+        mode: null,
+        reps: 1,
+        weightKg: 0,
+        durationSeconds: 0,
+        isCompleted: true,
+      ),
+      returnsNormally,
+    );
   });
 
   test('draft sets allow zero values but reject cross-mode measurements', () {

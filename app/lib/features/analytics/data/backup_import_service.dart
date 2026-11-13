@@ -1,7 +1,7 @@
 /// P7 Gate 4: Backup restore / GymLvl portable import.
 ///
 /// Restores a previously exported GymLvl backup (format "gymlvl-backup",
-/// version 1). Strict validation, preview before confirmation, deterministic
+/// versions 1 and 2). Strict validation, preview before confirmation, deterministic
 /// idempotent restore, and zero retroactive rewards for historical workouts.
 ///
 /// Uses the P4 BackupExportService schema as authority. Never restores
@@ -9,12 +9,17 @@
 library;
 
 import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 import 'package:app/features/workout/domain/exercise_repository.dart';
 import 'package:app/features/workout/domain/workout_repository.dart';
 
 const String kBackupFormat = 'gymlvl-backup';
 const int kBackupVersion = 1;
+const int kBackupVersion2 = 2;
+final RegExp _backupUuidPattern = RegExp(
+  r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+);
 
 /// Status of a record during backup restore preview/restore.
 enum RestoreRecordStatus { newRecord, existing, duplicate, conflict, invalid }
@@ -184,12 +189,12 @@ class BackupImportService {
 
     // 3. Validate version
     final version = parsed['version'];
-    if (version == null || version is! int || version != kBackupVersion) {
+    if (version is! int ||
+        (version != kBackupVersion && version != kBackupVersion2)) {
       errors.add(
         RestoreValidationError(
           code: 'unsupported_version',
-          message:
-              'Phiên bản không được hỗ trợ: $version. Yêu cầu phiên bản $kBackupVersion.',
+          message: 'Phiên bản không được hỗ trợ: $version.',
           section: 'version',
         ),
       );
@@ -252,7 +257,7 @@ class BackupImportService {
       );
     }
 
-    final dataMap = data as Map<String, dynamic>;
+    final dataMap = data;
 
     // 6. Validate workouts
     final workoutsRaw = dataMap['workouts'];
@@ -323,20 +328,21 @@ class BackupImportService {
         workoutIds.add(wId);
       }
 
-      // Validate dates if present
-      final startedAt = _parseDateTime(w['started_at']);
-      final completedAt = _parseDateTime(w['completed_at']);
-      final createdAt = _parseDateTime(w['created_at']);
-      final updatedAt = _parseDateTime(w['updated_at']);
-
-      if (w['started_at'] != null && startedAt == null) {
-        errors.add(
-          RestoreValidationError(
-            code: 'invalid_date',
-            message: 'Ngày bắt đầu không hợp lệ: ${w['started_at']}.',
-            section: 'data.workouts[$i].started_at',
-          ),
-        );
+      for (final dateField in [
+        'started_at',
+        'completed_at',
+        'created_at',
+        'updated_at',
+      ]) {
+        if (w[dateField] != null && _parseDateTime(w[dateField]) == null) {
+          errors.add(
+            RestoreValidationError(
+              code: 'invalid_date',
+              message: 'Invalid workout date.',
+              section: 'data.workouts[$i].$dateField',
+            ),
+          );
+        }
       }
 
       // Validate numeric fields
@@ -429,6 +435,17 @@ class BackupImportService {
                 message:
                     'exercise_id không hợp lệ trong workout_exercise tại chỉ số $i.',
                 section: 'data.workout_exercises[$i].exercise_id',
+              ),
+            );
+          }
+
+          final orderIndex = we['order_index'];
+          if (orderIndex is! int || orderIndex < 0) {
+            errors.add(
+              RestoreValidationError(
+                code: 'invalid_order_index',
+                message: 'Thứ tự bài tập không hợp lệ.',
+                section: 'data.workout_exercises[$i].order_index',
               ),
             );
           }
@@ -598,6 +615,87 @@ class BackupImportService {
       }
     }
 
+    for (final exercise in weList) {
+      if (!workoutIds.contains(exercise['workout_id'])) {
+        errors.add(
+          const RestoreValidationError(
+            code: 'orphan_workout_exercise',
+            message: 'Workout exercise references a missing workout.',
+            section: 'data.workout_exercises',
+          ),
+        );
+      }
+    }
+    for (final set in setsList) {
+      if (!weIds.contains(set['workout_exercise_id'])) {
+        errors.add(
+          const RestoreValidationError(
+            code: 'orphan_workout_set',
+            message: 'Workout set references a missing exercise.',
+            section: 'data.workout_sets',
+          ),
+        );
+      }
+    }
+    final preferences = dataMap['preferences'];
+    final customExercises = dataMap['custom_exercises'];
+    final customList = <Map<String, dynamic>>[];
+    final customIds = <String>{};
+    if (version == kBackupVersion2) {
+      if (customExercises is! List || preferences != null) {
+        errors.add(
+          const RestoreValidationError(
+            code: 'invalid_v2_sections',
+            message: 'Backup v2 sections are invalid.',
+          ),
+        );
+      } else {
+        for (final raw in customExercises) {
+          if (raw is! Map<String, dynamic> ||
+              raw['id'] is! String ||
+              raw['user_id'] != userId ||
+              raw['source'] != 'user' ||
+              raw.containsKey('image_url') ||
+              raw.containsKey('external_id') ||
+              raw.containsKey('source_revision') ||
+              !customIds.add(raw['id'] as String)) {
+            errors.add(
+              const RestoreValidationError(
+                code: 'invalid_custom_definition',
+                message: 'Backup custom definition is invalid.',
+              ),
+            );
+          } else {
+            customList.add(raw);
+          }
+        }
+      }
+    }
+    if (version == 1 &&
+        ((preferences is Map && preferences.isNotEmpty) ||
+            (customExercises is List && customExercises.isNotEmpty) ||
+            workouts.any((w) => w['status'] != 'completed') ||
+            weList.any(
+              (we) =>
+                  we['superset_group_id'] != null ||
+                  we['superset_position'] != null ||
+                  we['mode'] != null,
+            ) ||
+            setsList.any(
+              (set) =>
+                  (set['baseline_weight_kg'] != null &&
+                      set['baseline_weight_kg'] != 0) ||
+                  set['rpe'] != null ||
+                  set['rir'] != null,
+            ))) {
+      errors.add(
+        const RestoreValidationError(
+          code: 'unsupported_backup_data',
+          message: 'Backup contains data that cannot be restored safely.',
+        ),
+      );
+    }
+
     final hasDuplicates =
         hasDuplicateWorkouts ||
         hasDuplicateWe ||
@@ -615,9 +713,15 @@ class BackupImportService {
       workoutExerciseCount: weList.length,
       workoutSetCount: setsList.length,
       measurementCount: measurementsList.length,
-      customExerciseCount:
-          0, // Backup does not export custom exercises separately
+      customExerciseCount: customList.length,
       recordStatuses: [
+        ...customList.map(
+          (custom) => RestoreRecordPreview(
+            recordType: 'custom_exercise',
+            sourceId: custom['id'] as String,
+            status: RestoreRecordStatus.newRecord,
+          ),
+        ),
         ...workouts.map(
           (w) => RestoreRecordPreview(
             recordType: 'workout',
@@ -660,236 +764,539 @@ class BackupImportService {
     );
   }
 
-  /// Confirm and execute the backup restore. Uses import-safe persistence
-  /// (markWorkoutCompleted, NOT completeWorkout) so historical workouts
-  /// grant ZERO XP and no RPG rewards.
+  /// Restore only fields that the authenticated historical-import RPC can
+  /// preserve. Unsupported backup data fails before any workout is written.
   Future<BackupRestoreResult> restore({
     required String jsonContent,
     required String currentUserId,
     Future<bool> Function(String backupFingerprint)? isDuplicate,
     Future<void> Function(String backupFingerprint)? recordImported,
   }) async {
-    final previewResult = preview(jsonContent);
-    if (!previewResult.canRestore) {
+    final checked = preview(jsonContent);
+    if (!checked.canRestore) {
       return BackupRestoreResult(
         success: false,
-        errors: previewResult.validationResult.errors,
-      );
-    }
-
-    // Deterministic content fingerprint — same backup content → same hash.
-    final backupFingerprint = _sha1(jsonContent);
-
-    // Check if this exact backup has already been imported for this owner.
-    if (isDuplicate != null && await isDuplicate(backupFingerprint)) {
-      return BackupRestoreResult(
-        success: true,
-        restoredWorkoutCount: 0,
-        restoredExerciseCount: 0,
-        restoredSetCount: 0,
-        restoredMeasurementCount: 0,
-        skippedDuplicateCount: 1,
-        warnings: [
-          const RestoreValidationWarning(
-            code: 'already_imported',
-            message:
-                'Bản sao lưu này đã được khôi phục trước đó. Bỏ qua để tránh trùng dữ liệu.',
-          ),
-        ],
-        errors: [],
+        errors: checked.validationResult.errors,
       );
     }
 
     final parsed = json.decode(jsonContent) as Map<String, dynamic>;
     final data = parsed['data'] as Map<String, dynamic>;
+    final version = parsed['version'] as int;
+    const invalidOwner = RestoreValidationError(
+      code: 'owner_mismatch',
+      message: 'Backup owner does not match the signed-in account.',
+    );
+    const unsupported = RestoreValidationError(
+      code: 'unsupported_backup_data',
+      message: 'Backup contains data that cannot be restored safely.',
+    );
+    String? authenticatedOwner;
+    try {
+      if (workoutRepository is HistoricalImportIdentity) {
+        authenticatedOwner =
+            (workoutRepository as HistoricalImportIdentity).authenticatedUserId;
+      }
+    } catch (_) {
+      // A missing or expired session cannot authorize a same-owner restore.
+    }
+    if (currentUserId.isEmpty ||
+        data['user_id'] != currentUserId ||
+        authenticatedOwner != currentUserId) {
+      return const BackupRestoreResult(success: false, errors: [invalidOwner]);
+    }
+
+    final importer = workoutRepository;
+    if (importer is! HistoricalWorkoutImportRepository) {
+      return const BackupRestoreResult(
+        success: false,
+        errors: [
+          RestoreValidationError(
+            code: 'historical_import_unavailable',
+            message: 'Secure historical import is unavailable.',
+          ),
+        ],
+      );
+    }
+
+    final workouts = (data['workouts'] as List).cast<Map<String, dynamic>>();
+    final exercises = (data['workout_exercises'] as List? ?? const [])
+        .cast<Map<String, dynamic>>();
+    final sets = (data['workout_sets'] as List? ?? const [])
+        .cast<Map<String, dynamic>>();
+    final measurements = data['body_measurements'] as List? ?? const [];
+    final customExercises = data['custom_exercises'] as List? ?? const [];
+    final customIds = customExercises
+        .map((raw) => (raw as Map<String, dynamic>)['id'])
+        .toSet();
+    final preferences = data['preferences'] as Map?;
+    if ((version == kBackupVersion && customExercises.isNotEmpty) ||
+        (preferences?.isNotEmpty ?? false)) {
+      return const BackupRestoreResult(success: false, errors: [unsupported]);
+    }
+    if (customExercises.isNotEmpty &&
+        importer is! HistoricalCustomExerciseImportRepository) {
+      return const BackupRestoreResult(success: false, errors: [unsupported]);
+    }
+    if (measurements.isNotEmpty &&
+        importer is! HistoricalMeasurementImportRepository) {
+      return const BackupRestoreResult(success: false, errors: [unsupported]);
+    }
+
+    final workoutIds = workouts.map((w) => w['workout_id']).toSet();
+    final exerciseIds = exercises.map((e) => e['workout_exercise_id']).toSet();
+    for (final workout in workouts) {
+      final started = _parseDateTime(workout['started_at']);
+      final completed = _parseDateTime(workout['completed_at']);
+      final duration = workout['duration_seconds'];
+      if (workout['user_id'] != currentUserId) {
+        return const BackupRestoreResult(
+          success: false,
+          errors: [invalidOwner],
+        );
+      }
+      if (workout['status'] != 'completed' ||
+          started == null ||
+          completed == null ||
+          !completed.isAfter(started) ||
+          duration is! int ||
+          duration < 1 ||
+          duration > 86400 ||
+          (version == kBackupVersion2 &&
+              (workout['paused_at'] != null ||
+                  workout['paused_seconds'] is! int ||
+                  (workout['paused_seconds'] as int) < 0 ||
+                  (workout['training_started_at'] != null &&
+                      (_parseDateTime(workout['training_started_at']) == null ||
+                          _parseDateTime(
+                            workout['training_started_at'],
+                          )!.isBefore(started) ||
+                          _parseDateTime(
+                            workout['training_started_at'],
+                          )!.isAfter(completed)))))) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+    }
+    final seenOrders = <String>{};
+    for (final exercise in exercises) {
+      if (!workoutIds.contains(exercise['workout_id']) ||
+          exercise['exercise_id'] is! String ||
+          (exercise['exercise_id'] as String).isEmpty ||
+          exercise['order_index'] is! int ||
+          (exercise['order_index'] as int) < 0 ||
+          (version == kBackupVersion &&
+              (exercise['superset_group_id'] != null ||
+                  exercise['superset_position'] != null ||
+                  exercise['mode'] != null)) ||
+          (version == kBackupVersion2 &&
+              ((exercise['superset_group_id'] == null) !=
+                      (exercise['superset_position'] == null) ||
+                  (exercise['superset_position'] != null &&
+                      exercise['superset_position'] is! int) ||
+                  (exercise['superset_locked'] != null &&
+                      exercise['superset_locked'] is! bool) ||
+                  (exercise['mode'] != null &&
+                      !const [
+                        'reps-weight',
+                        'bodyweight',
+                        'timed',
+                        'cardio',
+                      ].contains(exercise['mode'])) ||
+                  exercise['exercise_source'] is! String ||
+                  (exercise['exercise_source'] == 'user' &&
+                      !customIds.contains(exercise['exercise_id']))))) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+      if (!seenOrders.add(
+        '${exercise['workout_id']}|${exercise['order_index']}',
+      )) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+    }
+    final seenSetNumbers = <String>{};
+    for (final set in sets) {
+      if (!exerciseIds.contains(set['workout_exercise_id']) ||
+          set['set_number'] is! int ||
+          (set['set_number'] as int) < 1 ||
+          set['reps'] is! int ||
+          set['weight_kg'] is! num ||
+          set['duration_seconds'] is! int ||
+          (set['is_completed'] != null && set['is_completed'] is! bool) ||
+          (set['rest_seconds'] != null && set['rest_seconds'] is! int) ||
+          (set['set_type'] != null &&
+              set['set_type'] != 'workout' &&
+              set['set_type'] != 'warmup') ||
+          (version == kBackupVersion &&
+              ((set['baseline_weight_kg'] != null &&
+                      set['baseline_weight_kg'] != 0) ||
+                  set['rpe'] != null ||
+                  set['rir'] != null)) ||
+          (version == kBackupVersion2 &&
+              (set['baseline_weight_kg'] is! num ||
+                  (set['rpe'] != null && set['rpe'] is! int) ||
+                  (set['rir'] != null && set['rir'] is! int)))) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+      if (!seenSetNumbers.add(
+        '${set['workout_exercise_id']}|${set['set_number']}',
+      )) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+    }
+    if (version == kBackupVersion2) {
+      const textFields = [
+        'id',
+        'name',
+        'category',
+        'equipment',
+        'slug',
+        'name_vi',
+        'name_en',
+      ];
+      const arrayFields = [
+        'instructions',
+        'secondary_muscles',
+        'form_cues',
+        'common_mistakes',
+        'alternative_exercise_slugs',
+      ];
+      for (final raw in customExercises) {
+        final custom = raw as Map<String, dynamic>;
+        if (custom['user_id'] != currentUserId ||
+            custom['source'] != 'user' ||
+            custom['is_archived'] is! bool ||
+            textFields.any((field) => custom[field] is! String) ||
+            arrayFields.any(
+              (field) =>
+                  custom[field] is! List ||
+                  (custom[field] as List).any((item) => item is! String),
+            )) {
+          return const BackupRestoreResult(
+            success: false,
+            errors: [unsupported],
+          );
+        }
+      }
+    }
+    for (final raw in measurements) {
+      final measurement = raw as Map<String, dynamic>;
+      final value = measurement['value'];
+      if (measurement['user_id'] != currentUserId) {
+        return const BackupRestoreResult(
+          success: false,
+          errors: [invalidOwner],
+        );
+      }
+      if (measurement['measurement_id'] is! String ||
+          measurement['measurement_type'] is! String ||
+          value is! num ||
+          !value.isFinite ||
+          value <= 0 ||
+          value > 1000 ||
+          measurement['unit'] is! String ||
+          _parseDateTime(measurement['measured_at']) == null) {
+        return const BackupRestoreResult(success: false, errors: [unsupported]);
+      }
+    }
+
+    // Same-account backups usually contain the original workout already.
+    // Refuse to clone it; a missing result is required before any import RPC.
+    for (final workout in workouts) {
+      final sourceId = workout['workout_id'] as String;
+      if (!_backupUuidPattern.hasMatch(sourceId)) {
+        return const BackupRestoreResult(
+          success: false,
+          errors: [
+            RestoreValidationError(
+              code: 'unsupported_source_workout_id',
+              message: 'Backup workout identity is not a UUID.',
+            ),
+          ],
+        );
+      }
+      try {
+        if (await workoutRepository.getWorkoutDetail(sourceId) != null) {
+          return const BackupRestoreResult(
+            success: false,
+            errors: [
+              RestoreValidationError(
+                code: 'source_workout_exists',
+                message: 'Source workout already exists in this account.',
+              ),
+            ],
+          );
+        }
+      } catch (_) {
+        return const BackupRestoreResult(
+          success: false,
+          errors: [
+            RestoreValidationError(
+              code: 'source_workout_lookup_failed',
+              message: 'Source workout could not be checked.',
+            ),
+          ],
+        );
+      }
+    }
+
+    final fingerprint = version == 2
+        ? 'backup:v2:sha256:${sha256.convert(utf8.encode(json.encode(_canonicalValue(data))))}'
+        : 'backup:v1:sha256:${sha256.convert(utf8.encode(jsonContent))}';
+    if (version == kBackupVersion &&
+        isDuplicate != null &&
+        await isDuplicate(_legacyFnvFingerprint(jsonContent))) {
+      return const BackupRestoreResult(
+        success: false,
+        errors: [
+          RestoreValidationError(
+            code: 'legacy_import_requires_review',
+            message: 'Older import record requires review before retry.',
+          ),
+        ],
+      );
+    }
+    if (isDuplicate != null && await isDuplicate(fingerprint)) {
+      return const BackupRestoreResult(
+        success: true,
+        skippedDuplicateCount: 1,
+        warnings: [
+          RestoreValidationWarning(
+            code: 'already_imported',
+            message: 'This backup was already imported.',
+          ),
+        ],
+      );
+    }
 
     var restoredWorkouts = 0;
     var restoredExercises = 0;
     var restoredSets = 0;
     var restoredMeasurements = 0;
+    var restoredCustomExercises = 0;
     var skippedDuplicates = 0;
-    final warnings = <RestoreValidationWarning>[];
     final errors = <RestoreValidationError>[];
-
-    final workoutsRaw = data['workouts'] as List;
-    final weRaw = data['workout_exercises'] as List?;
-    final setsRaw = data['workout_sets'] as List?;
-    final measurementsRaw = data['body_measurements'] as List?;
-
-    // Build lookup maps for referential integrity
-    final weByWorkoutId = <String, List<Map<String, dynamic>>>{};
-    if (weRaw != null) {
-      for (final we in weRaw) {
-        if (we is! Map<String, dynamic>) continue;
-        final wid = we['workout_id'] as String?;
-        if (wid != null) {
-          (weByWorkoutId[wid] ??= []).add(we);
-        }
-      }
-    }
-
-    final setsByWeId = <String, List<Map<String, dynamic>>>{};
-    if (setsRaw != null) {
-      for (final s in setsRaw) {
-        if (s is! Map<String, dynamic>) continue;
-        final weId = s['workout_exercise_id'] as String?;
-        if (weId != null) {
-          (setsByWeId[weId] ??= []).add(s);
-        }
-      }
-    }
-
-    // Restore in dependency order: workouts -> workout_exercises -> sets -> measurements
-    for (final wRaw in workoutsRaw) {
-      if (wRaw is! Map<String, dynamic>) continue;
-
-      try {
-        final wId = wRaw['workout_id'] as String;
-        final startedAt = _parseDateTime(wRaw['started_at']) ?? DateTime.now();
-        final completedAt = _parseDateTime(wRaw['completed_at']);
-        final durationSeconds = _parseInt(wRaw['duration_seconds']);
-        final notes = wRaw['notes'] as String?;
-
-        // Use startWorkout then add exercises/sets, then markWorkoutCompleted
-        // (NOT completeWorkout) to avoid retroactive rewards.
-        final workout = await workoutRepository.startWorkout();
-
-        // Note: We cannot set the original workout_id as it's auto-generated.
-        // The imported workout gets a new ID; referential integrity is
-        // preserved through the new workout's exercise links.
-        restoredWorkouts++;
-
-        // Restore exercises for this workout
-        final wes = (weByWorkoutId[wId] ?? <Map<String, dynamic>>[])
-          ..sort(
-            (a, b) => _parseInt(
-              a['order_index'] ?? 0,
-            ).compareTo(_parseInt(b['order_index'] ?? 0)),
-          );
-
-        var orderIndex = 0;
-        for (final we in wes) {
-          try {
-            final wex = await workoutRepository.addExerciseToWorkout(
-              workout.id,
-              we['exercise_id'] as String,
-              orderIndex++,
-            );
-            restoredExercises++;
-
-            // Restore sets for this exercise
-            final weSets =
-                (setsByWeId[we['workout_exercise_id'] as String] ??
-                      <Map<String, dynamic>>[])
-                  ..sort(
-                    (a, b) => _parseInt(
-                      a['set_number'] ?? 1,
-                    ).compareTo(_parseInt(b['set_number'] ?? 1)),
-                  );
-
-            var setNumber = 1;
-            for (final s in weSets) {
-              try {
-                await workoutRepository.addSet(
-                  wex.id,
-                  setNumber++,
-                  _parseInt(s['reps'] ?? 0),
-                  (_parseDouble(s['weight_kg'] ?? 0)),
-                  durationSeconds: _parseInt(s['duration_seconds'] ?? 0),
-                );
-                restoredSets++;
-              } catch (e) {
-                warnings.add(
-                  RestoreValidationWarning(
-                    code: 'set_restore_failed',
-                    message: 'Khôi phục set thất bại: ${s['set_id']}.',
-                  ),
-                );
-              }
-            }
-          } catch (e) {
-            warnings.add(
-              RestoreValidationWarning(
-                code: 'exercise_restore_failed',
-                message:
-                    'Khôi phục bài tập thất bại: ${we['workout_exercise_id']}.',
-              ),
-            );
-          }
-        }
-
-        // Mark workout completed WITHOUT rewards (historical import)
+    if (version == kBackupVersion2 && customExercises.isNotEmpty) {
+      final customImporter =
+          importer as HistoricalCustomExerciseImportRepository;
+      for (final raw in customExercises) {
+        final custom = raw as Map<String, dynamic>;
+        final sourceId = custom['id'] as String;
+        final payload = <String, dynamic>{
+          for (final field in [
+            'id',
+            'name',
+            'category',
+            'equipment',
+            'force_type',
+            'mechanic',
+            'instructions',
+            'slug',
+            'name_vi',
+            'name_en',
+            'movement_pattern',
+            'secondary_muscles',
+            'difficulty',
+            'form_cues',
+            'common_mistakes',
+            'alternative_exercise_slugs',
+            'is_archived',
+          ])
+            field: custom[field],
+        };
+        final key =
+            'backup:custom:sha256:'
+            '${sha256.convert(utf8.encode('$currentUserId|$sourceId'))}';
         try {
-          await workoutRepository.markWorkoutCompleted(
-            workout.id,
-            completedAt: completedAt,
-            durationSeconds: durationSeconds,
-            notes: notes,
+          final receipt = await customImporter.importCustomExercise(
+            importKey: key,
+            payload: payload,
           );
+          if (receipt.exerciseId != sourceId) {
+            throw StateError('custom_import_identity_mismatch');
+          }
+          if (receipt.alreadyImported) {
+            skippedDuplicates++;
+          } else if (receipt.created) {
+            restoredCustomExercises++;
+          }
         } catch (_) {
-          // Best-effort; records already persisted.
+          errors.add(
+            const RestoreValidationError(
+              code: 'custom_restore_failed',
+              message: 'Custom exercise could not be restored.',
+            ),
+          );
+          return BackupRestoreResult(
+            success: false,
+            restoredCustomExerciseCount: restoredCustomExercises,
+            skippedDuplicateCount: skippedDuplicates,
+            errors: errors,
+          );
         }
-      } catch (e) {
+      }
+    }
+    for (final workout in workouts) {
+      final workoutId = workout['workout_id'] as String;
+      final children =
+          exercises
+              .where((exercise) => exercise['workout_id'] == workoutId)
+              .toList()
+            ..sort(
+              (a, b) =>
+                  (a['order_index'] as int).compareTo(b['order_index'] as int),
+            );
+      final payload = <String, dynamic>{
+        'source_workout_id': workoutId,
+        'started_at': _parseDateTime(
+          workout['started_at'],
+        )!.toUtc().toIso8601String(),
+        'completed_at': _parseDateTime(
+          workout['completed_at'],
+        )!.toUtc().toIso8601String(),
+        'duration_seconds': workout['duration_seconds'],
+        'notes': workout['notes'],
+        if (version == kBackupVersion2) ...{
+          'training_started_at': workout['training_started_at'],
+          'paused_seconds': workout['paused_seconds'],
+        },
+        'exercises': [
+          for (final exercise in children)
+            <String, dynamic>{
+              'exercise_id': exercise['exercise_id'],
+              'order_index': exercise['order_index'],
+              'notes': exercise['notes'],
+              if (version == kBackupVersion2) ...{
+                'mode': exercise['mode'],
+                'superset_group_id': exercise['superset_group_id'],
+                'superset_position': exercise['superset_position'],
+                if (exercise['superset_locked'] != null)
+                  'superset_locked': exercise['superset_locked'],
+                'exercise_source': exercise['exercise_source'],
+                'exercise_external_id': exercise['exercise_external_id'],
+                'exercise_source_revision':
+                    exercise['exercise_source_revision'],
+              },
+              'sets': [
+                for (final set in sets.where(
+                  (set) =>
+                      set['workout_exercise_id'] ==
+                      exercise['workout_exercise_id'],
+                ))
+                  <String, dynamic>{
+                    'set_number': set['set_number'],
+                    'reps': set['reps'],
+                    'weight_kg': set['weight_kg'],
+                    'duration_seconds': set['duration_seconds'],
+                    'is_completed': set['is_completed'] ?? false,
+                    'set_type': set['set_type'] ?? 'workout',
+                    'rest_seconds': set['rest_seconds'] ?? 0,
+                    if (version == kBackupVersion2) ...{
+                      'baseline_weight_kg': set['baseline_weight_kg'],
+                      'rpe': set['rpe'],
+                      'rir': set['rir'],
+                    },
+                  },
+              ],
+            },
+        ],
+      };
+      // Share identity across backup versions. A richer reimport of the same
+      // source UUID conflicts on the server digest instead of cloning history.
+      final key =
+          'backup:workout:sha256:'
+          '${sha256.convert(utf8.encode('$currentUserId|$workoutId'))}';
+      try {
+        final receipt = await (importer as HistoricalWorkoutImportRepository)
+            .importHistoricalWorkout(importKey: key, payload: payload);
+        if (receipt.alreadyImported) {
+          skippedDuplicates++;
+        } else {
+          restoredWorkouts++;
+          restoredExercises += children.length;
+          restoredSets += children.fold<int>(
+            0,
+            (count, exercise) =>
+                count +
+                sets
+                    .where(
+                      (set) =>
+                          set['workout_exercise_id'] ==
+                          exercise['workout_exercise_id'],
+                    )
+                    .length,
+          );
+        }
+      } catch (_) {
         errors.add(
-          RestoreValidationError(
+          const RestoreValidationError(
             code: 'workout_restore_failed',
-            message: 'Khôi phục workout thất bại: ${wRaw['workout_id']}.',
+            message: 'Historical workout could not be restored.',
           ),
         );
       }
     }
 
-    // Restore body measurements
-    if (measurementsRaw != null) {
-      for (final mRaw in measurementsRaw) {
-        if (mRaw is! Map<String, dynamic>) continue;
-
+    if (importer is HistoricalMeasurementImportRepository) {
+      for (final raw in measurements) {
+        final measurement = raw as Map<String, dynamic>;
+        final payload = <String, dynamic>{
+          'measurement_type': measurement['measurement_type'],
+          'value': measurement['value'],
+          'unit': measurement['unit'],
+          'measured_at': _parseDateTime(
+            measurement['measured_at'],
+          )!.toUtc().toIso8601String(),
+          'notes': measurement['notes'],
+        };
+        final source = measurement['measurement_id'] as String;
+        final key =
+            'backup:v1:measurement:sha256:'
+            '${sha256.convert(utf8.encode('$currentUserId|$source'))}';
         try {
-          final mId = mRaw['measurement_id'] as String?;
-          if (mId == null || mId.isEmpty) continue;
-
-          // BodyMeasurement repository not exposed; skip silently or warn
-          warnings.add(
-            RestoreValidationWarning(
-              code: 'measurement_restore_skipped',
-              message: 'Khôi phục body_measurement không được hỗ trợ: $mId.',
+          final receipt =
+              await (importer as HistoricalMeasurementImportRepository)
+                  .importHistoricalMeasurement(
+                    importKey: key,
+                    payload: payload,
+                  );
+          if (receipt.alreadyImported) {
+            skippedDuplicates++;
+          } else {
+            restoredMeasurements++;
+          }
+        } catch (_) {
+          errors.add(
+            const RestoreValidationError(
+              code: 'measurement_restore_failed',
+              message: 'Historical measurement could not be restored.',
             ),
           );
-        } catch (_) {
-          // Skip silently
         }
       }
     }
 
-    // Record the import fingerprint so a subsequent restore of the same
-    // backup is detected as a duplicate.
-    if (recordImported != null && errors.isEmpty) {
-      await recordImported(backupFingerprint);
+    if (errors.isEmpty && recordImported != null) {
+      try {
+        await recordImported(fingerprint);
+      } catch (_) {
+        errors.add(
+          const RestoreValidationError(
+            code: 'import_record_failed',
+            message: 'Backup import receipt could not be recorded.',
+          ),
+        );
+      }
     }
-
     return BackupRestoreResult(
-      success: true,
+      success: errors.isEmpty,
       restoredWorkoutCount: restoredWorkouts,
       restoredExerciseCount: restoredExercises,
       restoredSetCount: restoredSets,
       restoredMeasurementCount: restoredMeasurements,
+      restoredCustomExerciseCount: restoredCustomExercises,
       skippedDuplicateCount: skippedDuplicates,
-      warnings: warnings,
       errors: errors,
     );
-  }
-
-  int _parseInt(dynamic value) {
-    if (value == null) return 0;
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    return int.tryParse(value.toString().trim()) ?? 0;
-  }
-
-  double _parseDouble(dynamic value) {
-    if (value == null) return 0.0;
-    if (value is num) return value.toDouble();
-    return double.tryParse(value.toString().replaceAll(',', '.')) ?? 0.0;
   }
 
   DateTime? _parseDateTime(dynamic value) {
@@ -903,12 +1310,23 @@ class BackupImportService {
     }
   }
 
-  String _sha1(String input) {
-    final bytes = utf8.encode(input);
-    var hash = 0x811c9dc5; // FNV offset basis (32-bit)
-    for (final b in bytes) {
-      hash ^= b;
-      hash = (hash * 0x01000193) & 0xFFFFFFFF; // FNV prime
+  dynamic _canonicalValue(dynamic value) {
+    if (value is Map) {
+      final map = value.cast<String, dynamic>();
+      return <String, dynamic>{
+        for (final key in map.keys.toList()..sort())
+          key: _canonicalValue(map[key]),
+      };
+    }
+    if (value is List) return value.map(_canonicalValue).toList();
+    return value;
+  }
+
+  String _legacyFnvFingerprint(String input) {
+    var hash = 0x811c9dc5;
+    for (final byte in utf8.encode(input)) {
+      hash ^= byte;
+      hash = (hash * 0x01000193) & 0xFFFFFFFF;
     }
     return hash.toRadixString(16).padLeft(8, '0');
   }

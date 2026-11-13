@@ -6,6 +6,7 @@ import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/exercise.dart';
 import 'package:app/features/workout/domain/workout_set.dart';
 import 'package:app/features/workout/domain/workout_repository.dart';
+import 'package:app/features/workout/domain/workout_mode_contract.dart';
 import 'package:app/features/workout/presentation/controllers/active_workout_controller.dart';
 import 'package:app/features/workout/presentation/providers/exercise_providers.dart';
 import 'package:app/features/progression/domain/progression_engine.dart';
@@ -60,7 +61,8 @@ Workout _fixtureWorkout({List<WorkoutExercise>? exercises}) => Workout(
       ],
 );
 
-class FakeRepository extends Fake implements WorkoutRepository {
+class FakeRepository extends Fake
+    implements WorkoutRepository, AtomicWorkoutMutationRepository {
   Workout active = _fixtureWorkout();
   int reorders = 0;
   int replaces = 0;
@@ -95,15 +97,36 @@ class FakeRepository extends Fake implements WorkoutRepository {
 
   @override
   Future<void> reorderExercises(String workoutId, List<String> ids) async {
+    throw StateError('legacy_reorder_must_not_be_used');
+  }
+
+  @override
+  Future<Workout> reorderWorkoutExercisesAtomically({
+    required String operationId,
+    required String workoutId,
+    required List<String> exerciseIds,
+  }) async {
     reorders++;
     active = active.copyWith(
       exercises: [
-        for (var i = 0; i < ids.length; i++)
+        for (var i = 0; i < exerciseIds.length; i++)
           active.exercises
-              .firstWhere((e) => e.id == ids[i])
+              .firstWhere((e) => e.id == exerciseIds[i])
               .copyWith(orderIndex: i),
       ],
     );
+    return active;
+  }
+
+  @override
+  Future<Workout> addExerciseWithDefaultSets({
+    required String operationId,
+    required String workoutId,
+    required String exerciseId,
+    required WorkoutMode? mode,
+    required List<Map<String, Object>> sets,
+  }) async {
+    throw StateError('add_not_part_of_p3_fixture');
   }
 
   @override

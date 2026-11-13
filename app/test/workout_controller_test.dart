@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:app/features/workout/domain/workout.dart';
+import 'package:app/features/workout/domain/exercise.dart';
 import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/workout_set.dart';
 import 'package:app/features/workout/domain/workout_repository.dart';
@@ -39,6 +40,8 @@ class FakeRepository extends Fake implements WorkoutRepository {
   int starts = 0;
   int finishes = 0;
   int cancels = 0;
+  int addedExercises = 0;
+  int addedSets = 0;
   bool failCompletion = false;
   bool failUpdate = false;
   Completer<void>? finishGate;
@@ -66,6 +69,47 @@ class FakeRepository extends Fake implements WorkoutRepository {
     active = active.copyWith(trainingStartedAt: started);
     return active;
   }
+
+  @override
+  Future<WorkoutExercise> addExerciseToWorkout(
+    String workoutId,
+    String exerciseId,
+    int orderIndex,
+  ) async {
+    addedExercises++;
+    return WorkoutExercise(
+      id: 'added-$addedExercises',
+      workoutId: workoutId,
+      exerciseId: exerciseId,
+      orderIndex: orderIndex,
+    );
+  }
+
+  @override
+  Future<WorkoutSet> addSet(
+    String workoutExerciseId,
+    int setNumber,
+    int reps,
+    double weightKg, {
+    double baselineWeightKg = 0,
+    int durationSeconds = 0,
+  }) async {
+    addedSets++;
+    return WorkoutSet(
+      id: 'added-set-$addedSets',
+      workoutExerciseId: workoutExerciseId,
+      setNumber: setNumber,
+      reps: reps,
+      weightKg: weightKg,
+      durationSeconds: durationSeconds,
+    );
+  }
+
+  @override
+  Future<WorkoutSet?> getLastSetForExercise(String exerciseId) async => null;
+
+  @override
+  Future<void> removeExerciseFromWorkout(String workoutExerciseId) async {}
 
   @override
   Future<Workout> setWorkoutPaused(String id, bool paused) async {
@@ -151,6 +195,50 @@ void main() {
     await Future.wait([controller.startWorkout(), controller.startWorkout()]);
     expect(repository.starts, 1);
   });
+  for (final exercise in [
+    const Exercise(
+      id: 'inferred-cardio',
+      name: 'Run',
+      category: 'Cardio',
+      equipment: 'Bodyweight',
+    ),
+    const Exercise(
+      id: 'inferred-static',
+      name: 'Wall Sit',
+      category: 'Legs',
+      equipment: 'Bodyweight',
+      forceType: 'Static',
+    ),
+    const Exercise(
+      id: 'inferred-plank',
+      name: 'Plank',
+      category: 'Core',
+      equipment: 'Bodyweight',
+      slug: 'plank',
+    ),
+  ]) {
+    test(
+      'closed mode gate rejects ${exercise.id} before repository writes',
+      () async {
+        await controller.startWorkout();
+        await controller.addExercise(exercise);
+
+        expect(repository.addedExercises, 0);
+        expect(repository.addedSets, 0);
+        expect(
+          container.read(activeWorkoutControllerProvider).errorMessage,
+          'mode_unavailable',
+        );
+        expect(
+          container
+              .read(activeWorkoutControllerProvider)
+              .exercises
+              .any((item) => item.exerciseId == exercise.id),
+          isFalse,
+        );
+      },
+    );
+  }
   test('active discard settles and cancels exactly once', () async {
     await controller.startWorkout();
     await expectLater(
@@ -273,6 +361,39 @@ void main() {
     await controller.startWorkout();
     expect(await controller.completeWorkout(), null);
     expect(repository.finishes, 0);
+  });
+  test('legacy duration-only completed set blocks reward RPC', () async {
+    repository.active = fixture().copyWith(
+      exercises: [
+        WorkoutExercise(
+          id: 'exercise',
+          workoutId: 'workout',
+          exerciseId: 'catalog',
+          sets: [
+            const WorkoutSet(
+              id: 'legacy-duration-set',
+              workoutExerciseId: 'exercise',
+              reps: 0,
+              weightKg: 0,
+              durationSeconds: 30,
+              isCompleted: true,
+            ),
+          ],
+        ),
+      ],
+    );
+    await controller.startWorkout();
+
+    expect(await controller.completeWorkout(), isNull);
+    expect(repository.finishes, 0);
+    expect(
+      container.read(activeWorkoutControllerProvider).errorMessage,
+      'mode_measurements_invalid',
+    );
+    expect(
+      container.read(activeWorkoutControllerProvider).hasActiveWorkout,
+      isTrue,
+    );
   });
   test('set updates are serialized and completion waits for them', () async {
     await controller.startWorkout();

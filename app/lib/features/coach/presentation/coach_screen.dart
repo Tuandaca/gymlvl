@@ -72,13 +72,18 @@ class _CoachScreenState extends ConsumerState<CoachScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                  child: Text(
-                    translateText(
-                      ref,
-                      vi: 'Gợi ý do AI tạo, không thay đổi dữ liệu tập luyện. Khi bạn gửi câu hỏi, mục tiêu và lịch sử tập 7 ngày sẽ được chia sẻ với dịch vụ AI đã cấu hình. Ngừng bài tập gây đau và tìm tư vấn chuyên môn khi cần.',
-                      en: 'AI suggestions do not change your workout records. Sending a question shares your goals and 7-day workout history with the configured AI service. Stop painful activity and seek qualified guidance when needed.',
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 160),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        translateText(
+                          ref,
+                          vi: 'Gợi ý AI không thay đổi dữ liệu tập luyện. Khi gửi câu hỏi, dịch vụ AI đã cấu hình sẽ nhận môi trường tập, mục tiêu, mức kinh nghiệm, số ngày tập ở phòng gym và ở nhà mỗi tuần; tối đa 7 buổi đã hoàn thành trong 7 ngày gần đây, gồm thời điểm, thời lượng, tên/nhóm bài tập, số lần lặp và mức tạ của các hiệp hoàn thành. Ngừng bài tập gây đau và tìm tư vấn chuyên môn khi cần.',
+                          en: 'AI advice does not change workout records. Sending a question shares your training environment, goals, experience, weekly gym and home days, and up to 7 completed workouts from the past 7 days with the configured AI service. Workout facts include time, duration, exercise names/categories, and completed-set reps and weights. Stop painful activity and seek qualified guidance when needed.',
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ),
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
                 Expanded(

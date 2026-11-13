@@ -316,19 +316,18 @@ SELECT public.p5_assert(
 -- =====================================================================
 -- Gate 5: Unlocks — exactly-once; core fitness ungated behind unlocks.
 -- =====================================================================
--- Core fitness is NOT gated behind unlocks: all 5 completions above succeeded
--- with rewards while the user still holds zero unlocks.
+-- Core fitness remains ungated: all five completions succeed while the
+-- server grants only verified, applicable unlocks.
 SELECT public.p5_assert(
   (SELECT count(*) FROM public.workout_rewards WHERE user_id='99999999-9999-9999-9999-999999999999') = 5,
   'GATE 5: all five workouts completed with rewards (core fitness ungated)'
 );
 SELECT public.p5_assert(
-  (SELECT count(*) FROM public.user_unlocks WHERE user_id='99999999-9999-9999-9999-999999999999') = 0,
-  'GATE 5: zero unlocks held during all five completions'
+  (SELECT count(*) FROM public.user_unlocks WHERE user_id='99999999-9999-9999-9999-999999999999') = 1,
+  'GATE 5: first-workout badge unlocked during completion; higher milestones remain locked'
 );
 
--- Unlock earned exactly once.
-INSERT INTO public.user_unlocks(user_id,unlock_id) VALUES('99999999-9999-9999-9999-999999999999','badge_first_workout');
+-- The server earned this unlock exactly once.
 SELECT public.p5_assert(
   (SELECT count(*) FROM public.user_unlocks WHERE user_id='99999999-9999-9999-9999-999999999999' AND unlock_id='badge_first_workout') = 1,
   'GATE 5: badge_first_workout unlock earned exactly once'

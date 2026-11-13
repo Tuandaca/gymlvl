@@ -10,6 +10,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
 const db = new PGlite({ extensions: { pgcrypto } });
 let completed = 0;
+let failed = false;
 
 async function runSql(label, filename) {
   try {
@@ -41,6 +42,9 @@ try {
       await runSql(`seed ${name}`, filename);
       await runSql(`seed replay ${name}`, filename);
     }
+  }
+  if (process.env.GYMLVL_DB_TEST_PROBE_SQL) {
+    await runSql('injected SQL regression', process.env.GYMLVL_DB_TEST_PROBE_SQL);
   }
   const testsDir = path.join(root, 'supabase/tests');
   const tests = (await readdir(testsDir)).filter(name => name.endsWith('.sql')).sort();
@@ -104,9 +108,11 @@ try {
   console.log(`PASS ${completed} SQL verification units against PostgreSQL ${String((await db.query('show server_version')).rows[0].server_version)}`);
   console.log('LIMITATION: isolated single-connection PostgreSQL; Supabase gateway/Auth/Edge runtime and true concurrent sessions require the local stack.');
 } catch (error) {
+  failed = true;
   console.error(`FAIL verification: ${error.message}`);
   if (error.code) console.error(`PostgreSQL code: ${error.code}`);
-  process.exitCode = 1;
 } finally {
   await db.close();
+  // PGlite close may reset process.exitCode; set it after cleanup for CI.
+  if (failed) process.exitCode = 1;
 }

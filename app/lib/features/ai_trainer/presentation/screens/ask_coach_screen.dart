@@ -1,8 +1,7 @@
 /// In-workout AI coaching screen.
 ///
-/// Displays an AI-generated recommendation for the current active workout.
-/// The user can accept to apply the change through existing GymLvl RPCs, or
-/// dismiss it. AI is advisory: it never mutates workout data directly.
+/// Displays advisory AI text during a workout. The current Edge contract does
+/// not return validated structured actions, so no Apply control is shown.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,19 +9,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/localization/localization_engine.dart';
 import '../../../../../ui/candy/candy.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../workout/presentation/providers/exercise_providers.dart';
-import '../../../workout/domain/workout_set.dart';
 import '../../domain/models/pt_context.dart';
 import '../../domain/models/pt_recommendation.dart';
 import '../../domain/services/routine_application_service.dart';
-import '../providers/pt_context_provider.dart';
 import '../providers/pt_recommendation_provider.dart';
 
 /// In-workout AI coaching screen.
 ///
-/// Shows a single recommendation derived from the current active workout
-/// context. The user can accept to apply it through existing GymLvl RPCs, or
-/// dismiss it.
+/// Shows advisory text generated from verified server-owned context.
 class AskCoachScreen extends ConsumerStatefulWidget {
   const AskCoachScreen({super.key});
 
@@ -31,10 +27,11 @@ class AskCoachScreen extends ConsumerStatefulWidget {
 }
 
 class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
+  String? _consentedForUserId;
+
   @override
   Widget build(BuildContext context) {
-    final contextAsync = ref.watch(ptContextProvider);
-
+    final userId = ref.watch(authStateStreamProvider).value?.session?.user.id;
     return CandyScaffold(
       appBar: AppBar(
         title: Text(
@@ -48,28 +45,65 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: _buildBody(contextAsync),
+      body: _buildBody(userId),
     );
   }
 
-  Widget _buildBody(AsyncValue<PtContext> contextAsync) {
-    return contextAsync.when(
-      data: (ptx) {
-        final recommendationAsync = ref.watch(ptRecommendationProvider(ptx));
-        return recommendationAsync.when(
-          data: (recommendation) => _buildContent(context, ptx, recommendation),
-          loading: () => const CandySkeleton(height: 300, borderRadius: 18),
-          error: (error, _) => _buildError(context, error.toString()),
-        );
-      },
+  Widget _buildBody(String? userId) {
+    if (userId == null) return _buildError();
+    if (_consentedForUserId != userId) return _buildConsentPrompt(userId);
+    final recommendationAsync = ref.watch(ptRecommendationProvider);
+    return recommendationAsync.when(
+      data: (recommendation) => _buildContent(context, null, recommendation),
       loading: () => const CandySkeleton(height: 300, borderRadius: 18),
-      error: (error, _) => _buildError(context, error.toString()),
+      error: (error, _) => _buildError(),
+    );
+  }
+
+  Widget _buildConsentPrompt(String userId) {
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: CandyCard(
+            shadow: CandyCardShadow.small,
+            padding: const EdgeInsets.all(16),
+            backgroundColor: CandyColors.canvas,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  translateText(
+                    ref,
+                    vi: 'Khi bấm Tạo gợi ý, dịch vụ AI đã cấu hình sẽ nhận môi trường tập, mục tiêu, mức kinh nghiệm, số ngày tập ở phòng gym và ở nhà mỗi tuần; tối đa 7 buổi đã hoàn thành trong 7 ngày gần đây, gồm thời điểm, thời lượng, tên/nhóm bài tập, số lần lặp và mức tạ của các hiệp hoàn thành. Gợi ý chỉ để tham khảo và không thay đổi dữ liệu tập luyện.',
+                    en: 'Generate shares your training environment, goals, experience, weekly gym and home days, and up to 7 completed workouts from the past 7 days with the configured AI service. Workout facts include time, duration, exercise names/categories, and completed-set reps and weights. Advice does not change workout records.',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                CandyButton(
+                  label: translateText(
+                    ref,
+                    vi: 'TẠO GỢI Ý',
+                    en: 'GENERATE ADVICE',
+                  ),
+                  variant: CandyButtonVariant.primary,
+                  onPressed: () {
+                    ref.invalidate(ptRecommendationProvider);
+                    setState(() => _consentedForUserId = userId);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildContent(
     BuildContext context,
-    PtContext ptx,
+    PtContext? ptx,
     PtRecommendation recommendation,
   ) {
     return SingleChildScrollView(
@@ -96,8 +130,8 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
                   child: Text(
                     translateText(
                       ref,
-                      vi: 'Gợi ý từ AI không thay đổi dữ liệu tập luyện. Khi bạn áp dụng, mục tiêu và lịch sử tập 7 ngày sẽ được chia sẻ với dịch vụ AI đã cấu hình.',
-                      en: 'AI suggestions do not change workout records. Sending a question shares your goals and 7-day workout history with the configured AI service. Stop painful activity and seek qualified guidance when needed.',
+                      vi: 'Gợi ý AI chỉ để tham khảo và không thay đổi dữ liệu tập luyện. Ngừng bài tập gây đau và tìm tư vấn chuyên môn khi cần.',
+                      en: 'AI advice is advisory and does not change workout records. Stop painful activity and seek qualified guidance when needed.',
                     ),
                     style: const TextStyle(
                       fontFamily: CandyFonts.body,
@@ -235,62 +269,67 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Confidence
-          Text(
-            translateText(ref, vi: 'ĐỘ TIN CẬY', en: 'CONFIDENCE'),
-            style: const TextStyle(
-              fontFamily: CandyFonts.display,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: CandyColors.ink,
+          // A text-only answer has no measured confidence score.
+          if (recommendation.isValidated) ...[
+            Text(
+              translateText(ref, vi: 'ĐỘ TIN CẬY', en: 'CONFIDENCE'),
+              style: const TextStyle(
+                fontFamily: CandyFonts.display,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: CandyColors.ink,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          CandyProgressBar(
-            progress: recommendation.confidence.clamp(0.0, 1.0),
-            height: 10,
-            fillColor: CandyColors.mintGreen,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${(recommendation.confidence * 100).round()}%',
-            style: const TextStyle(
-              fontFamily: CandyFonts.mono,
-              fontSize: 12,
-              color: CandyColors.charcoal,
+            const SizedBox(height: 8),
+            CandyProgressBar(
+              progress: recommendation.confidence.clamp(0.0, 1.0),
+              height: 10,
+              fillColor: CandyColors.mintGreen,
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              '${(recommendation.confidence * 100).round()}%',
+              style: const TextStyle(
+                fontFamily: CandyFonts.mono,
+                fontSize: 12,
+                color: CandyColors.charcoal,
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
 
           // Action buttons
-          Row(
-            children: [
-              Expanded(
-                child: CandyButton(
-                  label: translateText(
-                    ref,
-                    vi: 'ÁP DỤNG VÀO BUỔI TẬP',
-                    en: 'APPLY TO WORKOUT',
+          if (ptx != null &&
+              recommendation.isValidated &&
+              recommendation.hasActionable)
+            Row(
+              children: [
+                Expanded(
+                  child: CandyButton(
+                    label: translateText(
+                      ref,
+                      vi: 'ÁP DỤNG VÀO BUỔI TẬP',
+                      en: 'APPLY TO WORKOUT',
+                    ),
+                    variant: CandyButtonVariant.primary,
+                    size: CandyButtonSize.large,
+                    icon: Icons.edit_calendar,
+                    onPressed: () =>
+                        _showApplyDialog(context, ptx, recommendation),
                   ),
-                  variant: CandyButtonVariant.primary,
-                  size: CandyButtonSize.large,
-                  icon: Icons.edit_calendar,
-                  onPressed: () =>
-                      _showApplyDialog(context, ptx, recommendation),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CandyButton(
-                  label: translateText(ref, vi: 'BỎ QUA', en: 'DISMISS'),
-                  variant: CandyButtonVariant.secondary,
-                  size: CandyButtonSize.large,
-                  icon: Icons.close,
-                  onPressed: () => Navigator.of(context).pop(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CandyButton(
+                    label: translateText(ref, vi: 'BỎ QUA', en: 'DISMISS'),
+                    variant: CandyButtonVariant.secondary,
+                    size: CandyButtonSize.large,
+                    icon: Icons.close,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -393,7 +432,7 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
     );
   }
 
-  Widget _buildError(BuildContext context, String error) {
+  Widget _buildError() {
     return CandyScaffold(
       appBar: AppBar(
         title: Text(translateText(ref, vi: 'AI COACH', en: 'AI COACH')),
@@ -404,7 +443,11 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
       body: Center(
         child: CandyErrorState(
           title: translateText(ref, vi: 'LỖI', en: 'ERROR'),
-          message: error,
+          message: translateText(
+            ref,
+            vi: 'AI Coach hiện chưa phản hồi. Bạn vẫn có thể tập luyện và thử lại sau.',
+            en: 'AI Coach is unavailable. Workouts remain available; try again later.',
+          ),
           retryLabel: translateText(ref, vi: 'THỬ LẠI', en: 'RETRY'),
           onRetry: () => ref.invalidate(ptRecommendationProvider),
         ),
@@ -478,7 +521,7 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
     // Get the active workout to apply changes to.
     final active = await repo.getActiveWorkout();
     if (active == null) {
-      if (!mounted) return;
+      if (!mounted || !context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -495,7 +538,7 @@ class _AskCoachScreenState extends ConsumerState<AskCoachScreen> {
 
     final result = await service.applyRecommendation(active.id, item);
 
-    if (!mounted) return;
+    if (!mounted || !context.mounted) return;
 
     if (result.applied) {
       ScaffoldMessenger.of(context).showSnackBar(

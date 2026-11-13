@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkoutSet {
 
- String get id;@JsonKey(name: 'workout_exercise_id') String get workoutExerciseId;@JsonKey(name: 'set_number') int get setNumber; int get reps;@JsonKey(name: 'weight_kg') double get weightKg;@JsonKey(name: 'baseline_weight_kg') double get baselineWeightKg;@JsonKey(name: 'is_completed') bool get isCompleted;@JsonKey(name: 'rest_seconds') int get restSeconds;@JsonKey(name: 'duration_seconds') int get durationSeconds;@JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType get setType;/// RPE (1-10): NULLABLE, no default — backward compatible with legacy rows.
+ String get id;@JsonKey(name: 'workout_exercise_id') String get workoutExerciseId;@JsonKey(name: 'set_number') int get setNumber; int get reps;@JsonKey(name: 'weight_kg') double get weightKg;@JsonKey(name: 'baseline_weight_kg') double get baselineWeightKg;@JsonKey(name: 'is_completed') bool get isCompleted;@JsonKey(name: 'rest_seconds') int get restSeconds;@JsonKey(name: 'duration_seconds') int get durationSeconds;@JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType get setType;/// RPE (1-10): NULLABLE, no default — backward compatible with legacy rows.
 @JsonKey(name: 'rpe') int? get rpe;/// RIR (0-10): NULLABLE, no default — backward compatible with legacy rows.
 @JsonKey(name: 'rir') int? get rir;@JsonKey(name: 'created_at') DateTime? get createdAt;
 /// Create a copy of WorkoutSet
@@ -50,7 +50,7 @@ abstract mixin class $WorkoutSetCopyWith<$Res>  {
   factory $WorkoutSetCopyWith(WorkoutSet value, $Res Function(WorkoutSet) _then) = _$WorkoutSetCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'workout_exercise_id') String workoutExerciseId,@JsonKey(name: 'set_number') int setNumber, int reps,@JsonKey(name: 'weight_kg') double weightKg,@JsonKey(name: 'baseline_weight_kg') double baselineWeightKg,@JsonKey(name: 'is_completed') bool isCompleted,@JsonKey(name: 'rest_seconds') int restSeconds,@JsonKey(name: 'duration_seconds') int durationSeconds,@JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType setType,@JsonKey(name: 'rpe') int? rpe,@JsonKey(name: 'rir') int? rir,@JsonKey(name: 'created_at') DateTime? createdAt
+ String id,@JsonKey(name: 'workout_exercise_id') String workoutExerciseId,@JsonKey(name: 'set_number') int setNumber, int reps,@JsonKey(name: 'weight_kg') double weightKg,@JsonKey(name: 'baseline_weight_kg') double baselineWeightKg,@JsonKey(name: 'is_completed') bool isCompleted,@JsonKey(name: 'rest_seconds') int restSeconds,@JsonKey(name: 'duration_seconds') int durationSeconds,@JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType setType,@JsonKey(name: 'rpe') int? rpe,@JsonKey(name: 'rir') int? rir,@JsonKey(name: 'created_at') DateTime? createdAt
 });
 
 
@@ -167,7 +167,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkoutSet() when $default != null:
 return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_that.weightKg,_that.baselineWeightKg,_that.isCompleted,_that.restSeconds,_that.durationSeconds,_that.setType,_that.rpe,_that.rir,_that.createdAt);case _:
@@ -188,7 +188,7 @@ return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _WorkoutSet():
 return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_that.weightKg,_that.baselineWeightKg,_that.isCompleted,_that.restSeconds,_that.durationSeconds,_that.setType,_that.rpe,_that.rir,_that.createdAt);case _:
@@ -208,7 +208,7 @@ return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'workout_exercise_id')  String workoutExerciseId, @JsonKey(name: 'set_number')  int setNumber,  int reps, @JsonKey(name: 'weight_kg')  double weightKg, @JsonKey(name: 'baseline_weight_kg')  double baselineWeightKg, @JsonKey(name: 'is_completed')  bool isCompleted, @JsonKey(name: 'rest_seconds')  int restSeconds, @JsonKey(name: 'duration_seconds')  int durationSeconds, @JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)  WorkoutSetType setType, @JsonKey(name: 'rpe')  int? rpe, @JsonKey(name: 'rir')  int? rir, @JsonKey(name: 'created_at')  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkoutSet() when $default != null:
 return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_that.weightKg,_that.baselineWeightKg,_that.isCompleted,_that.restSeconds,_that.durationSeconds,_that.setType,_that.rpe,_that.rir,_that.createdAt);case _:
@@ -223,7 +223,7 @@ return $default(_that.id,_that.workoutExerciseId,_that.setNumber,_that.reps,_tha
 @JsonSerializable()
 
 class _WorkoutSet extends WorkoutSet {
-  const _WorkoutSet({required this.id, @JsonKey(name: 'workout_exercise_id') required this.workoutExerciseId, @JsonKey(name: 'set_number') this.setNumber = 1, this.reps = 0, @JsonKey(name: 'weight_kg') this.weightKg = 0, @JsonKey(name: 'baseline_weight_kg') this.baselineWeightKg = 0, @JsonKey(name: 'is_completed') this.isCompleted = false, @JsonKey(name: 'rest_seconds') this.restSeconds = 0, @JsonKey(name: 'duration_seconds') this.durationSeconds = 0, @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) this.setType = WorkoutSetType.workout, @JsonKey(name: 'rpe') this.rpe, @JsonKey(name: 'rir') this.rir, @JsonKey(name: 'created_at') this.createdAt}): super._();
+  const _WorkoutSet({required this.id, @JsonKey(name: 'workout_exercise_id') required this.workoutExerciseId, @JsonKey(name: 'set_number') this.setNumber = 1, this.reps = 0, @JsonKey(name: 'weight_kg') this.weightKg = 0, @JsonKey(name: 'baseline_weight_kg') this.baselineWeightKg = 0, @JsonKey(name: 'is_completed') this.isCompleted = false, @JsonKey(name: 'rest_seconds') this.restSeconds = 0, @JsonKey(name: 'duration_seconds') this.durationSeconds = 0, @JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) this.setType = WorkoutSetType.workout, @JsonKey(name: 'rpe') this.rpe, @JsonKey(name: 'rir') this.rir, @JsonKey(name: 'created_at') this.createdAt}): super._();
   factory _WorkoutSet.fromJson(Map<String, dynamic> json) => _$WorkoutSetFromJson(json);
 
 @override final  String id;
@@ -235,7 +235,7 @@ class _WorkoutSet extends WorkoutSet {
 @override@JsonKey(name: 'is_completed') final  bool isCompleted;
 @override@JsonKey(name: 'rest_seconds') final  int restSeconds;
 @override@JsonKey(name: 'duration_seconds') final  int durationSeconds;
-@override@JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) final  WorkoutSetType setType;
+@override@JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) final  WorkoutSetType setType;
 /// RPE (1-10): NULLABLE, no default — backward compatible with legacy rows.
 @override@JsonKey(name: 'rpe') final  int? rpe;
 /// RIR (0-10): NULLABLE, no default — backward compatible with legacy rows.
@@ -275,7 +275,7 @@ abstract mixin class _$WorkoutSetCopyWith<$Res> implements $WorkoutSetCopyWith<$
   factory _$WorkoutSetCopyWith(_WorkoutSet value, $Res Function(_WorkoutSet) _then) = __$WorkoutSetCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'workout_exercise_id') String workoutExerciseId,@JsonKey(name: 'set_number') int setNumber, int reps,@JsonKey(name: 'weight_kg') double weightKg,@JsonKey(name: 'baseline_weight_kg') double baselineWeightKg,@JsonKey(name: 'is_completed') bool isCompleted,@JsonKey(name: 'rest_seconds') int restSeconds,@JsonKey(name: 'duration_seconds') int durationSeconds,@JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType setType,@JsonKey(name: 'rpe') int? rpe,@JsonKey(name: 'rir') int? rir,@JsonKey(name: 'created_at') DateTime? createdAt
+ String id,@JsonKey(name: 'workout_exercise_id') String workoutExerciseId,@JsonKey(name: 'set_number') int setNumber, int reps,@JsonKey(name: 'weight_kg') double weightKg,@JsonKey(name: 'baseline_weight_kg') double baselineWeightKg,@JsonKey(name: 'is_completed') bool isCompleted,@JsonKey(name: 'rest_seconds') int restSeconds,@JsonKey(name: 'duration_seconds') int durationSeconds,@JsonKey(name: 'set_type', fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson) WorkoutSetType setType,@JsonKey(name: 'rpe') int? rpe,@JsonKey(name: 'rir') int? rir,@JsonKey(name: 'created_at') DateTime? createdAt
 });
 
 

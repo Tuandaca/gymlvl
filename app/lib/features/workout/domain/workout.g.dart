@@ -53,7 +53,7 @@ Map<String, dynamic> _$WorkoutToJson(_Workout instance) => <String, dynamic>{
   'completed_at': instance.completedAt?.toIso8601String(),
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
-  'workout_exercises': instance.exercises.map((e) => e.toJson()).toList(),
+  'workout_exercises': instance.exercises,
 };
 
 const _$WorkoutStatusEnumMap = {

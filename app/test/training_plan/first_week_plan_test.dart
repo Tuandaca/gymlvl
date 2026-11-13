@@ -143,7 +143,9 @@ void main() {
     expect(find.textContaining('Đang tải...'), findsOneWidget);
   });
 
-  testWidgets('start button is >= 48dp touch target', (WidgetTester tester) async {
+  testWidgets('start button is >= 48dp touch target', (
+    WidgetTester tester,
+  ) async {
     final overrides = [
       firstWeekPlanProvider.overrideWithValue(AsyncData(_plan())),
       newcomerJourneyProvider.overrideWithValue(AsyncData(PlanStarted())),

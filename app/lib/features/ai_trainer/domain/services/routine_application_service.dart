@@ -7,9 +7,7 @@
 /// via `WorkoutRepository`.
 library;
 
-import 'package:app/features/workout/domain/workout_exercise.dart';
 import 'package:app/features/workout/domain/workout_repository.dart';
-import 'package:app/features/workout/domain/workout_set.dart';
 import '../../domain/models/pt_recommendation.dart';
 
 /// Result of applying a recommendation through existing repository APIs.
@@ -221,7 +219,7 @@ class RoutineApplicationService {
     }
 
     try {
-      final set = await repository.updateSet(workoutExerciseId, reps: newReps);
+      await repository.updateSet(workoutExerciseId, reps: newReps);
       return RoutineApplicationResult(
         applied: true,
         message: 'Set reps updated.',
@@ -258,10 +256,7 @@ class RoutineApplicationService {
     }
 
     try {
-      final set = await repository.updateSet(
-        workoutExerciseId,
-        weightKg: newWeight,
-      );
+      await repository.updateSet(workoutExerciseId, weightKg: newWeight);
       return RoutineApplicationResult(
         applied: true,
         message: 'Set weight updated.',
@@ -298,10 +293,7 @@ class RoutineApplicationService {
     }
 
     try {
-      final set = await repository.updateSet(
-        workoutExerciseId,
-        restSeconds: newRest,
-      );
+      await repository.updateSet(workoutExerciseId, restSeconds: newRest);
       return RoutineApplicationResult(
         applied: true,
         message: 'Set rest time updated.',

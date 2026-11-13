@@ -33,6 +33,7 @@ class SupabaseCoachRepository implements CoachRepository {
             body: {
               'message': message,
               'history': history.map((m) => m.toJson()).toList(),
+              'consent': true,
             },
           )
           .timeout(const Duration(seconds: 35));

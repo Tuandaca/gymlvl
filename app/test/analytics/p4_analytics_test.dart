@@ -20,7 +20,7 @@ void main() {
     ),
   ];
 
-  Workout _completed(
+  Workout completed(
     String id,
     DateTime completedAt, {
     required String exerciseId,
@@ -81,19 +81,19 @@ void main() {
       final d2 = DateTime.utc(2026, 10, 1, 16); // same local day
       final d3 = DateTime.utc(2026, 10, 2);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d1,
           exerciseId: exA,
           sets: [working('s1', 10, 50)],
         ), // 1RM 66.67
-        _completed(
+        completed(
           'w2',
           d2,
           exerciseId: exA,
           sets: [working('s2', 5, 100)],
         ), // 1RM 116.67 -> day max
-        _completed(
+        completed(
           'w3',
           d3,
           exerciseId: exA,
@@ -115,7 +115,7 @@ void main() {
       final engine = AnalyticsEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: exA,
@@ -140,9 +140,9 @@ void main() {
       final d1 = DateTime.utc(2026, 10, 1);
       final d2 = DateTime.utc(2026, 10, 2);
       final workouts = [
-        _completed('w1', d1, exerciseId: exA, sets: [working('s1', 10, 50)]),
-        _completed('w2', d1, exerciseId: exB, sets: [working('s2', 10, 60)]),
-        _completed('w3', d2, exerciseId: exA, sets: [working('s3', 10, 70)]),
+        completed('w1', d1, exerciseId: exA, sets: [working('s1', 10, 50)]),
+        completed('w2', d1, exerciseId: exB, sets: [working('s2', 10, 60)]),
+        completed('w3', d2, exerciseId: exA, sets: [working('s3', 10, 70)]),
       ];
       final trend = engine.exerciseStrengthTrend(
         sets: allSets(workouts),
@@ -164,7 +164,7 @@ void main() {
       final engine = AnalyticsEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: exA,
@@ -187,13 +187,13 @@ void main() {
       final inWindow = now.subtract(const Duration(days: 10));
       final outOfWindow = now.subtract(const Duration(days: 40));
       final workouts = [
-        _completed(
+        completed(
           'w1',
           inWindow,
           exerciseId: exA,
           sets: [working('s1', 10, 50)],
         ),
-        _completed(
+        completed(
           'w2',
           outOfWindow,
           exerciseId: exA,
@@ -218,19 +218,19 @@ void main() {
       final d1 = DateTime.utc(2026, 10, 1);
       final d2 = DateTime.utc(2026, 10, 2);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d1,
           exerciseId: exA,
           sets: [working('s1', 10, 50)],
         ), // 500
-        _completed(
+        completed(
           'w2',
           d1,
           exerciseId: exA,
           sets: [working('s2', 5, 40)],
         ), // 200 -> day total 700
-        _completed(
+        completed(
           'w3',
           d2,
           exerciseId: exA,
@@ -252,8 +252,8 @@ void main() {
       final engine = AnalyticsEngine();
       final d1 = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed('w1', d1, exerciseId: exA, sets: [working('s1', 10, 50)]),
-        _completed(
+        completed('w1', d1, exerciseId: exA, sets: [working('s1', 10, 50)]),
+        completed(
           'w2',
           d1,
           exerciseId: exB,
@@ -306,7 +306,7 @@ void main() {
       final engine = AnalyticsEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed('w1', d, exerciseId: exA, sets: [working('s1', 10, 50)]),
+        completed('w1', d, exerciseId: exA, sets: [working('s1', 10, 50)]),
       ];
       final sets = allSets(workouts);
       final workoutExercises = workoutExercisesFor(workouts);

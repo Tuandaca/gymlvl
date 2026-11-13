@@ -79,9 +79,12 @@ class SupabaseExerciseRepository implements ExerciseRepository {
       throw ArgumentError('custom_exercise must have a non-null userId');
     }
 
+    final payload = exercise.toJson()
+      ..remove('created_at')
+      ..remove('updated_at');
     final response = await _supabase
         .from('exercises')
-        .insert(exercise.toJson())
+        .insert(payload)
         .select()
         .single();
 
@@ -98,9 +101,12 @@ class SupabaseExerciseRepository implements ExerciseRepository {
       throw ArgumentError('custom_exercise must have a non-null userId');
     }
 
+    final payload = exercise.toJson()
+      ..remove('created_at')
+      ..remove('updated_at');
     final response = await _supabase
         .from('exercises')
-        .update(exercise.toJson())
+        .update(payload)
         .eq('id', exercise.id)
         .eq('user_id', ownerId)
         .select()

@@ -11,13 +11,11 @@ import 'bodyweight_measurement.dart';
 class BodyweightTrendPoint {
   /// Local date (midnight) of the measurement.
   final DateTime date;
+
   /// Body mass in kg at [date].
   final double weightKg;
 
-  const BodyweightTrendPoint({
-    required this.date,
-    required this.weightKg,
-  });
+  const BodyweightTrendPoint({required this.date, required this.weightKg});
 
   @override
   bool operator ==(Object other) =>
@@ -55,13 +53,11 @@ class BodyweightTrend {
         ..sort((a, b) => a.measuredAt.compareTo(b.measuredAt));
 
   /// Trend points (date, weightKg) sorted ascending.
-  List<BodyweightTrendPoint> get points =>
-      sorted
-          .map((m) => BodyweightTrendPoint(
-                date: m.measuredAt,
-                weightKg: m.weightKg,
-              ))
-          .toList(growable: false);
+  List<BodyweightTrendPoint> get points => sorted
+      .map(
+        (m) => BodyweightTrendPoint(date: m.measuredAt, weightKg: m.weightKg),
+      )
+      .toList(growable: false);
 
   /// The earliest measurement, or null when there is no history.
   BodyweightMeasurement? get first => sorted.isEmpty ? null : sorted.first;
@@ -100,8 +96,9 @@ class BodyweightTrend {
   double? changeInLastDays(int days, {DateTime? reference}) {
     final ref = reference ?? DateTime.utc(2026, 11, 5);
     final windowStart = ref.subtract(Duration(days: days));
-    final inWindow =
-        sorted.where((m) => m.measuredAt.isAfter(windowStart)).toList();
+    final inWindow = sorted
+        .where((m) => m.measuredAt.isAfter(windowStart))
+        .toList();
     if (inWindow.length < 2) return null;
     return inWindow.last.weightKg - inWindow.first.weightKg;
   }

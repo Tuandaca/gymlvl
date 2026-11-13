@@ -53,7 +53,7 @@ async function rpcFetch(verify: (calls: { rpc: number }) => Promise<void>, autho
 }
 
 for (const [name, limit] of [["RPC", 16384], ["Coach", 20000]] as const) {
-  const value = name === "RPC" ? { message: "Tập luyện. Training." } : { message: "Tập luyện. Training.", history: [] };
+  const value = name === "RPC" ? { message: "Tập luyện. Training." } : { message: "Tập luyện. Training.", history: [], consent: true };
   async function handle(request: Request, overrides: Partial<CoachDependencies> = {}) {
     return name === "RPC" ? await rpcHandler("start_workout")(request) : await handleCoachRequest(request, deps(overrides));
   }
@@ -133,7 +133,7 @@ for (const size of [262144, 262145, 280000]) {
     const body = counted(padded(providerValue, size), 1000);
     let quota = 0;
     const response = await handleCoachRequest(new Request("https://local/coach", {
-      method: "POST", headers: { Authorization: "Bearer valid" }, body: JSON.stringify({ message: "hi" }),
+      method: "POST", headers: { Authorization: "Bearer valid" }, body: JSON.stringify({ message: "hi", consent: true }),
     }), deps({
       consumeQuota: () => { quota++; return Promise.resolve(true); },
       fetcher: () => Promise.resolve(new Response(body.stream, { headers: { "Content-Length": "1" } })),
@@ -151,7 +151,7 @@ for (const status of [429, 500]) {
   Deno.test(`Coach non-ok provider ${status} cancels unread body`, async () => {
     const body = counted("private-provider-body".repeat(20000));
     const response = await handleCoachRequest(new Request("https://local/coach", {
-      method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi"}',
+      method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi","consent":true}',
     }), deps({ fetcher: () => Promise.resolve(new Response(body.stream, { status })) }));
     equal(response.status, status === 429 ? 429 : 502);
     equal(body.state.bytes, 0);
@@ -191,7 +191,7 @@ Deno.test("bounded reader releases lock after stream read error", async () => {
 Deno.test("Coach malformed provider JSON preserves sanitized 503", async () => {
   const body = counted("private-not-json", 1);
   const response = await handleCoachRequest(new Request("https://local/coach", {
-    method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi"}',
+    method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi","consent":true}',
   }), deps({ fetcher: () => Promise.resolve(new Response(body.stream)) }));
   equal(response.status, 503);
   equal((await response.json()).code, "coach_unavailable");
@@ -201,7 +201,7 @@ Deno.test("Coach malformed provider JSON preserves sanitized 503", async () => {
 Deno.test("Coach provider multibyte padding cannot bypass byte cap", async () => {
   const body = counted(JSON.stringify({ ...providerValue, padding: "ế".repeat(90000) }));
   const response = await handleCoachRequest(new Request("https://local/coach", {
-    method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi"}',
+    method: "POST", headers: { Authorization: "Bearer valid" }, body: '{"message":"hi","consent":true}',
   }), deps({ fetcher: () => Promise.resolve(new Response(body.stream)) }));
   equal(response.status, 502);
   equal(body.state.bytes < body.total, true);
@@ -218,7 +218,7 @@ Deno.test("Coach preserves semantic limits and validation/quota/context/provider
     fetcher: () => { events.push("provider"); return Promise.resolve(Response.json(providerValue)); },
   });
   const send = (value: unknown, dependencies = configured) => handleCoachRequest(new Request("https://local/coach", {
-    method: "POST", headers: { Authorization: "Bearer valid" }, body: JSON.stringify(value),
+    method: "POST", headers: { Authorization: "Bearer valid" }, body: JSON.stringify({ consent: true, ...(value as Record<string, unknown>) }),
   }), dependencies);
   equal((await send({ message: "a".repeat(2001) })).status, 400);
   equal((await send({ message: "hi", history: [{ role: "user", content: "a".repeat(4001) }] })).status, 400);

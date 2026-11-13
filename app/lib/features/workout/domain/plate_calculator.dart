@@ -127,9 +127,7 @@ class PlateCalculationResult {
   String toString() {
     final plates = platesPerSide.isEmpty
         ? 'none'
-        : platesPerSide.entries
-              .map((e) => '${e.value}x ${e.value.toStringAsFixed(1)}kg')
-              .join(', ');
+        : platesPerSide.entries.map((e) => '${e.value}x ${e.key}kg').join(', ');
     return 'PlateCalculationResult(target=$targetWeight, bar=$barWeight, '
         'perSide=$plates, achieved=$achievedWeight, remainder=$remainder)';
   }

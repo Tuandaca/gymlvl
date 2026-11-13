@@ -81,23 +81,23 @@ class ExerciseAlias {
 
   /// Build from a Supabase JSON row (snake_case keys).
   factory ExerciseAlias.fromJson(Map<String, dynamic> json) => ExerciseAlias(
-        id: json['id'] as String,
-        userId: json['user_id'] as String,
-        exerciseId: json['exercise_id'] as String,
-        alias: json['alias'] as String,
-        createdAt: json['created_at'] == null
-            ? null
-            : DateTime.parse(json['created_at'] as String),
-      );
+    id: json['id'] as String,
+    userId: json['user_id'] as String,
+    exerciseId: json['exercise_id'] as String,
+    alias: json['alias'] as String,
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+  );
 
   /// Serialize to Supabase JSON (snake_case keys).
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'user_id': userId,
-        'exercise_id': exerciseId,
-        'alias': alias,
-        'created_at': createdAt?.toUtc().toIso8601String(),
-      };
+    'id': id,
+    'user_id': userId,
+    'exercise_id': exerciseId,
+    'alias': alias,
+    'created_at': createdAt?.toUtc().toIso8601String(),
+  };
 
   ExerciseAlias copyWith({
     String? id,

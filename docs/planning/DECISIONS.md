@@ -42,6 +42,9 @@ Status values:
 | D-041 | M3 real-data lifecycle, Superset v1 behavior, and four-mode contract | PARTIALLY_APPROVED — contracts accepted for local/test implementation; production gate closed | 2026-11-03 |
 | D-042 | M3.6 offline payload encryption, platform-backed key storage, auth/account-switch lifecycle, and two-connection PostgreSQL concurrency verification | ACCEPTED for additive local/test verification only: AES-256-GCM authenticated envelopes (`cryptography 2.9.0`, BSD-3) bound to owner/operation/workout/contract-version via length-prefixed AAD; keys never persist in SQLite/source/env/preferences/payload metadata and live behind `OfflinePayloadKeyStore` (`flutter_secure_storage 11.2.0`, BSD-3, DPAPI-protected file backend on Windows). `OfflinePayloadCipher.production()` and `OfflineSyncCoordinator.production()` throw `StateError` while `productionOfflinePayloadProtectionEnabled`/`productionOfflineSyncEnabled` stay `false`. Store schema v3 stores ciphertext+commit tag+nonce+key version only; plaintext and ciphertext are mutually exclusive per row; legacy v2 rows survive migration. Logout clears owner/generation and stops sync before ACK without discarding rows; discard requires explicit `ownerConfirmed`. Genuine two-connection PostgreSQL idempotency/race scenarios C1–C6 verified against an isolated disposable PostgreSQL 17.5 (embedded, two `pg.Client` connections, monitor sampled `pg_stat_activity` lock waits). Unit-tested encryption = deterministic fake key store; platform secure storage = verified on Windows real-runtime (two separate processes: create + recover); PostgreSQL concurrency = real two-connection verified; production activation = not approved. | 2026-11-04 |
 
+| D-055 | P9.5 transactional workout reorder and add-with-default-sets RPCs | ACCEPTED for local implementation only | 2026-11-13 |
+| D-056 | Retain current typography for P9; correct it in a separate task | ACCEPTED | 2026-11-13 |
+
 > Rows D-015–D-021 are missing from this summary; their sections exist below. The gap is recorded as
 > evidence for `FND-GOV-002` in `docs/audit/MASTER_FINDINGS.md` and is repaired in W4, not here.
 
@@ -694,6 +697,76 @@ and deleting a `workout_exercises` row cascades to its sets.
 
 **Consequences:** `MASTER_PLAN.md`, `TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`, `OPENGYM_PARITY_MATRIX.md` updated. P4 = COMPLETE; P5 = NEXT / NOT STARTED.
 
+## D-051 — Historical import transaction and backup ownership policy
+
+**Status:** ACCEPTED for local implementation on 2026-11-10 by the owner's explicit selection, “Mỗi workout, cùng tài khoản (đề xuất).” No production deployment or Git write is authorized.
+
+**Context:** Both historical import paths call `start_workout()`, which reuses an active session; then they attempt a client status UPDATE that authenticated ACL denies, swallow the failure, and report success. Imported completed rows can later affect live achievement counts. Backup v1 omits custom definitions and loses supported fields during restore. See `docs/audit/P9_DEFECT_GRAPH.md` and the P9.2 plan for exact source evidence and RED tests.
+
+**Decision:** Add a bounded, authenticated `import_historical_workout_v1` SECURITY DEFINER RPC that imports one historical workout atomically, creates a new row, and never calls `complete_workout` or writes rewards. Use a server-owned idempotency ledger keyed by owner and import key, with a payload digest. Mark imported workouts and exclude them from later achievement/streak counts. For backup restore, accept only the current account's data; cross-account transfer is deferred until an explicit mapping and consent policy exists. Preserve supported fields or fail validation before writing; never mark a lossy restore successful. A backup may be partially restored only at acknowledged item boundaries: each workout is one transaction, and custom definitions and body measurements are separate idempotent owner-scoped operations. Retry resumes remaining items, reports committed counts accurately, and records the file fingerprint only after all items succeed. A whole-file transaction would conflict with the selected per-workout policy.
+
+**Approval boundary:** This approval covers local additive schema/RPC and client implementation under the stated semantics. Production deployment, Git writes, live-data migration, and cross-account transfer remain unapproved.
+
+## D-052 — Class threshold parity with legacy level floor
+
+**Status:** ACCEPTED for local implementation on 2026-11-13 by the owner's explicit selection, “Giữ level cũ, áp dụng ngưỡng mới cho lượt thưởng sau (đề xuất).” No production deployment or Git write is authorized.
+
+**Context:** D-043 and Dart use `floor(xp_base * n^xp_slope)` as the cumulative XP threshold to reach class level `n`; effective PostgreSQL `complete_workout` and `switch_class` compare the current level and thus reach level 2 at `xp_base`. Stored levels may already exceed the D-043 result for their current class XP. The progression view also subtracts global XP from a class threshold.
+
+**Decision:** Future class awards and class switches compare XP with the next level's D-043 threshold. Preserve every previously stored class level and graduation as a per-user, per-class floor, including when a class is switched out and later restored. Do not reduce any stored level or graduation, rewrite class XP, or replay rewards. Additive private floor storage snapshots existing class rows; only server-owned RPCs mutate it. The display-only next-level estimate subtracts the selected class's XP and reports zero for a graduated class. Future awards may leave a grandfathered class at its prior level until it reaches the next canonical threshold.
+
+**Approval boundary:** The owner approved the local threshold and legacy-level policy only. Unlock awarding/ownership rules, production migration, live-data repair, and Git writes require separate review.
+
+## D-053 — Verified unlock backfill and future award ownership
+
+**Status:** ACCEPTED for local implementation on 2026-11-13 by the owner's explicit selection, “Backfill có kiểm chứng + lượt sau (đề xuất).” No production deployment or Git write is authorized.
+
+**Context:** `user_unlocks` has an owner-insert policy but no server award path. `get_player_progression` therefore keeps showing unlocks as pending even after qualifying achievements or levels. `badge_level_20` describes class graduation but was typed as a global level unlock.
+
+**Decision:** Grant missing unlock rows only from already recorded server-owned evidence: first workout and streak achievements, global level 10/20, and a graduated class at level 20. Backfill once from those records, then synchronize after a new `workout_rewards` row is inserted by `complete_workout` in the same transaction. The sync is idempotent and server-only; authenticated clients have no INSERT privilege/policy and cannot invoke it. Correct the graduation unlock's type to `class`. Never add XP, alter workout rewards, or revoke earned unlocks.
+
+**Approval boundary:** This covers the local additive migration and tests. Production migration, Git writes, and future unlock catalogue changes remain separately gated.
+
+## D-054 — Existing server-owned AI context and per-request egress consent
+
+**Status:** ACCEPTED for local P9.4 implementation under the owner's P9 AI hardening scope. This keeps the existing Edge Function as the authoritative context builder; it does not introduce a new backend, provider, or data store. Production deployment and Git writes remain unapproved.
+
+**Context:** The Edge Function already loads authenticated owner profile and seven-day completed workout data, while the PT client built empty history/set arrays and synthetic readiness, then sent that duplicate context and the account UUID in a prompt. PT screens invoked the provider on opening. The current Edge response is free-form text, with no validated structured action or calibrated confidence.
+
+**Decision:** The Edge Function requires `consent: true` on each request before quota, context access, or external provider egress, rejects client-supplied context, and sends only bounded allowlisted server facts without internal IDs. The chat Send action follows its visible disclosure; PT screens show a VI/EN disclosure and Generate action, with consent bound to the signed-in account. The client no longer builds or submits a synthetic PT context. Text replies remain advisory with no Apply control or confidence score; future structured application requires a separately validated server contract and human approval.
+
+## D-055 — Transactional workout reorder and add-with-default-sets
+
+**Status:** ACCEPTED for local implementation only. The owner approved the proposed contract on 2026-11-13 in response to the D-055 approval question under `AGENTS.md` §0(3). No production migration/deployment or Git write was approved.
+
+**Context:** The current workout reorder issues one authenticated table UPDATE per exercise and optimistically changes local state before acknowledgement. Adding an exercise inserts its parent, then queries the previous set and inserts defaults one at a time; best-effort DELETE cleanup can also fail. Fault-injection Flutter tests reproduce a diverged local order and orphaned parent with zero, one or two sets. Routine reorder is already a separate RPC and remains outside this scoped decision.
+
+**Proposed contract:** Add `reorder_workout_exercises_v1(p_operation_id uuid,p_workout_id uuid,p_exercise_ids uuid[])` and `add_workout_exercise_with_sets_v1(p_operation_id uuid,p_workout_id uuid,p_exercise_id uuid,p_mode text,p_sets jsonb)` as authenticated SECURITY DEFINER RPCs in one additive migration. Each call locks the account then active workout, validates owner and complete payload, performs all writes within the PostgreSQL function transaction, and writes a receipt to the existing private `workout_write_operations` ledger. Replays with the same key and canonical payload return the same result even after completion; a changed payload with the same key fails. Reorder validates a full permutation and updates `order_index` in one statement, retaining existing superset behavior; its receipt contains operation/workout IDs and exercise count. Add derives append order under lock, rejects an exercise already present in the workout, and creates one exercise plus 1–100 validated uncompleted default sets, with no reward write; its receipt contains operation/workout/exercise/set IDs. The Flutter controller prefetches suggestions, uses a stable operation ID across uncertain retries, reloads authoritative detail after acknowledgement, reconciles on failure, and fails closed if the atomic repository capability is unavailable.
+
+**Retry detail:** Flutter retains both the operation UUID and the exact validated payload across an uncertain response; recomputed last-set suggestions must not silently change a retry. A confirmed success or account/workout reset clears the pending operation.
+
+**Approval boundary:** Approval covers local migration, Flutter integration, tests and documentation only. Production migration/deployment, activation of offline/workout-mode gates, and Git writes remain separate decisions. The existing ledger migration is a deployment prerequisite.
+
+## D-056 — Retain current typography for P9; correct it separately
+
+**Status:** ACCEPTED by the owner on 2026-11-13 under `AGENTS.md` §0(3). No font asset or runtime typography change is approved by this entry.
+
+**Context:** The four bundled files named Archivo, Space Grotesk and Space Mono have identical `glyf` and `hmtx` SHA-256 digests to `InterVariable.ttf`, with the same 2,933 glyphs and variable axes. The two named Space Mono files have unequal `i` and `W` advance widths, so the current mono label is misleading. `app/assets/fonts/SOURCES.md` now records this existing provenance. UI/adversarial test harnesses now use the actual production light theme and current registered assets; no binary or app styling changed.
+
+**Decision:** Retain the current binaries and runtime family mapping for P9, disclose the discrepancy in `app/assets/fonts/SOURCES.md`, and handle typography in a separate task. The owner selected this option from the proposed choices. Neither a platform monospace remapping nor new font procurement is authorized here.
+
+**Boundary:** D-056 closes the P9.6 typography choice without claiming that the font names match the actual glyphs. A future typography task needs its own design/provenance review and approval before changing binaries or mappings. Production deployment, asset procurement and Git writes remain separately unauthorized.
+
+## D-057 — P9 scoped Git publication
+
+**Status:** ACCEPTED by the owner on 2026-11-13 for commit and push to `main` only.
+
+**Context:** P9.0–P9.6 and local quality gates were verified, but `main` contained 163 dirty status paths including pre-existing owner work, unrelated infrastructure and a local production backup. D-050 had withheld Git writes. The owner explicitly requested a push and selected "P9 plus dependent application code, excluding infrastructure and backups" after reviewing the dirty-tree scope.
+
+**Decision:** Publish only the explicit P9 candidate manifest: 126 selected file paths comprising P9 application code/tests and required application dependencies, additive migrations/SQL tests, Edge changes, verification tooling/CI, and P9 planning/audit records. Keep 50 unrelated dirty paths out of the index and commit. Commit and push on `main`; do not tag, deploy or apply a production migration. Verify the staged path set and the remote ref before reporting completion. The verified external backup at `D:\Projects\gymlvl_p9_push_backup_20261113_112704` preserves the starting state.
+
+**Consequences:** The current Git publication approval supersedes the Git-write restriction in D-050 only for this scoped push. It does not approve future Git writes or production operations. D-056's typography decision is unchanged.
+
 ## Open decisions
 
 These remain unresolved and block later milestones:
@@ -842,6 +915,16 @@ by the owner). Privacy-policy URL, support email, and age rating remain OWNER IN
 **Consequences:** `docs/audit/P8_RELEASE_HARDENING_REPORT.md`, `docs/planning/ARCHITECTURE.md`,
 `docs/planning/TASK_BOARD.md`, `docs/planning/SESSION_HANDOFF.md`, `docs/planning/CHANGELOG_AI.md`
 reflect P8 account-deletion implementation.
+
+## D-050 — P9 repository-native reliability hardening
+
+**Status:** ACCEPTED for local implementation and verification by the owner's P9 request on 2026-11-10. Production deployment and Git writes remain unapproved.
+
+**Context:** `main` advanced to `c68e577` after the P8 remediation, but the planning index still described P5 as active and the task board still named the completed remediation task. The owner explicitly requested P9 deep hardening. This records that planning conflict before implementation; current command output at `c68e577` takes precedence over historical status text.
+
+**Decision:** P9 is a sequence of scoped reliability tasks, starting with P9.0 baseline and exercise contract recovery. Use the repository's Lead and Agents A–E ownership, with independent Agent E review. Preserve all pre-existing dirty owner work. Keep migrations additive and local; do not deploy, commit, push, or tag. For P9.0, authenticated clients may archive custom exercises but may not hard-delete them: the existing DELETE grant can cascade into workout history and PRs, while the app exposes only archive. The privileged account-deletion path remains available. A concrete change to progression rules, historical-import semantics, or other material architecture still needs its own approved decision before implementation.
+
+**Evidence:** See `docs/audit/P9_DEFECT_GRAPH.md` for current-session baseline commands, static findings, dependencies, and the next scoped task. Previous production E2E evidence remains historical and does not validate a P9 change.
 
 ## Open decisions
 

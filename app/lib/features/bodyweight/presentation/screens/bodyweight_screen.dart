@@ -37,65 +37,65 @@ class BodyweightScreen extends ConsumerWidget {
   }
 
   Widget _buildLoading(WidgetRef ref) => CandyScaffold(
-        appBar: AppBar(
-          title: Text('bodyweight_title'.tr(ref)),
-          backgroundColor: CandyColors.canvas,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(height: 16.0),
-              Text(
-                'loading'.tr(ref),
-                style: const TextStyle(
-                  fontFamily: CandyFonts.body,
-                  fontSize: 14,
-                  color: CandyColors.charcoal,
-                ),
-              ),
-            ],
+    appBar: AppBar(
+      title: Text('bodyweight_title'.tr(ref)),
+      backgroundColor: CandyColors.canvas,
+      elevation: 0,
+      centerTitle: true,
+    ),
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16.0),
+          Text(
+            'loading'.tr(ref),
+            style: const TextStyle(
+              fontFamily: CandyFonts.body,
+              fontSize: 14,
+              color: CandyColors.charcoal,
+            ),
           ),
-        ),
-      );
+        ],
+      ),
+    ),
+  );
 
   Widget _buildError(WidgetRef ref, String message) => CandyScaffold(
-        appBar: AppBar(
-          title: Text('bodyweight_title'.tr(ref)),
-          backgroundColor: CandyColors.canvas,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: Center(
-          child: CandyErrorState(
-            title: 'error_title'.tr(ref),
-            message: message,
-            retryLabel: 'retry'.tr(ref),
-            onRetry: null,
-          ),
-        ),
-      );
+    appBar: AppBar(
+      title: Text('bodyweight_title'.tr(ref)),
+      backgroundColor: CandyColors.canvas,
+      elevation: 0,
+      centerTitle: true,
+    ),
+    body: Center(
+      child: CandyErrorState(
+        title: 'error_title'.tr(ref),
+        message: message,
+        retryLabel: 'retry'.tr(ref),
+        onRetry: null,
+      ),
+    ),
+  );
 
   Widget _buildEmpty(WidgetRef ref) => CandyScaffold(
-        appBar: AppBar(
-          title: Text('bodyweight_title'.tr(ref)),
-          backgroundColor: CandyColors.canvas,
-          elevation: 0,
-          centerTitle: true,
-        ),
-        body: Center(
-          child: CandyEmptyState(
-            icon: Icons.monitor_weight_outlined,
-            title: 'bodyweight_no_data'.tr(ref),
-            message: 'plan_empty'.tr(ref),
-            actionLabel: null,
-            onAction: null,
-          ),
-        ),
-      );
+    appBar: AppBar(
+      title: Text('bodyweight_title'.tr(ref)),
+      backgroundColor: CandyColors.canvas,
+      elevation: 0,
+      centerTitle: true,
+    ),
+    body: Center(
+      child: CandyEmptyState(
+        icon: Icons.monitor_weight_outlined,
+        title: 'bodyweight_no_data'.tr(ref),
+        message: 'plan_empty'.tr(ref),
+        actionLabel: null,
+        onAction: null,
+      ),
+    ),
+  );
 
   Widget _buildContent(WidgetRef ref, List<BodyweightTrendPoint> points) {
     final latest = points.last;

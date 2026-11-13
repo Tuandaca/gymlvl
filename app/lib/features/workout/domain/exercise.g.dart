@@ -45,6 +45,8 @@ _Exercise _$ExerciseFromJson(Map<String, dynamic> json) => _Exercise(
   source: json['source'] as String? ?? 'gymlvl_curated',
   externalId: json['external_id'] as String?,
   sourceRevision: json['source_revision'] as String?,
+  userId: json['user_id'] as String?,
+  isArchived: json['is_archived'] as bool? ?? false,
   createdAt: json['created_at'] == null
       ? null
       : DateTime.parse(json['created_at'] as String),
@@ -74,6 +76,8 @@ Map<String, dynamic> _$ExerciseToJson(_Exercise instance) => <String, dynamic>{
   'source': instance.source,
   'external_id': instance.externalId,
   'source_revision': instance.sourceRevision,
+  'user_id': instance.userId,
+  'is_archived': instance.isArchived,
   'created_at': instance.createdAt?.toIso8601String(),
   'updated_at': instance.updatedAt?.toIso8601String(),
 };

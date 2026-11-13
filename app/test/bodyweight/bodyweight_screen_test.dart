@@ -11,18 +11,9 @@ import 'package:app/ui/candy/candy_stat_tile.dart';
 
 List<BodyweightTrendPoint> _points() {
   return [
-    BodyweightTrendPoint(
-      date: DateTime(2026, 10, 1),
-      weightKg: 70.0,
-    ),
-    BodyweightTrendPoint(
-      date: DateTime(2026, 10, 2),
-      weightKg: 69.5,
-    ),
-    BodyweightTrendPoint(
-      date: DateTime(2026, 10, 3),
-      weightKg: 70.2,
-    ),
+    BodyweightTrendPoint(date: DateTime(2026, 10, 1), weightKg: 70.0),
+    BodyweightTrendPoint(date: DateTime(2026, 10, 2), weightKg: 69.5),
+    BodyweightTrendPoint(date: DateTime(2026, 10, 3), weightKg: 70.2),
   ];
 }
 
@@ -50,7 +41,9 @@ void main() {
     expect(find.byType(CandyStatTile), findsOneWidget);
   });
 
-  testWidgets('empty state when no bodyweight data', (WidgetTester tester) async {
+  testWidgets('empty state when no bodyweight data', (
+    WidgetTester tester,
+  ) async {
     final overrides = [
       bodyweightTrendProvider.overrideWithValue(
         AsyncData(<BodyweightTrendPoint>[]),
@@ -64,8 +57,10 @@ void main() {
     );
 
     expect(find.byType(CandyEmptyState), findsOneWidget);
-    expect(find.textContaining('Chưa có dữ liệu trọng lượng cơ thể.'),
-        findsOneWidget);
+    expect(
+      find.textContaining('Chưa có dữ liệu trọng lượng cơ thể.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('error state', (WidgetTester tester) async {

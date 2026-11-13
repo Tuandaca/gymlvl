@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/core/localization/localization_engine.dart';
 import 'package:app/core/router/main_shell_screen.dart';
-import 'package:app/core/theme/app_theme.dart';
+import 'package:app/core/theme/candy_theme.dart';
 import 'package:app/features/auth/presentation/providers/auth_providers.dart';
 import 'package:app/features/coach/data/coach_repository.dart';
 import 'package:app/features/coach/presentation/coach_screen.dart';
@@ -49,8 +49,9 @@ void main() {
 
   setUpAll(() async {
     for (final font in {
-      'Inter': 'assets/fonts/InterVariable.ttf',
-      'Orbitron': 'assets/fonts/OrbitronVariable.ttf',
+      'Archivo': 'assets/fonts/ArchivoVariable.ttf',
+      'Space Grotesk': 'assets/fonts/SpaceGroteskVariable.ttf',
+      'Space Mono': 'assets/fonts/SpaceMono-Regular.ttf',
     }.entries) {
       if (File(font.value).existsSync()) {
         final loader = FontLoader(font.key)
@@ -59,6 +60,9 @@ void main() {
               ByteData.sublistView(await File(font.value).readAsBytes()),
             ),
           );
+        if (font.key == 'Space Mono') {
+          loader.addFont(rootBundle.load('assets/fonts/SpaceMono-Bold.ttf'));
+        }
         await loader.load();
       }
     }
@@ -247,7 +251,8 @@ void main() {
           await tester.pumpWidget(
             ProviderScope(
               child: MaterialApp(
-                theme: AppTheme.darkTheme,
+                theme: CandyTheme.lightTheme,
+                themeMode: ThemeMode.light,
                 home: Scaffold(
                   body: Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -337,7 +342,8 @@ void main() {
               UncontrolledProviderScope(
                 container: container,
                 child: MaterialApp(
-                  theme: AppTheme.darkTheme,
+                  theme: CandyTheme.lightTheme,
+                  themeMode: ThemeMode.light,
                   locale: Locale(mode == AppLangMode.en ? 'en' : 'vi'),
                   supportedLocales: const [Locale('en'), Locale('vi')],
                   localizationsDelegates: const [
@@ -423,7 +429,8 @@ void main() {
                   ),
                 ],
                 child: MaterialApp.router(
-                  theme: AppTheme.darkTheme,
+                  theme: CandyTheme.lightTheme,
+                  themeMode: ThemeMode.light,
                   routerConfig: testRouter,
                 ),
               ),

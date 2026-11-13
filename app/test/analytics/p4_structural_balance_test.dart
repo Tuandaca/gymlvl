@@ -33,7 +33,7 @@ void main() {
 
   final exercises = [pushEx, pullEx, legsEx];
 
-  Workout _completed(
+  Workout completed(
     String id,
     DateTime completedAt, {
     required String exerciseId,
@@ -98,13 +98,13 @@ void main() {
       final d = DateTime.utc(2026, 10, 1);
       // Equal push and pull volume.
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: 'ex_bench',
           sets: [working('s1', 10, 50)],
         ), // 500 push
-        _completed(
+        completed(
           'w2',
           d,
           exerciseId: 'ex_row',
@@ -126,7 +126,7 @@ void main() {
       final engine = StructuralBalanceEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: 'ex_squat',
@@ -147,13 +147,13 @@ void main() {
       final engine = StructuralBalanceEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: 'ex_bench',
           sets: [working('s1', 10, 100)],
         ), // 1000 push
-        _completed(
+        completed(
           'w2',
           d,
           exerciseId: 'ex_row',
@@ -175,13 +175,13 @@ void main() {
       final engine = StructuralBalanceEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: 'ex_bench',
           sets: [working('s1', 10, 20)],
         ), // 200 push
-        _completed(
+        completed(
           'w2',
           d,
           exerciseId: 'ex_row',
@@ -216,18 +216,13 @@ void main() {
       final engine = StructuralBalanceEngine();
       final d = DateTime.utc(2026, 10, 1);
       final workouts = [
-        _completed(
+        completed(
           'w1',
           d,
           exerciseId: 'ex_bench',
           sets: [working('s1', 10, 50)],
         ),
-        _completed(
-          'w2',
-          d,
-          exerciseId: 'ex_row',
-          sets: [working('s2', 10, 50)],
-        ),
+        completed('w2', d, exerciseId: 'ex_row', sets: [working('s2', 10, 50)]),
       ];
       final ss = setsFor(workouts);
       final ww = weFor(workouts);

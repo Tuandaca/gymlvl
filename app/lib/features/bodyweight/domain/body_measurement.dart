@@ -42,8 +42,9 @@ extension BodyMeasurementTypeX on BodyMeasurementType {
   String get canonicalUnit {
     switch (this) {
       case BodyMeasurementType.bodyWeight:
-      case BodyMeasurementType.bodyFatPercentage:
         return 'kg';
+      case BodyMeasurementType.bodyFatPercentage:
+        return 'percent';
       case BodyMeasurementType.chest:
       case BodyMeasurementType.waist:
       case BodyMeasurementType.hips:

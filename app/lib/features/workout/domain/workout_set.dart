@@ -59,7 +59,11 @@ abstract class WorkoutSet with _$WorkoutSet {
     @JsonKey(name: 'is_completed') @Default(false) bool isCompleted,
     @JsonKey(name: 'rest_seconds') @Default(0) int restSeconds,
     @JsonKey(name: 'duration_seconds') @Default(0) int durationSeconds,
-    @JsonKey(fromJson: _workoutSetTypeFromJson, toJson: _workoutSetTypeToJson)
+    @JsonKey(
+      name: 'set_type',
+      fromJson: _workoutSetTypeFromJson,
+      toJson: _workoutSetTypeToJson,
+    )
     @Default(WorkoutSetType.workout)
     WorkoutSetType setType,
 

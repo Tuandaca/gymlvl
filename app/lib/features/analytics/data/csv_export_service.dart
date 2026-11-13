@@ -1,4 +1,4 @@
-/// P4 Gate 6: CSV data export service.
+// P4 Gate 6: CSV data export service.
 ///
 /// Produces RFC 4180-compatible CSV (UTF-8) from owner-scoped domain data.
 /// The service is pure Dart: it receives already owner-filtered data and
@@ -89,7 +89,7 @@ class CsvExportService {
         ]),
       );
     }
-    return lines.join('\n') + '\n';
+    return '${lines.join('\n')}\n';
   }
 
   /// Export workout exercises to CSV.
@@ -115,7 +115,7 @@ class CsvExportService {
         ]),
       );
     }
-    return lines.join('\n') + '\n';
+    return '${lines.join('\n')}\n';
   }
 
   /// Export workout sets to CSV.
@@ -143,7 +143,7 @@ class CsvExportService {
         ]),
       );
     }
-    return lines.join('\n') + '\n';
+    return '${lines.join('\n')}\n';
   }
 
   /// Export body measurements to CSV.
@@ -169,7 +169,7 @@ class CsvExportService {
         ]),
       );
     }
-    return lines.join('\n') + '\n';
+    return '${lines.join('\n')}\n';
   }
 
   /// Export all supported owner tables to a [CsvExportResult].

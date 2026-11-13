@@ -20,22 +20,31 @@ final localizationModeProvider =
     });
 
 class LocalizationModeNotifier extends Notifier<AppLangMode> {
+  late Future<void> _restore;
+  bool _selectedByUser = false;
+
   @override
   AppLangMode build() {
-    _loadFromPrefs();
+    _restore = _loadFromPrefs();
     return AppLangMode.vi; // Initial synchronous state
+  }
+
+  Future<AppLangMode> settledMode() async {
+    await _restore;
+    return state;
   }
 
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final modeStr = prefs.getString('lang_mode');
-    if (modeStr != null) {
+    if (modeStr != null && !_selectedByUser) {
       if (modeStr == 'en') state = AppLangMode.en;
       if (modeStr == 'bilingual') state = AppLangMode.bilingual;
     }
   }
 
   Future<void> setMode(AppLangMode mode) async {
+    _selectedByUser = true;
     state = mode;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('lang_mode', mode.name);

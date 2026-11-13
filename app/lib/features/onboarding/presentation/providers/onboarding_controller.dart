@@ -83,16 +83,17 @@ OnboardingFailure classifyOnboardingError(Object error, StackTrace? stack) {
 
   // Sanitized debug code: never include JWT, keys, tokens, passwords, or user data.
   String? debugCode;
-  if (isMissingFunction)
+  if (isMissingFunction) {
     debugCode = 'PGRST202';
-  else if (isAuthError)
+  } else if (isAuthError) {
     debugCode = '42501';
-  else if (isProfileUnavailable)
+  } else if (isProfileUnavailable) {
     debugCode = '22023-profile';
-  else if (isInvalidClass)
+  } else if (isInvalidClass) {
     debugCode = '22023-class';
-  else if (isInvalidProfile)
+  } else if (isInvalidProfile) {
     debugCode = '22023-profile';
+  }
 
   if (isMissingFunction) {
     return OnboardingFailure(

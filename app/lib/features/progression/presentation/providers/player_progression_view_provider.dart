@@ -60,13 +60,17 @@ PlayerProgression _parsePlayerProgression(Map<String, dynamic> data) {
           orElse: () => classes.first,
         )
       : null;
-  if (primary != null && primary.xpBase != null && primary.xpSlope != null) {
+  if (primary != null &&
+      !primary.isGraduated &&
+      primary.level < 20 &&
+      primary.xpBase != null &&
+      primary.xpSlope != null) {
     final nextLevelXP = RPGBridge.classXPForLevel(
       primary.level + 1,
       primary.xpBase!,
       primary.xpSlope!,
     );
-    xpToNextLevel = math.max(0, nextLevelXP - totalXP);
+    xpToNextLevel = math.max(0, nextLevelXP - primary.currentXP);
   }
 
   return PlayerProgression(

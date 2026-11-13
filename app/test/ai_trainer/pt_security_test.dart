@@ -10,7 +10,6 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:app/features/ai_trainer/domain/models/pt_context.dart';
 import 'package:app/features/ai_trainer/domain/models/pt_recommendation.dart';
 import 'package:app/features/ai_trainer/domain/services/pt_context_builder.dart';
 import 'package:app/features/analytics/domain/recovery_readiness.dart';

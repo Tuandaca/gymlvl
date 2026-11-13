@@ -16,7 +16,11 @@ class BodyweightTrendChart extends StatelessWidget {
   final List<BodyweightTrendPoint> points;
   final WidgetRef ref;
 
-  const BodyweightTrendChart({super.key, required this.points, required this.ref});
+  const BodyweightTrendChart({
+    super.key,
+    required this.points,
+    required this.ref,
+  });
 
   @override
   Widget build(BuildContext context) {
