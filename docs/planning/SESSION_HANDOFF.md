@@ -3,13 +3,13 @@
 ## NEW SESSION START HERE — P9 scoped GitHub publication (2026-11-13)
 
 - **Task:** P9 scoped GitHub publication, owner authorized P9 plus application dependencies and excluded infrastructure/backup paths.
-- **Status:** `PASS` for isolated commit-candidate verification; staged-diff inspection, commit, push and remote verification are pending. Production deployment `NOT RUN`.
-- **Commit:** `main` @ `c68e5773fbb18ba03f32f1b2e33eebdecf7017bc` before publication; `origin/main` matched. Read the containing publication commit with `git rev-parse HEAD` and verify the same SHA using `git ls-remote origin refs/heads/main`. Dirty owner work is intentionally preserved.
+- **Status:** `PASS` for isolated candidate verification, exact staged scope, P9 implementation commit, verified GitHub push and remote CI. Production deployment `NOT RUN`.
+- **Commit:** P9 implementation `main` @ `db4bb6a61641c5010da4c4da27fa49f9bfdb6ef8`; `origin/main` returned the same SHA after push. The containing documentation follow-up commit SHA is reported in the final handoff. Forty-six collapsed dirty status paths remain as intentionally preserved owner work.
 - **Changed files:** Candidate manifest `D:\Projects\gymlvl_p9_push_backup_20261113_112704\candidate_manifest.json` lists the exact 126 selected paths. This checkpoint updates `docs/planning/TASK_BOARD.md`, `SESSION_HANDOFF.md`, `CHANGELOG_AI.md`, and `DECISIONS.md`. Fifty unrelated paths remain excluded. Verified backup: `D:\Projects\gymlvl_p9_push_backup_20261113_112704` (bundle, Git archive, patch, status, dirty-file archive).
-- **Verification:** Isolated clone: Flutter 822/822, analyzer 0 issues, Dart format 308/0, codegen 39 outputs, Node guard 7/7, SQL 53 units/365 ACL, PostgreSQL concurrency 8/8, Edge check and 58/58 tests, web release and Android debug builds, candidate `git diff --check` all `PASS`. Android emitted a non-fatal Kotlin incremental-cache path warning. Remote CI/live production checks `NOT RUN` at this checkpoint.
+- **Verification:** Isolated clone: Flutter 822/822, analyzer 0 issues, Dart format 308/0, codegen 39 outputs, Node guard 7/7, SQL 53 units/365 ACL, PostgreSQL concurrency 8/8, Edge check and 58/58 tests, web release and Android debug builds, candidate `git diff --check` all `PASS`. `stage_manifest.py` → `PASS`, 126 exact paths; `compare_candidate_tree.py` → `PASS`, matching tree `16c886787659dace6699ed3bdc2b0616d6d4fac8`; `git diff --cached --check` → `PASS`; `git push origin main` and `git ls-remote origin refs/heads/main` → `PASS`, `db4bb6a`; `gh run watch 43367120360 --exit-status` → `PASS`, database/Edge, Flutter and Android release-manifest jobs. Android emitted a non-fatal Kotlin incremental-cache path warning. Live production checks `NOT RUN`.
 - **Decisions:** D-057 records the owner's scoped Git publication approval. D-056 typography disposition remains unchanged. No production authorization.
 - **Blockers:** No blocker to the scoped Git publication. Dataset importer tests still require `EXERCISEDB_SOURCE_DIR`; production migration/live Auth/gateway checks require separate authorization and preflight.
-- **Next action:** Stage only the candidate manifest paths, inspect `git diff --cached`, commit and push `main`, then verify remote SHA. Production preflight is separate.
+- **Next action:** Prepare production preflight only with separate authorization; typography correction is separate under D-056.
 
 ## NEW SESSION START HERE — P9 local closeout (2026-11-13)
 

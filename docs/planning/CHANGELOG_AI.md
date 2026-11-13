@@ -2,15 +2,17 @@
 
 Dated record of agent sessions and project checkpoints. Newest first.
 
-## 2026-11-13 — P9 scoped GitHub publication checkpoint
+## 2026-11-13 — P9 scoped GitHub publication (PASS)
 
 **Task:** Prepare the owner-approved GitHub publication of P9 plus required application code, excluding unrelated infrastructure, backups, local logs and agent work.
 
-**Changes:** Verified a complete bundle, a path-matching 803-file Git archive, and SHA-256 equality for all 175 existing dirty files in `D:\Projects\gymlvl_p9_push_backup_20261113_112704`. Prepared an isolated candidate from the bundle using an explicit 126-path manifest; 50 other dirty paths remain excluded. Updated `MASTER_PLAN.md` to label P9 local completion and separate production preflight. D-057 records the approved Git scope. No Git or production write had occurred when this checkpoint was authored.
+**Changes:** Verified a complete bundle, a path-matching 803-file Git archive, and SHA-256 equality for all 175 existing dirty files in `D:\Projects\gymlvl_p9_push_backup_20261113_112704`. Prepared an isolated candidate from the bundle using an explicit 126-path manifest; 50 other dirty paths remained excluded. Updated `MASTER_PLAN.md` to label P9 local completion and separate production preflight. D-057 records the approved Git scope. Committed P9 as `db4bb6a61641c5010da4c4da27fa49f9bfdb6ef8` and verified the same SHA on `origin/main` after push. No tag or production write.
 
 **Verification at `main` base `c68e577`:** Candidate `flutter test --reporter expanded` → `PASS`, 822/822; `flutter analyze` → `PASS`, `No issues found!`; Dart format → `PASS`, 308/0; generated-code guard → `PASS`, 39 outputs; Node guard tests → `PASS`, 7/7; SQL `npm test` → `PASS`, 53 units/365 ACL; concurrency → `PASS`, 8/8; Edge check/tests → `PASS`, 58/58; web release and Android debug builds → `PASS`, artifacts built; candidate `git diff --check` → `PASS`. Android emitted a non-fatal Kotlin cache warning. Remote CI and live production checks → `NOT RUN` at this checkpoint.
 
-**Next action:** Inspect the exact staged diff, commit and push `main`, then verify the remote SHA. Production migration/deployment remains separately gated.
+**Publication verification:** Exact staged manifest 126/126, excluded 50/50; tested candidate and staged main tree hash both `16c886787659dace6699ed3bdc2b0616d6d4fac8`; `git diff --cached --check` `PASS`; `git push origin main` `PASS` (`c68e577..db4bb6a`); `git ls-remote origin refs/heads/main` `PASS` (`db4bb6a`); `gh run watch 43367120360 --exit-status` `PASS`, database/Edge, Flutter and Android release-manifest jobs. Forty-six collapsed dirty status paths remain as preserved unrelated owner work.
+
+**Next action:** Production migration/deployment preflight remains separately gated; typography correction remains separate under D-056.
 
 ---
 
